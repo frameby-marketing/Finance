@@ -462,7 +462,7 @@
 <style id="live-extra-style">
 .save-toast{position:fixed;right:22px;bottom:22px;z-index:5000;min-width:220px;max-width:420px;padding:12px 15px;border-radius:10px;background:#111a2d;color:white;box-shadow:0 12px 36px rgba(17,26,45,.2);font-size:12px;font-weight:750;opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s}.save-toast.show{opacity:1;transform:none}.save-toast.error{background:#a52a38}.save-toast.ok{background:#106e55}.loading-mask{position:fixed;inset:0;z-index:4500;background:rgba(244,246,249,.72);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;font-weight:850;color:#344054}.loading-mask.hidden{display:none}.saving-cell{box-shadow:inset 3px 0 0 #2757d7}.unsaved-note{font-size:10px;color:#c97916;font-weight:800}.vehicle-name-input{min-width:150px}.empty-row td{padding:24px!important;text-align:center;color:#8a94a3!important}
 </style>
-<div id="saveToast" class="save-toast"></div><div id="loadingMask" class="loading-mask">데이터 불러오는 중...</div>
+<div id="saveToast" class="save-toast"></div><div id="loadingMask" class="loading-mask hidden">데이터 불러오는 중...</div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 let cards=[];
@@ -787,6 +787,9 @@ function setTripModuleAccess(allowed){
   const btn=document.querySelector('.finance-primary-btn[data-module="trip"]');
   if(btn)btn.hidden=!TRIP_MODULE_ALLOWED;
   if(!TRIP_MODULE_ALLOWED){
+    // 출장·차량 권한이 없으면 해당 모듈의 로딩 마스크도 즉시 닫습니다.
+    // 이전에는 loadData()가 호출되지 않아 "데이터 불러오는 중..."이 계속 남을 수 있었습니다.
+    loading(false);
     document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
     if(TRIP_PAGES.includes(document.querySelector('.page.active')?.id||'')||location.hash==='#trip'){
       showModule('card','dashboard');
