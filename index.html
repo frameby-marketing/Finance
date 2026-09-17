@@ -5,7 +5,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FRAMEBY 통합 관리</title>
+<title>Finance & Admin · 법인카드 / 출장·차량 관리</title>
 <style>
 :root{--bg:#f4f6f9;--panel:#fff;--line:#dfe4ea;--text:#172033;--muted:#6e7888;--nav:#111a2d;--primary:#2757d7;--soft:#eef3ff;--success:#138a66;--warn:#c97916;--radius:14px;--shadow:0 7px 24px rgba(22,36,67,.07)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Pretendard,"Noto Sans KR","Malgun Gothic",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}button,select,input,textarea{font:inherit}.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{background:var(--nav);color:#fff;padding:22px 15px;position:sticky;top:0;height:100vh}.brand{font-size:20px;font-weight:850;padding:4px 10px 20px;border-bottom:1px solid rgba(255,255,255,.12)}.brand small{display:block;margin-top:6px;font-size:11px;color:#aeb8cc;font-weight:500}.nav{display:flex;flex-direction:column;gap:6px;margin-top:18px}.nav button{border:0;background:transparent;color:#c9d2e5;padding:12px 13px;border-radius:9px;text-align:left;font-weight:750;cursor:pointer}.nav button:hover,.nav button.active{background:#283550;color:#fff}.side-note{position:absolute;left:15px;right:15px;bottom:18px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#9fabc1;font-size:11px;line-height:1.55;background:rgba(255,255,255,.035)}.main{padding:25px 30px 50px;min-width:0}.page{display:none}.page.active{display:block}.head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}.head h1{font-size:26px;margin:0}.head p{margin:6px 0 0;color:var(--muted)}.filters{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:750;color:var(--muted)}select,input,textarea{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;outline:none;color:var(--text)}select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(39,87,215,.09)}.preview{position:fixed;right:20px;top:16px;background:#111a2d;color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;z-index:20;box-shadow:var(--shadow)}.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;min-width:0}.kpi .label{font-size:12px;color:var(--muted);font-weight:750}.kpi .value{font-size:27px;font-weight:900;margin-top:8px;letter-spacing:-.5px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:6px}.two{grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);margin-bottom:14px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.section-title h2{margin:0;font-size:16px}.note{font-size:11px;color:var(--muted)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:820px;background:#fff}.table th{background:#f7f9fc;color:#526071;font-size:11px;text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px;border-bottom:1px solid #edf0f4}.table tr:last-child td{border-bottom:0}.table tbody tr:hover td{background:#fbfcff}.table .num{text-align:right;font-variant-numeric:tabular-nums}.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:#edf2f8;font-size:10px;font-weight:800;white-space:nowrap}.pill.blue{background:var(--soft);color:var(--primary)}.pill.green{background:#eaf7f2;color:var(--success)}.pill.orange{background:#fff4e7;color:var(--warn)}.pill.gray{background:#f1f3f5;color:#667085}.dot{width:6px;height:6px;border-radius:50%;background:currentColor}.action{border:1px solid #cbd6ef;background:#fff;color:var(--primary);padding:6px 9px;border-radius:7px;font-weight:800;font-size:11px;cursor:pointer}.action:hover,.action.active{background:var(--soft);border-color:#b9c9ef}.editor{display:grid;gap:12px}.auto-box{border:1px solid #d6e0f5;background:#f7f9ff;border-radius:11px;padding:13px}.auto-box .auto-title{font-size:11px;font-weight:850;color:var(--primary);margin-bottom:8px}.cost-lines{display:grid;gap:7px}.cost-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}.cost-line strong{font-size:13px}.cost-line.total{padding-top:8px;margin-top:3px;border-top:1px solid #dbe3f1;font-weight:900}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid .wide{grid-column:1/-1}.editor textarea{min-height:70px;resize:vertical}.fake-save{width:100%;border:0;background:var(--primary);color:#fff;padding:10px 12px;border-radius:9px;font-weight:850;cursor:not-allowed;opacity:.75}.legend{display:flex;gap:8px;flex-wrap:wrap}.subtle{font-size:11px;color:var(--muted);line-height:1.55}.summary-bar{display:grid;grid-template-columns:120px 1fr 85px;align-items:center;gap:10px;margin:11px 0}.track{height:9px;border-radius:99px;background:#edf1f5;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--primary)}.vehicle-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vehicle-card{border:1px solid var(--line);border-radius:10px;padding:13px;background:#fafbfd}.vehicle-card strong{display:block;font-size:15px}.vehicle-card span{display:block;color:var(--muted);font-size:11px;margin-top:5px}.vehicle-card b{display:block;margin-top:9px;font-size:19px}.route{font-weight:750}.muted{color:var(--muted)}.link-tag{display:inline-block;padding:4px 7px;border-radius:7px;background:#f2f5fb;color:#4b5d78;font-size:10px;font-weight:800}.screen-guide{margin-bottom:14px;border:1px dashed #bdc8dd;background:#fbfcff;border-radius:11px;padding:12px 14px;color:#5b6677;font-size:11px;line-height:1.6}.screen-guide b{color:var(--text)}
@@ -100,8 +100,21 @@
 .github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
 </style>
 <style id="integrated-github-style">
-.nav.integrated-nav{gap:10px}.nav-group{display:flex;flex-direction:column;gap:4px}.nav-category{display:flex!important;align-items:center;justify-content:space-between;width:100%;color:#fff!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;padding:11px 12px!important}.nav-category:hover{background:rgba(255,255,255,.09)!important}.nav-arrow{transition:.15s}.nav-group:not(.open) .nav-arrow{transform:rotate(-90deg)}.nav-sub{display:flex;flex-direction:column;gap:3px;padding-left:8px}.nav-group:not(.open) .nav-sub{display:none}.nav-sub button{padding:10px 12px!important;font-size:12px}.nav-sub button.active{background:#283550!important;color:#fff!important}.github-auth-gate{position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#0f1115;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Arial,sans-serif}.github-auth-card{max-width:410px;width:100%;text-align:center;background:#171a21;border:1px solid #262b36;border-radius:16px;padding:36px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}.github-auth-icon{font-size:32px;margin-bottom:14px}.github-auth-card h2{font-size:17px;font-weight:700;margin:0 0 8px}.github-auth-card p{font-size:13px;color:#9aa1ac;margin:0 0 22px;line-height:1.6}.github-auth-btn{display:flex;width:100%;justify-content:center;align-items:center;padding:12px 16px;border:1px solid #4c8dff;border-radius:8px;background:#4c8dff;color:#fff;font-size:14px;font-weight:700;cursor:pointer}.github-auth-btn:disabled{opacity:.55;cursor:default}.github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
-@media(max-width:720px){.nav.integrated-nav{flex-direction:column;overflow:visible}.nav-sub{flex-direction:row;overflow:auto;padding-left:0}.nav-category{white-space:nowrap}.side{height:auto}.side-note{display:none}}
+/* 통합 페이지는 공통 Dashboard_Hub/nav.js 사이드바를 사용하고,
+   이 HTML 내부에서는 법인카드/출장·차량 관리의 세부 메뉴를 상단 탭으로 표시합니다. */
+.app.integrated-content{display:block;min-height:100vh}
+.app.integrated-content>.main{width:100%;min-width:0;padding:24px 30px 50px}
+.module-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 20px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+.module-heading h1{margin:0;font-size:27px;letter-spacing:-.5px}.module-heading p{margin:6px 0 0;color:var(--muted);font-size:12px}
+.module-tabs{display:flex;align-items:center;gap:7px;padding:5px;background:#e9edf4;border:1px solid #dbe1ea;border-radius:11px;width:max-content;max-width:100%;overflow:auto}
+.module-tabs.hidden{display:none}
+.module-tab{border:0;background:transparent;color:#667085;padding:9px 15px;border-radius:8px;font-weight:850;cursor:pointer;white-space:nowrap}
+.module-tab:hover{color:var(--primary)}
+.module-tab.active{background:#fff;color:var(--primary);box-shadow:0 1px 5px rgba(22,36,67,.09)}
+/* 공통 Finance 메뉴에 이 페이지에서만 추가하는 출장·차량 관리 항목 */
+[data-frameby-trip-menu="1"]{cursor:pointer}
+.github-auth-gate{position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#0f1115;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Arial,sans-serif}.github-auth-card{max-width:410px;width:100%;text-align:center;background:#171a21;border:1px solid #262b36;border-radius:16px;padding:36px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}.github-auth-icon{font-size:32px;margin-bottom:14px}.github-auth-card h2{font-size:17px;font-weight:700;margin:0 0 8px}.github-auth-card p{font-size:13px;color:#9aa1ac;margin:0 0 22px;line-height:1.6}.github-auth-btn{display:flex;width:100%;justify-content:center;align-items:center;padding:12px 16px;border:1px solid #4c8dff;border-radius:8px;background:#4c8dff;color:#fff;font-size:14px;font-weight:700;cursor:pointer}.github-auth-btn:disabled{opacity:.55;cursor:default}.github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
+@media(max-width:720px){.app.integrated-content>.main{padding:18px 12px 40px}.module-header{align-items:flex-start}.module-tabs{width:100%}.module-tab{flex:0 0 auto}}
 </style>
 </head>
 <body>
@@ -118,31 +131,24 @@
 <div id="loading" class="loading"><div class="loading-box">법인카드 데이터를 불러오는 중...</div></div>
 <div id="filterMenu" class="filter-menu"></div>
 <div class="preview" id="statusBadge">Google Sheets · 통합 관리</div>
-<div class="app">
-  <aside class="side">
-  <div class="brand">FRAMEBY 통합 관리<small>Google Sheets 연동</small></div>
-  <nav class="nav integrated-nav">
-    <div class="nav-group open">
-      <button type="button" class="nav-category"><span>법인카드</span><span class="nav-arrow">⌄</span></button>
-      <div class="nav-sub">
-        <button class="active" data-page="dashboard">대시보드</button>
-        <button data-page="payment">결제일별 내역</button>
-        <button data-page="all">전체 사용내역</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button type="button" class="nav-category"><span>출장·차량 관리</span><span class="nav-arrow">⌄</span></button>
-      <div class="nav-sub">
-        <button data-page="trip">출장기록장</button>
-        <button data-page="vehicle">차량운행일지</button>
-        <button data-page="master">기초관리</button>
-      </div>
-    </div>
-  </nav>
-  <div class="side-note">법인카드와 출장·차량 기록을 한 화면에서 관리합니다.<br>회사 Google 계정의 스프레드시트 권한을 사용합니다.</div>
-</aside>
-
+<div class="app integrated-content">
   <main class="main">
+    <div class="module-header" id="moduleHeader">
+      <div class="module-heading">
+        <h1 id="moduleTitle">법인카드</h1>
+        <p id="moduleDesc">법인카드 사용현황을 조회합니다.</p>
+      </div>
+      <div class="module-tabs" id="cardModuleTabs" aria-label="법인카드 메뉴">
+        <button type="button" class="module-tab active" data-page="dashboard">대시보드</button>
+        <button type="button" class="module-tab" data-page="payment">결제일별 내역</button>
+        <button type="button" class="module-tab" data-page="all">전체 사용내역</button>
+      </div>
+      <div class="module-tabs hidden" id="tripModuleTabs" aria-label="출장·차량 관리 메뉴">
+        <button type="button" class="module-tab" data-page="trip">출장기록장</button>
+        <button type="button" class="module-tab" data-page="vehicle">차량운행일지</button>
+        <button type="button" class="module-tab" data-page="master">기초관리</button>
+      </div>
+    </div>
 <section class="page active" id="dashboard">
 <div class="head">
 <div><h1>대시보드</h1><p>월별 법인카드 사용현황을 확인합니다.</p></div>
@@ -546,9 +552,39 @@ function renderAll(){
   const m=$('allMonth').value,c=$('allCard').value,q=$('allSearch').value.trim().toLowerCase();let data=rows.filter(r=>(!m||r.date.startsWith(m))&&(!c||r.cardId===c)&&(!q||`${r.account} ${r.merchant}`.toLowerCase().includes(q)));data=applyTableState(data,'all');
   $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(card(r.cardId)?.name||'')}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
 }
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='dashboard')renderDashboard();if(id==='payment')renderPayment();if(id==='all')renderAll()}
+const CARD_PAGES=['dashboard','payment','all'];
+const TRIP_PAGES=['trip','vehicle','master'];
+let ACTIVE_MODULE='card';
+function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':ACTIVE_MODULE}
+function syncModuleHeader(module,id){
+  ACTIVE_MODULE=module;
+  const isCard=module==='card';
+  const title=document.getElementById('moduleTitle'),desc=document.getElementById('moduleDesc');
+  if(title)title.textContent=isCard?'법인카드':'출장·차량 관리';
+  if(desc)desc.textContent=isCard?'법인카드 사용현황을 조회합니다.':'출장기록과 차량운행일지를 관리합니다.';
+  document.getElementById('cardModuleTabs')?.classList.toggle('hidden',!isCard);
+  document.getElementById('tripModuleTabs')?.classList.toggle('hidden',isCard);
+  document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  document.body.dataset.activeModule=module;
+}
+function showModule(module,page){
+  const id=page||(module==='trip'?'trip':'dashboard');
+  showPage(id);
+  try{history.replaceState(null,'',module==='trip'?'#trip':'#card')}catch(e){}
+}
+function showPage(id){
+  const module=moduleForPage(id);
+  syncModuleHeader(module,id);
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+  if(id==='dashboard')renderDashboard();
+  if(id==='payment')renderPayment();
+  if(id==='all')renderAll();
+  if(id==='trip'||id==='vehicle'||id==='master'){
+    try{renderTripSystemAll()}catch(e){}
+  }
+}
 function bindEvents(){
-  document.querySelectorAll('.nav button[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+  document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
   $('monthFilter').addEventListener('change',renderDashboard);$('cardFilter').addEventListener('change',renderDashboard);$('payMonth').addEventListener('change',renderPayment);$('allMonth').addEventListener('change',renderAll);$('allCard').addEventListener('change',renderAll);$('allSearch').addEventListener('input',renderAll);
 }
 function showFatal(message){
@@ -783,7 +819,68 @@ function githubSilentFallback(){GITHUB_SILENT=false;clearTimeout(GITHUB_SILENT_T
 function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=true;btn.textContent='자동 로그인 확인 중...'}GITHUB_SILENT=true;GITHUB_SILENT_TIMER=setTimeout(()=>{if(GITHUB_SILENT)githubSilentFallback()},4000);try{GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:''})}catch(e){githubSilentFallback()}}
 function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubAuthError('Google 로그인 준비 중입니다. 잠시 후 다시 시도해 주세요.');return}const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=true;btn.textContent='로그인 중...'}GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:''})}
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
-function initIntegratedNav(){document.querySelectorAll('.nav-category').forEach(btn=>btn.addEventListener('click',()=>btn.closest('.nav-group')?.classList.toggle('open')));document.querySelectorAll('.nav button[data-page]').forEach(btn=>btn.addEventListener('click',()=>{const group=btn.closest('.nav-group');if(group)group.classList.add('open')}))}
+function textEquals(el,label){const s=String(el?.textContent||'').replace(/\s+/g,' ').trim().replace(/^[•·▪◦-]+\s*/,'');return s===label}
+function replaceLabelText(root,from,to){
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  let node;
+  while((node=walker.nextNode())){
+    if(String(node.nodeValue||'').trim()===from){node.nodeValue=node.nodeValue.replace(from,to);return true}
+  }
+  return false;
+}
+function closestMenuUnit(clickable){
+  const li=clickable.closest('li');
+  if(li)return li;
+  const p=clickable.parentElement;
+  if(p && p.children.length===1)return p;
+  return clickable;
+}
+function patchFinanceMenu(){
+  const candidates=[...document.querySelectorAll('a,button,[role="button"]')]
+    .filter(el=>!el.closest('#moduleHeader') && textEquals(el,'법인카드'));
+  if(!candidates.length)return false;
+  const cardClickable=candidates[0];
+  if(!cardClickable.dataset.framebyModuleHook){
+    cardClickable.dataset.framebyModuleHook='card';
+    cardClickable.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();showModule('card','dashboard');
+    },true);
+  }
+  const cardUnit=closestMenuUnit(cardClickable);
+  const parent=cardUnit.parentElement;
+  if(!parent)return true;
+  let tripUnit=parent.querySelector(':scope > [data-frameby-trip-menu="1"]');
+  if(!tripUnit){
+    tripUnit=cardUnit.cloneNode(true);
+    tripUnit.dataset.framebyTripMenu='1';
+    tripUnit.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    tripUnit.querySelectorAll('[aria-current]').forEach(el=>el.removeAttribute('aria-current'));
+    ['active','selected','current','is-active'].forEach(c=>tripUnit.classList.remove(c));
+    const tripClickable=tripUnit.matches('a,button,[role="button"]')?tripUnit:tripUnit.querySelector('a,button,[role="button"]');
+    if(tripClickable){
+      tripClickable.removeAttribute('aria-current');
+      ['active','selected','current','is-active'].forEach(c=>tripClickable.classList.remove(c));
+      if(tripClickable.tagName==='A')tripClickable.setAttribute('href','#trip');
+      replaceLabelText(tripClickable,'법인카드','출장·차량 관리') || (tripClickable.textContent='출장·차량 관리');
+      tripClickable.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showModule('trip','trip')},true);
+    }else{
+      replaceLabelText(tripUnit,'법인카드','출장·차량 관리') || (tripUnit.textContent='출장·차량 관리');
+      tripUnit.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();showModule('trip','trip')},true);
+    }
+    cardUnit.insertAdjacentElement('afterend',tripUnit);
+  }
+  return true;
+}
+function initIntegratedNav(){
+  document.querySelectorAll('.module-tab[data-page]').forEach(btn=>{if(btn.dataset.moduleBound)return;btn.dataset.moduleBound='1';btn.addEventListener('click',()=>showPage(btn.dataset.page))});
+  patchFinanceMenu();
+  const observer=new MutationObserver(()=>patchFinanceMenu());
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  setTimeout(()=>patchFinanceMenu(),300);
+  setTimeout(()=>patchFinanceMenu(),1000);
+  const initial=location.hash==='#trip'?'trip':'card';
+  showModule(initial,initial==='trip'?'trip':'dashboard');
+}
 function initIntegrated(){initIntegratedNav();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 initIntegrated();
 </script>
