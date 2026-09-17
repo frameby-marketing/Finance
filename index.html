@@ -110,6 +110,7 @@
 .finance-primary-btn:hover{background:#f6f8fc;color:var(--primary)}
 .finance-primary-btn.active{background:var(--soft);border-color:#d7e2ff;color:var(--primary)}
 .finance-primary-btn.active::after{content:"";position:absolute;left:15px;right:15px;bottom:-11px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.finance-primary-btn[hidden]{display:none!important}
 .finance-secondary{display:flex;align-items:center;justify-content:space-between;min-height:56px;padding:8px 30px;gap:18px;background:#fff}
 .secondary-tools{margin-left:auto;display:flex;align-items:flex-end;justify-content:flex-end;min-width:0}
 .secondary-tool-group{display:none;align-items:flex-end;gap:9px;flex-wrap:wrap;justify-content:flex-end}
@@ -160,7 +161,7 @@
     <nav class="finance-workspace-nav" aria-label="Finance & Admin 통합 메뉴">
       <div class="finance-primary" role="tablist" aria-label="업무 메뉴">
         <button type="button" class="finance-primary-btn active" data-module="card" role="tab" aria-selected="true">법인카드</button>
-        <button type="button" class="finance-primary-btn" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
+        <button type="button" class="finance-primary-btn" data-module="trip" role="tab" aria-selected="false" hidden>출장·차량 관리</button>
       </div>
       <div class="finance-secondary" id="cardSecondaryMenu">
         <div class="module-tabs" id="cardModuleTabs" aria-label="법인카드 세부 메뉴">
@@ -588,11 +589,13 @@ function syncModuleHeader(module,id){
   document.body.dataset.activeModule=module;
 }
 function showModule(module,page){
+  if(module==='trip'&&TRIP_MODULE_ALLOWED===false){module='card';page='dashboard'}
   const id=page||(module==='trip'?'trip':'dashboard');
   showPage(id);
   try{history.replaceState(null,'',module==='trip'?'#trip':'#card')}catch(e){}
 }
 function showPage(id){
+  if(TRIP_PAGES.includes(id)&&TRIP_MODULE_ALLOWED===false)id='dashboard';
   const module=moduleForPage(id);
   syncModuleHeader(module,id);
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
@@ -654,7 +657,7 @@ const tripStatusSel=document.querySelector('#trip .head .filters .field:nth-chil
 const vehicleMonthSel=document.querySelector('#vehicle .head .filters .field:nth-child(1) select');
 const vehicleFilterSel=document.querySelector('#vehicle .head .filters .field:nth-child(2) select');
 
-async function loadData(showMask=true){if(showMask)loading(true);try{const d=await rpc('getInitialData');Object.assign(state,d);normalizeState();initFilters();renderTripSystemAll()}catch(e){toast(e.message,'error');throw e}finally{if(showMask)loading(false)}}
+async function loadData(showMask=true){if(typeof TRIP_MODULE_ALLOWED!=='undefined'&&TRIP_MODULE_ALLOWED===false)return null;if(showMask)loading(true);try{const d=await rpc('getInitialData');Object.assign(state,d);normalizeState();initFilters();renderTripSystemAll()}catch(e){toast(e.message,'error');throw e}finally{if(showMask)loading(false)}}
 function normalizeState(){state.trips=state.trips||[];state.driveLogs=state.driveLogs||[];state.master=state.master||{department:[],summary:[],purpose:[]};state.master.department=state.master.department||[];state.master.summary=state.master.summary||[];state.master.purpose=state.master.purpose||[];state.vehicles=state.vehicles||[];state.sorts=state.sorts||{tripDashboard:{key:'tripDate',dir:'desc'},tripInput:{key:'tripDate',dir:'desc'},vehicleStatus:{key:'vehicle',dir:'asc'},vehicleDashboard:{key:'date',dir:'desc'},vehicleInput:{key:'date',dir:'desc'}};applyAutoBaseMileages()}
 function cmpSort(a,b){const an=typeof a==='number'?a:Number(String(a??'').replace(/,/g,'')),bn=typeof b==='number'?b:Number(String(b??'').replace(/,/g,''));if(String(a??'').trim()!==''&&String(b??'').trim()!==''&&Number.isFinite(an)&&Number.isFinite(bn))return an-bn;return String(a??'').localeCompare(String(b??''),'ko',{numeric:true,sensitivity:'base'})}
 function tripSortValue(t,key){const c=t.currentCosts||{};return ({recordId:t.recordId,tripDate:t.tripDate,person:t.person,department:t.department,summary:t.summary,purpose:t.purpose,region:t.region,transport:t.transport,payment:t.payment,routine:n(c.routine),fuel:n(c.fuel),entertainment:n(c.entertainment),transportCost:n(c.transport),lodging:n(c.lodging),other:n(c.other),total:n(t.total),status:t.status})[key]??''}
@@ -778,6 +781,22 @@ const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
 const GH_VEHICLE_HEADERS=['vehicle_id','차량명','기초키로수','누적거리','취득일','처분일','사용여부','수정일시'];
 let GITHUB_ACCESS_TOKEN=null,GITHUB_TOKEN_CLIENT=null,GITHUB_SILENT=false,GITHUB_SILENT_TIMER=null,GITHUB_USER_EMAIL='',GH_SHEET_IDS=null;
+let TRIP_MODULE_ALLOWED=null;
+function setTripModuleAccess(allowed){
+  TRIP_MODULE_ALLOWED=!!allowed;
+  const btn=document.querySelector('.finance-primary-btn[data-module="trip"]');
+  if(btn)btn.hidden=!TRIP_MODULE_ALLOWED;
+  if(!TRIP_MODULE_ALLOWED){
+    document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
+    if(TRIP_PAGES.includes(document.querySelector('.page.active')?.id||'')||location.hash==='#trip'){
+      showModule('card','dashboard');
+    }
+  }
+}
+async function githubCanAccessTrip(){
+  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.tripSpreadsheetId)}?fields=spreadsheetId`;
+  try{await githubFetchJson(u);return true}catch(e){if(e?.status===401)throw e;return false}
+}
 function githubAuthError(message){const el=document.getElementById('githubAuthError');if(!el)return;el.textContent=message||'';el.style.display=message?'block':'none'}
 function githubShowGate(){const el=document.getElementById('githubAuthGate');if(el)el.style.display='flex'}
 function githubHideGate(){const el=document.getElementById('githubAuthGate');if(el)el.style.display='none'}
@@ -833,7 +852,7 @@ function githubTripRpc(name,...args){const map={getInitialData:ghGetInitialData,
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
 function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));cardMap[cardName]??={name:cardName,group};raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원'});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1);idBy[name]=id;return{id,name,group:cardMap[name].group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
 async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
-async function githubAfterLogin(){const btn=document.getElementById('githubLoginBtn');try{const user=await githubUserInfo();GITHUB_USER_EMAIL=ghText(user.email);if(INTEGRATED_CONFIG.allowedDomain&&!GITHUB_USER_EMAIL.toLowerCase().endsWith('@'+INTEGRATED_CONFIG.allowedDomain))throw new Error('허용된 회사 계정(@'+INTEGRATED_CONFIG.allowedDomain+')으로 로그인해 주세요.');githubAuthError('');githubHideGate();const cardTask=githubLoadCardData().then(onDataLoaded).catch(e=>showFatal(e.message));const tripTask=loadData(true).catch(()=>{});await Promise.allSettled([cardTask,tripTask]);const badge=document.getElementById('statusBadge');if(badge)badge.textContent='Google Sheets · 통합 관리 · '+GITHUB_USER_EMAIL}catch(e){githubShowGate();githubAuthError(e?.message||'스프레드시트 접근 권한을 확인해 주세요.');if(btn){btn.disabled=false;btn.textContent='다른 Google 계정으로 로그인'}}}
+async function githubAfterLogin(){const btn=document.getElementById('githubLoginBtn');try{const user=await githubUserInfo();GITHUB_USER_EMAIL=ghText(user.email);if(INTEGRATED_CONFIG.allowedDomain&&!GITHUB_USER_EMAIL.toLowerCase().endsWith('@'+INTEGRATED_CONFIG.allowedDomain))throw new Error('허용된 회사 계정(@'+INTEGRATED_CONFIG.allowedDomain+')으로 로그인해 주세요.');const tripAllowed=await githubCanAccessTrip();setTripModuleAccess(tripAllowed);githubAuthError('');githubHideGate();const cardTask=githubLoadCardData().then(onDataLoaded).catch(e=>showFatal(e.message));const tripTask=tripAllowed?loadData(true).catch(()=>{}):Promise.resolve(null);await Promise.allSettled([cardTask,tripTask]);const badge=document.getElementById('statusBadge');if(badge)badge.textContent='Google Sheets · 통합 관리 · '+GITHUB_USER_EMAIL}catch(e){githubShowGate();githubAuthError(e?.message||'스프레드시트 접근 권한을 확인해 주세요.');if(btn){btn.disabled=false;btn.textContent='다른 Google 계정으로 로그인'}}}
 function githubInitTokenClient(){if(!window.google?.accounts?.oauth2)return false;GITHUB_TOKEN_CLIENT=google.accounts.oauth2.initTokenClient({client_id:INTEGRATED_CONFIG.oauthClientId,scope:INTEGRATED_CONFIG.oauthScope,callback:async resp=>{clearTimeout(GITHUB_SILENT_TIMER);const wasSilent=GITHUB_SILENT;GITHUB_SILENT=false;const btn=document.getElementById('githubLoginBtn');if(resp.error){if(!wasSilent)githubAuthError('로그인이 취소되었거나 실패했습니다. 다시 시도해 주세요.');if(btn){btn.disabled=false;btn.textContent='Google 계정으로 로그인'};githubShowGate();return}GITHUB_ACCESS_TOKEN=resp.access_token;githubTokenCacheSave(resp.access_token,resp.expires_in);await githubAfterLogin()}});const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=false;btn.textContent='Google 계정으로 로그인'}return true}
 function githubSilentFallback(){GITHUB_SILENT=false;clearTimeout(GITHUB_SILENT_TIMER);const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=false;btn.textContent='Google 계정으로 로그인'}githubShowGate()}
 function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=true;btn.textContent='자동 로그인 확인 중...'}GITHUB_SILENT=true;GITHUB_SILENT_TIMER=setTimeout(()=>{if(GITHUB_SILENT)githubSilentFallback()},4000);try{GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:''})}catch(e){githubSilentFallback()}}
