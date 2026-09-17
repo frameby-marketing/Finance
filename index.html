@@ -128,10 +128,11 @@
 @media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 14px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px;align-items:flex-start;flex-wrap:wrap}.module-tabs{width:auto;flex:1 1 auto}.module-tab{flex:0 0 auto}.secondary-tools{width:100%;margin-left:0}.secondary-tool-group{width:100%;justify-content:flex-start}.secondary-tool-group .search{min-width:150px;flex:1}}
 
 /* 출장·차량 3차 메뉴를 비어 있던 제목 영역으로 이동 */
-.head-subnav{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.head-subnav{display:flex;align-items:center;min-width:0}
 .head-subnav .subtabs{margin:0}
-.head-subnav>p{color:var(--muted);font-size:12px}
-@media(max-width:720px){.head-subnav{width:100%}.head-subnav .subtabs{max-width:100%;overflow:auto}}
+#trip>.head,#vehicle>.head{align-items:center;margin-bottom:14px}
+#trip>.head .head-actions,#vehicle>.head .head-actions{align-items:center}
+@media(max-width:720px){.head-subnav{width:100%}.head-subnav .subtabs{max-width:100%;overflow:auto}#trip>.head,#vehicle>.head{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -211,7 +212,6 @@
             <button class="subtab active" data-sub="trip-dashboard">대시보드</button>
             <button class="subtab" data-sub="trip-edit">입력</button>
           </div>
-          <p style="margin:0">원본 비용내역을 날짜·비용항목별로 자동 수집하고 출장정보만 정리합니다.</p>
         </div>
         <div class="head-actions">
           <div class="filters">
@@ -223,8 +223,6 @@
       </div>
 
       <div class="subview active" id="trip-dashboard">
-      <div class="screen-guide"><b>대시보드</b> · 월별 출장비용, 출장건수, 처리상태와 완성된 출장기록을 조회하는 화면.</div>
-
       <div class="grid kpis">
         <div class="card kpi"><div class="label">자동 수집 비용</div><div class="value">1,284,300원</div><div class="sub">이번 달 24건</div></div>
         <div class="card kpi"><div class="label">출장기록</div><div class="value">12건</div><div class="sub">날짜 기준 자동 묶음</div></div>
@@ -265,7 +263,6 @@
       </div>
 
       <div class="subview" id="trip-edit">
-        <div class="screen-guide"><b>입력</b> · 출장일자는 왼쪽에 고정하고, 비용은 합계만 표시합니다. 항목별 금액은 비용상세를 열어 확인하고, 출장정보는 아래 표에서 엑셀 셀처럼 바로 수정합니다. 적요명과 출장목적은 기초관리에서 등록한 값 중 선택합니다. 비용이 없는 출장은 + 출장 추가로 빈 행을 만들어 바로 입력합니다. 각 내역은 상태 옆 삭제 버튼으로 삭제할 수 있으며, 원본 출장사용내역 데이터는 삭제하지 않습니다. 별도 입력창이나 팝업은 없습니다.</div>
         <div class="card">
           <div class="section-title"><h2>출장기록 입력</h2><div class="section-actions"><span class="note">셀을 클릭해 바로 수정 · 출장일자 고정 · 비용은 합계 + 상세 열기 · 열 제목 드래그로 순서 변경</span><button class="add-trip-btn" type="button" id="addManualTrip">+ 출장 추가</button></div></div>
           <div class="inline-sheet-wrap">
@@ -290,7 +287,6 @@
             <button class="subtab active" data-sub="vehicle-dashboard">대시보드</button>
             <button class="subtab" data-sub="vehicle-edit">입력</button>
           </div>
-          <p style="margin:0">출장기록에서 차량을 선택한 건을 자동 연결하고 실제 운행거리만 정리합니다.</p>
         </div>
         <div class="head-actions">
           <div class="filters">
@@ -302,8 +298,6 @@
       </div>
 
       <div class="subview active" id="vehicle-dashboard">
-      <div class="screen-guide"><b>대시보드</b> · 차량별 기초 키로수, 누적 거리, 미적용 거리와 월별 운행현황을 조회하는 화면.</div>
-
       <div class="grid kpis three">
         <div class="card kpi"><div class="label">이번 달 운행</div><div class="value">8건</div><div class="sub">출장연동 7건 · 직접입력 1건</div></div>
         <div class="card kpi"><div class="label">작성 운행거리</div><div class="value">726 km</div><div class="sub">운행일지에 작성된 거리</div></div>
@@ -347,7 +341,6 @@
       </div>
 
       <div class="subview" id="vehicle-edit">
-        <div class="screen-guide"><b>입력</b> · 운행정보 입력폼 없이 운행내역 전체를 표로 나열하고, 필요한 셀을 엑셀처럼 직접 수정합니다. 차량별 기초 키로수는 한 번만 등록하면 각 운행행의 기초주행거리는 자동으로 이어집니다.</div>
       <div class="card odometer-panel">
         <div class="section-title"><h2>주행거리 작성 대조</h2><span class="note">입력한 누적 거리와 운행일지 작성 거리를 자동 비교</span></div>
         <div class="reconcile-grid">
