@@ -132,7 +132,12 @@
 .head-subnav .subtabs{margin:0}
 #trip>.head,#vehicle>.head{align-items:center;margin-bottom:14px}
 #trip>.head .head-actions,#vehicle>.head .head-actions{align-items:center}
-@media(max-width:720px){.head-subnav{width:100%}.head-subnav .subtabs{max-width:100%;overflow:auto}#trip>.head,#vehicle>.head{align-items:flex-start}}
+#trip>.head .filters,#vehicle>.head .filters{align-items:center;gap:10px}
+#trip>.head .field,#vehicle>.head .field{flex-direction:row;align-items:center;gap:6px}
+#trip>.head .field label,#vehicle>.head .field label{margin:0;white-space:nowrap;font-size:11px;line-height:1;color:var(--muted)}
+#trip>.head .field select,#vehicle>.head .field select{height:34px}
+#trip>.head .excel-btn,#vehicle>.head .excel-btn{height:34px;display:inline-flex;align-items:center}
+@media(max-width:720px){.head-subnav{width:100%}.head-subnav .subtabs{max-width:100%;overflow:auto}#trip>.head,#vehicle>.head{align-items:flex-start}#trip>.head .head-actions,#vehicle>.head .head-actions{width:100%;justify-content:flex-start}#trip>.head .filters,#vehicle>.head .filters{flex-wrap:wrap}}
 </style>
 </head>
 <body>
