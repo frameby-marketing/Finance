@@ -110,7 +110,14 @@
 .finance-primary-btn:hover{background:#f6f8fc;color:var(--primary)}
 .finance-primary-btn.active{background:var(--soft);border-color:#d7e2ff;color:var(--primary)}
 .finance-primary-btn.active::after{content:"";position:absolute;left:15px;right:15px;bottom:-11px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
-.finance-secondary{display:flex;align-items:center;min-height:56px;padding:8px 30px;gap:12px;background:#fff}
+.finance-secondary{display:flex;align-items:center;justify-content:space-between;min-height:56px;padding:8px 30px;gap:18px;background:#fff}
+.secondary-tools{margin-left:auto;display:flex;align-items:flex-end;justify-content:flex-end;min-width:0}
+.secondary-tool-group{display:none;align-items:flex-end;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.secondary-tool-group.active{display:flex}
+.secondary-tool-group .field{gap:3px}.secondary-tool-group .field label{font-size:10px}
+.secondary-tool-group select,.secondary-tool-group input{padding:7px 9px;min-height:34px}
+.secondary-tool-group .search{min-width:190px}
+.card-page-direct{padding-top:0}
 .finance-secondary.hidden{display:none}
 .module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
 .module-tabs.hidden{display:none}
@@ -118,7 +125,7 @@
 .module-tab:hover{background:#f5f7fb;color:var(--primary)}
 .module-tab.active{background:var(--soft);border-color:#d7e2ff;color:var(--primary);box-shadow:none}
 .github-auth-gate{position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#0f1115;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Arial,sans-serif}.github-auth-card{max-width:410px;width:100%;text-align:center;background:#171a21;border:1px solid #262b36;border-radius:16px;padding:36px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}.github-auth-icon{font-size:32px;margin-bottom:14px}.github-auth-card h2{font-size:17px;font-weight:700;margin:0 0 8px}.github-auth-card p{font-size:13px;color:#9aa1ac;margin:0 0 22px;line-height:1.6}.github-auth-btn{display:flex;width:100%;justify-content:center;align-items:center;padding:12px 16px;border:1px solid #4c8dff;border-radius:8px;background:#4c8dff;color:#fff;font-size:14px;font-weight:700;cursor:pointer}.github-auth-btn:disabled{opacity:.55;cursor:default}.github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
-@media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 18px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px}.module-tabs{width:100%}.module-tab{flex:0 0 auto}}
+@media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 14px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px;align-items:flex-start;flex-wrap:wrap}.module-tabs{width:auto;flex:1 1 auto}.module-tab{flex:0 0 auto}.secondary-tools{width:100%;margin-left:0}.secondary-tool-group{width:100%;justify-content:flex-start}.secondary-tool-group .search{min-width:150px;flex:1}}
 
 /* 출장·차량 3차 메뉴를 비어 있던 제목 영역으로 이동 */
 .head-subnav{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
@@ -155,6 +162,20 @@
           <button type="button" class="module-tab" data-page="payment">결제일별 내역</button>
           <button type="button" class="module-tab" data-page="all">전체 사용내역</button>
         </div>
+        <div class="secondary-tools" id="cardSecondaryTools" aria-label="법인카드 조회 조건">
+          <div class="secondary-tool-group active" data-tools-page="dashboard">
+            <div class="field"><label>조회 월</label><select id="monthFilter"></select></div>
+            <div class="field"><label>카드</label><select id="cardFilter"><option value="">전체 카드</option></select></div>
+          </div>
+          <div class="secondary-tool-group" data-tools-page="payment">
+            <div class="field"><label>결제 월</label><select id="payMonth"></select></div>
+          </div>
+          <div class="secondary-tool-group" data-tools-page="all">
+            <div class="field"><label>월</label><select id="allMonth"><option value="">전체</option></select></div>
+            <div class="field"><label>카드</label><select id="allCard"><option value="">전체 카드</option></select></div>
+            <div class="field"><label>검색</label><input class="search" id="allSearch" placeholder="사용처·계정과목"/></div>
+          </div>
+        </div>
       </div>
       <div class="finance-secondary hidden" id="tripSecondaryMenu">
         <div class="module-tabs" id="tripModuleTabs" aria-label="출장·차량 관리 세부 메뉴">
@@ -164,14 +185,7 @@
         </div>
       </div>
     </nav>
-<section class="page active" id="dashboard">
-<div class="head">
-<div><p style="margin:0">월별 법인카드 사용현황을 확인합니다.</p></div>
-<div class="filters">
-<div class="field"><label>조회 월</label><select id="monthFilter"></select></div>
-<div class="field"><label>카드</label><select id="cardFilter"><option value="">전체 카드</option></select></div>
-</div>
-</div>
+<section class="page active card-page-direct" id="dashboard">
 <div class="grid kpis">
 <div class="card kpi"><div class="label">총 사용금액</div><div class="value" id="kpiTotal">0원</div><div class="sub" id="kpiCount">0건</div></div>
 <div class="card kpi"><div class="label">불공제 금액</div><div class="value" id="kpiBad">0원</div><div class="sub" id="kpiBadRate">0%</div></div>
@@ -184,22 +198,10 @@
 </div>
 <div class="card"><div class="section-title"><h2>일자별 사용현황</h2><span class="note">카드별 합계</span></div><div id="dailyTable"></div></div>
 </section>
-<section class="page" id="payment">
-<div class="head">
-<div><p style="margin:0">매월 25일 결제 · 전월 12일 ~ 당월 11일 사용분</p></div>
-<div class="field"><label>결제 월</label><select id="payMonth"></select></div>
-</div>
+<section class="page card-page-direct" id="payment">
 <div id="paymentBody"></div>
 </section>
-<section class="page" id="all">
-<div class="head">
-<div><p style="margin:0">스프레드시트 기준 전체 사용내역을 조회합니다.</p></div>
-<div class="filters">
-<div class="field"><label>월</label><select id="allMonth"><option value="">전체</option></select></div>
-<div class="field"><label>카드</label><select id="allCard"><option value="">전체 카드</option></select></div>
-<div class="field"><label>검색</label><input class="search" id="allSearch" placeholder="사용처·계정과목"/></div>
-</div>
-</div>
+<section class="page card-page-direct" id="all">
 <div class="card"><div id="allTable"></div></div>
 </section>
     <section class="page" id="trip">
@@ -584,6 +586,7 @@ function syncModuleHeader(module,id){
     b.setAttribute('aria-selected',active?'true':'false');
   });
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  document.querySelectorAll('.secondary-tool-group[data-tools-page]').forEach(g=>g.classList.toggle('active',isCard&&g.dataset.toolsPage===id));
   document.body.dataset.activeModule=module;
 }
 function showModule(module,page){
