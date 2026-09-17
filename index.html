@@ -119,6 +119,12 @@
 .module-tab.active{background:var(--soft);border-color:#d7e2ff;color:var(--primary);box-shadow:none}
 .github-auth-gate{position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#0f1115;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Arial,sans-serif}.github-auth-card{max-width:410px;width:100%;text-align:center;background:#171a21;border:1px solid #262b36;border-radius:16px;padding:36px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}.github-auth-icon{font-size:32px;margin-bottom:14px}.github-auth-card h2{font-size:17px;font-weight:700;margin:0 0 8px}.github-auth-card p{font-size:13px;color:#9aa1ac;margin:0 0 22px;line-height:1.6}.github-auth-btn{display:flex;width:100%;justify-content:center;align-items:center;padding:12px 16px;border:1px solid #4c8dff;border-radius:8px;background:#4c8dff;color:#fff;font-size:14px;font-weight:700;cursor:pointer}.github-auth-btn:disabled{opacity:.55;cursor:default}.github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
 @media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 18px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px}.module-tabs{width:100%}.module-tab{flex:0 0 auto}}
+
+/* 출장·차량 3차 메뉴를 비어 있던 제목 영역으로 이동 */
+.head-subnav{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.head-subnav .subtabs{margin:0}
+.head-subnav>p{color:var(--muted);font-size:12px}
+@media(max-width:720px){.head-subnav{width:100%}.head-subnav .subtabs{max-width:100%;overflow:auto}}
 </style>
 </head>
 <body>
@@ -198,7 +204,13 @@
 </section>
     <section class="page" id="trip">
       <div class="head">
-        <div><p style="margin:0">원본 비용내역을 날짜·비용항목별로 자동 수집하고 출장정보만 정리합니다.</p></div>
+        <div class="head-subnav">
+          <div class="subtabs" data-tabs="trip">
+            <button class="subtab active" data-sub="trip-dashboard">대시보드</button>
+            <button class="subtab" data-sub="trip-edit">입력</button>
+          </div>
+          <p style="margin:0">원본 비용내역을 날짜·비용항목별로 자동 수집하고 출장정보만 정리합니다.</p>
+        </div>
         <div class="head-actions">
           <div class="filters">
             <div class="field"><label>조회 월</label><select><option>2026-09</option><option>2026-08</option><option>2026-07</option></select></div>
@@ -206,11 +218,6 @@
           </div>
           <button class="excel-btn" type="button" data-export="trip" title="클릭하면 제공된 출장기록부 XLSX 양식에 현재 조회 내역을 작성해 다운로드합니다">엑셀 다운로드</button>
         </div>
-      </div>
-
-      <div class="subtabs" data-tabs="trip">
-        <button class="subtab active" data-sub="trip-dashboard">대시보드</button>
-        <button class="subtab" data-sub="trip-edit">입력</button>
       </div>
 
       <div class="subview active" id="trip-dashboard">
@@ -276,7 +283,13 @@
 
     <section class="page" id="vehicle">
       <div class="head">
-        <div><p style="margin:0">출장기록에서 차량을 선택한 건을 자동 연결하고 실제 운행거리만 정리합니다.</p></div>
+        <div class="head-subnav">
+          <div class="subtabs" data-tabs="vehicle">
+            <button class="subtab active" data-sub="vehicle-dashboard">대시보드</button>
+            <button class="subtab" data-sub="vehicle-edit">입력</button>
+          </div>
+          <p style="margin:0">출장기록에서 차량을 선택한 건을 자동 연결하고 실제 운행거리만 정리합니다.</p>
+        </div>
         <div class="head-actions">
           <div class="filters">
             <div class="field"><label>조회 월</label><select><option>2026-09</option><option>2026-08</option></select></div>
@@ -284,11 +297,6 @@
           </div>
           <button class="excel-btn" type="button" data-export="vehicle" title="클릭하면 제공된 XLS 양식에 현재 조회 운행내역을 작성해 다운로드합니다">엑셀 다운로드</button>
         </div>
-      </div>
-
-      <div class="subtabs" data-tabs="vehicle">
-        <button class="subtab active" data-sub="vehicle-dashboard">대시보드</button>
-        <button class="subtab" data-sub="vehicle-edit">입력</button>
       </div>
 
       <div class="subview active" id="vehicle-dashboard">
