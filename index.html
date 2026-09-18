@@ -117,6 +117,13 @@
 .secondary-tool-group .field{gap:3px}.secondary-tool-group .field label{font-size:10px}
 .secondary-tool-group select,.secondary-tool-group input{padding:7px 9px;min-height:34px}
 .secondary-tool-group .search{min-width:190px}
+.cash-secondary-tools{margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.cash-year-control{display:flex;align-items:center;gap:7px}
+.cash-year-control label{font-size:10px;color:#6e7888;font-weight:800}
+.cash-year-control select{height:34px;border:1px solid #dfe4ea;border-radius:8px;background:#fff;padding:0 9px;color:#344055;font-weight:800}
+.cash-refresh-btn{height:34px;border:1px solid #dfe4ea;border-radius:8px;background:#fff;color:#344055;padding:0 11px;font-size:11px;font-weight:800;cursor:pointer}
+.cash-refresh-btn:hover{background:#f7f9fc}
+.cash-refresh-btn span{display:inline-block;margin-right:3px}
 .card-page-direct{padding-top:0}
 .finance-secondary.hidden{display:none}
 .module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
@@ -125,7 +132,7 @@
 .module-tab:hover{background:#f5f7fb;color:var(--primary)}
 .module-tab.active{background:var(--soft);border-color:#d7e2ff;color:var(--primary);box-shadow:none}
 .github-auth-gate{position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:#0f1115;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,Arial,sans-serif}.github-auth-card{max-width:410px;width:100%;text-align:center;background:#171a21;border:1px solid #262b36;border-radius:16px;padding:36px 28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}.github-auth-icon{font-size:32px;margin-bottom:14px}.github-auth-card h2{font-size:17px;font-weight:700;margin:0 0 8px}.github-auth-card p{font-size:13px;color:#9aa1ac;margin:0 0 22px;line-height:1.6}.github-auth-btn{display:flex;width:100%;justify-content:center;align-items:center;padding:12px 16px;border:1px solid #4c8dff;border-radius:8px;background:#4c8dff;color:#fff;font-size:14px;font-weight:700;cursor:pointer}.github-auth-btn:disabled{opacity:.55;cursor:default}.github-auth-error{display:none;color:#ff7a86;font-size:12.5px;margin-top:14px;line-height:1.6}.github-auth-note{font-size:11.5px!important;margin-top:14px!important;margin-bottom:0!important;color:#777f8b!important}
-@media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 14px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px;align-items:flex-start;flex-wrap:wrap}.module-tabs{width:auto;flex:1 1 auto}.module-tab{flex:0 0 auto}.secondary-tools{width:100%;margin-left:0}.secondary-tool-group{width:100%;justify-content:flex-start}.secondary-tool-group .search{min-width:150px;flex:1}}
+@media(max-width:720px){.app.integrated-content>.main{padding:0 12px 40px}.finance-workspace-nav{margin:0 -12px 14px}.finance-primary{padding:0 16px;gap:24px}.finance-secondary{padding:8px 12px;align-items:flex-start;flex-wrap:wrap}.module-tabs{width:auto;flex:1 1 auto}.module-tab{flex:0 0 auto}.secondary-tools{width:100%;margin-left:0}.secondary-tool-group{width:100%;justify-content:flex-start}.secondary-tool-group .search{min-width:150px;flex:1}.cash-secondary-tools{margin-left:auto}.cash-year-control label{display:none}}
 
 /* 출장·차량 3차 메뉴를 비어 있던 제목 영역으로 이동 */
 .head-subnav{display:flex;align-items:center;min-width:0}
@@ -173,6 +180,21 @@
           <button type="button" class="module-tab active" data-cash-page="calendar">달력</button>
           <button type="button" class="module-tab" data-cash-page="monthly">현황</button>
           <button type="button" class="module-tab" data-cash-page="report">보고서</button>
+        </div>
+        <div class="cash-secondary-tools" aria-label="자금수지 연도 및 새로고침">
+          <div class="cash-year-control">
+            <label for="cashGlobalYear">연도</label>
+            <select id="cashGlobalYear">
+              <option value="2022">2022년</option>
+              <option value="2023">2023년</option>
+              <option value="2024">2024년</option>
+              <option value="2025">2025년</option>
+              <option value="2026" selected>2026년</option>
+              <option value="2027">2027년</option>
+              <option value="2028">2028년</option>
+            </select>
+          </div>
+          <button type="button" class="cash-refresh-btn" id="cashOuterRefreshBtn"><span>↻</span> 새로고침</button>
         </div>
       </div>
       <div class="finance-secondary" id="cardSecondaryMenu">
@@ -611,7 +633,13 @@ function ensureCashflowFrame(page){
   CASH_ACTIVE_PAGE=page||CASH_ACTIVE_PAGE||'calendar';
   const frame=document.getElementById('cashflowFrame');
   if(!frame)return;
-  const send=()=>{try{frame.contentWindow?.postMessage({type:'frameby-cash-nav',page:CASH_ACTIVE_PAGE},'*')}catch(e){}};
+  const send=()=>{
+    try{
+      frame.contentWindow?.postMessage({type:'frameby-cash-nav',page:CASH_ACTIVE_PAGE},'*');
+      const year=document.getElementById('cashGlobalYear')?.value||'2026';
+      frame.contentWindow?.postMessage({type:'frameby-cash-year',year},'*');
+    }catch(e){}
+  };
   if(!CASHFLOW_FRAME_LOADED){
     const source=document.getElementById('cashflowSource')?.value||'';
     frame.addEventListener('load',()=>{CASHFLOW_FRAME_LOADED=true;setTimeout(send,30)},{once:true});
@@ -898,6 +926,23 @@ function initIntegratedNav(){
     btn.dataset.moduleBound='1';
     btn.addEventListener('click',()=>showCashPage(btn.dataset.cashPage));
   });
+  const cashYear=document.getElementById('cashGlobalYear');
+  if(cashYear && !cashYear.dataset.bound){
+    cashYear.dataset.bound='1';
+    cashYear.addEventListener('change',()=>{
+      const frame=document.getElementById('cashflowFrame');
+      if(CASHFLOW_FRAME_LOADED) frame?.contentWindow?.postMessage({type:'frameby-cash-year',year:cashYear.value},'*');
+    });
+  }
+  const cashRefresh=document.getElementById('cashOuterRefreshBtn');
+  if(cashRefresh && !cashRefresh.dataset.bound){
+    cashRefresh.dataset.bound='1';
+    cashRefresh.addEventListener('click',()=>{
+      const frame=document.getElementById('cashflowFrame');
+      if(!CASHFLOW_FRAME_LOADED){ ensureCashflowFrame(CASH_ACTIVE_PAGE); return; }
+      frame?.contentWindow?.postMessage({type:'frameby-cash-refresh'},'*');
+    });
+  }
   const initial=location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':'card';
   showModule(initial,initial==='trip'?'trip':initial==='cash'?'calendar':'dashboard');
 }
@@ -2329,7 +2374,26 @@ async function cgSoftDeleteWebRecord(id){await cgUser();const all=await cgAllSto
 const CASH_GITHUB_RPC={getAppData:cgGetAppData,saveWebRecord:cgSaveWebRecord,saveExpectedExpenseSnapshot:cgSaveExpectedExpenseSnapshot,softDeleteWebRecord:cgSoftDeleteWebRecord};
 function cgRunner(success,failure){return new Proxy({}, {get(_t,p){if(p==='withSuccessHandler')return fn=>cgRunner(fn,failure);if(p==='withFailureHandler')return fn=>cgRunner(success,fn);return(...args)=>{const fn=CASH_GITHUB_RPC[p];if(!fn){const e=new Error('지원하지 않는 호출: '+String(p));failure?.(e);return}Promise.resolve().then(()=>fn(...args)).then(v=>success?.(v)).catch(e=>failure?.(e))}}})}
 window.google=window.google||{};window.google.script=window.google.script||{};window.google.script.run=cgRunner(null,null);
-window.addEventListener('message',e=>{const d=e.data||{};if(d.type!=='frameby-cash-nav')return;const page={calendar:'calendarPage',monthly:'monthlyPage',report:'reportPage'}[d.page]||'calendarPage';setTimeout(()=>document.querySelector('.navbtn[data-page="'+page+'"]')?.click(),0)});
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.type==='frameby-cash-nav'){
+    const page={calendar:'calendarPage',monthly:'monthlyPage',report:'reportPage'}[d.page]||'calendarPage';
+    setTimeout(()=>document.querySelector('.navbtn[data-page="'+page+'"]')?.click(),0);
+    return;
+  }
+  if(d.type==='frameby-cash-year'){
+    const sel=document.getElementById('globalYear');
+    const year=String(d.year||'');
+    if(sel && [...sel.options].some(o=>o.value===year) && sel.value!==year){
+      sel.value=year;
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    return;
+  }
+  if(d.type==='frameby-cash-refresh'){
+    document.getElementById('refreshDataBtn')?.click();
+  }
+});
 
 </script>
 <style id="frameby-cash-integrated-style">
@@ -2340,38 +2404,9 @@ window.addEventListener('message',e=>{const d=e.data||{};if(d.type!=='frameby-ca
 </style>
 </meta></meta>
 <style id="frameby-cash-embedded-style">
-.topbar{height:52px;padding:0 18px;justify-content:flex-end}
-.topbar .brand,.topbar .mainnav{display:none!important}
+/* 통합 메뉴에서 연도/새로고침을 제공하므로 내부 상단바는 표시하지 않습니다. */
+.topbar{display:none!important}
 .page{padding-top:16px}
-
-/* 현황 화면에서는 연도/새로고침을 제목과 같은 줄 오른쪽에 배치 */
-body:has(#monthlyPage:not(.hidden)) .topbar{
-  position:absolute;
-  top:16px;
-  right:26px;
-  width:auto;
-  height:38px;
-  padding:0;
-  border:0;
-  background:transparent;
-  z-index:40;
-}
-body:has(#monthlyPage:not(.hidden)) .topbar .spacer{display:none}
-body:has(#monthlyPage:not(.hidden)) #monthlyPage>.toolbar{
-  min-height:42px;
-  padding-right:230px;
-}
-@media(max-width:850px){
-  body:has(#monthlyPage:not(.hidden)) .topbar{
-    position:static;
-    width:100%;
-    height:48px;
-    padding:8px 14px 0!important;
-    background:transparent;
-    justify-content:flex-end!important;
-  }
-  body:has(#monthlyPage:not(.hidden)) #monthlyPage>.toolbar{padding-right:0}
-}
 </style>
 </head>
 <body>
