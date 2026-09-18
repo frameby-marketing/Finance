@@ -150,6 +150,12 @@
 .cashflow-host.active{display:block}
 .cashflow-frame{display:block;width:100%;height:calc(100vh - 155px);min-height:680px;border:0;background:var(--bg)}
 @media(max-width:720px){.cashflow-frame{height:calc(100vh - 185px);min-height:620px}}
+
+/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 */
+#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
+#cashPrimaryTab{order:1!important}
+#cardPrimaryTab{order:2!important}
+#tripPrimaryTab{order:3!important}
 </style>
 </head>
 <body>
@@ -171,9 +177,9 @@
     <!-- 상위 메뉴명은 이 영역에서만 표시하며 본문에는 법인카드/출장·차량 관리 제목을 반복하지 않습니다. -->
     <nav class="finance-workspace-nav" aria-label="Finance & Admin 통합 메뉴">
       <div class="finance-primary" role="tablist" aria-label="업무 메뉴">
-        <button type="button" class="finance-primary-btn" data-module="cash" role="tab" aria-selected="false">자금수지</button>
-        <button type="button" class="finance-primary-btn active" data-module="card" role="tab" aria-selected="true">법인카드</button>
-        <button type="button" class="finance-primary-btn" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
+        <button type="button" class="finance-primary-btn" id="cashPrimaryTab" data-module="cash" role="tab" aria-selected="false">자금수지</button>
+        <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
+        <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
         <div class="module-tabs" id="cashModuleTabs" aria-label="자금수지 세부 메뉴">
@@ -641,7 +647,12 @@ function ensureCashflowFrame(page){
     }catch(e){}
   };
   if(!CASHFLOW_FRAME_LOADED){
-    const source=document.getElementById('cashflowSource')?.value||'';
+    const sourceEl=document.getElementById('cashflowSource');
+    const source=sourceEl?.value||sourceEl?.textContent||'';
+    if(!source.trim()){
+      requestAnimationFrame(()=>ensureCashflowFrame(CASH_ACTIVE_PAGE));
+      return;
+    }
     frame.addEventListener('load',()=>{CASHFLOW_FRAME_LOADED=true;setTimeout(send,30)},{once:true});
     frame.srcdoc=source;
   }else send();
@@ -911,6 +922,7 @@ function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}co
 function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubAuthError('Google 로그인 준비 중입니다. 잠시 후 다시 시도해 주세요.');return}const btn=document.getElementById('githubLoginBtn');if(btn){btn.disabled=true;btn.textContent='로그인 중...'}GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:''})}
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
 function initIntegratedNav(){
+  ['cashPrimaryTab','cardPrimaryTab','tripPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(btn=>{
     if(btn.dataset.moduleBound)return;
     btn.dataset.moduleBound='1';
@@ -948,7 +960,11 @@ function initIntegratedNav(){
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
 function initIntegrated(){initIntegratedNav();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
-initIntegrated();
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
+}else{
+  initIntegrated();
+}
 </script>
 
 <textarea id="cashflowSource" style="display:none" aria-hidden="true"><!DOCTYPE html>
