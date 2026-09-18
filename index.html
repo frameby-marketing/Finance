@@ -2343,6 +2343,35 @@ window.addEventListener('message',e=>{const d=e.data||{};if(d.type!=='frameby-ca
 .topbar{height:52px;padding:0 18px;justify-content:flex-end}
 .topbar .brand,.topbar .mainnav{display:none!important}
 .page{padding-top:16px}
+
+/* 현황 화면에서는 연도/새로고침을 제목과 같은 줄 오른쪽에 배치 */
+body:has(#monthlyPage:not(.hidden)) .topbar{
+  position:absolute;
+  top:16px;
+  right:26px;
+  width:auto;
+  height:38px;
+  padding:0;
+  border:0;
+  background:transparent;
+  z-index:40;
+}
+body:has(#monthlyPage:not(.hidden)) .topbar .spacer{display:none}
+body:has(#monthlyPage:not(.hidden)) #monthlyPage>.toolbar{
+  min-height:42px;
+  padding-right:230px;
+}
+@media(max-width:850px){
+  body:has(#monthlyPage:not(.hidden)) .topbar{
+    position:static;
+    width:100%;
+    height:48px;
+    padding:8px 14px 0!important;
+    background:transparent;
+    justify-content:flex-end!important;
+  }
+  body:has(#monthlyPage:not(.hidden)) #monthlyPage>.toolbar{padding-right:0}
+}
 </style>
 </head>
 <body>
