@@ -967,12 +967,11 @@ if(document.readyState==='loading'){
 }
 </script>
 
-<textarea id="cashflowSource" style="display:none" aria-hidden="true"><!DOCTYPE html>
-
+<textarea id="cashflowSource" style="display:none" aria-hidden="true"><!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>자금수지 관리</title>
 <style>
 :root{
@@ -2285,8 +2284,515 @@ body.cf-data-loading #calendarPage .calendar-wrap::after{
   background:#fff !important;
 }
 
-</style>
 
+/* ===== 제조/광고 실제 사용내역: 날짜 숨김, 거래처명/금액 2열 ===== */
+.actual-cost-head{
+  grid-template-columns:1fr 105px !important;
+}
+#mfgRows .sheet-edit-row,
+#adRows .sheet-edit-row{
+  grid-template-columns:1fr 105px !important;
+}
+#mfgRows .sheet-edit-row .date-cell,
+#adRows .sheet-edit-row .date-cell{
+  display:none !important;
+}
+.actual-cost-total{
+  grid-template-columns:1fr 105px !important;
+}
+.actual-cost-total span:nth-child(2){
+  display:none !important;
+}
+
+/* ===== 단기차입금 미니리스트 ===== */
+.loan-edit-head,
+#loanRows .sheet-edit-row{
+  grid-template-columns:88px 1fr 1fr !important;
+}
+#loanRows .sheet-edit-row input:nth-child(2),
+#loanRows .sheet-edit-row input:nth-child(3){
+  text-align:right !important;
+  font-variant-numeric:tabular-nums;
+}
+#loanRows .sheet-edit-row input.loan-negative{
+  color:#e23c3c !important;
+}
+.loan-summary{
+  display:grid;
+  grid-template-columns:58px 1fr 44px 1fr;
+  align-items:center;
+  border-top:1px solid var(--line);
+  background:#f7f9fc;
+  font-size:10px;
+  font-weight:900;
+}
+.loan-summary > *{padding:8px 6px}
+.loan-summary strong{
+  text-align:right;
+  font-size:11px;
+  color:#23344f;
+  font-variant-numeric:tabular-nums;
+}
+
+
+/* ===== 단기차입금 원장형: 잔액 자동계산 ===== */
+.loan-edit-head,
+.loan-opening-row,
+#loanRows .loan-edit-row,
+.loan-summary{
+  display:grid !important;
+  grid-template-columns:88px 1fr 1fr !important;
+  align-items:center !important;
+}
+.loan-opening-row{
+  min-height:31px;
+  background:#f7f9fc;
+  border-top:1px solid #dfe5ee;
+  border-bottom:1px solid #dfe5ee;
+}
+.loan-opening-row > *{
+  padding:7px 6px;
+  font-size:10px;
+}
+.loan-opening-row > span{
+  text-align:center;
+  font-weight:900;
+  color:#56657d;
+}
+.loan-opening-row strong{
+  text-align:right;
+  color:#26364e;
+  font-variant-numeric:tabular-nums;
+}
+#loanRows .loan-edit-row{
+  min-height:31px;
+  border-bottom:1px solid var(--line);
+}
+#loanRows .loan-edit-row input{
+  min-width:0;
+}
+#loanRows .loan-balance-display{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  min-height:31px;
+  padding:0 6px;
+  font-size:10px;
+  font-weight:800;
+  color:#26364e;
+  font-variant-numeric:tabular-nums;
+  border-left:1px solid var(--line);
+}
+#loanRows .loan-change-cell.loan-negative{
+  color:#e33b3b !important;
+}
+.loan-summary{
+  min-height:31px;
+  background:#f7f9fc;
+  border-top:1px solid #dfe5ee;
+  border-bottom:1px solid #dfe5ee;
+}
+.loan-summary > *{
+  padding:7px 6px !important;
+}
+.loan-summary > span{
+  text-align:center;
+  color:#56657d;
+  font-size:10px;
+  font-weight:900;
+}
+.loan-summary strong{
+  text-align:right;
+  font-size:10px;
+  font-weight:900;
+  color:#23344f;
+  font-variant-numeric:tabular-nums;
+}
+.loan-summary strong.loan-negative{
+  color:#e33b3b !important;
+}
+
+
+/* 미니리스트 저장 상태 / 오류는 팝업 대신 비차단 표시 */
+#cfMiniStatus{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:9999;
+  display:none;
+  padding:8px 11px;
+  border-radius:8px;
+  background:#fff;
+  border:1px solid #dfe5ee;
+  box-shadow:0 5px 18px rgba(20,34,60,.12);
+  font-size:11px;
+  font-weight:800;
+  color:#58667b;
+}
+#cfMiniStatus.show{display:block}
+#cfMiniStatus.error{color:#b42318;border-color:#f3c7c3;background:#fff8f7}
+#cfMiniStatus.saved{color:#237a55;border-color:#c7e5d6;background:#f7fffb}
+#cfMiniStatus.saving{color:#315f9f;border-color:#cbdaf2;background:#f7faff}
+
+
+/* ===== 달력 우측 미니리스트: 고정 높이 + 내부 스크롤 ===== */
+#incomeRows,
+#mfgRows,
+#mfgExpectedRows,
+#adRows,
+#adExpectedRows,
+#loanRows{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+
+#incomeRows{max-height:180px !important}
+#mfgRows,
+#mfgExpectedRows,
+#adRows,
+#adExpectedRows{max-height:118px !important}
+#loanRows{max-height:430px !important}
+
+/* 행이 늘어나도 카드가 아래로 계속 커지지 않도록 최소/최대 높이를 고정 */
+#incomeRows:empty,
+#mfgRows:empty,
+#mfgExpectedRows:empty,
+#adRows:empty,
+#adExpectedRows:empty,
+#loanRows:empty{
+  min-height:0 !important;
+}
+
+/* 스크롤은 얇게 */
+#incomeRows::-webkit-scrollbar,
+#mfgRows::-webkit-scrollbar,
+#mfgExpectedRows::-webkit-scrollbar,
+#adRows::-webkit-scrollbar,
+#adExpectedRows::-webkit-scrollbar,
+#loanRows::-webkit-scrollbar{
+  width:6px;
+}
+#incomeRows::-webkit-scrollbar-thumb,
+#mfgRows::-webkit-scrollbar-thumb,
+#mfgExpectedRows::-webkit-scrollbar-thumb,
+#adRows::-webkit-scrollbar-thumb,
+#adExpectedRows::-webkit-scrollbar-thumb,
+#loanRows::-webkit-scrollbar-thumb{
+  background:#cfd7e3;
+  border-radius:999px;
+}
+
+/* 큰 화면에서는 남는 가로공간을 써서 차입금을 수입/비용 오른쪽에 배치 */
+@media (min-width:1700px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(900px,1fr) minmax(680px,720px) !important;
+  }
+  #calendarPage .side{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    grid-template-areas:
+      "income loan"
+      "cost   loan"
+      "forecast forecast" !important;
+    gap:14px !important;
+    align-items:start !important;
+  }
+  #incomeMiniCard{grid-area:income}
+  #costMiniCard{grid-area:cost}
+  #shortLoanCard{
+    grid-area:loan;
+    align-self:start;
+    position:sticky;
+    top:78px;
+  }
+  #forecastMiniCard{grid-area:forecast}
+}
+
+/* 중간/작은 화면은 기존처럼 세로 배치 */
+@media (max-width:1699px){
+  #calendarPage .side{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  #shortLoanCard{position:static}
+}
+
+
+/* ===== 단기차입금 카드 초록색 완전 제거: 최종 강제 오버라이드 ===== */
+#shortLoanCard{
+  background:#ffffff !important;
+  border-color:#e3e8ef !important;
+}
+#shortLoanCard .loan-opening-row{
+  background:#f7f9fc !important;
+  border-top:1px solid #e3e8ef !important;
+  border-bottom:1px solid #e3e8ef !important;
+}
+#shortLoanCard .loan-opening-row > span,
+#shortLoanCard .loan-opening-row strong{
+  color:#56657d !important;
+}
+#shortLoanCard .loan-summary{
+  background:#f7f9fc !important;
+  border-top:1px solid #e3e8ef !important;
+  border-bottom:1px solid #e3e8ef !important;
+}
+#shortLoanCard .loan-summary > span,
+#shortLoanCard .loan-summary strong{
+  color:#23344f !important;
+}
+#shortLoanCard .loan-edit-head{
+  background:#f7f9fc !important;
+  color:#56657d !important;
+}
+#shortLoanCard .loan-edit-head span{
+  color:#56657d !important;
+}
+#shortLoanCard .loan-negative,
+#shortLoanCard .loan-change-cell.loan-negative,
+#shortLoanCard .loan-summary strong.loan-negative{
+  color:#e33b3b !important;
+}
+
+
+/* ===== 큰 화면: 달력 원래 폭 유지 + 남는 오른쪽 여백 활용 ===== */
+/* 1800px를 넘는 화면에서는 달력 페이지에 한해서 기존 .page 최대폭을 벗어나
+   브라우저의 남는 좌우 공간을 실제로 사용한다. */
+@media (min-width:1801px){
+  #calendarPage{
+    width:calc(100vw - 52px) !important;
+    margin-left:calc((1800px - 100vw) / 2) !important;
+  }
+
+  /* 달력을 먼저 충분히 확보하고, 오른쪽 미니리스트만 2열로 사용 */
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(1180px,1fr) 600px !important;
+    gap:16px !important;
+  }
+
+  #calendarPage .side{
+    display:grid !important;
+    grid-template-columns:293px 293px !important;
+    grid-template-areas:
+      "income loan"
+      "cost   loan"
+      "forecast forecast" !important;
+    gap:14px !important;
+    align-items:start !important;
+  }
+
+  #incomeMiniCard{grid-area:income !important}
+  #costMiniCard{grid-area:cost !important}
+  #shortLoanCard{
+    grid-area:loan !important;
+    position:sticky !important;
+    top:78px !important;
+  }
+  #forecastMiniCard{grid-area:forecast !important}
+}
+
+/* 1700~1800px에서는 페이지 폭을 억지로 넓히지 않고 기존 폭 유지 */
+@media (min-width:1700px) and (max-width:1800px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(0,1fr) 560px !important;
+  }
+  #calendarPage .side{
+    grid-template-columns:273px 273px !important;
+  }
+}
+
+
+/* ===== 달력 우측 미니리스트 글씨 가독성 보정 ===== */
+#calendarPage .side,
+#calendarPage .side input,
+#calendarPage .side button,
+#calendarPage .side span,
+#calendarPage .side strong,
+#calendarPage .side h3{
+  font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* 카드 제목 */
+#calendarPage .side .metric-title h3{
+  font-size:15px !important;
+  line-height:1.35 !important;
+  letter-spacing:-0.2px !important;
+}
+
+/* 표 머리글 */
+#calendarPage .side .sheet-edit-head,
+#calendarPage .side .actual-cost-head,
+#calendarPage .side .loan-edit-head{
+  font-size:11px !important;
+  line-height:1.35 !important;
+}
+#calendarPage .side .sheet-edit-head span,
+#calendarPage .side .actual-cost-head span,
+#calendarPage .side .loan-edit-head span{
+  padding-top:8px !important;
+  padding-bottom:8px !important;
+}
+
+/* 실제 입력/표시 행 */
+#calendarPage .side .sheet-edit-row{
+  min-height:34px !important;
+}
+#calendarPage .side .sheet-edit-row input{
+  height:34px !important;
+  font-size:12px !important;
+  line-height:1.3 !important;
+  letter-spacing:-0.15px !important;
+}
+
+/* 합계 */
+#calendarPage .side .sheet-edit-total,
+#calendarPage .side .income-edit-total,
+#calendarPage .side .loan-summary{
+  font-size:12px !important;
+  line-height:1.35 !important;
+}
+#calendarPage .side .sheet-edit-total span,
+#calendarPage .side .income-edit-total span,
+#calendarPage .side .loan-summary > *{
+  padding-top:9px !important;
+  padding-bottom:9px !important;
+}
+
+/* 단기차입금 전기/잔액도 동일 크기 */
+#shortLoanCard .loan-opening-row{
+  min-height:34px !important;
+}
+#shortLoanCard .loan-opening-row > *,
+#shortLoanCard .loan-balance-display{
+  font-size:12px !important;
+  line-height:1.35 !important;
+}
+#shortLoanCard .loan-balance-display{
+  min-height:34px !important;
+}
+
+/* 제조/광고 내부 소제목 */
+#calendarPage .side .section-title-row strong,
+#calendarPage .side .side-subhead strong{
+  font-size:13px !important;
+}
+#calendarPage .side .cost-note,
+#calendarPage .side .side-subhead span{
+  font-size:11px !important;
+}
+
+/* 큰 화면에서 미니리스트 2열 자체도 너무 좁지 않게 */
+@media (min-width:1801px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(1180px,1fr) 680px !important;
+  }
+  #calendarPage .side{
+    grid-template-columns:333px 333px !important;
+    gap:14px !important;
+  }
+}
+
+/* 1700~1800px도 최소 가독성 확보 */
+@media (min-width:1700px) and (max-width:1800px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(0,1fr) 610px !important;
+  }
+  #calendarPage .side{
+    grid-template-columns:298px 298px !important;
+  }
+}
+
+
+/* ===== 달력 세로 압축: 세부내역은 자르지 않고 빈 공간만 축소 ===== */
+#calendarSubview .content-grid{
+  align-items:start !important;
+}
+
+/* 오른쪽 미니리스트 높이에 달력 전체를 강제로 맞추지 않음 */
+#calendarSubview .calendar-card{
+  height:auto !important;
+  align-self:start !important;
+}
+
+/* 주차 높이는 기본 145px, 내용이 많으면 자동으로 더 늘어남 */
+#calendarSubview .calendar{
+  flex:0 0 auto !important;
+  grid-auto-rows:minmax(145px, auto) !important;
+  align-content:start !important;
+}
+
+/* 하루 셀 */
+#calendarSubview .day{
+  height:auto !important;
+  min-height:145px !important;
+  padding:5px 7px 5px !important;
+  overflow:visible !important;
+}
+
+/* 요일 머리글도 살짝 압축 */
+#calendarSubview .calendar-head div{
+  padding:7px 6px !important;
+}
+
+/* 날짜 영역 */
+#calendarSubview .day .date{
+  flex-basis:20px !important;
+  min-height:20px !important;
+  height:20px !important;
+}
+#calendarSubview .today .num{
+  width:22px !important;
+  height:22px !important;
+}
+
+/* 입금/지출 제목행 */
+#calendarSubview .day .sumrow{
+  flex-basis:20px !important;
+  min-height:20px !important;
+  height:20px !important;
+}
+
+/* 세부내역은 줄이지 않고 줄간격/여백만 압축 */
+#calendarSubview .day .detail{
+  line-height:1.25 !important;
+  row-gap:1px !important;
+  padding-bottom:2px !important;
+  overflow:visible !important;
+  max-height:none !important;
+}
+
+/* 경상수지/현잔액 하단부 */
+#calendarSubview .day .dayfoot{
+  grid-template-rows:19px 19px !important;
+  flex-basis:43px !important;
+  min-height:43px !important;
+  height:43px !important;
+  padding-top:4px !important;
+}
+#calendarSubview .day .dayfoot > span,
+#calendarSubview .day .dayfoot > b{
+  min-height:19px !important;
+  height:19px !important;
+}
+
+/* 아주 좁은 화면에서만 기존 모바일 높이 우선 */
+@media(max-width:900px){
+  #calendarSubview .day{
+    min-height:160px !important;
+  }
+}
+@media(max-width:700px){
+  #calendarSubview .day{
+    min-height:175px !important;
+  }
+}
+
+</style>
 <script>
 /* GitHub Pages 연결부: 기존 자금수지 UI의 google.script.run 호출만 Google Sheets API로 치환 */
 const CASH_GITHUB_CONFIG=Object.freeze({
@@ -2381,13 +2887,55 @@ async function cgGetAppData(year){await cgUser();const store=await cgReadStore(y
 async function cgAllStore(){const vals=await cgValuesGet(CASH_GITHUB_CONFIG.storeSheet,'A2:L');return vals.map((r,i)=>cgStoreObj(r,i+2))}
 function cgStoreRow(obj,created,updated,deleted=''){return[obj.id,obj.type,obj.year,obj.month,obj.date,obj.vendor,obj.description,cgNum(obj.amount),obj.state||'사용',created||updated,updated,deleted]}
 async function cgSaveWebRecord(payload){await cgUser();payload=payload||{};const all=await cgAllStore(),now=cgNow(),id=cgClean(payload.id)||cgId(),date=cgClean(payload.date),year=Number(payload.year)||(date?Number(date.slice(0,4)):2026),month=Number(payload.month)||(date?Number(date.slice(5,7)):0),obj={id,type:cgClean(payload.type),year,month,date,vendor:cgClean(payload.vendor),description:cgClean(payload.description),amount:cgNum(payload.amount),state:'사용'};const old=all.find(r=>r.id===id);if(old)await cgValuesUpdate(CASH_GITHUB_CONFIG.storeSheet,'A'+old.rowNo+':L'+old.rowNo,[cgStoreRow(obj,old.created||now,now,'')]);else await cgValuesAppend(CASH_GITHUB_CONFIG.storeSheet,cgStoreRow(obj,now,now,''));return obj}
+async function cgSaveMiniListBatch(payload){
+  await cgUser();
+  payload=payload||{};
+  const records=Array.isArray(payload.records)?payload.records:[];
+  const yearDefault=Number(payload.year)||2026;
+  const monthDefault=Number(payload.month)||0;
+  const allowed=new Set(['월매출입금','제조비','제조비예상','광고비','광고비예상','단기차입금']);
+  const all=await cgAllStore();
+  const byId=new Map(all.map(r=>[r.id,r]));
+  const now=cgNow(),saved=[],updates=[],appends=[];
+  for(const rec0 of records){
+    const rec=rec0||{};
+    const type=cgClean(rec.type);
+    if(!allowed.has(type))continue;
+    const date=cgClean(rec.date);
+    const year=Number(rec.year)||yearDefault||(date?Number(date.slice(0,4)):2026);
+    const month=Number(rec.month)||monthDefault||(date?Number(date.slice(5,7)):0);
+    let id=cgClean(rec.id);
+    let old=id?byId.get(id):null;
+    if(!id){id=cgId();old=null}
+    const obj={
+      id,type,year,month,
+      date,
+      vendor:cgClean(rec.vendor),
+      description:cgClean(rec.description),
+      amount:cgNum(rec.amount),
+      state:'사용'
+    };
+    if(old){
+      updates.push({
+        range:cgRange(CASH_GITHUB_CONFIG.storeSheet,'A'+old.rowNo+':L'+old.rowNo),
+        values:[cgStoreRow(obj,old.created||now,now,'')]
+      });
+    }else{
+      appends.push(cgStoreRow(obj,now,now,''));
+    }
+    saved.push(obj);
+  }
+  await cgBatchValues(updates);
+  if(appends.length)await cgValuesAppend(CASH_GITHUB_CONFIG.storeSheet,appends);
+  return{ok:true,saved,store:await cgReadStore(yearDefault)};
+}
 async function cgSaveExpectedExpenseSnapshot(payload){await cgUser();payload=payload||{};const year=Number(payload.year);if(!year)throw new Error('저장 연도가 올바르지 않습니다.');const months=[...new Set((Array.isArray(payload.months)?payload.months:[]).map(Number).filter(m=>m>=1&&m<=12))];if(!months.length)throw new Error('저장할 월 범위가 없습니다.');const monthSet=new Set(months),all=await cgAllStore(),byId=new Map(all.map(r=>[r.id,r])),active=all.filter(r=>r.state!=='삭제'&&r.type==='예상지출'&&Number(r.year)===year&&monthSet.has(Number(r.month))),submittedIds=new Set(),updates=[],appends=[],now=cgNow();
   for(const rec0 of (Array.isArray(payload.records)?payload.records:[])){const rec=rec0||{},month=Number(rec.month),day=Number(rec.day);if(!monthSet.has(month))continue;const maxDay=new Date(Date.UTC(year,month,0)).getUTCDate();if(day<1||day>maxDay)continue;const date=year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'),vendor=cgClean(rec.vendor),description=cgClean(rec.description),amount=cgNum(rec.amount);if(!vendor&&!description&&!cgClean(rec.amount))continue;let id=cgClean(rec.id),old=id?byId.get(id):null;if(!(old&&old.type==='예상지출'&&Number(old.year)===year&&monthSet.has(Number(old.month)))){id='';old=null}if(!id)id=cgId();const obj={id,type:'예상지출',year,month,date,vendor,description,amount,state:'사용'};if(old)updates.push({range:cgRange(CASH_GITHUB_CONFIG.storeSheet,'A'+old.rowNo+':L'+old.rowNo),values:[cgStoreRow(obj,old.created||now,now,'')]});else appends.push(cgStoreRow(obj,now,now,''));submittedIds.add(id)}
   active.forEach(old=>{if(submittedIds.has(old.id))return;updates.push({range:cgRange(CASH_GITHUB_CONFIG.storeSheet,'I'+old.rowNo+':L'+old.rowNo),values:[['삭제',old.created||'',now,now]]})});
   await cgBatchValues(updates);if(appends.length)await cgValuesAppend(CASH_GITHUB_CONFIG.storeSheet,appends);return{ok:true,savedCount:submittedIds.size,store:await cgReadStore(year)}
 }
 async function cgSoftDeleteWebRecord(id){await cgUser();const all=await cgAllStore(),old=all.find(r=>r.id===cgClean(id));if(!old)return{ok:true};const now=cgNow();await cgValuesUpdate(CASH_GITHUB_CONFIG.storeSheet,'I'+old.rowNo+':L'+old.rowNo,[['삭제',old.created||'',now,now]]);return{ok:true,id}}
-const CASH_GITHUB_RPC={getAppData:cgGetAppData,saveWebRecord:cgSaveWebRecord,saveExpectedExpenseSnapshot:cgSaveExpectedExpenseSnapshot,softDeleteWebRecord:cgSoftDeleteWebRecord};
+const CASH_GITHUB_RPC={getAppData:cgGetAppData,saveWebRecord:cgSaveWebRecord,saveMiniListBatch:cgSaveMiniListBatch,saveExpectedExpenseSnapshot:cgSaveExpectedExpenseSnapshot,softDeleteWebRecord:cgSoftDeleteWebRecord};
 function cgRunner(success,failure){return new Proxy({}, {get(_t,p){if(p==='withSuccessHandler')return fn=>cgRunner(fn,failure);if(p==='withFailureHandler')return fn=>cgRunner(success,fn);return(...args)=>{const fn=CASH_GITHUB_RPC[p];if(!fn){const e=new Error('지원하지 않는 호출: '+String(p));failure?.(e);return}Promise.resolve().then(()=>fn(...args)).then(v=>success?.(v)).catch(e=>failure?.(e))}}})}
 window.google=window.google||{};window.google.script=window.google.script||{};window.google.script.run=cgRunner(null,null);
 window.addEventListener('message',e=>{
@@ -2418,12 +2966,12 @@ window.addEventListener('message',e=>{
 .topbar{justify-content:flex-end!important}
 @media(max-width:850px){.topbar{display:flex!important;padding:0 14px!important}.year-select-wrap{margin-left:auto}}
 </style>
-</meta></meta>
 <style id="frameby-cash-embedded-style">
 /* 통합 메뉴에서 연도/새로고침을 제공하므로 내부 상단바는 표시하지 않습니다. */
 .topbar{display:none!important}
 .page{padding-top:16px}
 </style>
+
 </head>
 <body>
 <div class="app">
@@ -2442,12 +2990,12 @@ window.addEventListener('message',e=>{
         <option value="2023">2023년</option>
         <option value="2024">2024년</option>
         <option value="2025">2025년</option>
-        <option selected="" value="2026">2026년</option>
+        <option value="2026" selected>2026년</option>
         <option value="2027">2027년</option>
         <option value="2028">2028년</option>
       </select>
     </div>
-    <button class="refresh-btn" id="refreshDataBtn" type="button"><span class="refresh-icon">↻</span>새로고침</button>
+    <button id="refreshDataBtn" class="refresh-btn" type="button"><span class="refresh-icon">↻</span>새로고침</button>
   </header>
 
   <main class="page">
@@ -2467,7 +3015,7 @@ window.addEventListener('message',e=>{
         </div>
       </div>
 
-      <div class="calendar-subview" id="calendarSubview">
+      <div id="calendarSubview" class="calendar-subview">
       <div class="content-grid">
         <div class="card calendar-card">
           <div class="calendar-head">
@@ -2477,7 +3025,7 @@ window.addEventListener('message',e=>{
         </div>
 
         <aside class="side">
-          <div class="card metric-card">
+          <div class="card metric-card" id="incomeMiniCard">
             <div class="metric-title">
               <h3 id="incomeMiniTitle">9월 월매출 입금내역</h3>
               <button class="add-row-btn" id="addIncomeRow" title="입금내역 행 추가">+</button>
@@ -2488,24 +3036,24 @@ window.addEventListener('message',e=>{
             </div>
             <div id="incomeRows">
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-17"/>
-                <input type="text" value="쿠팡 로켓배송"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="647800"/>
+                <input type="text" class="date-cell" value="2026-09-17" placeholder="">
+                <input type="text" value="쿠팡 로켓배송">
+                <input type="text" class="amount-cell" inputmode="numeric" value="647800">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-18"/>
-                <input type="text" value="쿠팡 로켓배송"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="2833490"/>
+                <input type="text" class="date-cell" value="2026-09-18" placeholder="">
+                <input type="text" value="쿠팡 로켓배송">
+                <input type="text" class="amount-cell" inputmode="numeric" value="2833490">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-21"/>
-                <input type="text" value="쿠팡 로켓배송"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="436960"/>
+                <input type="text" class="date-cell" value="2026-09-21" placeholder="">
+                <input type="text" value="쿠팡 로켓배송">
+                <input type="text" class="amount-cell" inputmode="numeric" value="436960">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value=""/>
-                <input type="text" value="PH 현대차 2,000개 정산"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="31521120"/>
+                <input type="text" class="date-cell" value="" placeholder="">
+                <input type="text" value="PH 현대차 2,000개 정산">
+                <input type="text" class="amount-cell" inputmode="numeric" value="31521120">
               </div>
             </div>
             <div class="sheet-edit-total">
@@ -2513,7 +3061,7 @@ window.addEventListener('message',e=>{
             </div>
           </div>
 
-          <div class="card metric-card">
+          <div class="card metric-card" id="costMiniCard">
             <div class="metric-title">
               <h3 id="costMiniTitle">9월 제조/광고 비용</h3><span>월 기준</span>
             </div>
@@ -2525,27 +3073,25 @@ window.addEventListener('message',e=>{
                 <button class="mini-plus" id="addMfgRow" title="제조비 행 추가">+</button>
               </div>
             </div>
-            <div class="sheet-edit-head">
-              <span>일자</span><span>거래처 / 내용</span><span>금액</span>
-            </div>
+            <div class="sheet-edit-head actual-cost-head"><span>거래처명</span><span>금액</span></div>
             <div id="mfgRows">
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-03"/>
-                <input type="text" value="관세법인 플러스원"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="4990690"/>
+                <input type="text" class="date-cell" value="2026-09-03" placeholder="">
+                <input type="text" value="관세법인 플러스원">
+                <input type="text" class="amount-cell" inputmode="numeric" value="4990690">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-08"/>
-                <input type="text" value="LIDIAN"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="24549053"/>
+                <input type="text" class="date-cell" value="2026-09-08" placeholder="">
+                <input type="text" value="LIDIAN">
+                <input type="text" class="amount-cell" inputmode="numeric" value="24549053">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-11"/>
-                <input type="text" value="TAI RU"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="26393026"/>
+                <input type="text" class="date-cell" value="2026-09-11" placeholder="">
+                <input type="text" value="TAI RU">
+                <input type="text" class="amount-cell" inputmode="numeric" value="26393026">
               </div>
             </div>
-            <div class="sheet-edit-total">
+            <div class="sheet-edit-total actual-cost-total">
               <span>사용 합계</span><span></span><span id="mfgTotal">55,932,769</span>
             </div>
 
@@ -2561,14 +3107,14 @@ window.addEventListener('message',e=>{
             </div>
             <div id="mfgExpectedRows">
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-15"/>
-                <input type="text" value="TAI RU"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="27101530"/>
+                <input type="text" class="date-cell" value="2026-09-15" placeholder="">
+                <input type="text" value="TAI RU">
+                <input type="text" class="amount-cell" inputmode="numeric" value="27101530">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-30"/>
-                <input type="text" value="에스앤에스"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="110660"/>
+                <input type="text" class="date-cell" value="2026-09-30" placeholder="">
+                <input type="text" value="에스앤에스">
+                <input type="text" class="amount-cell" inputmode="numeric" value="110660">
               </div>
             </div>
             <div class="sheet-edit-total">
@@ -2582,27 +3128,25 @@ window.addEventListener('message',e=>{
                 <button class="mini-plus" id="addAdRow" title="광고비 행 추가">+</button>
               </div>
             </div>
-            <div class="sheet-edit-head">
-              <span>일자</span><span>거래처 / 내용</span><span>금액</span>
-            </div>
+            <div class="sheet-edit-head actual-cost-head"><span>거래처명</span><span>금액</span></div>
             <div id="adRows">
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-05"/>
-                <input type="text" value="네이버"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="7800000"/>
+                <input type="text" class="date-cell" value="2026-09-05" placeholder="">
+                <input type="text" value="네이버">
+                <input type="text" class="amount-cell" inputmode="numeric" value="7800000">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-10"/>
-                <input type="text" value="구글"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="700000"/>
+                <input type="text" class="date-cell" value="2026-09-10" placeholder="">
+                <input type="text" value="구글">
+                <input type="text" class="amount-cell" inputmode="numeric" value="700000">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-09-12"/>
-                <input type="text" value="메타"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="11546045"/>
+                <input type="text" class="date-cell" value="2026-09-12" placeholder="">
+                <input type="text" value="메타">
+                <input type="text" class="amount-cell" inputmode="numeric" value="11546045">
               </div>
             </div>
-            <div class="sheet-edit-total">
+            <div class="sheet-edit-total actual-cost-total">
               <span>사용 합계</span><span></span><span id="adTotal">20,046,045</span>
             </div>
 
@@ -2618,14 +3162,14 @@ window.addEventListener('message',e=>{
             </div>
             <div id="adExpectedRows">
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value=""/>
-                <input type="text" value="네이버/구글 광고비 충전"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="9500000"/>
+                <input type="text" class="date-cell" value="" placeholder="">
+                <input type="text" value="네이버/구글 광고비 충전">
+                <input type="text" class="amount-cell" inputmode="numeric" value="9500000">
               </div>
               <div class="sheet-edit-row">
-                <input class="date-cell" placeholder="" type="text" value="2026-10-15"/>
-                <input type="text" value="메타-8월 광고비"/>
-                <input class="amount-cell" inputmode="numeric" type="text" value="10986175"/>
+                <input type="text" class="date-cell" value="2026-10-15" placeholder="">
+                <input type="text" value="메타-8월 광고비">
+                <input type="text" class="amount-cell" inputmode="numeric" value="10986175">
               </div>
             </div>
             <div class="sheet-edit-total">
@@ -2633,7 +3177,33 @@ window.addEventListener('message',e=>{
             </div>
           </div>
 
-          <div class="card forecast-note-card">
+
+          <div class="card metric-card" id="shortLoanCard">
+            <div class="metric-title">
+              <h3 id="loanMiniTitle">9월 단기차입금</h3>
+              <button class="add-row-btn" id="addLoanRow" title="단기차입금 행 추가">+</button>
+            </div>
+
+            <div class="sheet-edit-head loan-edit-head">
+              <span>일자</span><span>차입금액</span><span>잔액</span>
+            </div>
+
+            <div class="loan-opening-row">
+              <span>전기</span>
+              <strong id="loanOpeningAmount">0</strong>
+              <strong id="loanOpeningBalance">0</strong>
+            </div>
+
+            <div id="loanRows"></div>
+
+            <div class="loan-summary">
+              <span id="loanMonthLabel">[9월계]</span>
+              <strong id="loanMonthTotal">0</strong>
+              <strong id="loanBalanceTotal">0</strong>
+            </div>
+          </div>
+
+          <div class="card forecast-note-card" id="forecastMiniCard">
             <div class="forecast-note-title">
               <h3>예측매출 산정 기준</h3>
               <span>일별자금수지 기준</span>
@@ -2651,26 +3221,26 @@ window.addEventListener('message',e=>{
 
       </div>
 
-      <div class="calendar-subview hidden" id="expectedExpenseSubview">
+      <div id="expectedExpenseSubview" class="calendar-subview hidden">
         <div class="card" style="padding:14px 14px 0">
           <div class="expected-headline">
             <div class="expected-headline-copy">
               <h2>월별 예상지출내역</h2>
-              <span class="expected-year-label" id="expectedYearLabel">2026년 · 화면에서 수정 후 저장 버튼을 눌러 반영</span>
+              <span id="expectedYearLabel" class="expected-year-label">2026년 · 화면에서 수정 후 저장 버튼을 눌러 반영</span>
             </div>
             <div class="expected-save-actions">
-              <span class="expected-save-status" id="expectedSaveStatus">저장됨</span>
-              <button class="expected-save-btn" id="expectedSaveBtn" type="button">저장</button>
+              <span id="expectedSaveStatus" class="expected-save-status">저장됨</span>
+              <button id="expectedSaveBtn" class="expected-save-btn" type="button">저장</button>
             </div>
           </div>
           <div class="expected-wrap">
-            <div class="expected-month-grid" id="expectedExpenseBody"></div>
+            <div id="expectedExpenseBody" class="expected-month-grid"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="hidden" id="monthlyPage">
+    <section id="monthlyPage" class="hidden">
       <div class="toolbar">
         <div class="titlewrap">
           <h1 id="monthlyTitle">월별 자금수지현황</h1>
@@ -2680,8 +3250,8 @@ window.addEventListener('message',e=>{
       </div>
 
       <div class="filterbar">
-        <div class="field"><label>시작일</label><input id="startDate" type="date" value="2026-01-01"/></div>
-        <div class="field"><label>종료일</label><input id="endDate" type="date" value="2026-12-31"/></div>
+        <div class="field"><label>시작일</label><input type="date" id="startDate" value="2026-01-01"></div>
+        <div class="field"><label>종료일</label><input type="date" id="endDate" value="2026-12-31"></div>
         <div class="field"><label>빠른 월 선택</label>
           <select id="monthSelect">
             <option value="">전체</option>
@@ -2701,7 +3271,7 @@ window.addEventListener('message',e=>{
       </div>
     </section>
 
-    <section class="hidden" id="reportPage">
+    <section id="reportPage" class="hidden">
       <div class="toolbar">
         <div class="titlewrap">
           <h1>월자금보고서</h1>
@@ -2714,7 +3284,7 @@ window.addEventListener('message',e=>{
               <option value="all">전체</option>
               <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
               <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
-              <option value="7">7월</option><option selected="" value="8">8월</option><option value="9">9월</option>
+              <option value="7">7월</option><option value="8" selected>8월</option><option value="9">9월</option>
               <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
             </select>
           </div>
@@ -2875,12 +3445,17 @@ function syncCalendarMonthTitles(){
   document.getElementById('monthLabel').textContent=`${selectedYear}년 ${calendarMonth}월`;
   const incomeTitle=document.getElementById('incomeMiniTitle');
   const costTitle=document.getElementById('costMiniTitle');
+  const loanTitle=document.getElementById('loanMiniTitle');
   if(incomeTitle) incomeTitle.textContent=`${calendarMonth}월 월매출 입금내역`;
   if(costTitle) costTitle.textContent=`${calendarMonth}월 제조/광고 비용`;
+  if(loanTitle) loanTitle.textContent=`${calendarMonth}월 단기차입금`;
 
   // 월 이동 시에도 지난 월/현재·미래월 표시 상태를 즉시 갱신
   syncHistoricalCalendarUI();
   renderForecastNote();
+
+  // 미니리스트/단기차입금도 선택한 월 기준으로 즉시 다시 표시
+  if(Array.isArray(window.__CF_STORE__)) cfRenderSidebarStore();
 }
 
 
@@ -4147,7 +4722,12 @@ function addEditableRow(rowsId,totalId){
   bindEditableRow(row,rowsId,totalId);
   bindSmartDateCells(row);
   bindAmountCells(row);
-  row.querySelector('.date-cell').focus();
+
+  if(rowsId==='mfgRows' || rowsId==='adRows'){
+    row.querySelectorAll('input')[1]?.focus();
+  }else{
+    row.querySelector('.date-cell')?.focus();
+  }
   recalcEditableGroup(rowsId,totalId);
 }
 
@@ -4159,32 +4739,47 @@ function bindEditableRow(row,rowsId,totalId){
 
 
 function normalizeDateOrText(value){
-  const raw=(value||'').trim();
+  const raw=String(value||'').trim();
   if(!raw) return '';
 
-  // Keep ordinary text such as "예정", "미정" exactly as entered.
-  if(/[가-힣A-Za-z]/.test(raw)) return raw;
+  const yDefault=Number(selectedYear)||new Date().getFullYear();
+  const mDefault=Number(calendarMonth)||new Date().getMonth()+1;
 
-  // YYYY-MM-DD / YYYY.M.D / YYYY/M/D
-  let m=raw.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})$/);
-  if(m){
-    const y=Number(m[1]), mo=Number(m[2]), d=Number(m[3]);
-    if(mo>=1&&mo<=12&&d>=1&&d<=31){
-      return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    }
-  }
+  const valid=(y,m,d)=>{
+    const dt=new Date(y,m-1,d);
+    return dt.getFullYear()===y && dt.getMonth()===m-1 && dt.getDate()===d;
+  };
+  const out=(y,m,d)=>valid(y,m,d)
+    ? `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    : '';
 
-  // M/D, M-D, M.D -> use currently selected year.
-  m=raw.match(/^(\d{1,2})[.\-/](\d{1,2})$/);
-  if(m){
-    const mo=Number(m[1]), d=Number(m[2]);
-    if(mo>=1&&mo<=12&&d>=1&&d<=31){
-      const y=typeof selectedYear==='number' ? selectedYear : 2026;
-      return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    }
-  }
+  let s=raw.replace(/\s+/g,' ').trim();
 
-  // D only -> keep as-is because month cannot be determined safely.
+  // 20260918
+  let m=s.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if(m) return out(Number(m[1]),Number(m[2]),Number(m[3])) || raw;
+
+  // 2026-9-18 / 2026.9.18 / 2026/9/18 / 2026년 9월 18일
+  m=s.match(/^(\d{4})\s*(?:년|[./-])\s*(\d{1,2})\s*(?:월|[./-])\s*(\d{1,2})\s*일?\.?$/);
+  if(m) return out(Number(m[1]),Number(m[2]),Number(m[3])) || raw;
+
+  // 9/18/2026 / 9-18-2026
+  m=s.match(/^(\d{1,2})\s*[./-]\s*(\d{1,2})\s*[./-]\s*(\d{4})$/);
+  if(m) return out(Number(m[3]),Number(m[1]),Number(m[2])) || raw;
+
+  // 9월 18일
+  m=s.match(/^(\d{1,2})\s*월\s*(\d{1,2})\s*일?$/);
+  if(m) return out(yDefault,Number(m[1]),Number(m[2])) || raw;
+
+  // 9/18, 9-18, 9.18
+  m=s.match(/^(\d{1,2})\s*[./-]\s*(\d{1,2})$/);
+  if(m) return out(yDefault,Number(m[1]),Number(m[2])) || raw;
+
+  // 18일 / 18 -> 현재 조회 월 사용
+  m=s.match(/^(\d{1,2})\s*일?$/);
+  if(m) return out(yDefault,mDefault,Number(m[1])) || raw;
+
+  // 예정/미정 등 일반 텍스트는 그대로 유지
   return raw;
 }
 
@@ -4256,6 +4851,11 @@ editableGroups.forEach(([rowsId,totalId,btnId])=>{
   recalcEditableGroup(rowsId,totalId);
 });
 
+document.getElementById('addLoanRow')?.addEventListener('click', addLoanRow);
+document.querySelectorAll('#loanRows .sheet-edit-row').forEach(bindLoanRow);
+recalcLoanGroup();
+
+
 
 
 var __calendarAlignTimer = null;
@@ -4298,8 +4898,8 @@ function alignCalendarDetailHeights(){
       if(expense) maxExpense=Math.max(maxExpense,Math.ceil(expense.scrollHeight));
     });
 
-    if(maxIncome) maxIncome+=6;
-    if(maxExpense) maxExpense+=6;
+    if(maxIncome) maxIncome+=2;
+    if(maxExpense) maxExpense+=2;
 
     week.forEach(day=>{
       const income=day.querySelector('.income-section');
@@ -4853,14 +5453,460 @@ sampleReportForMonth = function(month){
   };
 };
 
+
+function cfClearStaticMiniDefaults(){
+  [
+    ['incomeRows','incomeEditTotal'],
+    ['mfgRows','mfgTotal'],
+    ['mfgExpectedRows','mfgExpectedTotal'],
+    ['adRows','adTotal'],
+    ['adExpectedRows','adExpectedTotal'],
+    ['loanRows','loanMonthTotal']
+  ].forEach(([rowsId,totalId])=>{
+    const holder=document.getElementById(rowsId);
+    if(holder) holder.innerHTML='';
+    const total=document.getElementById(totalId);
+    if(total) total.textContent='0';
+  });
+
+  const opening=document.getElementById('loanOpeningAmount');
+  const openingBal=document.getElementById('loanOpeningBalance');
+  const loanBal=document.getElementById('loanBalanceTotal');
+  if(opening) opening.textContent='0';
+  if(openingBal) openingBal.textContent='0';
+  if(loanBal) loanBal.textContent='0';
+}
+
+function cfNormalizeMiniPasteDate(value){
+  return normalizeDateOrText(value);
+}
+
+function cfParseMiniPaste(text,rowsId){
+  const rows=String(text||'')
+    .replace(/\r/g,'')
+    .split('\n')
+    .map(line=>{
+      const cols=line.split('\t').map(v=>String(v??'').trim());
+      while(cols.length && cols[cols.length-1]==='') cols.pop();
+      return cols;
+    })
+    .filter(cols=>cols.some(v=>v!==''));
+
+  if(!rows.length) return [];
+
+  const headerText=rows[0].join(' ').replace(/\s+/g,'');
+  if(
+    headerText.includes('거래처') ||
+    headerText.includes('차입금액') ||
+    headerText.includes('입금액') ||
+    headerText.includes('예상금액') ||
+    headerText.includes('금액')
+  ) rows.shift();
+
+  return rows.map(cols=>{
+    if(rowsId==='mfgRows' || rowsId==='adRows'){
+      // 실제 제조/광고: 거래처명 | 금액
+      // 날짜까지 3칸을 복사해 와도 날짜는 버리고 뒤의 2칸 사용.
+      const firstDate=cols[0] ? normalizeDateOrText(cols[0]) : '';
+      if(cols.length>=3 && /^\d{4}-\d{2}-\d{2}$/.test(firstDate)){
+        return {date:'',description:cols[1]||'',amount:cols[2]||''};
+      }
+      return {date:'',description:cols[0]||'',amount:cols[1]||''};
+    }
+
+    if(rowsId==='loanRows'){
+      return {
+        date:cfNormalizeMiniPasteDate(cols[0]||''),
+        amount:cols[1]||''
+      };
+    }
+
+    // 월매출 / 제조비예상 / 광고비예상
+    // 3칸: 일자 | 거래처/내용 | 금액
+    // 2칸: 거래처/내용 | 금액
+    if(cols.length>=3){
+      return {
+        date:cfNormalizeMiniPasteDate(cols[0]||''),
+        description:cols[1]||'',
+        amount:cols[2]||''
+      };
+    }
+
+    return {
+      date:'',
+      description:cols[0]||'',
+      amount:cols[1]||''
+    };
+  }).filter(r=>r.date || r.description || String(r.amount||'').trim());
+}
+
+function cfCreateMiniPasteRow(rowsId,totalId){
+  if(rowsId==='loanRows'){
+    const holder=document.getElementById('loanRows');
+    const row=document.createElement('div');
+    row.className='sheet-edit-row loan-edit-row';
+    row.innerHTML=`
+      <input type="text" class="date-cell" value="" placeholder="">
+      <input type="text" class="amount-cell loan-change-cell" inputmode="numeric" value="" placeholder="">
+      <span class="loan-balance-display">0</span>
+    `;
+    holder.appendChild(row);
+    bindLoanRow(row);
+    cfBindSidebarPersistence(holder,'loanRows','loanMonthTotal');
+    return row;
+  }
+
+  const holder=document.getElementById(rowsId);
+  const row=document.createElement('div');
+  row.className='sheet-edit-row';
+  row.innerHTML=`
+    <input type="text" class="date-cell" value="" placeholder="">
+    <input type="text" value="" placeholder="">
+    <input type="text" class="amount-cell" inputmode="numeric" value="" placeholder="">
+  `;
+  holder.appendChild(row);
+  bindEditableRow(row,rowsId,totalId);
+  bindSmartDateCells(row);
+  bindAmountCells(row);
+  cfBindSidebarPersistence(holder,rowsId,totalId);
+  return row;
+}
+
+function cfFillMiniPasteRow(row,rowsId,data){
+  const ins=row.querySelectorAll('input');
+
+  if(rowsId==='loanRows'){
+    if(ins[0]) ins[0].value=cfNormalizeMiniPasteDate(data.date||'');
+    if(ins[1]) ins[1].value=formatAmountValue(data.amount||'');
+    return;
+  }
+
+  const actualNoDate=(rowsId==='mfgRows' || rowsId==='adRows');
+
+  if(ins[0]) ins[0].value=actualNoDate ? '' : cfNormalizeMiniPasteDate(data.date||'');
+  if(ins[1]) ins[1].value=data.description||'';
+  if(ins[2]) ins[2].value=formatAmountValue(data.amount||'');
+}
+
+
+function cfMiniRecordFromRow(row,rowsId){
+  const type=cfStoreTypeForRows(rowsId);
+  const ins=row.querySelectorAll('input');
+  if(!type) return null;
+
+  if(rowsId==='loanRows'){
+    const date=cfNormalizeMiniPasteDate(ins[0]?.value||'');
+    const amount=Number(String(ins[1]?.value||'0').replace(/,/g,''))||0;
+    if(ins[0]) ins[0].value=date;
+
+    if(!date || !amount) return null;
+
+    return {
+      id:row.dataset.recordId||'',
+      type,
+      year:selectedYear,
+      month:Number(date.slice(5,7))||calendarMonth,
+      date,
+      vendor:'',
+      description:'',
+      amount
+    };
+  }
+
+  const actualNoDate=(rowsId==='mfgRows' || rowsId==='adRows');
+  const date=actualNoDate ? '' : cfNormalizeMiniPasteDate(ins[0]?.value||'');
+  const description=ins[1]?.value?.trim()||'';
+  const amount=Number(String(ins[2]?.value||'0').replace(/,/g,''))||0;
+
+  if(ins[0] && !actualNoDate) ins[0].value=date;
+  if(!date && !description && !amount) return null;
+
+  return {
+    id:row.dataset.recordId||'',
+    type,
+    year:selectedYear,
+    month:date && /^\d{4}-\d{2}-\d{2}$/.test(date)
+      ? Number(date.slice(5,7))
+      : calendarMonth,
+    date,
+    vendor:'',
+    description,
+    amount
+  };
+}
+
+function cfSaveMiniPasteBatch(rowsId,totalId,rows){
+  if(!rows.length) return;
+
+  if(typeof google==='undefined' || !google.script?.run){
+    if(rowsId==='loanRows') recalcLoanGroup();
+    else recalcEditableGroup(rowsId,totalId);
+    return;
+  }
+
+  const records=rows.map(row=>cfMiniRecordFromRow(row,rowsId)).filter(Boolean);
+  if(!records.length) return;
+
+  cfSetMiniStatus('저장 중…','saving');
+
+  google.script.run
+    .withSuccessHandler(result=>{
+      const saved=Array.isArray(result?.saved) ? result.saved : [];
+      saved.forEach((rec,i)=>{
+        if(rows[i] && rec?.id) rows[i].dataset.recordId=rec.id;
+      });
+
+      if(Array.isArray(result?.store)) window.__CF_STORE__=result.store;
+
+      if(rowsId==='loanRows'){
+        // 전기/월계/잔액까지 서버 최종값 기준으로 다시 계산
+        cfRenderLoanStore(window.__CF_STORE__||[]);
+      }else{
+        recalcEditableGroup(rowsId,totalId);
+      }
+
+      cfSetMiniStatus('저장됨','saved');
+    })
+    .withFailureHandler(err=>{
+      cfShowError(err);
+      cfSetMiniStatus('저장 실패','error');
+    })
+    .saveMiniListBatch({
+      year:selectedYear,
+      month:calendarMonth,
+      records
+    });
+}
+
+function cfBindMiniListPaste(root,rowsId,totalId){
+  // 개별 root에는 더 이상 paste listener를 중복 등록하지 않음.
+  // cfBindAllMiniListPaste()의 document capture listener가 전담.
+}
+
+function cfBindAllMiniListPaste(){
+  if(document.documentElement.dataset.miniPasteBound==='1') return;
+  document.documentElement.dataset.miniPasteBound='1';
+
+  const config={
+    incomeRows:'incomeEditTotal',
+    mfgRows:'mfgTotal',
+    mfgExpectedRows:'mfgExpectedTotal',
+    adRows:'adTotal',
+    adExpectedRows:'adExpectedTotal',
+    loanRows:'loanMonthTotal'
+  };
+
+  document.addEventListener('paste',e=>{
+    const input=e.target.closest?.('input');
+    if(!input) return;
+
+    const root=input.closest('#incomeRows,#mfgRows,#mfgExpectedRows,#adRows,#adExpectedRows,#loanRows');
+    if(!root) return;
+
+    const rowsId=root.id;
+    const totalId=config[rowsId];
+    const parsed=cfParseMiniPaste(e.clipboardData?.getData('text/plain')||'',rowsId);
+    if(!parsed.length) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    let startRow=input.closest('.sheet-edit-row');
+    if(!startRow) startRow=cfCreateMiniPasteRow(rowsId,totalId);
+
+    let currentRows=[...root.querySelectorAll('.sheet-edit-row')];
+    let startIndex=currentRows.indexOf(startRow);
+    if(startIndex<0) startIndex=0;
+
+    const touched=[];
+
+    parsed.forEach((data,i)=>{
+      currentRows=[...root.querySelectorAll('.sheet-edit-row')];
+      let row=currentRows[startIndex+i];
+      if(!row) row=cfCreateMiniPasteRow(rowsId,totalId);
+
+      cfFillMiniPasteRow(row,rowsId,data);
+      touched.push(row);
+    });
+
+    if(rowsId==='loanRows') recalcLoanGroup();
+    else recalcEditableGroup(rowsId,totalId);
+
+    // 여러 줄도 서버 호출은 딱 한 번.
+    cfSaveMiniPasteBatch(rowsId,totalId,touched);
+  },true);
+}
+
 function cfStoreTypeForRows(rowsId){
   return ({
     incomeRows:'월매출입금',
     mfgRows:'제조비',
     mfgExpectedRows:'제조비예상',
     adRows:'광고비',
-    adExpectedRows:'광고비예상'
+    adExpectedRows:'광고비예상',
+    loanRows:'단기차입금'
   })[rowsId] || '';
+}
+
+
+
+function cfFormatLoanAmount(value, accounting=false){
+  const n=Number(String(value??0).replace(/,/g,''))||0;
+  const abs=Math.abs(n).toLocaleString('ko-KR');
+  if(n<0) return accounting ? `(${abs})` : `-${abs}`;
+  return abs;
+}
+
+function cfLoanOpeningBalance(store, year, month){
+  // 차입금원장의 기준 전기금액은 항상 70,000,000원으로 고정.
+  return 70000000;
+}
+
+
+function cfLoanCarryBalance(store, year, month){
+  const base=70000000;
+
+  const prior=(store||[])
+    .filter(r=>{
+      if(r.type!=='단기차입금' || Number(r.year)!==Number(year)) return false;
+
+      const date=String(r.date||'').trim();
+      // 과거에 저장됐던 '전기' 레코드는 거래로 계산하지 않음.
+      if(date==='전기') return false;
+
+      const recMonth=Number(r.month || date.slice(5,7) || 0);
+      return recMonth>0 && recMonth<Number(month);
+    })
+    .reduce((sum,r)=>sum+(Number(r.amount)||0),0);
+
+  return base+prior;
+}
+
+function cfMakeLoanRowHtml(rec, runningBalance){
+  const date=rec?.date||'';
+  const amount=Number(rec?.amount||0);
+  const negClass=amount<0?' loan-negative':'';
+
+  return `<div class="sheet-edit-row loan-edit-row" data-record-id="${rec?.id||''}">
+    <input type="text" class="date-cell" value="${date}" placeholder="">
+    <input type="text" class="amount-cell loan-change-cell${negClass}" inputmode="numeric" value="${amount}">
+    <span class="loan-balance-display">${cfFormatLoanAmount(runningBalance)}</span>
+  </div>`;
+}
+
+function recalcLoanGroup(){
+  const holder=document.getElementById('loanRows');
+  if(!holder) return;
+
+  const fixedOpening=70000000;
+  const carryOpening=Number(holder.dataset.carryBalance||fixedOpening);
+  const rows=[...holder.querySelectorAll('.loan-edit-row')];
+
+  rows.sort((a,b)=>{
+    const ad=a.querySelector('.date-cell')?.value?.trim()||'9999-99-99';
+    const bd=b.querySelector('.date-cell')?.value?.trim()||'9999-99-99';
+    return ad.localeCompare(bd);
+  });
+  rows.forEach(row=>holder.appendChild(row));
+
+  let monthTotal=0;
+  let balance=carryOpening;
+
+  rows.forEach(row=>{
+    const amount=Number(String(row.querySelector('.loan-change-cell')?.value||'0').replace(/,/g,''))||0;
+    monthTotal+=amount;
+    balance+=amount;
+
+    const input=row.querySelector('.loan-change-cell');
+    if(input) input.classList.toggle('loan-negative',amount<0);
+
+    const balanceEl=row.querySelector('.loan-balance-display');
+    if(balanceEl) balanceEl.textContent=cfFormatLoanAmount(balance);
+  });
+
+  const monthLabel=document.getElementById('loanMonthLabel');
+  const openingAmount=document.getElementById('loanOpeningAmount');
+  const openingBalance=document.getElementById('loanOpeningBalance');
+  const totalEl=document.getElementById('loanMonthTotal');
+  const balanceEl=document.getElementById('loanBalanceTotal');
+
+  if(monthLabel) monthLabel.textContent=`[${calendarMonth}월계]`;
+
+  // '전기'는 원장 기준값 70,000,000원으로 고정
+  if(openingAmount) openingAmount.textContent=cfFormatLoanAmount(fixedOpening);
+  if(openingBalance) openingBalance.textContent=cfFormatLoanAmount(fixedOpening);
+
+  if(totalEl){
+    totalEl.textContent=cfFormatLoanAmount(monthTotal,true);
+    totalEl.classList.toggle('loan-negative',monthTotal<0);
+  }
+  if(balanceEl) balanceEl.textContent=cfFormatLoanAmount(balance);
+}
+
+function bindLoanRow(row){
+  if(!row || row.dataset.loanBound==='1') return;
+  row.dataset.loanBound='1';
+
+  bindSmartDateCells(row);
+  bindAmountCells(row);
+
+  row.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',recalcLoanGroup);
+    inp.addEventListener('blur',recalcLoanGroup);
+  });
+}
+
+function addLoanRow(){
+  const holder=document.getElementById('loanRows');
+  if(!holder) return;
+
+  const row=document.createElement('div');
+  row.className='sheet-edit-row loan-edit-row';
+  row.innerHTML=`
+    <input type="text" class="date-cell" value="" placeholder="">
+    <input type="text" class="amount-cell loan-change-cell" inputmode="numeric" value="" placeholder="">
+    <span class="loan-balance-display">0</span>
+  `;
+
+  holder.appendChild(row);
+  bindLoanRow(row);
+  cfBindSidebarPersistence(holder,'loanRows','loanMonthTotal');
+  row.querySelector('.date-cell')?.focus();
+  recalcLoanGroup();
+}
+
+function cfRenderLoanStore(store){
+  const holder=document.getElementById('loanRows');
+  if(!holder) return;
+
+  const monthLabel=document.getElementById('loanMonthLabel');
+  if(monthLabel) monthLabel.textContent=`[${calendarMonth}월계]`;
+
+  const allLoans=(store||[])
+    .filter(r=>{
+      if(r.type!=='단기차입금' || Number(r.year)!==selectedYear) return false;
+      // 과거 저장된 '전기' 레코드는 거래내역에서 제외
+      return String(r.date||'').trim()!=='전기';
+    })
+    .sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+
+  const carry=cfLoanCarryBalance(allLoans,selectedYear,calendarMonth);
+  holder.dataset.carryBalance=String(carry);
+
+  const recs=allLoans.filter(r=>{
+    const recMonth=Number(r.month || String(r.date||'').slice(5,7) || 0);
+    return recMonth===calendarMonth;
+  });
+
+  let running=carry;
+  holder.innerHTML=recs.map(rec=>{
+    running+=Number(rec.amount)||0;
+    return cfMakeLoanRowHtml(rec,running);
+  }).join('');
+
+  holder.querySelectorAll('.loan-edit-row').forEach(bindLoanRow);
+  cfBindSidebarPersistence(holder,'loanRows','loanMonthTotal');
+  recalcLoanGroup();
 }
 
 function cfMakeStoreRowHtml(rec){
@@ -4883,16 +5929,17 @@ function cfRenderSidebarStore(){
     ['adRows','adTotal','광고비'],
     ['adExpectedRows','adExpectedTotal','광고비예상']
   ];
+
   groups.forEach(([rowsId,totalId,type])=>{
     const holder=document.getElementById(rowsId);
     if(!holder) return;
+
     const recs=store.filter(r=>{
       if(r.type!==type || Number(r.year)!==selectedYear) return false;
       const recMonth=Number(r.month || String(r.date||'').slice(5,7) || 0);
       return recMonth===calendarMonth;
     });
 
-    // 해당 월 저장내역이 없으면 이전 월 화면값을 남기지 않고 빈칸 처리.
     if(!recs.length){
       holder.innerHTML='';
       const total=document.getElementById(totalId);
@@ -4906,29 +5953,109 @@ function cfRenderSidebarStore(){
     cfBindSidebarPersistence(holder,rowsId,totalId);
     recalcEditableGroup(rowsId,totalId);
   });
+
+  cfRenderLoanStore(store);
+  cfBindAllMiniListPaste();
 }
 
 function cfBindSidebarPersistence(root,rowsId,totalId){
   const type=cfStoreTypeForRows(rowsId);
-  if(!type) return;
+  if(!type || !root) return;
+
+  const upsertLocal=(saved)=>{
+    if(!saved?.id) return;
+    window.__CF_STORE__=Array.isArray(window.__CF_STORE__) ? window.__CF_STORE__ : [];
+    const pos=window.__CF_STORE__.findIndex(r=>r.id===saved.id);
+    if(pos>=0) window.__CF_STORE__[pos]=saved;
+    else window.__CF_STORE__.push(saved);
+  };
+
+  const removeLocal=(id)=>{
+    if(!id || !Array.isArray(window.__CF_STORE__)) return;
+    window.__CF_STORE__=window.__CF_STORE__.filter(r=>r.id!==id);
+  };
+
   root.querySelectorAll('.sheet-edit-row').forEach(row=>{
     if(row.dataset.cfBound==='1') return;
     row.dataset.cfBound='1';
+
     row.querySelectorAll('input').forEach(inp=>{
       inp.addEventListener('change',()=>{
         const ins=row.querySelectorAll('input');
-        const date=ins[0]?.value?.trim()||'';
+        const recordId=row.dataset.recordId||'';
+
+        if(rowsId==='loanRows'){
+          const date=cfNormalizeMiniPasteDate(ins[0]?.value||'');
+          if(ins[0]) ins[0].value=date;
+          const amount=Number(String(ins[1]?.value||'0').replace(/,/g,''))||0;
+
+          if(!date && !amount){
+            if(recordId && typeof google!=='undefined' && google.script?.run){
+              google.script.run
+                .withSuccessHandler(()=>{
+                  removeLocal(recordId);
+                  row.remove();
+                  recalcLoanGroup();
+                })
+                .withFailureHandler(cfShowError)
+                .softDeleteWebRecord(recordId);
+            }
+            return;
+          }
+          if(!date || !amount) return;
+          if(typeof google==='undefined' || !google.script?.run) return;
+
+          google.script.run.withSuccessHandler(saved=>{
+            row.dataset.recordId=saved.id;
+            upsertLocal(saved);
+            recalcLoanGroup();
+          }).withFailureHandler(cfShowError).saveWebRecord({
+            id:recordId,
+            type:'단기차입금',
+            year:selectedYear,
+            month:calendarMonth,
+            date,
+            vendor:'',
+            description:'',
+            amount
+          });
+          return;
+        }
+
+        const actualNoDate=(rowsId==='mfgRows' || rowsId==='adRows');
+        const date=actualNoDate ? '' : cfNormalizeMiniPasteDate(ins[0]?.value||'');
+        if(ins[0] && !actualNoDate) ins[0].value=date;
         const desc=ins[1]?.value?.trim()||'';
-        const amount=Number((ins[2]?.value||'0').replace(/,/g,''))||0;
-        if(!date && !desc && !amount) return;
+        const amount=Number(String(ins[2]?.value||'0').replace(/,/g,''))||0;
+
+        if(!date && !desc && !amount){
+          if(recordId && typeof google!=='undefined' && google.script?.run){
+            google.script.run
+              .withSuccessHandler(()=>{
+                removeLocal(recordId);
+                row.remove();
+                recalcEditableGroup(rowsId,totalId);
+              })
+              .withFailureHandler(cfShowError)
+              .softDeleteWebRecord(recordId);
+          }
+          return;
+        }
         if(typeof google==='undefined' || !google.script?.run) return;
+
         google.script.run.withSuccessHandler(saved=>{
           row.dataset.recordId=saved.id;
+          upsertLocal(saved);
           recalcEditableGroup(rowsId,totalId);
         }).withFailureHandler(cfShowError).saveWebRecord({
-          id:row.dataset.recordId||'', type, year:selectedYear,
-          month: date && /^\\d{4}-\\d{2}-\\d{2}$/.test(date) ? Number(date.slice(5,7)) : calendarMonth,
-          date, vendor:'', description:desc, amount
+          id:recordId,
+          type,
+          year:selectedYear,
+          month:calendarMonth,
+          date,
+          vendor:'',
+          description:desc,
+          amount
         });
       });
     });
@@ -5232,12 +6359,12 @@ function cfBindExpectedDirectPaste(){
 function cfBindAllPersistence(){
   [
     ['incomeRows','incomeEditTotal'],['mfgRows','mfgTotal'],['mfgExpectedRows','mfgExpectedTotal'],
-    ['adRows','adTotal'],['adExpectedRows','adExpectedTotal']
+    ['adRows','adTotal'],['adExpectedRows','adExpectedTotal'],['loanRows','loanMonthTotal']
   ].forEach(([r,t])=>{
     const root=document.getElementById(r);
     if(root) cfBindSidebarPersistence(root,r,t);
   });
-  cfBindExpectedPersistence();
+  cfBindAllMiniListPaste();
 }
 
 function cfBindExpectedPersistence(){
@@ -5429,10 +6556,39 @@ function cfLoadExpectedFromStore(){
   cfMarkExpectedSaved();
 }
 
+
+let __CF_MINI_STATUS_TIMER__=null;
+let __CF_LAST_ERROR_TEXT__='';
+let __CF_LAST_ERROR_AT__=0;
+
+function cfSetMiniStatus(text,state=''){
+  let el=document.getElementById('cfMiniStatus');
+  if(!el){
+    el=document.createElement('div');
+    el.id='cfMiniStatus';
+    document.body.appendChild(el);
+  }
+
+  el.textContent=text;
+  el.className=`show ${state||''}`;
+
+  clearTimeout(__CF_MINI_STATUS_TIMER__);
+  __CF_MINI_STATUS_TIMER__=setTimeout(()=>{
+    el.className='';
+  }, state==='error' ? 5000 : 1800);
+}
+
 function cfShowError(err){
   console.error(err);
   const msg=(err && err.message) ? err.message : String(err||'오류가 발생했습니다.');
-  alert(msg);
+  const now=Date.now();
+
+  // 같은 오류가 연속 발생해도 팝업을 여러 번 띄우지 않음.
+  if(msg===__CF_LAST_ERROR_TEXT__ && now-__CF_LAST_ERROR_AT__<2000) return;
+  __CF_LAST_ERROR_TEXT__=msg;
+  __CF_LAST_ERROR_AT__=now;
+
+  cfSetMiniStatus(`저장 오류 · ${msg}`,'error');
 }
 
 function loadCashflowLive(){
@@ -5518,7 +6674,11 @@ function refreshCashflowData(){
 document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('refreshDataBtn')?.addEventListener('click', refreshCashflowData);
 
-  // 최초 접속 시 자동 조회. 기존처럼 별도 즉시 호출을 두지 않아 중복 조회하지 않는다.
+  // HTML에 박힌 샘플값은 사용하지 않고 저장소 데이터를 유일한 원본으로 사용.
+  cfClearStaticMiniDefaults();
+  cfBindAllMiniListPaste();
+
+  // 최초 접속 시 자동 조회.
   autoLoadCashflowOnEntry();
 });
 
