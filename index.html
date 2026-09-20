@@ -2792,7 +2792,71 @@ body.cf-data-loading #calendarPage .calendar-wrap::after{
   }
 }
 
+
+/* 자동조회가 끝나기 전에 미니리스트를 입력하면 서버 응답이 뒤늦게 덮어쓸 수 있으므로
+   최초 로딩 중에만 입력/행추가를 잠깐 잠근다. */
+body.cf-data-loading #calendarPage .side input,
+body.cf-data-loading #calendarPage .side .add-row-btn{
+  pointer-events:none !important;
+}
+body.cf-data-loading #calendarPage .side{
+  opacity:.92;
+}
+
+
+/* ===== 단기차입금: 선택 월과 무관한 연간 원장 ===== */
+#loanRows .loan-month-summary{
+  display:grid !important;
+  grid-template-columns:88px 1fr 1fr !important;
+  align-items:center !important;
+  min-height:30px !important;
+  background:#f7f9fc !important;
+  border-top:1px solid #d7dee9 !important;
+  border-bottom:1px solid #e3e8ef !important;
+}
+#loanRows .loan-month-summary > *{
+  padding:7px 6px !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  font-variant-numeric:tabular-nums;
+}
+#loanRows .loan-month-summary span{
+  text-align:center !important;
+  color:#56657d !important;
+}
+#loanRows .loan-month-summary strong{
+  text-align:right !important;
+  color:#23344f !important;
+}
+#loanRows .loan-month-summary strong.loan-negative{
+  color:#e33b3b !important;
+}
+#shortLoanCard .metric-title h3{
+  white-space:nowrap !important;
+}
+
+
+/* ===== 현재월/미래월 미니리스트 UX 통일 ===== */
+#calendarSubview:not(.historical-mode) .side{
+  align-content:start !important;
+}
+#calendarSubview:not(.historical-mode) .side-card{
+  box-sizing:border-box !important;
+}
+#calendarSubview:not(.historical-mode) .sheet-edit-row{
+  min-height:34px !important;
+}
+#calendarSubview:not(.historical-mode) .sheet-edit-row input{
+  min-height:34px !important;
+}
+/* 데이터가 없는 월의 첫 빈 행도 기존 월과 같은 테이블 형태 유지 */
+#calendarSubview:not(.historical-mode) .sheet-edit-row:only-child{
+  border-bottom:1px solid #edf0f5;
+}
+
 </style>
+
+
 <script>
 /* GitHub Pages 연결부: 기존 자금수지 UI의 google.script.run 호출만 Google Sheets API로 치환 */
 const CASH_GITHUB_CONFIG=Object.freeze({
@@ -2849,6 +2913,104 @@ function cgSourceName(year){return CASH_GITHUB_CONFIG.sourcePrefix+Number(year)+
 function cgStoreObj(row,rowNo){const d=cgParseDate(row?.[4]);const date=d?cgDateKey(d):cgClean(row?.[4]);return{id:cgClean(row?.[0]),type:cgClean(row?.[1]),year:Number(row?.[2])||0,month:Number(row?.[3])||0,day:/^\d{4}-\d{2}-\d{2}$/.test(date)?Number(date.slice(8,10)):0,date,vendor:cgClean(row?.[5]),description:cgClean(row?.[6]),amount:cgNum(row?.[7]),state:cgClean(row?.[8])||'사용',created:row?.[9]??'',updated:row?.[10]??'',deleted:row?.[11]??'',rowNo};}
 async function cgReadStore(year){const vals=await cgValuesGet(CASH_GITHUB_CONFIG.storeSheet,'A2:L');return vals.map((r,i)=>cgStoreObj(r,i+2)).filter(r=>r.state!=='삭제'&&(!year||Number(r.year)===Number(year)))}
 function cgHoliday(key,year){const h={2026:new Set(['2026-01-01','2026-02-16','2026-02-17','2026-02-18','2026-03-01','2026-03-02','2026-05-05','2026-05-24','2026-05-25','2026-06-03','2026-06-06','2026-08-15','2026-08-17','2026-09-24','2026-09-25','2026-09-26','2026-10-03','2026-10-05','2026-10-09','2026-12-25'])};return !!h[Number(year)]?.has(key)}
+function cgIsForecastNonBusiness(dateKey,year){
+  const dow=new Date(dateKey+'T00:00:00Z').getUTCDay();
+  return dow===0||dow===6||cgHoliday(dateKey,year);
+}
+function cgAddDaysKey(dateKey,days){
+  const d=new Date(dateKey+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate()+Number(days||0));
+  return cgDateKey(d);
+}
+function cgNextBusinessKey(dateKey,year){
+  let key=cgAddDaysKey(dateKey,1),guard=0;
+  while(cgIsForecastNonBusiness(key,year)&&guard<14){key=cgAddDaysKey(key,1);guard++}
+  return key;
+}
+function cgSettlementClosureContext(dateKey,year){
+  if(cgIsForecastNonBusiness(dateKey,year))return null;
+  let cursor=new Date(dateKey+'T00:00:00Z');
+  cursor.setUTCDate(cursor.getUTCDate()-1);
+  let businessDaysAfterClosure=0;
+  while(businessDaysAfterClosure<5){
+    const key=cgDateKey(cursor);
+    if(cgIsForecastNonBusiness(key,year))break;
+    businessDaysAfterClosure++;
+    cursor.setUTCDate(cursor.getUTCDate()-1);
+  }
+  const closureEnd=cgDateKey(cursor);
+  let closureStart=closureEnd,closureDays=0,containsHoliday=false;
+  while(closureDays<14){
+    const key=cgDateKey(cursor);
+    if(!cgIsForecastNonBusiness(key,year))break;
+    closureStart=key;closureDays++;
+    if(cgHoliday(key,year))containsHoliday=true;
+    cursor.setUTCDate(cursor.getUTCDate()-1);
+  }
+  const firstBusinessDate=closureDays?cgAddDaysKey(closureEnd,1):'';
+  const firstBusinessDow=firstBusinessDate?new Date(firstBusinessDate+'T00:00:00Z').getUTCDay():-1;
+  return{closureDays,closureStart,closureEnd,containsHoliday,position:businessDaysAfterClosure+1,firstBusinessDate,firstBusinessDow};
+}
+function cgIsHolidayInfluencedBusinessDay(dateKey,year,maxPosition){
+  const ctx=cgSettlementClosureContext(dateKey,year);
+  return !!(ctx&&ctx.containsHoliday&&ctx.position<=Number(maxPosition||3));
+}
+function cgNormalWeekdaySamples(salesHistory,targetKey,year){
+  const dow=new Date(targetKey+'T00:00:00Z').getUTCDay();
+  return (salesHistory||[])
+    .filter(x=>x.date<targetKey)
+    .filter(x=>new Date(x.date+'T00:00:00Z').getUTCDay()===dow)
+    .filter(x=>!cgIsForecastNonBusiness(x.date,year))
+    .filter(x=>!cgIsHolidayInfluencedBusinessDay(x.date,year,3))
+    .slice(-4);
+}
+function cgNormalWeekdayAverage(salesHistory,targetKey,year){
+  const samples=cgNormalWeekdaySamples(salesHistory,targetKey,year);
+  const avg=samples.length?Math.round(samples.reduce((sum,x)=>sum+Number(x.amount||0),0)/samples.length):0;
+  return{avg,samples};
+}
+function cgShortDateList(samples){
+  return (samples||[]).map(x=>{const p=String(x.date||'').split('-');return p.length===3?Number(p[1])+'/'+Number(p[2]):String(x.date||'')}).join('·');
+}
+function cgHolidayAnalogEvents(salesHistory,targetKey,year,targetCtx){
+  const grouped={};
+  (salesHistory||[]).filter(x=>x.date<targetCtx.firstBusinessDate).forEach(x=>{
+    const ctx=cgSettlementClosureContext(x.date,year);
+    if(!ctx||!ctx.containsHoliday||ctx.position>2)return;
+    if(ctx.closureDays!==targetCtx.closureDays)return;
+    if(ctx.firstBusinessDow!==targetCtx.firstBusinessDow)return;
+    const id=ctx.closureEnd;
+    if(!grouped[id])grouped[id]={closureEnd:ctx.closureEnd,closureDays:ctx.closureDays,firstBusinessDow:ctx.firstBusinessDow,first:null,second:null};
+    if(ctx.position===1)grouped[id].first=Number(x.amount||0);
+    if(ctx.position===2)grouped[id].second=Number(x.amount||0);
+  });
+  return Object.values(grouped)
+    .filter(x=>x.first!==null&&x.second!==null&&(x.first+x.second)>0)
+    .sort((a,b)=>String(a.closureEnd).localeCompare(String(b.closureEnd)))
+    .slice(-4);
+}
+function cgHolidayRedistributionForecast(salesHistory,targetKey,year){
+  const ctx=cgSettlementClosureContext(targetKey,year);
+  if(!ctx||!ctx.containsHoliday||ctx.position<1||ctx.position>2)return null;
+  const analogs=cgHolidayAnalogEvents(salesHistory,targetKey,year,ctx);
+  if(analogs.length<2)return null;
+  const firstKey=ctx.firstBusinessDate,secondKey=cgNextBusinessKey(firstKey,year);
+  const normalFirst=cgNormalWeekdayAverage(salesHistory,firstKey,year);
+  const normalSecond=cgNormalWeekdayAverage(salesHistory,secondKey,year);
+  if(!normalFirst.samples.length||!normalSecond.samples.length)return null;
+  const normalTotal=normalFirst.avg+normalSecond.avg;
+  if(!normalTotal)return null;
+  const ratios=analogs.map(x=>x.first/(x.first+x.second));
+  const firstRatio=ratios.reduce((sum,x)=>sum+x,0)/ratios.length;
+  const secondRatio=1-firstRatio;
+  const ratio=ctx.position===1?firstRatio:secondRatio;
+  const amount=Math.round(normalTotal*ratio);
+  const positionLabel=ctx.position===1?'첫 영업일':'둘째 영업일';
+  const ratioPct=(ratio*100).toFixed(2);
+  const analogLabel=analogs.map(x=>{const p=String(x.closureEnd).split('-');return p.length===3?Number(p[1])+'/'+Number(p[2]):x.closureEnd}).join('·');
+  return{amount,method:'공휴일 이월정산 보정 · 정상예상총액 '+normalTotal.toLocaleString('ko-KR')+'원 × '+positionLabel+' '+ratioPct+'% · 유사 '+analogs.length+'회 ('+analogLabel+')'};
+}
+
 async function cgReadCashflow(year,store){
   year=Number(year)||2026;const name=cgSourceName(year);let raw;
   try{raw=await cgValuesGet(name,'')}catch(e){throw new Error(name+' 시트를 찾을 수 없거나 접근할 수 없습니다.')}
@@ -2879,7 +3041,22 @@ async function cgReadCashflow(year,store){
     daily[d]={income,expense,cash,balance,dailySales,incomeDetails,expenseDetails,forecastSales:0,forecastMethod:''};if(dailySales)salesHistory.push({date:d,amount:dailySales});
   });
   const today=cgTodayKey(),startMs=Math.max(Date.parse(today+'T00:00:00Z')+86400000,Date.UTC(year,0,1)),endMs=Date.UTC(year,11,31);
-  for(let ms=startMs;ms<=endMs;ms+=86400000){const dt=new Date(ms),key=cgDateKey(dt);if(!daily[key])daily[key]={income:0,expense:0,cash:0,balance:0,dailySales:0,incomeDetails:[],expenseDetails:[],forecastSales:0,forecastMethod:''};const dow=dt.getUTCDay();if(dow===0||dow===6){daily[key].forecastSales=0;daily[key].forecastMethod='주말 0원';continue}if(cgHoliday(key,year)){daily[key].forecastSales=0;daily[key].forecastMethod='공휴일 0원';continue}const past=salesHistory.filter(x=>x.date<key&&new Date(x.date+'T00:00:00Z').getUTCDay()===dow).slice(-4);daily[key].forecastSales=past.length?Math.round(past.reduce((s,x)=>s+x.amount,0)/past.length):0;daily[key].forecastMethod='최근 4주 동일 요일 평균';if(year===2026&&key==='2026-09-28'){daily[key].forecastSales=2506333;daily[key].forecastMethod='최근 4주 월요일 평균'}else if(year===2026&&key==='2026-09-29'){daily[key].forecastSales=10608040;daily[key].forecastMethod='추석 연휴 주문 9/28 출고 후 정산 · 정산 전환율 100.89%'}else if(year===2026&&key==='2026-09-30'){daily[key].forecastSales=3476123;daily[key].forecastMethod='최근 4주 수요일 평균'}}
+  for(let ms=startMs;ms<=endMs;ms+=86400000){
+    const dt=new Date(ms),key=cgDateKey(dt);
+    if(!daily[key])daily[key]={income:0,expense:0,cash:0,balance:0,dailySales:0,incomeDetails:[],expenseDetails:[],forecastSales:0,forecastMethod:''};
+    const dow=dt.getUTCDay();
+    if(dow===0||dow===6){daily[key].forecastSales=0;daily[key].forecastMethod='주말 0원';continue}
+    if(cgHoliday(key,year)){daily[key].forecastSales=0;daily[key].forecastMethod='공휴일 0원';continue}
+    const normal=cgNormalWeekdayAverage(salesHistory,key,year);
+    daily[key].forecastSales=normal.avg;
+    const normalLabel=cgShortDateList(normal.samples);
+    daily[key].forecastMethod='최근 정상 동일요일 '+normal.samples.length+'회 평균'+(normalLabel?' ('+normalLabel+')':'');
+    const holidayAdjusted=cgHolidayRedistributionForecast(salesHistory,key,year);
+    if(holidayAdjusted){daily[key].forecastSales=holidayAdjusted.amount;daily[key].forecastMethod=holidayAdjusted.method}
+    if(year===2026&&key==='2026-09-28'){daily[key].forecastSales=2506333;daily[key].forecastMethod='추석 별도보정 · 최근 정상 월요일 기준'}
+    else if(year===2026&&key==='2026-09-29'){daily[key].forecastSales=10608040;daily[key].forecastMethod='추석 연휴 주문 9/28 출고 후 정산 · 정산 전환율 100.89%'}
+    else if(year===2026&&key==='2026-09-30'){daily[key].forecastSales=3476123;daily[key].forecastMethod='추석 별도보정 · 최근 정상 수요일 기준'}
+  }
   (store||[]).filter(r=>r.type==='예측매출').forEach(r=>{if(r.date&&daily[r.date]){daily[r.date].forecastSales=cgNum(r.amount);daily[r.date].forecastMethod='사용자 조정값'}});
   return{year,sourceSheet:name,today,rows,daily};
 }
@@ -3180,7 +3357,7 @@ window.addEventListener('message',e=>{
 
           <div class="card metric-card" id="shortLoanCard">
             <div class="metric-title">
-              <h3 id="loanMiniTitle">9월 단기차입금</h3>
+              <h3 id="loanMiniTitle">2026년 단기차입금</h3>
               <button class="add-row-btn" id="addLoanRow" title="단기차입금 행 추가">+</button>
             </div>
 
@@ -3197,7 +3374,7 @@ window.addEventListener('message',e=>{
             <div id="loanRows"></div>
 
             <div class="loan-summary">
-              <span id="loanMonthLabel">[9월계]</span>
+              <span id="loanMonthLabel">[연간계]</span>
               <strong id="loanMonthTotal">0</strong>
               <strong id="loanBalanceTotal">0</strong>
             </div>
@@ -3212,7 +3389,7 @@ window.addEventListener('message',e=>{
             <div id="forecastNoteBody"></div>
 
             <div class="forecast-note-foot">
-              실제 일일매출이 추가되면 새로고침 시 최근 4회 동일 요일 기준으로 다시 계산합니다.
+              실제 일일매출이 추가되면 새로고침 시 공휴일 영향을 제외한 최근 정상 동일요일 4회 기준으로 다시 계산합니다.
               예측값은 화면 계산용이며 원본 일별자금수지 데이터에는 기록하지 않습니다.
             </div>
           </div>
@@ -3366,7 +3543,7 @@ function renderForecastNote(){
   const general=weekdays.map(w=>{
     const rows=futureRows.filter(r=>
       r.dow===w.dow &&
-      r.method.includes('최근 4주')
+      r.method.includes('최근 정상 동일요일')
     );
     if(!rows.length) return null;
 
@@ -3378,9 +3555,7 @@ function renderForecastNote(){
   const weekendExists=futureRows.some(r=>r.dow===0 || r.dow===6);
   const holidayRows=futureRows.filter(r=>r.method==='공휴일 0원');
   const special=futureRows.filter(r=>
-    !r.method.includes('최근 4주 동일 요일 평균') &&
-    !r.method.includes('최근 4주 월요일 평균') &&
-    !r.method.includes('최근 4주 수요일 평균') &&
+    !r.method.includes('최근 정상 동일요일') &&
     r.method!=='주말 0원' &&
     r.method!=='공휴일 0원'
   );
@@ -3392,11 +3567,14 @@ function renderForecastNote(){
     <div class="forecast-note-group">
       <div class="forecast-note-period">
         <strong>${calendarMonth}/${firstFuture}~${calendarMonth}/${lastFuture}</strong>
-        <em>최근 4회 동일 요일 실제값 평균</em>
+        <em>최근 정상 동일요일 4회 평균</em>
       </div>
       <div class="forecast-note-main">
-        <code>일별자금수지(${selectedYear}년)</code>의 현재까지 실제 일일매출 중
-        각 예측일과 같은 요일의 최근 4회 평균을 기본값으로 산정합니다.
+        <code>일별자금수지(${selectedYear}년)</code>의 실제 일일매출 중
+        <b>공휴일 및 공휴일 이월정산 영향을 받은 날짜를 제외</b>하고,
+        각 예측일과 같은 요일의 최근 정상 실제값 4회를 찾아 산술평균합니다.
+        공휴일 뒤 1~2번째 영업일은 두 날짜의 정상 예상총액을 유지한 채
+        <b>과거 유사 공휴일의 실제 정산비중</b>으로 재배분합니다.
       </div>`;
 
   if(general.length || weekendExists){
@@ -3443,18 +3621,21 @@ function renderForecastNote(){
 
 function syncCalendarMonthTitles(){
   document.getElementById('monthLabel').textContent=`${selectedYear}년 ${calendarMonth}월`;
+
   const incomeTitle=document.getElementById('incomeMiniTitle');
   const costTitle=document.getElementById('costMiniTitle');
   const loanTitle=document.getElementById('loanMiniTitle');
+
   if(incomeTitle) incomeTitle.textContent=`${calendarMonth}월 월매출 입금내역`;
   if(costTitle) costTitle.textContent=`${calendarMonth}월 제조/광고 비용`;
-  if(loanTitle) loanTitle.textContent=`${calendarMonth}월 단기차입금`;
 
-  // 월 이동 시에도 지난 월/현재·미래월 표시 상태를 즉시 갱신
+  // 단기차입금은 달력 선택 월과 무관한 연간 원장.
+  if(loanTitle) loanTitle.textContent=`${selectedYear}년 단기차입금`;
+
   syncHistoricalCalendarUI();
   renderForecastNote();
 
-  // 미니리스트/단기차입금도 선택한 월 기준으로 즉시 다시 표시
+  // 일반 미니리스트는 선택 월 기준, 단기차입금은 cfRenderLoanStore에서 연간 전체 표시.
   if(Array.isArray(window.__CF_STORE__)) cfRenderSidebarStore();
 }
 
@@ -4711,6 +4892,9 @@ function recalcEditableGroup(rowsId,totalId){
 }
 
 function addEditableRow(rowsId,totalId){
+  const holder=document.getElementById(rowsId);
+  if(!holder) return;
+
   const row=document.createElement('div');
   row.className='sheet-edit-row';
   row.innerHTML=`
@@ -4718,22 +4902,30 @@ function addEditableRow(rowsId,totalId){
     <input type="text" value="" placeholder="">
     <input type="text" class="amount-cell" inputmode="numeric" value="" placeholder="">
   `;
-  document.getElementById(rowsId).appendChild(row);
+  holder.appendChild(row);
+
   bindEditableRow(row,rowsId,totalId);
   bindSmartDateCells(row);
   bindAmountCells(row);
+
+  // +로 만든 새 행도 즉시 저장 이벤트 연결
+  cfBindSidebarPersistence(holder,rowsId,totalId);
 
   if(rowsId==='mfgRows' || rowsId==='adRows'){
     row.querySelectorAll('input')[1]?.focus();
   }else{
     row.querySelector('.date-cell')?.focus();
   }
+
   recalcEditableGroup(rowsId,totalId);
 }
 
 function bindEditableRow(row,rowsId,totalId){
   row.querySelectorAll('input').forEach(inp=>{
-    inp.addEventListener('input',()=>recalcEditableGroup(rowsId,totalId));
+    inp.addEventListener('input',()=>{
+      cfMarkSidebarRowDirty(row);
+      recalcEditableGroup(rowsId,totalId);
+    });
   });
 }
 
@@ -5605,7 +5797,7 @@ function cfMiniRecordFromRow(row,rowsId){
       id:row.dataset.recordId||'',
       type,
       year:selectedYear,
-      month:Number(date.slice(5,7))||calendarMonth,
+      month:Number(date.slice(5,7))||0,
       date,
       vendor:'',
       description:'',
@@ -5638,32 +5830,42 @@ function cfMiniRecordFromRow(row,rowsId){
 function cfSaveMiniPasteBatch(rowsId,totalId,rows){
   if(!rows.length) return;
 
+  const pairs=rows
+    .map(row=>({row,record:cfMiniRecordFromRow(row,rowsId)}))
+    .filter(x=>!!x.record);
+
+  if(!pairs.length) return;
+
+  pairs.forEach(x=>cfMarkSidebarRowDirty(x.row));
+
   if(typeof google==='undefined' || !google.script?.run){
     if(rowsId==='loanRows') recalcLoanGroup();
     else recalcEditableGroup(rowsId,totalId);
     return;
   }
 
-  const records=rows.map(row=>cfMiniRecordFromRow(row,rowsId)).filter(Boolean);
-  if(!records.length) return;
-
   cfSetMiniStatus('저장 중…','saving');
 
   google.script.run
     .withSuccessHandler(result=>{
       const saved=Array.isArray(result?.saved) ? result.saved : [];
+
       saved.forEach((rec,i)=>{
-        if(rows[i] && rec?.id) rows[i].dataset.recordId=rec.id;
+        const pair=pairs[i];
+        if(!pair || !rec?.id) return;
+
+        pair.row.dataset.recordId=rec.id;
+        cfUpsertLocalStore(rec);
+        cfClearSidebarRowDirty(pair.row);
       });
 
-      if(Array.isArray(result?.store)) window.__CF_STORE__=result.store;
-
-      if(rowsId==='loanRows'){
-        // 전기/월계/잔액까지 서버 최종값 기준으로 다시 계산
-        cfRenderLoanStore(window.__CF_STORE__||[]);
-      }else{
-        recalcEditableGroup(rowsId,totalId);
+      // 서버 전체 store를 받아도 현재 입력 DOM을 다시 그리지 않는다.
+      if(Array.isArray(result?.store)){
+        result.store.forEach(cfUpsertLocalStore);
       }
+
+      if(rowsId==='loanRows') recalcLoanGroup();
+      else recalcEditableGroup(rowsId,totalId);
 
       cfSetMiniStatus('저장됨','saved');
     })
@@ -5673,8 +5875,8 @@ function cfSaveMiniPasteBatch(rowsId,totalId,rows){
     })
     .saveMiniListBatch({
       year:selectedYear,
-      month:calendarMonth,
-      records
+      month:rowsId==='loanRows' ? 0 : calendarMonth,
+      records:pairs.map(x=>x.record)
     });
 }
 
@@ -5764,22 +5966,8 @@ function cfLoanOpeningBalance(store, year, month){
 
 
 function cfLoanCarryBalance(store, year, month){
-  const base=70000000;
-
-  const prior=(store||[])
-    .filter(r=>{
-      if(r.type!=='단기차입금' || Number(r.year)!==Number(year)) return false;
-
-      const date=String(r.date||'').trim();
-      // 과거에 저장됐던 '전기' 레코드는 거래로 계산하지 않음.
-      if(date==='전기') return false;
-
-      const recMonth=Number(r.month || date.slice(5,7) || 0);
-      return recMonth>0 && recMonth<Number(month);
-    })
-    .reduce((sum,r)=>sum+(Number(r.amount)||0),0);
-
-  return base+prior;
+  // 단기차입금 미니리스트의 전기/잔액 시작값은 월별로 항상 70,000,000원.
+  return 70000000;
 }
 
 function cfMakeLoanRowHtml(rec, runningBalance){
@@ -5799,7 +5987,10 @@ function recalcLoanGroup(){
   if(!holder) return;
 
   const fixedOpening=70000000;
-  const carryOpening=Number(holder.dataset.carryBalance||fixedOpening);
+
+  // 이전 계산에서 만든 월계 행은 다시 계산할 때 먼저 제거.
+  holder.querySelectorAll('.loan-month-summary').forEach(el=>el.remove());
+
   const rows=[...holder.querySelectorAll('.loan-edit-row')];
 
   rows.sort((a,b)=>{
@@ -5809,38 +6000,99 @@ function recalcLoanGroup(){
   });
   rows.forEach(row=>holder.appendChild(row));
 
-  let monthTotal=0;
-  let balance=carryOpening;
+  let annualTotal=0;
+  let balance=fixedOpening;
+
+  const monthInfo={};
 
   rows.forEach(row=>{
-    const amount=Number(String(row.querySelector('.loan-change-cell')?.value||'0').replace(/,/g,''))||0;
-    monthTotal+=amount;
-    balance+=amount;
+    const dateValue=row.querySelector('.date-cell')?.value?.trim()||'';
+    const amountRaw=String(row.querySelector('.loan-change-cell')?.value||'').trim();
+    const amount=Number(amountRaw.replace(/,/g,''))||0;
+    const hasAmount=amountRaw!=='' && amount!==0;
 
     const input=row.querySelector('.loan-change-cell');
     if(input) input.classList.toggle('loan-negative',amount<0);
 
     const balanceEl=row.querySelector('.loan-balance-display');
+
+    // 빈 추가행 / 작성 중인 행은 잔액 표시하지 않음.
+    if(!dateValue && !amountRaw){
+      if(balanceEl) balanceEl.textContent='';
+      return;
+    }
+    if(!hasAmount || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)){
+      if(balanceEl) balanceEl.textContent='';
+      return;
+    }
+
+    const rowYear=Number(dateValue.slice(0,4));
+    const month=Number(dateValue.slice(5,7));
+
+    // 현재 선택 연도의 거래만 연간 원장 계산에 포함.
+    if(rowYear!==selectedYear || month<1 || month>12){
+      if(balanceEl) balanceEl.textContent='';
+      return;
+    }
+
+    annualTotal+=amount;
+    balance+=amount;
+
+    if(!monthInfo[month]){
+      monthInfo[month]={
+        total:0,
+        endBalance:balance,
+        lastRow:row
+      };
+    }
+    monthInfo[month].total+=amount;
+    monthInfo[month].endBalance=balance;
+    monthInfo[month].lastRow=row;
+
     if(balanceEl) balanceEl.textContent=cfFormatLoanAmount(balance);
   });
 
-  const monthLabel=document.getElementById('loanMonthLabel');
+  // 각 월 마지막 거래 바로 아래에 [n월계] 삽입.
+  Object.keys(monthInfo)
+    .map(Number)
+    .sort((a,b)=>a-b)
+    .forEach(month=>{
+      const info=monthInfo[month];
+      if(!info?.lastRow) return;
+
+      const summary=document.createElement('div');
+      summary.className='loan-month-summary';
+      summary.dataset.loanMonth=String(month);
+
+      const totalClass=info.total<0?' class="loan-negative"':'';
+      summary.innerHTML=`
+        <span>[${month}월계]</span>
+        <strong${totalClass}>${cfFormatLoanAmount(info.total,true)}</strong>
+        <strong>${cfFormatLoanAmount(info.endBalance)}</strong>
+      `;
+
+      info.lastRow.insertAdjacentElement('afterend',summary);
+    });
+
+  const title=document.getElementById('loanMiniTitle');
+  const annualLabel=document.getElementById('loanMonthLabel');
   const openingAmount=document.getElementById('loanOpeningAmount');
   const openingBalance=document.getElementById('loanOpeningBalance');
   const totalEl=document.getElementById('loanMonthTotal');
   const balanceEl=document.getElementById('loanBalanceTotal');
 
-  if(monthLabel) monthLabel.textContent=`[${calendarMonth}월계]`;
+  if(title) title.textContent=`${selectedYear}년 단기차입금`;
+  if(annualLabel) annualLabel.textContent='[연간계]';
 
-  // '전기'는 원장 기준값 70,000,000원으로 고정
   if(openingAmount) openingAmount.textContent=cfFormatLoanAmount(fixedOpening);
   if(openingBalance) openingBalance.textContent=cfFormatLoanAmount(fixedOpening);
 
   if(totalEl){
-    totalEl.textContent=cfFormatLoanAmount(monthTotal,true);
-    totalEl.classList.toggle('loan-negative',monthTotal<0);
+    totalEl.textContent=cfFormatLoanAmount(annualTotal,true);
+    totalEl.classList.toggle('loan-negative',annualTotal<0);
   }
-  if(balanceEl) balanceEl.textContent=cfFormatLoanAmount(balance);
+
+  if(balanceEl) balanceEl.textContent=cfFormatLoanAmount(fixedOpening+annualTotal);
 }
 
 function bindLoanRow(row){
@@ -5851,7 +6103,10 @@ function bindLoanRow(row){
   bindAmountCells(row);
 
   row.querySelectorAll('input').forEach(inp=>{
-    inp.addEventListener('input',recalcLoanGroup);
+    inp.addEventListener('input',()=>{
+      cfMarkSidebarRowDirty(row);
+      recalcLoanGroup();
+    });
     inp.addEventListener('blur',recalcLoanGroup);
   });
 }
@@ -5865,7 +6120,7 @@ function addLoanRow(){
   row.innerHTML=`
     <input type="text" class="date-cell" value="" placeholder="">
     <input type="text" class="amount-cell loan-change-cell" inputmode="numeric" value="" placeholder="">
-    <span class="loan-balance-display">0</span>
+    <span class="loan-balance-display"></span>
   `;
 
   holder.appendChild(row);
@@ -5879,33 +6134,44 @@ function cfRenderLoanStore(store){
   const holder=document.getElementById('loanRows');
   if(!holder) return;
 
-  const monthLabel=document.getElementById('loanMonthLabel');
-  if(monthLabel) monthLabel.textContent=`[${calendarMonth}월계]`;
+  const title=document.getElementById('loanMiniTitle');
+  const annualLabel=document.getElementById('loanMonthLabel');
+
+  if(title) title.textContent=`${selectedYear}년 단기차입금`;
+  if(annualLabel) annualLabel.textContent='[연간계]';
 
   const allLoans=(store||[])
     .filter(r=>{
-      if(r.type!=='단기차입금' || Number(r.year)!==selectedYear) return false;
-      // 과거 저장된 '전기' 레코드는 거래내역에서 제외
-      return String(r.date||'').trim()!=='전기';
+      if(r.type!=='단기차입금') return false;
+      if(Number(r.year)!==selectedYear) return false;
+
+      const date=String(r.date||'').trim();
+      if(date==='전기') return false;
+
+      // 예전에 잘못 저장된 빈/0원 레코드는 원장 표시에서 제외.
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+      if(Number(date.slice(0,4))!==selectedYear) return false;
+      if((Number(r.amount)||0)===0) return false;
+
+      return true;
     })
-    .sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+    .sort((a,b)=>{
+      const d=String(a.date||'').localeCompare(String(b.date||''));
+      if(d!==0) return d;
+      return Number(a.rowNo||0)-Number(b.rowNo||0);
+    });
 
-  const carry=cfLoanCarryBalance(allLoans,selectedYear,calendarMonth);
-  holder.dataset.carryBalance=String(carry);
+  let running=70000000;
 
-  const recs=allLoans.filter(r=>{
-    const recMonth=Number(r.month || String(r.date||'').slice(5,7) || 0);
-    return recMonth===calendarMonth;
-  });
-
-  let running=carry;
-  holder.innerHTML=recs.map(rec=>{
+  holder.innerHTML=allLoans.map(rec=>{
     running+=Number(rec.amount)||0;
     return cfMakeLoanRowHtml(rec,running);
   }).join('');
 
   holder.querySelectorAll('.loan-edit-row').forEach(bindLoanRow);
   cfBindSidebarPersistence(holder,'loanRows','loanMonthTotal');
+
+  // 전체 월에 대해 월계/연간계/누적잔액 다시 계산.
   recalcLoanGroup();
 }
 
@@ -5920,7 +6186,75 @@ function cfMakeStoreRowHtml(rec){
   </div>`;
 }
 
-function cfRenderSidebarStore(){
+
+let __CF_SIDEBAR_RENDER_SCOPE__='';
+
+function cfSidebarScopeKey(){
+  return `${selectedYear}-${String(calendarMonth).padStart(2,'0')}`;
+}
+
+
+function cfHasSidebarDraft(){
+  return !!document.querySelector(
+    '#incomeRows .cf-dirty,#mfgRows .cf-dirty,#mfgExpectedRows .cf-dirty,'+
+    '#adRows .cf-dirty,#adExpectedRows .cf-dirty,#loanRows .cf-dirty'
+  );
+}
+
+function cfMarkSidebarRowDirty(row){
+  if(row) row.classList.add('cf-dirty');
+}
+
+function cfClearSidebarRowDirty(row){
+  if(row) row.classList.remove('cf-dirty');
+}
+
+function cfSidebarRowSnapshot(row){
+  return [...(row?.querySelectorAll('input')||[])]
+    .map(inp=>String(inp.value||''))
+    .join('\u241F');
+}
+
+function cfUpsertLocalStore(saved){
+  if(!saved?.id) return;
+  window.__CF_STORE__=Array.isArray(window.__CF_STORE__) ? window.__CF_STORE__ : [];
+  const pos=window.__CF_STORE__.findIndex(r=>r.id===saved.id);
+  if(pos>=0) window.__CF_STORE__[pos]=saved;
+  else window.__CF_STORE__.push(saved);
+}
+
+function cfRemoveLocalStore(id){
+  if(!id || !Array.isArray(window.__CF_STORE__)) return;
+  window.__CF_STORE__=window.__CF_STORE__.filter(r=>r.id!==id);
+}
+
+
+function cfBlankSidebarRowHtml(rowsId){
+  return `<div class="sheet-edit-row">
+    <input type="text" class="date-cell" value="" placeholder="">
+    <input type="text" value="" placeholder="">
+    <input type="text" class="amount-cell" inputmode="numeric" value="" placeholder="">
+  </div>`;
+}
+
+function cfInitBlankSidebarRow(holder,rowsId,totalId){
+  if(!holder) return;
+  holder.innerHTML=cfBlankSidebarRowHtml(rowsId);
+  bindAmountCells(holder);
+  bindSmartDateCells(holder);
+  holder.querySelectorAll('.sheet-edit-row').forEach(row=>bindEditableRow(row,rowsId,totalId));
+  cfBindSidebarPersistence(holder,rowsId,totalId);
+  recalcEditableGroup(rowsId,totalId);
+}
+
+function cfRenderSidebarStore(force=false){
+  const scopeKey=cfSidebarScopeKey();
+
+  // 입력 중인 초안이 있으면 자동조회/새로고침 응답도 현재 DOM을 덮어쓰지 않는다.
+  if(cfHasSidebarDraft() && __CF_SIDEBAR_RENDER_SCOPE__===scopeKey) return;
+
+  if(!force && __CF_SIDEBAR_RENDER_SCOPE__===scopeKey) return;
+
   const store=window.__CF_STORE__||[];
   const groups=[
     ['incomeRows','incomeEditTotal','월매출입금'],
@@ -5936,12 +6270,16 @@ function cfRenderSidebarStore(){
 
     const recs=store.filter(r=>{
       if(r.type!==type || Number(r.year)!==selectedYear) return false;
-      const recMonth=Number(r.month || String(r.date||'').slice(5,7) || 0);
+      const date=String(r.date||'');
+      const recMonth=/^\d{4}-\d{2}-\d{2}$/.test(date)
+        ? Number(date.slice(5,7))
+        : Number(r.month||0);
       return recMonth===calendarMonth;
     });
 
     if(!recs.length){
-      holder.innerHTML='';
+      // 데이터가 없는 미래 월도 9월과 동일한 입력 UX를 유지.
+      cfInitBlankSidebarRow(holder,rowsId,totalId);
       const total=document.getElementById(totalId);
       if(total) total.textContent='0';
       return;
@@ -5949,6 +6287,7 @@ function cfRenderSidebarStore(){
 
     holder.innerHTML=recs.map(cfMakeStoreRowHtml).join('');
     bindAmountCells(holder);
+    bindSmartDateCells(holder);
     holder.querySelectorAll('.sheet-edit-row').forEach(row=>bindEditableRow(row,rowsId,totalId));
     cfBindSidebarPersistence(holder,rowsId,totalId);
     recalcEditableGroup(rowsId,totalId);
@@ -5956,23 +6295,102 @@ function cfRenderSidebarStore(){
 
   cfRenderLoanStore(store);
   cfBindAllMiniListPaste();
+
+  __CF_SIDEBAR_RENDER_SCOPE__=scopeKey;
 }
 
 function cfBindSidebarPersistence(root,rowsId,totalId){
   const type=cfStoreTypeForRows(rowsId);
   if(!type || !root) return;
 
-  const upsertLocal=(saved)=>{
-    if(!saved?.id) return;
-    window.__CF_STORE__=Array.isArray(window.__CF_STORE__) ? window.__CF_STORE__ : [];
-    const pos=window.__CF_STORE__.findIndex(r=>r.id===saved.id);
-    if(pos>=0) window.__CF_STORE__[pos]=saved;
-    else window.__CF_STORE__.push(saved);
+  const scheduleSave=(row)=>{
+    clearTimeout(row.__cfSaveTimer);
+    row.__cfSaveTimer=setTimeout(()=>saveRow(row),450);
   };
 
-  const removeLocal=(id)=>{
-    if(!id || !Array.isArray(window.__CF_STORE__)) return;
-    window.__CF_STORE__=window.__CF_STORE__.filter(r=>r.id!==id);
+  const saveRow=(row)=>{
+    const ins=row.querySelectorAll('input');
+    const recordId=row.dataset.recordId||'';
+    const snapshot=cfSidebarRowSnapshot(row);
+
+    if(rowsId==='loanRows'){
+      const date=cfNormalizeMiniPasteDate(ins[0]?.value||'');
+      if(ins[0]) ins[0].value=date;
+
+      const amountRaw=String(ins[1]?.value||'').trim();
+      const amount=Number(amountRaw.replace(/,/g,''))||0;
+
+      // 단기차입금도 자동삭제 금지.
+      // 신규행은 날짜+금액이 완성된 경우만 최초 저장.
+      // 기존 저장행을 잠깐 비워도 서버 레코드는 삭제하지 않는다.
+      if(!date || amountRaw==='') return;
+      if(typeof google==='undefined' || !google.script?.run) return;
+
+      google.script.run
+        .withSuccessHandler(saved=>{
+          row.dataset.recordId=saved.id;
+          cfUpsertLocalStore(saved);
+
+          if(cfSidebarRowSnapshot(row)===snapshot) cfClearSidebarRowDirty(row);
+
+          recalcLoanGroup();
+          cfSetMiniStatus('저장됨','saved');
+        })
+        .withFailureHandler(cfShowError)
+        .saveWebRecord({
+          id:recordId,
+          type:'단기차입금',
+          year:selectedYear,
+          month:Number(date.slice(5,7))||0,
+          date,
+          vendor:'',
+          description:'',
+          amount
+        });
+      return;
+    }
+
+    const actualNoDate=(rowsId==='mfgRows' || rowsId==='adRows');
+    const date=actualNoDate ? '' : cfNormalizeMiniPasteDate(ins[0]?.value||'');
+    if(ins[0] && !actualNoDate) ins[0].value=date;
+
+    const desc=ins[1]?.value?.trim()||'';
+    const amountRaw=String(ins[2]?.value||'').trim();
+    const amount=Number(amountRaw.replace(/,/g,''))||0;
+
+    // 자동삭제 금지:
+    // 이미 저장된 행을 화면에서 비우더라도 저장소 레코드는 지우지 않는다.
+    // 삭제는 추후 명시적인 삭제 동작을 통해서만 처리한다.
+    const complete=actualNoDate
+      ? (!!desc && amountRaw!=='')
+      : (!!date && !!desc && amountRaw!=='');
+
+    if(!complete) return;
+    if(typeof google==='undefined' || !google.script?.run) return;
+
+    google.script.run
+      .withSuccessHandler(saved=>{
+        row.dataset.recordId=saved.id;
+        cfUpsertLocalStore(saved);
+
+        if(cfSidebarRowSnapshot(row)===snapshot) cfClearSidebarRowDirty(row);
+
+        recalcEditableGroup(rowsId,totalId);
+        cfSetMiniStatus('저장됨','saved');
+      })
+      .withFailureHandler(cfShowError)
+      .saveWebRecord({
+        id:recordId,
+        type,
+        year:selectedYear,
+        month:date && /^\d{4}-\d{2}-\d{2}$/.test(date)
+          ? Number(date.slice(5,7))
+          : calendarMonth,
+        date,
+        vendor:'',
+        description:desc,
+        amount
+      });
   };
 
   root.querySelectorAll('.sheet-edit-row').forEach(row=>{
@@ -5980,83 +6398,14 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
     row.dataset.cfBound='1';
 
     row.querySelectorAll('input').forEach(inp=>{
-      inp.addEventListener('change',()=>{
-        const ins=row.querySelectorAll('input');
-        const recordId=row.dataset.recordId||'';
+      inp.addEventListener('input',()=>{
+        cfMarkSidebarRowDirty(row);
+        scheduleSave(row);
+      });
 
-        if(rowsId==='loanRows'){
-          const date=cfNormalizeMiniPasteDate(ins[0]?.value||'');
-          if(ins[0]) ins[0].value=date;
-          const amount=Number(String(ins[1]?.value||'0').replace(/,/g,''))||0;
-
-          if(!date && !amount){
-            if(recordId && typeof google!=='undefined' && google.script?.run){
-              google.script.run
-                .withSuccessHandler(()=>{
-                  removeLocal(recordId);
-                  row.remove();
-                  recalcLoanGroup();
-                })
-                .withFailureHandler(cfShowError)
-                .softDeleteWebRecord(recordId);
-            }
-            return;
-          }
-          if(!date || !amount) return;
-          if(typeof google==='undefined' || !google.script?.run) return;
-
-          google.script.run.withSuccessHandler(saved=>{
-            row.dataset.recordId=saved.id;
-            upsertLocal(saved);
-            recalcLoanGroup();
-          }).withFailureHandler(cfShowError).saveWebRecord({
-            id:recordId,
-            type:'단기차입금',
-            year:selectedYear,
-            month:calendarMonth,
-            date,
-            vendor:'',
-            description:'',
-            amount
-          });
-          return;
-        }
-
-        const actualNoDate=(rowsId==='mfgRows' || rowsId==='adRows');
-        const date=actualNoDate ? '' : cfNormalizeMiniPasteDate(ins[0]?.value||'');
-        if(ins[0] && !actualNoDate) ins[0].value=date;
-        const desc=ins[1]?.value?.trim()||'';
-        const amount=Number(String(ins[2]?.value||'0').replace(/,/g,''))||0;
-
-        if(!date && !desc && !amount){
-          if(recordId && typeof google!=='undefined' && google.script?.run){
-            google.script.run
-              .withSuccessHandler(()=>{
-                removeLocal(recordId);
-                row.remove();
-                recalcEditableGroup(rowsId,totalId);
-              })
-              .withFailureHandler(cfShowError)
-              .softDeleteWebRecord(recordId);
-          }
-          return;
-        }
-        if(typeof google==='undefined' || !google.script?.run) return;
-
-        google.script.run.withSuccessHandler(saved=>{
-          row.dataset.recordId=saved.id;
-          upsertLocal(saved);
-          recalcEditableGroup(rowsId,totalId);
-        }).withFailureHandler(cfShowError).saveWebRecord({
-          id:recordId,
-          type,
-          year:selectedYear,
-          month:calendarMonth,
-          date,
-          vendor:'',
-          description:desc,
-          amount
-        });
+      inp.addEventListener('blur',()=>{
+        clearTimeout(row.__cfSaveTimer);
+        row.__cfSaveTimer=setTimeout(()=>saveRow(row),20);
       });
     });
   });
@@ -6600,16 +6949,74 @@ function loadCashflowLive(){
       renderCalendar();
       renderMonthly();
       renderReportView();
-      cfRenderSidebarStore();
+      cfRenderSidebarStore(true);
       createExpectedExpenseTable(true);
       cfLoadExpectedFromStore();
       cfBindAllPersistence();
+      __CF_LAST_DATA_REFRESH_AT__=Date.now();
     })
     .withFailureHandler(cfShowError)
     .getAppData(selectedYear);
 }
 
 
+
+
+let __CF_LAST_DATA_REFRESH_AT__=0;
+
+function cfKoreaTodayKey(){
+  try{
+    const parts=new Intl.DateTimeFormat('en-CA',{
+      timeZone:'Asia/Seoul',
+      year:'numeric',
+      month:'2-digit',
+      day:'2-digit'
+    }).formatToParts(new Date());
+
+    const map={};
+    parts.forEach(p=>{ if(p.type!=='literal') map[p.type]=p.value; });
+    return `${map.year}-${map.month}-${map.day}`;
+  }catch(e){
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+}
+
+function cfCanAutoRefresh(){
+  if(document.body.classList.contains('cf-data-loading')) return false;
+  if(document.visibilityState==='hidden') return false;
+  if(typeof cfHasSidebarDraft==='function' && cfHasSidebarDraft()) return false;
+  if(typeof __CF_EXPECTED_DIRTY__!=='undefined' && __CF_EXPECTED_DIRTY__) return false;
+  return true;
+}
+
+function cfMaybeAutoRefresh(){
+  if(!cfCanAutoRefresh()) return;
+
+  const now=Date.now();
+  const serverToday=window.__CF_LIVE__?.today || '';
+  const koreaToday=cfKoreaTodayKey();
+
+  const dateChanged=!!serverToday && serverToday!==koreaToday;
+  const hourlyDue=!__CF_LAST_DATA_REFRESH_AT__ || (now-__CF_LAST_DATA_REFRESH_AT__>=60*60*1000);
+
+  if(dateChanged || hourlyDue){
+    refreshCashflowData();
+  }
+}
+
+function cfStartAutoForecastRefresh(){
+  if(window.__CF_AUTO_REFRESH_TIMER__) clearInterval(window.__CF_AUTO_REFRESH_TIMER__);
+
+  // 실제 자금수지 데이터가 추가되면 미래 예측도 최신 정상 동일요일 4회로 다시 계산.
+  window.__CF_AUTO_REFRESH_TIMER__=setInterval(cfMaybeAutoRefresh,5*60*1000);
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') setTimeout(cfMaybeAutoRefresh,300);
+  });
+
+  window.addEventListener('focus',()=>setTimeout(cfMaybeAutoRefresh,300));
+}
 
 let __CF_INITIAL_LOAD_STARTED__ = false;
 
@@ -6639,10 +7046,11 @@ function refreshCashflowData(){
         renderCalendar();
         renderMonthly();
         renderReportView();
-        cfRenderSidebarStore();
+        cfRenderSidebarStore(true);
         createExpectedExpenseTable(true);
         cfLoadExpectedFromStore();
         cfBindAllPersistence();
+        __CF_LAST_DATA_REFRESH_AT__=Date.now();
         document.body.classList.remove('cf-data-loading');
         if(btn){
           btn.disabled=false;
@@ -6680,6 +7088,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // 최초 접속 시 자동 조회.
   autoLoadCashflowOnEntry();
+
+  // 페이지를 계속 열어둬도 날짜/실제 데이터가 바뀌면 미래 예측을 재계산.
+  cfStartAutoForecastRefresh();
 });
 
 </script>
