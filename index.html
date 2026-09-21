@@ -2963,8 +2963,6 @@ body.cf-data-loading #calendarPage .side{
 }
 
 </style>
-
-
 <script>
 /* GitHub Pages 연결부: 기존 자금수지 UI의 google.script.run 호출만 Google Sheets API로 치환 */
 const CASH_GITHUB_CONFIG=Object.freeze({
@@ -3256,6 +3254,7 @@ window.addEventListener('message',e=>{
 .topbar{display:none!important}
 .page{padding-top:16px}
 </style>
+
 
 </head>
 <body>
@@ -3628,13 +3627,11 @@ function renderForecastNote(){
   body.innerHTML=`
     <div class="forecast-note-group forecast-note-compact">
       <div class="forecast-note-main">
-        <b>일일매출</b> 최근 정상 동일요일 4회 평균
+        <b>기준</b> 일별자금수지
         <span class="forecast-dot">·</span>
-        <b>주말·공휴일</b> 제외${hasHolidayAdjust?' 및 이월정산 보정':''}
+        <b>예측</b> 일일매출만 최근 정상 동일요일 4회 평균${hasHolidayAdjust?' + 공휴일 이월보정':''}
         <span class="forecast-dot">·</span>
-        <b>기타 입금</b> 원본/월매출 미니리스트의 확정 일자·금액 합산
-        <span class="forecast-dot">·</span>
-        실제값 추가 시 자동 재계산
+        <b>기타 수입</b> 일별자금수지 기입값 그대로 반영
       </div>
     </div>`;
 }
@@ -3740,8 +3737,7 @@ function renderCalendar(){
   cal.innerHTML='';
 
   const firstDay=new Date(selectedYear,calendarMonth-1,1);
-  const jsDay=firstDay.getDay();
-  const offset=jsDay;
+  const offset=firstDay.getDay();
   const total=new Date(selectedYear,calendarMonth,0).getDate();
   const prevTotal=new Date(selectedYear,calendarMonth-1,0).getDate();
 
@@ -3761,19 +3757,20 @@ function renderCalendar(){
     const todayKey=window.__CF_LIVE__?.today || '';
     const isFuture=todayKey && dateKey>todayKey;
 
-    let inc, exp, cash;
-    let futureIncomeDetails=[];
+    let inc=0, exp=0, cash=0;
+    let incomeDetails=[];
 
     const hasLiveSource=!!window.__CF_LIVE__;
 
     if(liveDay){
       if(isFuture){
-        // ① 자동예측 대상은 일일매출.
+        // 미래 날짜:
+        // 1) 일일매출만 예측값 사용
+        // 2) 월매출/B2B/기타환급 등 일별자금수지에 이미 기입된 다른 수입항목은 그대로 반영
+        // 3) 웹사이트 미니리스트 값은 달력 계산에 사용하지 않음
         const forecastDailySales=Number(liveDay.forecastSales||0);
 
-        // ② 원본 일별자금수지에 미래 확정 입금항목이 있으면 같이 반영.
-        //    일일매출은 위 자동예측값을 사용하므로 원본 일일매출 행은 제외.
-        const sourceKnown=(liveDay.incomeDetails||[])
+        const knownSourceIncome=(liveDay.incomeDetails||[])
           .filter(x=>String(x?.name||'').trim()!=='일일매출')
           .map(x=>({
             name:String(x?.name||'입금'),
@@ -3781,44 +3778,34 @@ function renderCalendar(){
           }))
           .filter(x=>x.amount!==0);
 
-        // ③ 웹사이트저장소의 월매출 입금내역도 날짜가 있으면 예상매출에 합산.
-        const storeKnown=(window.__CF_STORE__||[])
-          .filter(r=>
-            r.type==='월매출입금' &&
-            Number(r.year)===selectedYear &&
-            String(r.date||'')===dateKey
-          )
-          .map(r=>({
-            name:String(r.description||r.vendor||'월매출'),
-            amount:Number(r.amount||0)
-          }))
-          .filter(x=>x.amount!==0);
-
-        // 월매출을 저장소에서 별도로 입력했다면 원본의 월매출 행은 중복 합산하지 않는다.
-        const sourceFiltered=storeKnown.length
-          ? sourceKnown.filter(x=>String(x.name).trim()!=='월매출')
-          : sourceKnown;
-
-        futureIncomeDetails=[
+        incomeDetails=[
           ...(forecastDailySales!==0 ? [{name:'예상 일일매출',amount:forecastDailySales}] : []),
-          ...sourceFiltered,
-          ...storeKnown
+          ...knownSourceIncome
         ];
 
-        inc=futureIncomeDetails.reduce((sum,x)=>sum+Number(x.amount||0),0);
+        inc=incomeDetails.reduce((sum,x)=>sum+Number(x.amount||0),0);
       }else{
+        // 과거/당일은 일별자금수지 실제 수입항목 그대로.
         inc=Number(liveDay.income||0);
+        incomeDetails=(liveDay.incomeDetails||[]).map(x=>({
+          name:String(x?.name||'입금'),
+          amount:Number(x?.amount||0)
+        }));
       }
 
       exp=Number(liveDay.expense||0);
       cash=isFuture ? inc-exp : Number(liveDay.cash ?? (inc-exp));
 
-      if(!isFuture && Number.isFinite(Number(liveDay.balance))) running=Number(liveDay.balance);
-      else running += cash;
+      if(!isFuture && Number.isFinite(Number(liveDay.balance))){
+        running=Number(liveDay.balance);
+      }else{
+        running += cash;
+      }
     }else if(hasLiveSource){
       inc=0;
       exp=0;
       cash=0;
+      incomeDetails=[];
     }else{
       [inc,exp]=sampleDays[day]||[0,0];
       cash=inc-exp;
@@ -3836,25 +3823,18 @@ function renderCalendar(){
       +(dow===6?' saturday':'')
       +(holidayName?' holiday':'');
 
-    const incList = liveDay
-      ? (isFuture ? futureIncomeDetails : (liveDay.incomeDetails||[]))
-      : [];
-
+    const incList = liveDay ? incomeDetails : [];
     const expList = liveDay ? (liveDay.expenseDetails||[]) : [];
 
     const incDetails=inc?`
       <div class="detail income-detail">${(incList.length?incList:[
-        {name:'일일매출',amount:Math.round(inc*.56)},
-        {name:'월매출',amount:Math.round(inc*.24)},
-        {name:'B2B매출',amount:inc-Math.round(inc*.56)-Math.round(inc*.24)}
+        {name:'일일매출',amount:inc}
       ]).map(x=>`<span>${x.name}</span><span class="v">${fmt(Number(x.amount||0))}</span>`).join('')}</div>`:
       `<div class="detail income-detail"></div>`;
 
     const expDetails=exp?`
       <div class="detail expense-detail">${(expList.length?expList:[
-        {name:'원재료',amount:Math.round(exp*.43)},
-        {name:'광고비',amount:Math.round(exp*.31)},
-        {name:'기타',amount:exp-Math.round(exp*.43)-Math.round(exp*.31)}
+        {name:'기타',amount:exp}
       ]).map(x=>`<span>${x.name}</span><span class="v">${fmt(Number(x.amount||0))}</span>`).join('')}</div>`:
       `<div class="detail expense-detail"></div>`;
 
