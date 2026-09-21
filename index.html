@@ -2854,6 +2854,114 @@ body.cf-data-loading #calendarPage .side{
   border-bottom:1px solid #edf0f5;
 }
 
+
+/* ===== 단기차입금 원장: 내부 스크롤 제거 + 전체 행 연속 표시 ===== */
+#loanRows{
+  max-height:none !important;
+  height:auto !important;
+  overflow-y:visible !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:auto !important;
+  scrollbar-gutter:auto !important;
+}
+
+/* 긴 원장이므로 카드 자체도 화면 안에서 별도 스크롤/고정하지 않고 페이지와 함께 자연스럽게 늘어남 */
+#shortLoanCard{
+  max-height:none !important;
+  height:auto !important;
+  overflow:visible !important;
+  position:static !important;
+  align-self:start !important;
+}
+
+/* 단기차입금 내부 스크롤바 비활성 */
+#loanRows::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  display:none !important;
+}
+
+
+/* ===== 모든 미니리스트: 내부 스크롤 없이 전체 행 나열 ===== */
+#incomeRows,
+#mfgRows,
+#mfgExpectedRows,
+#adRows,
+#adExpectedRows,
+#loanRows{
+  max-height:none !important;
+  height:auto !important;
+  min-height:0 !important;
+  overflow:visible !important;
+  overscroll-behavior:auto !important;
+  scrollbar-gutter:auto !important;
+}
+
+#incomeRows::-webkit-scrollbar,
+#mfgRows::-webkit-scrollbar,
+#mfgExpectedRows::-webkit-scrollbar,
+#adRows::-webkit-scrollbar,
+#adExpectedRows::-webkit-scrollbar,
+#loanRows::-webkit-scrollbar{
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+}
+
+#incomeMiniCard,
+#costMiniCard,
+#shortLoanCard{
+  max-height:none !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+
+/* 큰 화면: 산정기준을 단기차입금 바로 아래 오른쪽 열에 배치 */
+@media (min-width:1700px){
+  #calendarPage .side{
+    grid-template-areas:
+      "income loan"
+      "cost   loan"
+      ".      forecast" !important;
+    align-items:start !important;
+  }
+
+  #incomeMiniCard{grid-area:income !important}
+  #costMiniCard{grid-area:cost !important}
+  #shortLoanCard{
+    grid-area:loan !important;
+    position:static !important;
+    top:auto !important;
+  }
+  #forecastMiniCard{
+    grid-area:forecast !important;
+    align-self:start !important;
+  }
+}
+
+/* 산정기준은 기준만 짧게 표시 */
+#forecastMiniCard .forecast-note-title{
+  margin-bottom:6px !important;
+}
+#forecastMiniCard .forecast-note-group{
+  padding:8px 0 0 !important;
+}
+#forecastMiniCard .forecast-note-main{
+  font-size:11px !important;
+  line-height:1.65 !important;
+  color:#59677c !important;
+}
+#forecastMiniCard .forecast-note-main b{
+  color:#26364f !important;
+}
+#forecastMiniCard .forecast-dot{
+  margin:0 4px;
+  color:#a5afbd;
+}
+#forecastMiniCard .forecast-note-foot{
+  display:none !important;
+}
+
 </style>
 
 
@@ -3493,11 +3601,8 @@ function renderForecastNote(){
   const live=window.__CF_LIVE__;
   if(!live || Number(live.year)!==Number(selectedYear)){
     body.innerHTML=`
-      <div class="forecast-note-group">
-        <div class="forecast-note-period">
-          <strong>${calendarMonth}월</strong>
-          <em>일별자금수지 데이터 불러오는 중</em>
-        </div>
+      <div class="forecast-note-group forecast-note-compact">
+        <div class="forecast-note-main">일별자금수지 데이터 불러오는 중</div>
       </div>`;
     return;
   }
@@ -3505,118 +3610,33 @@ function renderForecastNote(){
   const daily=live.daily||{};
   const todayKey=live.today||'';
   const lastDay=new Date(selectedYear,calendarMonth,0).getDate();
-  const futureRows=[];
+  const methods=[];
 
   for(let day=1;day<=lastDay;day++){
     const key=`${selectedYear}-${String(calendarMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const row=daily[key];
-    if(!row || (todayKey && key<=todayKey)) continue;
-    futureRows.push({
-      key,
-      day,
-      dow:new Date(`${key}T00:00:00`).getDay(),
-      amount:Number(row.forecastSales||0),
-      method:String(row.forecastMethod||'')
-    });
+    if(todayKey && key<=todayKey) continue;
+    const method=String(daily[key]?.forecastMethod||'');
+    if(method) methods.push(method);
   }
 
-  if(!futureRows.length){
-    body.innerHTML=`
-      <div class="forecast-note-group">
-        <div class="forecast-note-period">
-          <strong>${calendarMonth}월</strong>
-          <em>예측 대상 없음</em>
-        </div>
-        <div class="forecast-note-main">현재 선택한 월에는 미래 예측매출 대상일이 없습니다.</div>
-      </div>`;
-    return;
-  }
-
-  const weekdays=[
-    {dow:1,label:'월'},
-    {dow:2,label:'화'},
-    {dow:3,label:'수'},
-    {dow:4,label:'목'},
-    {dow:5,label:'금'}
-  ];
-
-  const general=weekdays.map(w=>{
-    const rows=futureRows.filter(r=>
-      r.dow===w.dow &&
-      r.method.includes('최근 정상 동일요일')
-    );
-    if(!rows.length) return null;
-
-    // 현재 로직은 동일 요일의 최근 실제 4회 평균을 사용.
-    // 특수 보정/사용자 조정값은 아래 별도 표기.
-    return {label:w.label,amount:rows[0].amount};
-  }).filter(Boolean);
-
-  const weekendExists=futureRows.some(r=>r.dow===0 || r.dow===6);
-  const holidayRows=futureRows.filter(r=>r.method==='공휴일 0원');
-  const special=futureRows.filter(r=>
-    !r.method.includes('최근 정상 동일요일') &&
-    r.method!=='주말 0원' &&
-    r.method!=='공휴일 0원'
+  const hasHolidayAdjust=methods.some(m=>
+    m.includes('공휴일 이월정산') ||
+    m.includes('추석') ||
+    m.includes('정산비중')
   );
 
-  const firstFuture=futureRows[0].day;
-  const lastFuture=futureRows[futureRows.length-1].day;
-
-  let html=`
-    <div class="forecast-note-group">
-      <div class="forecast-note-period">
-        <strong>${calendarMonth}/${firstFuture}~${calendarMonth}/${lastFuture}</strong>
-        <em>최근 정상 동일요일 4회 평균</em>
-      </div>
+  body.innerHTML=`
+    <div class="forecast-note-group forecast-note-compact">
       <div class="forecast-note-main">
-        <code>일별자금수지(${selectedYear}년)</code>의 실제 일일매출 중
-        <b>공휴일 및 공휴일 이월정산 영향을 받은 날짜를 제외</b>하고,
-        각 예측일과 같은 요일의 최근 정상 실제값 4회를 찾아 산술평균합니다.
-        공휴일 뒤 1~2번째 영업일은 두 날짜의 정상 예상총액을 유지한 채
-        <b>과거 유사 공휴일의 실제 정산비중</b>으로 재배분합니다.
-      </div>`;
-
-  if(general.length || weekendExists){
-    const values=general
-      .map(x=>`${x.label} <b>${fmt(x.amount)}원</b>`)
-      .concat(weekendExists?['토·일 <b>0원</b>']:[])
-      .concat(holidayRows.length?['공휴일 <b>0원</b>']:[]);
-    html+=`<div class="forecast-note-values">${values.join(' · ')}</div>`;
-  }
-  html+=`</div>`;
-
-  if(special.length){
-    // 같은 특수방법/금액의 중복은 제거
-    const unique=[];
-    const seen=new Set();
-    special.forEach(r=>{
-      const k=`${r.key}|${r.amount}|${r.method}`;
-      if(!seen.has(k)){
-        seen.add(k);
-        unique.push(r);
-      }
-    });
-
-    html+=`
-      <div class="forecast-note-group">
-        <div class="forecast-note-period">
-          <strong>별도 보정</strong>
-          <em>특수 정산 흐름 / 사용자 조정</em>
-        </div>
-        <div class="forecast-note-main">
-          기본 동일 요일 평균이 아닌 날짜는 아래 기준을 별도로 적용합니다.
-        </div>
-        <div class="forecast-note-values">
-          ${unique.map(r=>`${calendarMonth}/${r.day} <b>${fmt(r.amount)}원</b>`).join(' · ')}
-        </div>
-        <div class="forecast-flow">
-          ${unique.map(r=>`${calendarMonth}/${r.day}: ${r.method}`).join('<br>')}
-        </div>
-      </div>`;
-  }
-
-  body.innerHTML=html;
+        <b>일일매출</b> 최근 정상 동일요일 4회 평균
+        <span class="forecast-dot">·</span>
+        <b>주말·공휴일</b> 제외${hasHolidayAdjust?' 및 이월정산 보정':''}
+        <span class="forecast-dot">·</span>
+        <b>기타 입금</b> 원본/월매출 미니리스트의 확정 일자·금액 합산
+        <span class="forecast-dot">·</span>
+        실제값 추가 시 자동 재계산
+      </div>
+    </div>`;
 }
 
 function syncCalendarMonthTitles(){
@@ -3720,8 +3740,8 @@ function renderCalendar(){
   cal.innerHTML='';
 
   const firstDay=new Date(selectedYear,calendarMonth-1,1);
-  const jsDay=firstDay.getDay(); // 0 Sun ... 6 Sat
-  const offset=jsDay; // Sunday-first
+  const jsDay=firstDay.getDay();
+  const offset=jsDay;
   const total=new Date(selectedYear,calendarMonth,0).getDate();
   const prevTotal=new Date(selectedYear,calendarMonth-1,0).getDate();
 
@@ -3742,11 +3762,57 @@ function renderCalendar(){
     const isFuture=todayKey && dateKey>todayKey;
 
     let inc, exp, cash;
+    let futureIncomeDetails=[];
+
     const hasLiveSource=!!window.__CF_LIVE__;
+
     if(liveDay){
-      inc = isFuture ? Number(liveDay.forecastSales||0) : Number(liveDay.income||0);
-      exp = Number(liveDay.expense||0);
-      cash = isFuture ? inc-exp : Number(liveDay.cash ?? (inc-exp));
+      if(isFuture){
+        // ① 자동예측 대상은 일일매출.
+        const forecastDailySales=Number(liveDay.forecastSales||0);
+
+        // ② 원본 일별자금수지에 미래 확정 입금항목이 있으면 같이 반영.
+        //    일일매출은 위 자동예측값을 사용하므로 원본 일일매출 행은 제외.
+        const sourceKnown=(liveDay.incomeDetails||[])
+          .filter(x=>String(x?.name||'').trim()!=='일일매출')
+          .map(x=>({
+            name:String(x?.name||'입금'),
+            amount:Number(x?.amount||0)
+          }))
+          .filter(x=>x.amount!==0);
+
+        // ③ 웹사이트저장소의 월매출 입금내역도 날짜가 있으면 예상매출에 합산.
+        const storeKnown=(window.__CF_STORE__||[])
+          .filter(r=>
+            r.type==='월매출입금' &&
+            Number(r.year)===selectedYear &&
+            String(r.date||'')===dateKey
+          )
+          .map(r=>({
+            name:String(r.description||r.vendor||'월매출'),
+            amount:Number(r.amount||0)
+          }))
+          .filter(x=>x.amount!==0);
+
+        // 월매출을 저장소에서 별도로 입력했다면 원본의 월매출 행은 중복 합산하지 않는다.
+        const sourceFiltered=storeKnown.length
+          ? sourceKnown.filter(x=>String(x.name).trim()!=='월매출')
+          : sourceKnown;
+
+        futureIncomeDetails=[
+          ...(forecastDailySales!==0 ? [{name:'예상 일일매출',amount:forecastDailySales}] : []),
+          ...sourceFiltered,
+          ...storeKnown
+        ];
+
+        inc=futureIncomeDetails.reduce((sum,x)=>sum+Number(x.amount||0),0);
+      }else{
+        inc=Number(liveDay.income||0);
+      }
+
+      exp=Number(liveDay.expense||0);
+      cash=isFuture ? inc-exp : Number(liveDay.cash ?? (inc-exp));
+
       if(!isFuture && Number.isFinite(Number(liveDay.balance))) running=Number(liveDay.balance);
       else running += cash;
     }else if(hasLiveSource){
@@ -3758,11 +3824,12 @@ function renderCalendar(){
       cash=inc-exp;
       running += cash;
     }
-    const d=document.createElement('div');
 
+    const d=document.createElement('div');
     const isToday=(dateKey===todayKey);
     const dow=new Date(`${dateKey}T00:00:00`).getDay();
     const holidayName=getPublicHolidayName(dateKey);
+
     d.className='day'
       +(isToday?' today':'')
       +(dow===0?' sunday':'')
@@ -3770,10 +3837,9 @@ function renderCalendar(){
       +(holidayName?' holiday':'');
 
     const incList = liveDay
-      ? (isFuture
-          ? [{name:'예상매출',amount:inc}]
-          : (liveDay.incomeDetails||[]))
+      ? (isFuture ? futureIncomeDetails : (liveDay.incomeDetails||[]))
       : [];
+
     const expList = liveDay ? (liveDay.expenseDetails||[]) : [];
 
     const incDetails=inc?`
@@ -3803,23 +3869,25 @@ function renderCalendar(){
         ${expDetails}
       </div>
       <div class="dayfoot">
-        <span>경상수지</span><span class="${cash>=0?'plus':'minus'}">${cash>=0?'+':''}${fmt(cash)}</span>
-        <b>현잔액</b><span class="bal">${fmt(running)}</span>
-      </div>`;
+        <span>경상수지</span><b class="${cash<0?'neg':'pos'}">${fmt(cash)}</b>
+        <span>현잔액</span><b>${fmt(running)}</b>
+      </div>
+    `;
+
     cal.appendChild(d);
   }
 
-  let next=1;
-  while(cal.children.length%7!==0){
+  const used=offset+total;
+  const trailing=(7-(used%7))%7;
+  for(let i=1;i<=trailing;i++){
     const d=document.createElement('div');
     d.className='day muted';
-    d.innerHTML='<div class="date"><span class="num">'+next+'</span></div>';
+    d.innerHTML=`<div class="date"><span class="num">${i}</span></div>`;
     cal.appendChild(d);
-    next++;
   }
 
   syncCalendarMonthTitles();
-  alignCalendarDetailHeights();
+  requestAnimationFrame(alignCalendarDetailHeights);
 }
 
 document.getElementById('prevMonth')?.addEventListener('click',()=>{
@@ -6278,8 +6346,7 @@ function cfRenderSidebarStore(force=false){
     });
 
     if(!recs.length){
-      // 데이터가 없는 미래 월도 9월과 동일한 입력 UX를 유지.
-      cfInitBlankSidebarRow(holder,rowsId,totalId);
+      holder.innerHTML='';
       const total=document.getElementById(totalId);
       if(total) total.textContent='0';
       return;
@@ -6299,6 +6366,65 @@ function cfRenderSidebarStore(force=false){
   __CF_SIDEBAR_RENDER_SCOPE__=scopeKey;
 }
 
+
+function cfSidebarRowIsBlank(row,rowsId){
+  if(!row) return true;
+  const ins=[...row.querySelectorAll('input')];
+
+  if(rowsId==='loanRows'){
+    return !(String(ins[0]?.value||'').trim() || String(ins[1]?.value||'').trim());
+  }
+
+  // 제조/광고 실제 사용내역은 날짜칸이 숨겨져 있으므로
+  // 화면에서 보이는 거래처명+금액이 모두 비었는지를 기준으로 삭제한다.
+  if(rowsId==='mfgRows' || rowsId==='adRows'){
+    return !(String(ins[1]?.value||'').trim() || String(ins[2]?.value||'').trim());
+  }
+
+  return !ins.some(inp=>String(inp.value||'').trim());
+}
+
+function cfDeleteSidebarRow(row,rowsId,totalId){
+  if(!row || row.__cfDeleting) return;
+  row.__cfDeleting=true;
+
+  clearTimeout(row.__cfSaveTimer);
+
+  const recordId=row.dataset.recordId||'';
+
+  const finish=()=>{
+    if(recordId) cfRemoveLocalStore(recordId);
+    row.remove();
+
+    if(rowsId==='loanRows') recalcLoanGroup();
+    else recalcEditableGroup(rowsId,totalId);
+
+    cfSetMiniStatus('삭제됨','saved');
+  };
+
+  // 아직 저장되지 않은 빈 행은 화면에서만 제거.
+  if(!recordId){
+    finish();
+    return;
+  }
+
+  if(typeof google==='undefined' || !google.script?.run){
+    row.__cfDeleting=false;
+    return;
+  }
+
+  cfSetMiniStatus('삭제 중…','saving');
+
+  google.script.run
+    .withSuccessHandler(finish)
+    .withFailureHandler(err=>{
+      row.__cfDeleting=false;
+      cfShowError(err);
+      cfSetMiniStatus('삭제 실패','error');
+    })
+    .softDeleteWebRecord(recordId);
+}
+
 function cfBindSidebarPersistence(root,rowsId,totalId){
   const type=cfStoreTypeForRows(rowsId);
   if(!type || !root) return;
@@ -6309,6 +6435,8 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
   };
 
   const saveRow=(row)=>{
+    if(!row || row.__cfDeleting || !row.isConnected) return;
+
     const ins=row.querySelectorAll('input');
     const recordId=row.dataset.recordId||'';
     const snapshot=cfSidebarRowSnapshot(row);
@@ -6320,14 +6448,12 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
       const amountRaw=String(ins[1]?.value||'').trim();
       const amount=Number(amountRaw.replace(/,/g,''))||0;
 
-      // 단기차입금도 자동삭제 금지.
-      // 신규행은 날짜+금액이 완성된 경우만 최초 저장.
-      // 기존 저장행을 잠깐 비워도 서버 레코드는 삭제하지 않는다.
       if(!date || amountRaw==='') return;
       if(typeof google==='undefined' || !google.script?.run) return;
 
       google.script.run
         .withSuccessHandler(saved=>{
+          if(!row.isConnected) return;
           row.dataset.recordId=saved.id;
           cfUpsertLocalStore(saved);
 
@@ -6358,9 +6484,6 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
     const amountRaw=String(ins[2]?.value||'').trim();
     const amount=Number(amountRaw.replace(/,/g,''))||0;
 
-    // 자동삭제 금지:
-    // 이미 저장된 행을 화면에서 비우더라도 저장소 레코드는 지우지 않는다.
-    // 삭제는 추후 명시적인 삭제 동작을 통해서만 처리한다.
     const complete=actualNoDate
       ? (!!desc && amountRaw!=='')
       : (!!date && !!desc && amountRaw!=='');
@@ -6370,6 +6493,7 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
 
     google.script.run
       .withSuccessHandler(saved=>{
+        if(!row.isConnected) return;
         row.dataset.recordId=saved.id;
         cfUpsertLocalStore(saved);
 
@@ -6398,12 +6522,37 @@ function cfBindSidebarPersistence(root,rowsId,totalId){
     row.dataset.cfBound='1';
 
     row.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Backspace' || e.key==='Delete'){
+          row.__cfDeleteKey=true;
+
+          // 이미 아무것도 없는 새 행에서도 Delete/Backspace를 누르면 바로 제거.
+          setTimeout(()=>{
+            if(row.__cfDeleteKey && cfSidebarRowIsBlank(row,rowsId)){
+              cfDeleteSidebarRow(row,rowsId,totalId);
+            }
+            row.__cfDeleteKey=false;
+          },0);
+        }else{
+          row.__cfDeleteKey=false;
+        }
+      });
+
       inp.addEventListener('input',()=>{
         cfMarkSidebarRowDirty(row);
+
+        // 마지막 값을 Delete/Backspace로 지워 행 전체가 비면 저장소에서도 삭제.
+        if(row.__cfDeleteKey && cfSidebarRowIsBlank(row,rowsId)){
+          cfDeleteSidebarRow(row,rowsId,totalId);
+          row.__cfDeleteKey=false;
+          return;
+        }
+
         scheduleSave(row);
       });
 
       inp.addEventListener('blur',()=>{
+        if(row.__cfDeleting || !row.isConnected) return;
         clearTimeout(row.__cfSaveTimer);
         row.__cfSaveTimer=setTimeout(()=>saveRow(row),20);
       });
