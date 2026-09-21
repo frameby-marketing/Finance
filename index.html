@@ -3255,7 +3255,6 @@ window.addEventListener('message',e=>{
 .page{padding-top:16px}
 </style>
 
-
 </head>
 <body>
 <div class="app">
@@ -3631,7 +3630,7 @@ function renderForecastNote(){
         <span class="forecast-dot">·</span>
         <b>예측</b> 일일매출만 최근 정상 동일요일 4회 평균${hasHolidayAdjust?' + 공휴일 이월보정':''}
         <span class="forecast-dot">·</span>
-        <b>기타 수입</b> 일별자금수지 기입값 그대로 반영
+        <b>기타 수입</b> 일별자금수지 기입값 그대로 반영<span class="forecast-dot">·</span><b>잔액</b> 전월 예상 기말잔액 연속 반영
       </div>
     </div>`;
 }
@@ -3732,6 +3731,81 @@ function getPublicHolidayName(dateKey){
   return KOREA_PUBLIC_HOLIDAYS[selectedYear]?.[dateKey] || '';
 }
 
+
+function cfDateKeyFromDate(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function cfProjectedIncomeForDay(liveDay){
+  if(!liveDay) return 0;
+
+  // 예측하는 것은 일일매출만.
+  const forecastDailySales=Number(liveDay.forecastSales||0);
+
+  // 월매출/B2B/기타환급 등 일별자금수지에 이미 기입된 수입은 그대로 반영.
+  const knownSourceIncome=(liveDay.incomeDetails||[])
+    .filter(x=>String(x?.name||'').trim()!=='일일매출')
+    .reduce((sum,x)=>sum+Number(x?.amount||0),0);
+
+  return forecastDailySales + knownSourceIncome;
+}
+
+function cfProjectedOpeningBalance(year,month){
+  const live=window.__CF_LIVE__;
+  if(!live || !live.daily) return 31400000;
+
+  const daily=live.daily;
+  const todayKey=String(live.today||'');
+  const targetStart=new Date(year,month-1,1);
+  const targetKey=cfDateKeyFromDate(targetStart);
+
+  // 선택 월 1일 이전의 가장 최근 실제 기말잔액을 기준점으로 찾는다.
+  let anchorDate=null;
+  let anchorBalance=null;
+
+  Object.keys(daily).forEach(key=>{
+    if(key>=targetKey) return;
+    if(todayKey && key>todayKey) return;
+
+    const bal=Number(daily[key]?.balance);
+    if(!Number.isFinite(bal)) return;
+
+    if(!anchorDate || key>anchorDate){
+      anchorDate=key;
+      anchorBalance=bal;
+    }
+  });
+
+  // 실제 기준점이 없을 때만 기존 fallback 사용.
+  if(anchorBalance===null) return 31400000;
+
+  let running=anchorBalance;
+  let cursor=new Date(anchorDate+'T00:00:00');
+  cursor.setDate(cursor.getDate()+1);
+
+  while(cursor<targetStart){
+    const key=cfDateKeyFromDate(cursor);
+    const liveDay=daily[key];
+
+    if(liveDay){
+      const isActual=!todayKey || key<=todayKey;
+
+      if(isActual && Number.isFinite(Number(liveDay.balance))){
+        // 중간에 실제 기말잔액이 있으면 그 값으로 다시 기준을 맞춤.
+        running=Number(liveDay.balance);
+      }else{
+        const income=cfProjectedIncomeForDay(liveDay);
+        const expense=Number(liveDay.expense||0);
+        running += income-expense;
+      }
+    }
+
+    cursor.setDate(cursor.getDate()+1);
+  }
+
+  return running;
+}
+
 function renderCalendar(){
   const cal=document.getElementById('calendar');
   cal.innerHTML='';
@@ -3741,7 +3815,10 @@ function renderCalendar(){
   const total=new Date(selectedYear,calendarMonth,0).getDate();
   const prevTotal=new Date(selectedYear,calendarMonth-1,0).getDate();
 
-  const balanceStart=31400000;
+  // 선택 월의 기초잔액은 전월 예상 기말잔액을 그대로 이어받는다.
+  // 예: 10월 = 9월 마지막 실제잔액 + 9월 남은 예상 일일매출
+  //              + 일별자금수지 확정 수입 - 확정 지출
+  const balanceStart=cfProjectedOpeningBalance(selectedYear,calendarMonth);
   let running=balanceStart;
 
   for(let i=0;i<offset;i++){
