@@ -946,7 +946,7 @@ const INTEGRATED_CONFIG={
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
-  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
 };
 const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접대비','교통비','숙박비','기타비','합계','출장자','구분','적요명','출장목적','방문지역','이동수단','결제수단','상태','삭제여부','생성일시','수정일시','유류비'];
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
@@ -1023,25 +1023,35 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
   }
 }
 async function githubCheckResearchAccess(){
-  if(!INTEGRATED_CONFIG.researchDocumentId) return false;
-  const url='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)+'?fields=id&supportsAllDrives=true';
-  const response=await fetch(url,{headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}});
-  if(response.ok) return true;
-  if(response.status===401){
-    githubTokenCacheClear();
-    GITHUB_ACCESS_TOKEN=null;
-    throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
-  }
-  if(response.status===404) return false;
-  if(response.status===403){
-    let message='';
-    try{const body=await response.json();message=body?.error?.message||''}catch(e){}
-    if(/insufficient|scope|credential|permission/i.test(message)){
-      throw Object.assign(new Error('연구개발 문서 권한 확인을 위해 Google Drive 권한 동의가 필요합니다. 다시 로그인해 주세요.'),{status:403,code:'DRIVE_SCOPE_REQUIRED'});
-    }
-    return false;
-  }
-  throw Object.assign(new Error(`연구개발 문서 권한 확인 실패 (HTTP ${response.status})`),{status:response.status});
+  if(!INTEGRATED_CONFIG.researchWebAppUrl||!GITHUB_ACCESS_TOKEN) return false;
+  return new Promise((resolve,reject)=>{
+    const frame=document.createElement('iframe');
+    frame.style.display='none';
+    frame.setAttribute('aria-hidden','true');
+
+    const cleanup=()=>{
+      window.removeEventListener('message',onMessage);
+      clearTimeout(timer);
+      try{frame.remove()}catch(e){}
+    };
+    const onMessage=event=>{
+      const host=(()=>{try{return new URL(event.origin).hostname}catch(e){return''}})();
+      if(!(host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com'))) return;
+      const msg=event.data||{};
+      if(msg.type!=='frameby-research-access') return;
+      cleanup();
+      resolve(!!msg.allowed);
+    };
+    const timer=setTimeout(()=>{
+      cleanup();
+      reject(new Error('연구개발 문서 권한 확인 응답이 없습니다. 연구개발 Apps Script를 새 버전으로 재배포해 주세요.'));
+    },12000);
+
+    window.addEventListener('message',onMessage);
+    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
+    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'accessProbe=1&accessToken='+encodeURIComponent(GITHUB_ACCESS_TOKEN)+'&_='+Date.now();
+    document.body.appendChild(frame);
+  });
 }
 async function githubVerifyIntegratedAccess(){
   const [card,cash,trip,research]=await Promise.all([
@@ -1193,7 +1203,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-drive-v1';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-probe-v2';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
