@@ -151,13 +151,22 @@
 .cashflow-frame{display:block;width:100%;height:calc(100vh - 155px);min-height:680px;border:0;background:var(--bg)}
 @media(max-width:720px){.cashflow-frame{height:calc(100vh - 185px);min-height:620px}}
 
-/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 */
-#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
+.research-host{padding:0!important;overflow:hidden;position:relative;background:#f6f7f9}
+.research-host.active{display:block}
+.research-frame{display:block;width:100%;height:calc(100vh - 108px);min-height:720px;border:0;background:#f6f7f9}
+.research-loading{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:#f6f7f9;color:#58667a;font-size:13px;font-weight:800}
+.research-loading.hidden{display:none}
+.research-access-probe{position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none}
+@media(max-width:720px){.research-frame{height:calc(100vh - 90px);min-height:650px}}
+
+/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 → 연구개발 */
+#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
 #cashPrimaryTab{order:1!important}
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
-/* 모듈별 스프레드시트 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
-#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+#researchPrimaryTab{order:4!important}
+/* 모듈별 공유 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
+#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 
 /* 권한 확인 전에는 통합 화면을 DOM에 두더라도 화면에는 전혀 노출하지 않습니다. */
 body.frameby-auth-locked .integrated-content,
@@ -173,10 +182,10 @@ body.frameby-auth-ready{overflow:auto}
   <div class="github-auth-card">
     <div class="github-auth-icon">🔒</div>
     <h2>통합 관리 접근 권한 확인</h2>
-    <p>자금수지, 법인카드, 출장·차량 관리 중 사용 권한이 있는 스프레드시트를 공유받은 회사 Google 계정으로 로그인해 주세요.</p>
+    <p>자금수지, 법인카드, 출장·차량 관리 또는 연구개발 문서 중 사용 권한이 있는 회사 Google 계정으로 로그인해 주세요.</p>
     <button type="button" class="github-auth-btn" id="githubLoginBtn" disabled>로그인 준비 중...</button>
     <div class="github-auth-error" id="githubAuthError"></div>
-    <p class="github-auth-note">GitHub Pages에서는 Google Sheets API로 기존 스프레드시트에 직접 연결합니다.</p>
+    <p class="github-auth-note">각 업무별 스프레드시트 또는 연구개발 Google Docs의 실제 공유권한을 확인합니다.</p>
   </div>
 </div>
 <div id="loading" class="loading"><div class="loading-box">법인카드 데이터를 불러오는 중...</div></div>
@@ -190,6 +199,7 @@ body.frameby-auth-ready{overflow:auto}
         <button type="button" class="finance-primary-btn" id="cashPrimaryTab" data-module="cash" role="tab" aria-selected="false">자금수지</button>
         <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
+        <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
         <div class="module-tabs" id="cashModuleTabs" aria-label="자금수지 세부 메뉴">
@@ -244,6 +254,10 @@ body.frameby-auth-ready{overflow:auto}
     </nav>
 <section class="page cashflow-host" id="cashflowHost">
       <iframe id="cashflowFrame" class="cashflow-frame" title="자금수지"></iframe>
+    </section>
+<section class="page research-host" id="researchHost">
+      <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
+      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 <section class="page active card-page-direct" id="dashboard">
 <div class="grid kpis">
@@ -656,15 +670,15 @@ const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
 let CASHFLOW_FRAME_LOADED=false;
-window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false};
+window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,research:false};
 window.FRAMEBY_ACCESS_READY=false;
 function githubHasModuleAccess(module){return !window.FRAMEBY_ACCESS_READY || !!window.FRAMEBY_MODULE_ACCESS?.[module]}
-function githubFirstAccessibleModule(){return ['cash','card','trip'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
-function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':'dashboard'}
-function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':ACTIVE_MODULE}
+function githubFirstAccessibleModule(){return ['cash','card','trip','research'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
+function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':module==='research'?'research':'dashboard'}
+function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':id==='researchHost'?'research':ACTIVE_MODULE}
 function syncModuleHeader(module,id){
   ACTIVE_MODULE=module;
-  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash';
+  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash',isResearch=module==='research';
   document.getElementById('cardSecondaryMenu')?.classList.toggle('hidden',!isCard);
   document.getElementById('tripSecondaryMenu')?.classList.toggle('hidden',!isTrip);
   document.getElementById('cashSecondaryMenu')?.classList.toggle('hidden',!isCash);
@@ -700,6 +714,20 @@ function ensureCashflowFrame(page){
     frame.srcdoc=source;
   }else send();
 }
+function ensureResearchFrame(){
+  const frame=document.getElementById('researchFrame');
+  if(!frame||frame.dataset.loaded==='1')return;
+  const src=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
+  if(!src)return;
+  const loadingEl=document.getElementById('researchLoading');
+  loadingEl?.classList.remove('hidden');
+  frame.addEventListener('load',()=>{
+    frame.dataset.loaded='1';
+    loadingEl?.classList.add('hidden');
+  },{once:true});
+  frame.src=src;
+}
+
 function showCashPage(page){
   CASH_ACTIVE_PAGE=page||'calendar';
   showModule('cash',CASH_ACTIVE_PAGE);
@@ -716,6 +744,13 @@ function showModule(module,page){
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='cashflowHost'));
     ensureCashflowFrame(CASH_ACTIVE_PAGE);
     try{history.replaceState(null,'','#cash')}catch(e){}
+    return;
+  }
+  if(module==='research'){
+    syncModuleHeader('research','researchHost');
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
+    ensureResearchFrame();
+    try{history.replaceState(null,'','#research')}catch(e){}
     return;
   }
   const id=page||(module==='trip'?'trip':'dashboard');
@@ -906,6 +941,8 @@ const INTEGRATED_CONFIG={
   cardDataSheet:'사용내역',cardDataStartRow:3,
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
+  researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
+  researchWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
@@ -985,23 +1022,52 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
     throw e;
   }
 }
+function githubCheckResearchAccess(){
+  return new Promise(resolve=>{
+    const src=(INTEGRATED_CONFIG.researchWebAppUrl||'')+(INTEGRATED_CONFIG.researchWebAppUrl?.includes('?')?'&':'?')+'accessProbe=1&_='+Date.now();
+    if(!src){resolve(false);return}
+    const frame=document.createElement('iframe');
+    frame.className='research-access-probe';
+    frame.setAttribute('aria-hidden','true');
+    let done=false;
+    const finish=allowed=>{
+      if(done)return;done=true;
+      clearTimeout(timer);
+      window.removeEventListener('message',onMessage);
+      try{frame.remove()}catch(e){}
+      resolve(!!allowed);
+    };
+    const onMessage=event=>{
+      if(event.source!==frame.contentWindow)return;
+      const data=event.data||{};
+      if(data.type!=='frameby-research-access')return;
+      finish(data.allowed===true);
+    };
+    window.addEventListener('message',onMessage);
+    const timer=setTimeout(()=>finish(false),8000);
+    frame.src=src;
+    document.body.appendChild(frame);
+  });
+}
 async function githubVerifyIntegratedAccess(){
-  const [card,cash,trip]=await Promise.all([
+  const [card,cash,trip,research]=await Promise.all([
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cardSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cashSpreadsheetId),
-    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId)
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId),
+    githubCheckResearchAccess()
   ]);
-  return {cash,card,trip};
+  return {cash,card,trip,research};
 }
 function githubApplyModuleAccess(access){
   window.FRAMEBY_MODULE_ACCESS={
     cash:!!access?.cash,
     card:!!access?.card,
-    trip:!!access?.trip
+    trip:!!access?.trip,
+    research:!!access?.research
   };
   window.FRAMEBY_ACCESS_READY=true;
 
-  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab'};
+  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab',research:'researchPrimaryTab'};
   Object.entries(ids).forEach(([module,id])=>{
     const el=document.getElementById(id);
     if(!el) return;
@@ -1017,7 +1083,7 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
 }
 function githubOpenAuthorizedInitialModule(){
-  const requested=location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
+  const requested=location.hash==='#research'?'research':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
   const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
   if(!target) return false;
   showModule(target,githubDefaultPageForModule(target));
@@ -1039,9 +1105,9 @@ async function githubAfterLogin(){
     // 각 스프레드시트의 실제 공유 권한을 따로 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
-    const allowedModules=['cash','card','trip'].filter(m=>access[m]);
+    const allowedModules=['cash','card','trip','research'].filter(m=>access[m]);
     if(!allowedModules.length){
-      throw new Error('공유받은 Finance & Admin 스프레드시트가 없습니다. 계정별 공유 권한을 확인해 주세요.');
+      throw new Error('공유받은 관리 자료가 없습니다. 스프레드시트 또는 연구개발 문서 공유 권한을 확인해 주세요.');
     }
 
     // 법인카드는 권한이 있을 때만 데이터를 조회합니다.
@@ -1072,18 +1138,18 @@ async function githubAfterLogin(){
       });
     }
 
-    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량'};
+    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',research:'연구개발'};
     const badge=document.getElementById('statusBadge');
-    if(badge)badge.textContent='Google Sheets · '+allowedModules.map(m=>labelMap[m]).join(' · ')+' · '+GITHUB_USER_EMAIL;
+    if(badge)badge.textContent='Google Workspace · '+allowedModules.map(m=>labelMap[m]).join(' · ')+' · '+GITHUB_USER_EMAIL;
   }catch(e){
     githubTokenCacheClear();
     GITHUB_ACCESS_TOKEN=null;
     window.FRAMEBY_ACCESS_READY=false;
-    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false};
+    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,research:false};
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
-    githubAuthError(e?.message||'스프레드시트 접근 권한을 확인해 주세요.');
+    githubAuthError(e?.message||'회사 자료 공유 권한을 확인해 주세요.');
     if(btn){
       btn.disabled=false;
       btn.textContent='다른 Google 계정으로 로그인';
@@ -1097,7 +1163,7 @@ function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}co
 function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubAuthError('Google 로그인 준비 중입니다. 잠시 후 다시 시도해 주세요.');return}const btn=document.getElementById('githubLoginBtn');const force=btn?.dataset.forceAccount==='1';if(btn){btn.disabled=true;btn.textContent='로그인 중...';btn.dataset.forceAccount=''}GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:force?'select_account':''})}
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
 function initIntegratedNav(){
-  ['cashPrimaryTab','cardPrimaryTab','tripPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
+  ['cashPrimaryTab','cardPrimaryTab','tripPrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(btn=>{
     if(btn.dataset.moduleBound)return;
     btn.dataset.moduleBound='1';
