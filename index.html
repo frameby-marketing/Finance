@@ -156,6 +156,8 @@
 #cashPrimaryTab{order:1!important}
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
+/* 모듈별 스프레드시트 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
+#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 
 /* 권한 확인 전에는 통합 화면을 DOM에 두더라도 화면에는 전혀 노출하지 않습니다. */
 body.frameby-auth-locked .integrated-content,
@@ -171,7 +173,7 @@ body.frameby-auth-ready{overflow:auto}
   <div class="github-auth-card">
     <div class="github-auth-icon">🔒</div>
     <h2>통합 관리 접근 권한 확인</h2>
-    <p>자금수지, 법인카드 및 출장·차량 관리 스프레드시트를 공유받은 회사 Google 계정으로 로그인해 주세요.</p>
+    <p>자금수지, 법인카드, 출장·차량 관리 중 사용 권한이 있는 스프레드시트를 공유받은 회사 Google 계정으로 로그인해 주세요.</p>
     <button type="button" class="github-auth-btn" id="githubLoginBtn" disabled>로그인 준비 중...</button>
     <div class="github-auth-error" id="githubAuthError"></div>
     <p class="github-auth-note">GitHub Pages에서는 Google Sheets API로 기존 스프레드시트에 직접 연결합니다.</p>
@@ -654,6 +656,11 @@ const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
 let CASHFLOW_FRAME_LOADED=false;
+window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false};
+window.FRAMEBY_ACCESS_READY=false;
+function githubHasModuleAccess(module){return !window.FRAMEBY_ACCESS_READY || !!window.FRAMEBY_MODULE_ACCESS?.[module]}
+function githubFirstAccessibleModule(){return ['cash','card','trip'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
+function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':'dashboard'}
 function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':ACTIVE_MODULE}
 function syncModuleHeader(module,id){
   ACTIVE_MODULE=module;
@@ -698,6 +705,11 @@ function showCashPage(page){
   showModule('cash',CASH_ACTIVE_PAGE);
 }
 function showModule(module,page){
+  if(window.FRAMEBY_ACCESS_READY && !githubHasModuleAccess(module)){
+    const fallback=githubFirstAccessibleModule();
+    if(fallback && fallback!==module) return showModule(fallback,githubDefaultPageForModule(fallback));
+    return;
+  }
   if(module==='cash'){
     CASH_ACTIVE_PAGE=page||CASH_ACTIVE_PAGE||'calendar';
     syncModuleHeader('cash','cashflowHost');
@@ -712,6 +724,11 @@ function showModule(module,page){
 }
 function showPage(id){
   const module=moduleForPage(id);
+  if(window.FRAMEBY_ACCESS_READY && !githubHasModuleAccess(module)){
+    const fallback=githubFirstAccessibleModule();
+    if(fallback) return showModule(fallback,githubDefaultPageForModule(fallback));
+    return;
+  }
   syncModuleHeader(module,id);
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
   if(id==='dashboard')renderDashboard();
@@ -873,6 +890,7 @@ document.querySelectorAll('[data-export="trip"]').forEach(b=>b.addEventListener(
 
 let lastSourceRefreshAt=0;
 async function refreshFromSourceOnFocus(){
+  if(!window.FRAMEBY_ACCESS_READY || !window.FRAMEBY_MODULE_ACCESS?.trip) return;
   const now=Date.now();
   if(now-lastSourceRefreshAt<3000)return;
   lastSourceRefreshAt=now;
@@ -957,9 +975,52 @@ async function githubVerifySpreadsheetAccess(spreadsheetId){
   if(!data?.spreadsheetId)throw new Error('스프레드시트 접근 권한을 확인할 수 없습니다.');
   return true;
 }
+async function githubCheckSpreadsheetAccess(spreadsheetId){
+  if(!spreadsheetId) return false;
+  try{
+    await githubVerifySpreadsheetAccess(spreadsheetId);
+    return true;
+  }catch(e){
+    if(e?.status===403 || e?.status===404) return false;
+    throw e;
+  }
+}
 async function githubVerifyIntegratedAccess(){
-  const ids=[INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.cashSpreadsheetId].filter(Boolean);
-  await Promise.all(ids.map(githubVerifySpreadsheetAccess));
+  const [card,cash,trip]=await Promise.all([
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cardSpreadsheetId),
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cashSpreadsheetId),
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId)
+  ]);
+  return {cash,card,trip};
+}
+function githubApplyModuleAccess(access){
+  window.FRAMEBY_MODULE_ACCESS={
+    cash:!!access?.cash,
+    card:!!access?.card,
+    trip:!!access?.trip
+  };
+  window.FRAMEBY_ACCESS_READY=true;
+
+  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab'};
+  Object.entries(ids).forEach(([module,id])=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const allowed=!!window.FRAMEBY_MODULE_ACCESS[module];
+    el.classList.toggle('frameby-no-access',!allowed);
+    el.hidden=!allowed;
+    el.setAttribute('aria-hidden',allowed?'false':'true');
+    el.tabIndex=allowed?0:-1;
+  });
+
+  if(!window.FRAMEBY_MODULE_ACCESS.cash) document.getElementById('cashSecondaryMenu')?.classList.add('hidden');
+  if(!window.FRAMEBY_MODULE_ACCESS.card) document.getElementById('cardSecondaryMenu')?.classList.add('hidden');
+  if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
+}
+function githubOpenAuthorizedInitialModule(){
+  const requested=location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
+  const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
+  if(!target) return false;
+  showModule(target,githubDefaultPageForModule(target));
   return true;
 }
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
@@ -975,27 +1036,47 @@ async function githubAfterLogin(){
       throw new Error('허용된 회사 계정(@'+INTEGRATED_CONFIG.allowedDomain+')으로 로그인해 주세요.');
     }
 
-    // 도메인만 맞는 계정도 화면을 볼 수 없도록 실제 3개 스프레드시트 권한을 모두 선확인합니다.
-    await githubVerifyIntegratedAccess();
-    const cardPayload=await githubLoadCardData();
+    // 각 스프레드시트의 실제 공유 권한을 따로 확인합니다.
+    const access=await githubVerifyIntegratedAccess();
+    githubApplyModuleAccess(access);
+    const allowedModules=['cash','card','trip'].filter(m=>access[m]);
+    if(!allowedModules.length){
+      throw new Error('공유받은 Finance & Admin 스프레드시트가 없습니다. 계정별 공유 권한을 확인해 주세요.');
+    }
+
+    // 법인카드는 권한이 있을 때만 데이터를 조회합니다.
+    let cardPayload=null;
+    if(access.card) cardPayload=await githubLoadCardData();
 
     githubAuthError('');
-    onDataLoaded(cardPayload);
+    if(cardPayload){
+      onDataLoaded(cardPayload);
+    }else{
+      const loadingEl=document.getElementById('loading');
+      if(loadingEl) loadingEl.classList.add('hidden');
+    }
+
     githubUnlockApp();
+    githubOpenAuthorizedInitialModule();
 
-    // 화면을 연 뒤 출장 데이터만 초기화. 권한 자체는 위 preflight에서 이미 확인되었습니다.
-    loadData(true).catch(e=>{
-      if(e?.status===401||e?.status===403){
-        githubLockApp();
-        githubAuthError(e?.message||'스프레드시트 접근 권한을 확인해 주세요.');
-      }
-    });
+    // 출장·차량도 권한이 있을 때만 초기 데이터를 조회합니다.
+    if(access.trip){
+      loadData(true).catch(e=>{
+        if(e?.status===401){
+          githubLockApp();
+          githubAuthError(e?.message||'Google 로그인이 만료되었습니다. 다시 로그인해 주세요.');
+        }
+      });
+    }
 
+    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량'};
     const badge=document.getElementById('statusBadge');
-    if(badge)badge.textContent='Google Sheets · 통합 관리 · '+GITHUB_USER_EMAIL;
+    if(badge)badge.textContent='Google Sheets · '+allowedModules.map(m=>labelMap[m]).join(' · ')+' · '+GITHUB_USER_EMAIL;
   }catch(e){
     githubTokenCacheClear();
     GITHUB_ACCESS_TOKEN=null;
+    window.FRAMEBY_ACCESS_READY=false;
+    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false};
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
@@ -1046,8 +1127,7 @@ function initIntegratedNav(){
       frame?.contentWindow?.postMessage({type:'frameby-cash-refresh'},'*');
     });
   }
-  const initial=location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':'card';
-  showModule(initial,initial==='trip'?'trip':initial==='cash'?'calendar':'dashboard');
+  // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
 function initIntegrated(){githubLockApp();initIntegratedNav();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
