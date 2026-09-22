@@ -6,6 +6,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Finance & Admin · 법인카드 / 출장·차량 관리</title>
+<script>
+(function(){
+  try{
+    var saved=localStorage.getItem('theme');
+    var theme=saved==='light'||saved==='dark'?saved:'dark';
+    localStorage.setItem('theme',theme);
+    document.documentElement.setAttribute('data-theme',theme);
+  }catch(e){}
+})();
+</script>
 <style>
 :root{--bg:#f4f6f9;--panel:#fff;--line:#dfe4ea;--text:#172033;--muted:#6e7888;--nav:#111a2d;--primary:#2757d7;--soft:#eef3ff;--success:#138a66;--warn:#c97916;--radius:14px;--shadow:0 7px 24px rgba(22,36,67,.07)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Pretendard,"Noto Sans KR","Malgun Gothic",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}button,select,input,textarea{font:inherit}.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{background:var(--nav);color:#fff;padding:22px 15px;position:sticky;top:0;height:100vh}.brand{font-size:20px;font-weight:850;padding:4px 10px 20px;border-bottom:1px solid rgba(255,255,255,.12)}.brand small{display:block;margin-top:6px;font-size:11px;color:#aeb8cc;font-weight:500}.nav{display:flex;flex-direction:column;gap:6px;margin-top:18px}.nav button{border:0;background:transparent;color:#c9d2e5;padding:12px 13px;border-radius:9px;text-align:left;font-weight:750;cursor:pointer}.nav button:hover,.nav button.active{background:#283550;color:#fff}.side-note{position:absolute;left:15px;right:15px;bottom:18px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#9fabc1;font-size:11px;line-height:1.55;background:rgba(255,255,255,.035)}.main{padding:25px 30px 50px;min-width:0}.page{display:none}.page.active{display:block}.head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}.head h1{font-size:26px;margin:0}.head p{margin:6px 0 0;color:var(--muted)}.filters{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:750;color:var(--muted)}select,input,textarea{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;outline:none;color:var(--text)}select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(39,87,215,.09)}.preview{position:fixed;right:20px;top:16px;background:#111a2d;color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;z-index:20;box-shadow:var(--shadow)}.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;min-width:0}.kpi .label{font-size:12px;color:var(--muted);font-weight:750}.kpi .value{font-size:27px;font-weight:900;margin-top:8px;letter-spacing:-.5px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:6px}.two{grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);margin-bottom:14px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.section-title h2{margin:0;font-size:16px}.note{font-size:11px;color:var(--muted)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:820px;background:#fff}.table th{background:#f7f9fc;color:#526071;font-size:11px;text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px;border-bottom:1px solid #edf0f4}.table tr:last-child td{border-bottom:0}.table tbody tr:hover td{background:#fbfcff}.table .num{text-align:right;font-variant-numeric:tabular-nums}.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:#edf2f8;font-size:10px;font-weight:800;white-space:nowrap}.pill.blue{background:var(--soft);color:var(--primary)}.pill.green{background:#eaf7f2;color:var(--success)}.pill.orange{background:#fff4e7;color:var(--warn)}.pill.gray{background:#f1f3f5;color:#667085}.dot{width:6px;height:6px;border-radius:50%;background:currentColor}.action{border:1px solid #cbd6ef;background:#fff;color:var(--primary);padding:6px 9px;border-radius:7px;font-weight:800;font-size:11px;cursor:pointer}.action:hover,.action.active{background:var(--soft);border-color:#b9c9ef}.editor{display:grid;gap:12px}.auto-box{border:1px solid #d6e0f5;background:#f7f9ff;border-radius:11px;padding:13px}.auto-box .auto-title{font-size:11px;font-weight:850;color:var(--primary);margin-bottom:8px}.cost-lines{display:grid;gap:7px}.cost-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}.cost-line strong{font-size:13px}.cost-line.total{padding-top:8px;margin-top:3px;border-top:1px solid #dbe3f1;font-weight:900}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid .wide{grid-column:1/-1}.editor textarea{min-height:70px;resize:vertical}.fake-save{width:100%;border:0;background:var(--primary);color:#fff;padding:10px 12px;border-radius:9px;font-weight:850;cursor:not-allowed;opacity:.75}.legend{display:flex;gap:8px;flex-wrap:wrap}.subtle{font-size:11px;color:var(--muted);line-height:1.55}.summary-bar{display:grid;grid-template-columns:120px 1fr 85px;align-items:center;gap:10px;margin:11px 0}.track{height:9px;border-radius:99px;background:#edf1f5;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--primary)}.vehicle-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vehicle-card{border:1px solid var(--line);border-radius:10px;padding:13px;background:#fafbfd}.vehicle-card strong{display:block;font-size:15px}.vehicle-card span{display:block;color:var(--muted);font-size:11px;margin-top:5px}.vehicle-card b{display:block;margin-top:9px;font-size:19px}.route{font-weight:750}.muted{color:var(--muted)}.link-tag{display:inline-block;padding:4px 7px;border-radius:7px;background:#f2f5fb;color:#4b5d78;font-size:10px;font-weight:800}.screen-guide{margin-bottom:14px;border:1px dashed #bdc8dd;background:#fbfcff;border-radius:11px;padding:12px 14px;color:#5b6677;font-size:11px;line-height:1.6}.screen-guide b{color:var(--text)}
@@ -165,6 +175,22 @@
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
 #researchPrimaryTab{order:4!important}
+.finance-theme-toggle{order:5;margin-left:auto;display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--panel);flex:0 0 auto}
+.finance-theme-btn{border:0;background:transparent;color:var(--muted);padding:7px 11px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.finance-theme-btn.active{background:var(--primary);color:#fff}
+
+html[data-theme="dark"]{--bg:#0f1117;--panel:#181b23;--line:#2a2f3b;--text:#e8eaf0;--muted:#9ca3b0;--nav:#111827;--primary:#6c7bff;--soft:#242b45;--success:#42c99a;--warn:#f2a84b;--shadow:0 7px 24px rgba(0,0,0,.28)}
+html[data-theme="dark"] body,html[data-theme="dark"] .research-host,html[data-theme="dark"] .research-loading{background:var(--bg);color:var(--text)}
+html[data-theme="dark"] .finance-workspace-nav,html[data-theme="dark"] .finance-primary,html[data-theme="dark"] .finance-secondary,html[data-theme="dark"] .card,html[data-theme="dark"] .table,html[data-theme="dark"] .inline-sheet-wrap,html[data-theme="dark"] .inline-sheet,html[data-theme="dark"] .master-table,html[data-theme="dark"] .vehicle-card,html[data-theme="dark"] .mini,html[data-theme="dark"] .metric-chip{background:var(--panel);color:var(--text);border-color:var(--line)}
+html[data-theme="dark"] select,html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] .cash-year-control select,html[data-theme="dark"] .cash-refresh-btn,html[data-theme="dark"] .excel-btn,html[data-theme="dark"] .action,html[data-theme="dark"] .master-add{background:#12151c;color:var(--text);border-color:var(--line)}
+html[data-theme="dark"] .table th,html[data-theme="dark"] .inline-sheet th,html[data-theme="dark"] .master-table th,html[data-theme="dark"] .vehicle-status-table th,html[data-theme="dark"] .year-total-row td{background:#1e2330;color:var(--muted);border-color:var(--line)}
+html[data-theme="dark"] .table td,html[data-theme="dark"] .inline-sheet td,html[data-theme="dark"] .master-table td,html[data-theme="dark"] .vehicle-status-table td{background:var(--panel);color:var(--text);border-color:var(--line)}
+html[data-theme="dark"] .table tbody tr:hover td{background:#202634}
+html[data-theme="dark"] .module-tab,html[data-theme="dark"] .finance-primary-btn{color:var(--muted)}
+html[data-theme="dark"] .module-tab.active,html[data-theme="dark"] .finance-primary-btn.active{background:var(--soft);color:#aeb8ff;border-color:#394367}
+html[data-theme="dark"] .subtabs{background:#202530;border-color:var(--line)}
+html[data-theme="dark"] .subtab.active{background:#30384a;color:#fff}
+@media(max-width:900px){.finance-theme-toggle{margin-left:0}}
 /* 모듈별 공유 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
 #cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 
@@ -200,6 +226,10 @@ body.frameby-auth-ready{overflow:auto}
         <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
         <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
+        <div class="finance-theme-toggle" role="group" aria-label="화면 테마 선택">
+          <button type="button" class="finance-theme-btn" id="financeThemeLight">☀️ 일반모드</button>
+          <button type="button" class="finance-theme-btn" id="financeThemeDark">🌙 다크모드</button>
+        </div>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
         <div class="module-tabs" id="cashModuleTabs" aria-label="자금수지 세부 메뉴">
@@ -701,6 +731,7 @@ function ensureCashflowFrame(page){
       frame.contentWindow?.postMessage({type:'frameby-cash-nav',page:CASH_ACTIVE_PAGE},'*');
       const year=document.getElementById('cashGlobalYear')?.value||'2026';
       frame.contentWindow?.postMessage({type:'frameby-cash-year',year},'*');
+      frame.contentWindow?.postMessage({type:'frameby-cash-theme',theme:document.documentElement.getAttribute('data-theme')||'dark'},'*');
     }catch(e){}
   };
   if(!CASHFLOW_FRAME_LOADED){
@@ -1247,10 +1278,30 @@ function initIntegratedNav(){
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
 function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-drive-v1';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function syncFinanceThemeUi(theme){
+  document.getElementById('financeThemeLight')?.classList.toggle('active',theme==='light');
+  document.getElementById('financeThemeDark')?.classList.toggle('active',theme==='dark');
+  if(CASHFLOW_FRAME_LOADED) document.getElementById('cashflowFrame')?.contentWindow?.postMessage({type:'frameby-cash-theme',theme},'*');
+}
+function setFinanceTheme(theme,persist){
+  const next=theme==='light'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  if(persist!==false){try{localStorage.setItem('theme',next)}catch(e){}}
+  syncFinanceThemeUi(next);
+}
+function initFinanceTheme(){
+  let saved='dark';
+  try{const value=localStorage.getItem('theme');if(value==='light'||value==='dark')saved=value}catch(e){}
+  setFinanceTheme(saved,false);
+  document.getElementById('financeThemeLight')?.addEventListener('click',()=>setFinanceTheme('light',true));
+  document.getElementById('financeThemeDark')?.addEventListener('click',()=>setFinanceTheme('dark',true));
+  new MutationObserver(()=>{const theme=document.documentElement.getAttribute('data-theme');if(theme==='light'||theme==='dark')syncFinanceThemeUi(theme)}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  window.addEventListener('storage',event=>{if(event.key==='theme'&&(event.newValue==='light'||event.newValue==='dark'))setFinanceTheme(event.newValue,false)});
+}
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
+  document.addEventListener('DOMContentLoaded',()=>{initFinanceTheme();initIntegrated()},{once:true});
 }else{
-  initIntegrated();
+  initFinanceTheme();initIntegrated();
 }
 </script>
 
@@ -1260,6 +1311,14 @@ if(document.readyState==='loading'){
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>자금수지 관리</title>
+<script>
+(function(){
+  try{
+    var saved=parent.document.documentElement.getAttribute('data-theme')||localStorage.getItem('theme')||'dark';
+    document.documentElement.setAttribute('data-theme',saved==='light'?'light':'dark');
+  }catch(e){document.documentElement.setAttribute('data-theme','dark')}
+})();
+</script>
 <style>
 :root{
   --bg:#f5f7fb;
@@ -1276,6 +1335,13 @@ if(document.readyState==='loading'){
   --nav:#0f1d3a;
   --shadow:0 8px 28px rgba(28,39,60,.07);
 }
+html[data-theme="dark"]{
+  --bg:#0f1117;--panel:#181b23;--line:#2a2f3b;--text:#e8eaf0;--muted:#9ca3b0;
+  --blue:#7b8cff;--blue-soft:#242b45;--green:#42c99a;--green-soft:#16392f;
+  --red:#ff737d;--red-soft:#402126;--nav:#111827;--shadow:0 8px 28px rgba(0,0,0,.28);
+}
+html[data-theme="dark"] .topbar,html[data-theme="dark"] .card,html[data-theme="dark"] .panel,html[data-theme="dark"] table,html[data-theme="dark"] th,html[data-theme="dark"] td{background-color:var(--panel);color:var(--text);border-color:var(--line)}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea,html[data-theme="dark"] button{border-color:var(--line)}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select{font:inherit}
@@ -3510,6 +3576,11 @@ function cgRunner(success,failure){return new Proxy({}, {get(_t,p){if(p==='withS
 window.google=window.google||{};window.google.script=window.google.script||{};window.google.script.run=cgRunner(null,null);
 window.addEventListener('message',e=>{
   const d=e.data||{};
+  if(d.type==='frameby-cash-theme'){
+    const theme=d.theme==='light'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',theme);
+    return;
+  }
   if(d.type==='frameby-cash-nav'){
     const page={calendar:'calendarPage',monthly:'monthlyPage',report:'reportPage'}[d.page]||'calendarPage';
     setTimeout(()=>document.querySelector('.navbtn[data-page="'+page+'"]')?.click(),0);
