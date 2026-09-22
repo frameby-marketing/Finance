@@ -257,7 +257,7 @@ body.frameby-auth-ready{overflow:auto}
     </section>
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
-      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/macros/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec?mode=embed"></iframe>
+      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec?mode=embed"></iframe>
     </section>
 <section class="page active card-page-direct" id="dashboard">
 <div class="grid kpis">
@@ -979,7 +979,7 @@ const INTEGRATED_CONFIG={
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
-  researchWebAppUrl:'https://script.google.com/macros/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
+  researchWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
@@ -1074,53 +1074,57 @@ async function githubCheckResearchAccess(){
 
   return new Promise((resolve,reject)=>{
     const frame=document.createElement('iframe');
+    const frameName='framebyResearchAuth_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    frame.name=frameName;
     frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
     frame.setAttribute('aria-hidden','true');
-    let tokenSent=false;
+
+    const form=document.createElement('form');
+    form.method='POST';
+    form.action=INTEGRATED_CONFIG.researchWebAppUrl;
+    form.target=frameName;
+    form.style.display='none';
+
+    const addField=(name,value)=>{
+      const input=document.createElement('input');
+      input.type='hidden';input.name=name;input.value=value;
+      form.appendChild(input);
+    };
+    addField('mode','auth');
+    addField('accessToken',GITHUB_ACCESS_TOKEN);
 
     const cleanup=()=>{
       window.removeEventListener('message',onMessage);
       clearTimeout(timer);
+      try{form.remove()}catch(e){}
       try{frame.remove()}catch(e){}
     };
     const onMessage=event=>{
       if(event.source!==frame.contentWindow) return;
       if(!githubIsResearchOrigin(event.origin)) return;
       const msg=event.data||{};
+      if(msg.type!=='frameby-research-auth-result') return;
 
-      if(msg.type==='frameby-research-bridge-ready'){
-        if(tokenSent) return;
-        tokenSent=true;
-        try{
-          frame.contentWindow.postMessage({type:'frameby-research-auth',accessToken:GITHUB_ACCESS_TOKEN},event.origin);
-        }catch(e){
-          cleanup();
-          reject(new Error('연구개발 로그인 계정을 전달하지 못했습니다.'));
-        }
-        return;
-      }
-
-      if(msg.type==='frameby-research-auth-result'){
-        cleanup();
-        if(msg.allowed && msg.sessionKey){
-          RESEARCH_SESSION_KEY=String(msg.sessionKey||'');
-          RESEARCH_AUTH_EMAIL=String(msg.email||'').toLowerCase();
-          resolve(true);
-        }else{
-          // 서버가 명시적으로 공유권한 없음이라고 답한 경우에만 false 처리합니다.
-          resolve(false);
-        }
+      cleanup();
+      if(msg.allowed && msg.sessionKey){
+        RESEARCH_SESSION_KEY=String(msg.sessionKey||'');
+        RESEARCH_AUTH_EMAIL=String(msg.email||'').toLowerCase();
+        resolve(true);
+      }else{
+        RESEARCH_ACCESS_ERROR=String(msg.message||'');
+        resolve(false);
       }
     };
+
     const timer=setTimeout(()=>{
       cleanup();
-      reject(new Error('연구개발 권한 확인 서버에 연결하지 못했습니다. Apps Script 웹앱 배포 설정을 확인해 주세요.'));
-    },12000);
+      reject(new Error('연구개발 권한 확인 서버 응답이 없습니다. Apps Script 새 버전 배포 여부를 확인해 주세요.'));
+    },15000);
 
     window.addEventListener('message',onMessage);
-    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
-    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=bridge&_='+Date.now();
     document.body.appendChild(frame);
+    document.body.appendChild(form);
+    form.submit();
   });
 }
 async function githubVerifyIntegratedAccess(){
