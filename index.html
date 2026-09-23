@@ -1,22 +1,29 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<meta name="color-scheme" content="light">
+<script>
+(function(){
+  function forceFinanceLight(){
+    try{
+      localStorage.setItem('theme','light');
+      localStorage.setItem('fb-hub-theme','light');
+      document.documentElement.setAttribute('data-theme','light');
+      document.documentElement.style.colorScheme='light';
+    }catch(e){}
+  }
+  forceFinanceLight();
+  window.__FRAMEBY_FORCE_LIGHT__=forceFinanceLight;
+})();
+</script>
 <script src="https://frameby-marketing.github.io/Dashboard_Hub/nav.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Finance & Admin · 법인카드 / 출장·차량 관리</title>
-<script>
-(function(){
-  try{
-    var saved=localStorage.getItem('theme');
-    var theme=saved==='light'||saved==='dark'?saved:'dark';
-    localStorage.setItem('theme',theme);
-    document.documentElement.setAttribute('data-theme',theme);
-  }catch(e){}
-})();
-</script>
+<title>Finance & Admin · 자금수지 / 법인카드 / 출장·차량 / 연구개발</title>
 <style>
+:root{color-scheme:light!important}
+html[data-theme="dark"]{color-scheme:light!important}
 :root{--bg:#f4f6f9;--panel:#fff;--line:#dfe4ea;--text:#172033;--muted:#6e7888;--nav:#111a2d;--primary:#2757d7;--soft:#eef3ff;--success:#138a66;--warn:#c97916;--radius:14px;--shadow:0 7px 24px rgba(22,36,67,.07)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Pretendard,"Noto Sans KR","Malgun Gothic",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}button,select,input,textarea{font:inherit}.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{background:var(--nav);color:#fff;padding:22px 15px;position:sticky;top:0;height:100vh}.brand{font-size:20px;font-weight:850;padding:4px 10px 20px;border-bottom:1px solid rgba(255,255,255,.12)}.brand small{display:block;margin-top:6px;font-size:11px;color:#aeb8cc;font-weight:500}.nav{display:flex;flex-direction:column;gap:6px;margin-top:18px}.nav button{border:0;background:transparent;color:#c9d2e5;padding:12px 13px;border-radius:9px;text-align:left;font-weight:750;cursor:pointer}.nav button:hover,.nav button.active{background:#283550;color:#fff}.side-note{position:absolute;left:15px;right:15px;bottom:18px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#9fabc1;font-size:11px;line-height:1.55;background:rgba(255,255,255,.035)}.main{padding:25px 30px 50px;min-width:0}.page{display:none}.page.active{display:block}.head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}.head h1{font-size:26px;margin:0}.head p{margin:6px 0 0;color:var(--muted)}.filters{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:750;color:var(--muted)}select,input,textarea{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;outline:none;color:var(--text)}select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(39,87,215,.09)}.preview{position:fixed;right:20px;top:16px;background:#111a2d;color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;z-index:20;box-shadow:var(--shadow)}.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;min-width:0}.kpi .label{font-size:12px;color:var(--muted);font-weight:750}.kpi .value{font-size:27px;font-weight:900;margin-top:8px;letter-spacing:-.5px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:6px}.two{grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);margin-bottom:14px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.section-title h2{margin:0;font-size:16px}.note{font-size:11px;color:var(--muted)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}.table{width:100%;border-collapse:collapse;min-width:820px;background:#fff}.table th{background:#f7f9fc;color:#526071;font-size:11px;text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px;border-bottom:1px solid #edf0f4}.table tr:last-child td{border-bottom:0}.table tbody tr:hover td{background:#fbfcff}.table .num{text-align:right;font-variant-numeric:tabular-nums}.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:#edf2f8;font-size:10px;font-weight:800;white-space:nowrap}.pill.blue{background:var(--soft);color:var(--primary)}.pill.green{background:#eaf7f2;color:var(--success)}.pill.orange{background:#fff4e7;color:var(--warn)}.pill.gray{background:#f1f3f5;color:#667085}.dot{width:6px;height:6px;border-radius:50%;background:currentColor}.action{border:1px solid #cbd6ef;background:#fff;color:var(--primary);padding:6px 9px;border-radius:7px;font-weight:800;font-size:11px;cursor:pointer}.action:hover,.action.active{background:var(--soft);border-color:#b9c9ef}.editor{display:grid;gap:12px}.auto-box{border:1px solid #d6e0f5;background:#f7f9ff;border-radius:11px;padding:13px}.auto-box .auto-title{font-size:11px;font-weight:850;color:var(--primary);margin-bottom:8px}.cost-lines{display:grid;gap:7px}.cost-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}.cost-line strong{font-size:13px}.cost-line.total{padding-top:8px;margin-top:3px;border-top:1px solid #dbe3f1;font-weight:900}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid .wide{grid-column:1/-1}.editor textarea{min-height:70px;resize:vertical}.fake-save{width:100%;border:0;background:var(--primary);color:#fff;padding:10px 12px;border-radius:9px;font-weight:850;cursor:not-allowed;opacity:.75}.legend{display:flex;gap:8px;flex-wrap:wrap}.subtle{font-size:11px;color:var(--muted);line-height:1.55}.summary-bar{display:grid;grid-template-columns:120px 1fr 85px;align-items:center;gap:10px;margin:11px 0}.track{height:9px;border-radius:99px;background:#edf1f5;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--primary)}.vehicle-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vehicle-card{border:1px solid var(--line);border-radius:10px;padding:13px;background:#fafbfd}.vehicle-card strong{display:block;font-size:15px}.vehicle-card span{display:block;color:var(--muted);font-size:11px;margin-top:5px}.vehicle-card b{display:block;margin-top:9px;font-size:19px}.route{font-weight:750}.muted{color:var(--muted)}.link-tag{display:inline-block;padding:4px 7px;border-radius:7px;background:#f2f5fb;color:#4b5d78;font-size:10px;font-weight:800}.screen-guide{margin-bottom:14px;border:1px dashed #bdc8dd;background:#fbfcff;border-radius:11px;padding:12px 14px;color:#5b6677;font-size:11px;line-height:1.6}.screen-guide b{color:var(--text)}
 
@@ -175,22 +182,6 @@
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
 #researchPrimaryTab{order:4!important}
-.finance-theme-toggle{order:5;margin-left:auto;display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--panel);flex:0 0 auto}
-.finance-theme-btn{border:0;background:transparent;color:var(--muted);padding:7px 11px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
-.finance-theme-btn.active{background:var(--primary);color:#fff}
-
-html[data-theme="dark"]{--bg:#0f1117;--panel:#181b23;--line:#2a2f3b;--text:#e8eaf0;--muted:#9ca3b0;--nav:#111827;--primary:#6c7bff;--soft:#242b45;--success:#42c99a;--warn:#f2a84b;--shadow:0 7px 24px rgba(0,0,0,.28)}
-html[data-theme="dark"] body,html[data-theme="dark"] .research-host,html[data-theme="dark"] .research-loading{background:var(--bg);color:var(--text)}
-html[data-theme="dark"] .finance-workspace-nav,html[data-theme="dark"] .finance-primary,html[data-theme="dark"] .finance-secondary,html[data-theme="dark"] .card,html[data-theme="dark"] .table,html[data-theme="dark"] .inline-sheet-wrap,html[data-theme="dark"] .inline-sheet,html[data-theme="dark"] .master-table,html[data-theme="dark"] .vehicle-card,html[data-theme="dark"] .mini,html[data-theme="dark"] .metric-chip{background:var(--panel);color:var(--text);border-color:var(--line)}
-html[data-theme="dark"] select,html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] .cash-year-control select,html[data-theme="dark"] .cash-refresh-btn,html[data-theme="dark"] .excel-btn,html[data-theme="dark"] .action,html[data-theme="dark"] .master-add{background:#12151c;color:var(--text);border-color:var(--line)}
-html[data-theme="dark"] .table th,html[data-theme="dark"] .inline-sheet th,html[data-theme="dark"] .master-table th,html[data-theme="dark"] .vehicle-status-table th,html[data-theme="dark"] .year-total-row td{background:#1e2330;color:var(--muted);border-color:var(--line)}
-html[data-theme="dark"] .table td,html[data-theme="dark"] .inline-sheet td,html[data-theme="dark"] .master-table td,html[data-theme="dark"] .vehicle-status-table td{background:var(--panel);color:var(--text);border-color:var(--line)}
-html[data-theme="dark"] .table tbody tr:hover td{background:#202634}
-html[data-theme="dark"] .module-tab,html[data-theme="dark"] .finance-primary-btn{color:var(--muted)}
-html[data-theme="dark"] .module-tab.active,html[data-theme="dark"] .finance-primary-btn.active{background:var(--soft);color:#aeb8ff;border-color:#394367}
-html[data-theme="dark"] .subtabs{background:#202530;border-color:var(--line)}
-html[data-theme="dark"] .subtab.active{background:#30384a;color:#fff}
-@media(max-width:900px){.finance-theme-toggle{margin-left:0}}
 /* 모듈별 공유 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
 #cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 
@@ -201,15 +192,28 @@ body.frameby-auth-locked #filterMenu,
 body.frameby-auth-locked #statusBadge{display:none!important}
 body.frameby-auth-locked{background:#0f1115!important;overflow:hidden}
 body.frameby-auth-ready{overflow:auto}
-
-/* 로그인 화면도 홈에서 선택한 공통 테마를 그대로 사용합니다. */
-html[data-theme="light"] body.frameby-auth-locked{background:#f5f6f8!important}
-html[data-theme="light"] .github-auth-gate{background:#f5f6f8;color:#1a1d23}
-html[data-theme="light"] .github-auth-card{background:#fff;border-color:#e5e7eb;box-shadow:0 24px 70px rgba(20,30,55,.12)}
-html[data-theme="light"] .github-auth-card p{color:#6b7280}
-html[data-theme="light"] .github-auth-note{color:#8b929e!important}
-html[data-theme="light"] .github-auth-error{color:#d93a3a}
 </style>
+
+<script>
+(function(){
+  const apply=()=>{
+    try{
+      localStorage.setItem('theme','light');
+      localStorage.setItem('fb-hub-theme','light');
+      if(document.documentElement.getAttribute('data-theme')!=='light') document.documentElement.setAttribute('data-theme','light');
+      document.documentElement.style.colorScheme='light';
+    }catch(e){}
+  };
+  const start=()=>{
+    apply();
+    try{
+      new MutationObserver(apply).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+      window.addEventListener('storage',e=>{if(e.key==='theme'||e.key==='fb-hub-theme')apply()});
+    }catch(e){}
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+})();
+</script>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -234,10 +238,6 @@ html[data-theme="light"] .github-auth-error{color:#d93a3a}
         <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
         <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
-        <div class="finance-theme-toggle" role="group" aria-label="화면 테마 선택">
-          <button type="button" class="finance-theme-btn" id="financeThemeLight">☀️ 일반모드</button>
-          <button type="button" class="finance-theme-btn" id="financeThemeDark">🌙 다크모드</button>
-        </div>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
         <div class="module-tabs" id="cashModuleTabs" aria-label="자금수지 세부 메뉴">
@@ -295,7 +295,7 @@ html[data-theme="light"] .github-auth-error{color:#d93a3a}
     </section>
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
-      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
+      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec?mode=embed"></iframe>
     </section>
 <section class="page active card-page-direct" id="dashboard">
 <div class="grid kpis">
@@ -739,7 +739,6 @@ function ensureCashflowFrame(page){
       frame.contentWindow?.postMessage({type:'frameby-cash-nav',page:CASH_ACTIVE_PAGE},'*');
       const year=document.getElementById('cashGlobalYear')?.value||'2026';
       frame.contentWindow?.postMessage({type:'frameby-cash-year',year},'*');
-      frame.contentWindow?.postMessage({type:'frameby-cash-theme',theme:document.documentElement.getAttribute('data-theme')||'dark'},'*');
     }catch(e){}
   };
   if(!CASHFLOW_FRAME_LOADED){
@@ -787,22 +786,38 @@ function githubInitResearchMessaging(){
     }
   });
 }
-function ensureResearchFrame(){
+async function ensureResearchFrame(){
   const frame=document.getElementById('researchFrame');
   if(!frame)return;
   const loadingEl=document.getElementById('researchLoading');
-  loadingEl?.classList.remove('hidden');
+  if(loadingEl){loadingEl.textContent='연구개발 권한을 확인하는 중...';loadingEl.classList.remove('hidden')}
 
-  if(frame.dataset.started==='1') return;
+  if(!RESEARCH_SESSION_KEY){
+    try{
+      const ok=await githubCreateResearchSession();
+      if(!ok){
+        if(loadingEl){loadingEl.textContent='연구개발 문서 공유 권한이 없습니다.';loadingEl.classList.remove('hidden')}
+        return;
+      }
+    }catch(e){
+      if(loadingEl){
+        loadingEl.innerHTML='연구개발 연결을 완료하지 못했습니다.<br><a href="'+INTEGRATED_CONFIG.researchWebAppUrl+'" target="_blank" rel="noopener" style="color:#2757d7;font-weight:800">연구개발 직접 열기</a>';
+        loadingEl.classList.remove('hidden');
+      }
+      return;
+    }
+  }
 
-  const base=frame.dataset.src||'';
-  if(!base)return;
-  const url=new URL(base);
-  if(GITHUB_USER_EMAIL) url.searchParams.set('expectedEmail',GITHUB_USER_EMAIL);
+  if(frame.dataset.started==='1'){
+    githubSendResearchSession();
+    return;
+  }
 
+  const src=frame.dataset.src||'';
+  if(!src)return;
+  if(loadingEl)loadingEl.textContent='연구개발 데이터를 불러오는 중...';
   frame.dataset.started='1';
-  frame.addEventListener('load',()=>{loadingEl?.classList.add('hidden')},{once:true});
-  frame.src=url.toString();
+  frame.src=src;
 }
 
 function showCashPage(page){
@@ -1023,8 +1038,13 @@ const INTEGRATED_CONFIG={
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
-  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
 };
+const RESEARCH_SHARED_EMAILS=Object.freeze([
+  'account@frame-by.com',
+  'marketing@frame-by.com',
+  'ygiho@frame-by.com'
+]);
 const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접대비','교통비','숙박비','기타비','합계','출장자','구분','적요명','출장목적','방문지역','이동수단','결제수단','상태','삭제여부','생성일시','수정일시','유류비'];
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
 const GH_VEHICLE_HEADERS=['vehicle_id','차량명','기초키로수','누적거리','취득일','처분일','사용여부','수정일시'];
@@ -1106,27 +1126,93 @@ function githubIsResearchOrigin(origin){
     return host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com');
   }catch(e){return false}
 }
+async function githubGetResearchSharedEmails(){
+  if(!INTEGRATED_CONFIG.researchWebAppUrl) return null;
+  return new Promise((resolve,reject)=>{
+    const frame=document.createElement('iframe');
+    frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
+    frame.setAttribute('aria-hidden','true');
+    const cleanup=()=>{window.removeEventListener('message',onMessage);clearTimeout(timer);try{frame.remove()}catch(e){}};
+    const onMessage=event=>{
+      if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin)) return;
+      const msg=event.data||{};
+      if(msg.type!=='frameby-research-share-list'||!Array.isArray(msg.emails)) return;
+      cleanup();resolve(msg.emails.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
+    };
+    const timer=setTimeout(()=>{cleanup();reject(new Error('share-list-timeout'))},1500);
+    window.addEventListener('message',onMessage);
+    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
+    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=share-list&_='+Date.now();
+    document.body.appendChild(frame);
+  });
+}
 async function githubCheckResearchAccess(){
-  if(!INTEGRATED_CONFIG.researchDocumentId||!GITHUB_ACCESS_TOKEN) return false;
+  const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
+  if(!email) return false;
+  const fallback=RESEARCH_SHARED_EMAILS.includes(email);
+  try{
+    const live=await githubGetResearchSharedEmails();
+    return Array.isArray(live)?live.includes(email):fallback;
+  }catch(e){
+    return fallback;
+  }
+}
+async function githubCreateResearchSession(){
+  if(!INTEGRATED_CONFIG.researchWebAppUrl||!GITHUB_ACCESS_TOKEN) return false;
   RESEARCH_SESSION_KEY='';
-  RESEARCH_AUTH_EMAIL=GITHUB_USER_EMAIL||'';
+  RESEARCH_AUTH_EMAIL='';
   RESEARCH_ACCESS_ERROR='';
 
-  const url=`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}?fields=id&supportsAllDrives=true`;
-  const response=await fetch(url,{headers:{Authorization:`Bearer ${GITHUB_ACCESS_TOKEN}`}});
-  if(response.status===401){
-    githubTokenCacheClear();
-    GITHUB_ACCESS_TOKEN=null;
-    throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
-  }
-  if(response.status===403||response.status===404) return false;
-  if(!response.ok){
-    let message=`연구개발 문서 권한 확인 실패 (HTTP ${response.status})`;
-    try{const body=await response.json();message=body?.error?.message||message}catch(e){}
-    throw Object.assign(new Error(message),{status:response.status});
-  }
-  const data=await response.json();
-  return !!data?.id;
+  return new Promise((resolve,reject)=>{
+    const frame=document.createElement('iframe');
+    frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
+    frame.setAttribute('aria-hidden','true');
+    let tokenSent=false;
+
+    const cleanup=()=>{
+      window.removeEventListener('message',onMessage);
+      clearTimeout(timer);
+      try{frame.remove()}catch(e){}
+    };
+    const onMessage=event=>{
+      if(event.source!==frame.contentWindow) return;
+      if(!githubIsResearchOrigin(event.origin)) return;
+      const msg=event.data||{};
+
+      if(msg.type==='frameby-research-bridge-ready'){
+        if(tokenSent) return;
+        tokenSent=true;
+        try{
+          frame.contentWindow.postMessage({type:'frameby-research-auth',accessToken:GITHUB_ACCESS_TOKEN},event.origin);
+        }catch(e){
+          cleanup();
+          reject(new Error('연구개발 로그인 계정을 전달하지 못했습니다.'));
+        }
+        return;
+      }
+
+      if(msg.type==='frameby-research-auth-result'){
+        cleanup();
+        if(msg.allowed && msg.sessionKey){
+          RESEARCH_SESSION_KEY=String(msg.sessionKey||'');
+          RESEARCH_AUTH_EMAIL=String(msg.email||'').toLowerCase();
+          resolve(true);
+        }else{
+          // 서버가 명시적으로 공유권한 없음이라고 답한 경우에만 false 처리합니다.
+          resolve(false);
+        }
+      }
+    };
+    const timer=setTimeout(()=>{
+      cleanup();
+      reject(new Error('연구개발 권한 확인 서버에 연결하지 못했습니다. Apps Script 웹앱 배포 설정을 확인해 주세요.'));
+    },12000);
+
+    window.addEventListener('message',onMessage);
+    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
+    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=bridge&_='+Date.now();
+    document.body.appendChild(frame);
+  });
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -1285,31 +1371,11 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-drive-v1';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
-function syncFinanceThemeUi(theme){
-  document.getElementById('financeThemeLight')?.classList.toggle('active',theme==='light');
-  document.getElementById('financeThemeDark')?.classList.toggle('active',theme==='dark');
-  if(CASHFLOW_FRAME_LOADED) document.getElementById('cashflowFrame')?.contentWindow?.postMessage({type:'frameby-cash-theme',theme},'*');
-}
-function setFinanceTheme(theme,persist){
-  const next=theme==='light'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  if(persist!==false){try{localStorage.setItem('theme',next)}catch(e){}}
-  syncFinanceThemeUi(next);
-}
-function initFinanceTheme(){
-  let saved='dark';
-  try{const value=localStorage.getItem('theme');if(value==='light'||value==='dark')saved=value}catch(e){}
-  setFinanceTheme(saved,false);
-  document.getElementById('financeThemeLight')?.addEventListener('click',()=>setFinanceTheme('light',true));
-  document.getElementById('financeThemeDark')?.addEventListener('click',()=>setFinanceTheme('dark',true));
-  new MutationObserver(()=>{const theme=document.documentElement.getAttribute('data-theme');if(theme==='light'||theme==='dark')syncFinanceThemeUi(theme)}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-  window.addEventListener('storage',event=>{if(event.key==='theme'&&(event.newValue==='light'||event.newValue==='dark'))setFinanceTheme(event.newValue,false)});
-}
+function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-probe-v2';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>{initFinanceTheme();initIntegrated()},{once:true});
+  document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
-  initFinanceTheme();initIntegrated();
+  initIntegrated();
 }
 </script>
 
@@ -1319,14 +1385,6 @@ if(document.readyState==='loading'){
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>자금수지 관리</title>
-<script>
-(function(){
-  try{
-    var saved=parent.document.documentElement.getAttribute('data-theme')||localStorage.getItem('theme')||'dark';
-    document.documentElement.setAttribute('data-theme',saved==='light'?'light':'dark');
-  }catch(e){document.documentElement.setAttribute('data-theme','dark')}
-})();
-</script>
 <style>
 :root{
   --bg:#f5f7fb;
@@ -1343,13 +1401,6 @@ if(document.readyState==='loading'){
   --nav:#0f1d3a;
   --shadow:0 8px 28px rgba(28,39,60,.07);
 }
-html[data-theme="dark"]{
-  --bg:#0f1117;--panel:#181b23;--line:#2a2f3b;--text:#e8eaf0;--muted:#9ca3b0;
-  --blue:#7b8cff;--blue-soft:#242b45;--green:#42c99a;--green-soft:#16392f;
-  --red:#ff737d;--red-soft:#402126;--nav:#111827;--shadow:0 8px 28px rgba(0,0,0,.28);
-}
-html[data-theme="dark"] .topbar,html[data-theme="dark"] .card,html[data-theme="dark"] .panel,html[data-theme="dark"] table,html[data-theme="dark"] th,html[data-theme="dark"] td{background-color:var(--panel);color:var(--text);border-color:var(--line)}
-html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea,html[data-theme="dark"] button{border-color:var(--line)}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select{font:inherit}
@@ -3584,11 +3635,6 @@ function cgRunner(success,failure){return new Proxy({}, {get(_t,p){if(p==='withS
 window.google=window.google||{};window.google.script=window.google.script||{};window.google.script.run=cgRunner(null,null);
 window.addEventListener('message',e=>{
   const d=e.data||{};
-  if(d.type==='frameby-cash-theme'){
-    const theme=d.theme==='light'?'light':'dark';
-    document.documentElement.setAttribute('data-theme',theme);
-    return;
-  }
   if(d.type==='frameby-cash-nav'){
     const page={calendar:'calendarPage',monthly:'monthlyPage',report:'reportPage'}[d.page]||'calendarPage';
     setTimeout(()=>document.querySelector('.navbtn[data-page="'+page+'"]')?.click(),0);
