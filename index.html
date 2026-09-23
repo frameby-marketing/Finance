@@ -295,7 +295,7 @@ body.frameby-auth-ready{overflow:auto}
     </section>
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
-      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec?mode=embed"></iframe>
+      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 <section class="page active card-page-direct" id="dashboard">
 <div class="grid kpis">
@@ -753,69 +753,34 @@ function ensureCashflowFrame(page){
   }else send();
 }
 function githubSendResearchSession(){
-  const frame=document.getElementById('researchFrame');
-  if(!frame?.contentWindow||!RESEARCH_SESSION_KEY) return;
-  try{frame.contentWindow.postMessage({type:'frameby-research-session',sessionKey:RESEARCH_SESSION_KEY},'*')}catch(e){}
+  // v20: 별도 임베드 세션을 사용하지 않습니다.
 }
 function githubInitResearchMessaging(){
-  if(window.__FRAMEBY_RESEARCH_MESSAGE_BOUND__) return;
-  window.__FRAMEBY_RESEARCH_MESSAGE_BOUND__=true;
-  window.addEventListener('message',event=>{
-    if(!githubIsResearchOrigin(event.origin)) return;
-    const frame=document.getElementById('researchFrame');
-    if(!frame||event.source!==frame.contentWindow) return;
-    const msg=event.data||{};
-    if(msg.type==='frameby-research-ready'){
-      githubSendResearchSession();
-      return;
-    }
-    if(msg.type==='frameby-research-authenticated'){
-      frame.dataset.loaded='1';
-      document.getElementById('researchLoading')?.classList.add('hidden');
-      return;
-    }
-    if(msg.type==='frameby-research-auth-failed'){
-      const loadingEl=document.getElementById('researchLoading');
-      if(loadingEl){loadingEl.textContent=msg.message||'연구개발 문서 접근 권한을 확인할 수 없습니다.';loadingEl.classList.remove('hidden')}
-      return;
-    }
-    if(msg.type==='frameby-research-session-expired'){
-      RESEARCH_SESSION_KEY='';
-      const loadingEl=document.getElementById('researchLoading');
-      if(loadingEl){loadingEl.textContent='연구개발 로그인 세션이 만료되었습니다. 새로고침해 주세요.';loadingEl.classList.remove('hidden')}
-    }
-  });
+  // v20: 연구개발 웹앱 자체의 기존 Google Workspace 인증을 그대로 사용합니다.
 }
-async function ensureResearchFrame(){
+function ensureResearchFrame(){
   const frame=document.getElementById('researchFrame');
   if(!frame)return;
   const loadingEl=document.getElementById('researchLoading');
-  if(loadingEl){loadingEl.textContent='연구개발 권한을 확인하는 중...';loadingEl.classList.remove('hidden')}
 
-  if(!RESEARCH_SESSION_KEY){
-    try{
-      const ok=await githubCreateResearchSession();
-      if(!ok){
-        if(loadingEl){loadingEl.textContent='연구개발 문서 공유 권한이 없습니다.';loadingEl.classList.remove('hidden')}
-        return;
-      }
-    }catch(e){
-      if(loadingEl){
-        loadingEl.innerHTML='연구개발 연결을 완료하지 못했습니다.<br><a href="'+INTEGRATED_CONFIG.researchWebAppUrl+'" target="_blank" rel="noopener" style="color:#2757d7;font-weight:800">연구개발 직접 열기</a>';
-        loadingEl.classList.remove('hidden');
-      }
-      return;
-    }
-  }
+  if(frame.dataset.started==='1') return;
 
-  if(frame.dataset.started==='1'){
-    githubSendResearchSession();
+  const src=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
+  if(!src){
+    if(loadingEl){loadingEl.textContent='연구개발 연결 주소를 확인할 수 없습니다.';loadingEl.classList.remove('hidden')}
     return;
   }
 
-  const src=frame.dataset.src||'';
-  if(!src)return;
-  if(loadingEl)loadingEl.textContent='연구개발 데이터를 불러오는 중...';
+  if(loadingEl){
+    loadingEl.textContent='연구개발 데이터를 불러오는 중...';
+    loadingEl.classList.remove('hidden');
+  }
+
+  frame.addEventListener('load',()=>{
+    frame.dataset.loaded='1';
+    if(loadingEl)loadingEl.classList.add('hidden');
+  },{once:true});
+
   frame.dataset.started='1';
   frame.src=src;
 }
@@ -1371,7 +1336,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-probe-v2';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-embed-v20';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
