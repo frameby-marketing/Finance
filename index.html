@@ -753,6 +753,7 @@ function syncModuleHeader(module,id){
   document.querySelectorAll('.module-tab[data-research-page]').forEach(b=>b.classList.toggle('active',isResearch&&b.dataset.researchPage===RESEARCH_ACTIVE_PAGE));
   document.querySelectorAll('.secondary-tool-group[data-tools-page]').forEach(g=>g.classList.toggle('active',isCard&&g.dataset.toolsPage===id));
   document.getElementById('researchMonthRow')?.classList.toggle('hidden',!(isResearch&&RESEARCH_ACTIVE_PAGE==='notes'));
+  document.getElementById('researchYearBtn')?.classList.toggle('active',Number(RESEARCH_ACTIVE_MONTH)===0);
   document.querySelectorAll('.research-month-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.month)===Number(RESEARCH_ACTIVE_MONTH)));
   document.body.dataset.activeModule=module;
 }
@@ -784,42 +785,43 @@ function githubSendResearchSession(){
 function githubInitResearchMessaging(){
   // v20: 연구개발 웹앱 자체의 기존 Google Workspace 인증을 그대로 사용합니다.
 }
-function ensureResearchFrame(){
+function ensureResearchFrame(forceReload){
   const frame=document.getElementById('researchFrame');
   if(!frame)return;
   const loadingEl=document.getElementById('researchLoading');
 
-  const sendNav=()=>{
-    try{
-      frame.contentWindow?.postMessage({type:'frameby-research-shell-nav',page:RESEARCH_ACTIVE_PAGE,year:RESEARCH_ACTIVE_YEAR,month:RESEARCH_ACTIVE_MONTH},'*');
-    }catch(e){}
-  };
-
-  if(frame.dataset.started==='1'){
-    sendNav();
+  const base=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
+  if(!base){
+    if(loadingEl){
+      loadingEl.textContent='연구개발 연결 주소를 확인할 수 없습니다.';
+      loadingEl.classList.remove('hidden');
+    }
     return;
   }
 
-  const src=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
-  if(!src){
-    if(loadingEl){loadingEl.textContent='연구개발 연결 주소를 확인할 수 없습니다.';loadingEl.classList.remove('hidden')}
-    return;
-  }
+  const params=new URLSearchParams();
+  params.set('shell','1');
+  params.set('page',RESEARCH_ACTIVE_PAGE||'notes');
+  params.set('year',String(RESEARCH_ACTIVE_YEAR||2026));
+  params.set('month',String(RESEARCH_ACTIVE_MONTH||0));
+  params.set('_nav',String(Date.now()));
+  const src=base+(base.includes('?')?'&':'?')+params.toString();
+
+  if(!forceReload && frame.dataset.currentView===src) return;
 
   if(loadingEl){
     loadingEl.textContent='연구개발 데이터를 불러오는 중...';
     loadingEl.classList.remove('hidden');
   }
 
-  frame.addEventListener('load',()=>{
+  frame.onload=()=>{
     frame.dataset.loaded='1';
     if(loadingEl)loadingEl.classList.add('hidden');
-    setTimeout(sendNav,120);
-  },{once:true});
+  };
 
   frame.dataset.started='1';
-  const sep=src.includes('?')?'&':'?';
-  frame.src=src+sep+'shell=1';
+  frame.dataset.currentView=src;
+  frame.src=src;
 }
 
 function showCashPage(page){
@@ -878,19 +880,19 @@ function initResearchShell(){
     RESEARCH_ACTIVE_PAGE='notes';
     RESEARCH_ACTIVE_MONTH=0;
     syncModuleHeader('research','researchHost');
-    ensureResearchFrame();
+    ensureResearchFrame(true);
   });
   document.querySelectorAll('.module-tab[data-research-page]').forEach(btn=>btn.addEventListener('click',()=>{
     RESEARCH_ACTIVE_PAGE=btn.dataset.researchPage||'notes';
     if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=RESEARCH_ACTIVE_MONTH||0;
     syncModuleHeader('research','researchHost');
-    ensureResearchFrame();
+    ensureResearchFrame(true);
   }));
   document.querySelectorAll('.research-month-btn').forEach(btn=>btn.addEventListener('click',()=>{
     RESEARCH_ACTIVE_PAGE='notes';
     RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
     syncModuleHeader('research','researchHost');
-    ensureResearchFrame();
+    ensureResearchFrame(true);
   }));
 }
 
@@ -1401,7 +1403,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-menu-share-v23';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v24';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
