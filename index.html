@@ -201,6 +201,14 @@ body.frameby-auth-locked #filterMenu,
 body.frameby-auth-locked #statusBadge{display:none!important}
 body.frameby-auth-locked{background:#0f1115!important;overflow:hidden}
 body.frameby-auth-ready{overflow:auto}
+
+/* 로그인 화면도 홈에서 선택한 공통 테마를 그대로 사용합니다. */
+html[data-theme="light"] body.frameby-auth-locked{background:#f5f6f8!important}
+html[data-theme="light"] .github-auth-gate{background:#f5f6f8;color:#1a1d23}
+html[data-theme="light"] .github-auth-card{background:#fff;border-color:#e5e7eb;box-shadow:0 24px 70px rgba(20,30,55,.12)}
+html[data-theme="light"] .github-auth-card p{color:#6b7280}
+html[data-theme="light"] .github-auth-note{color:#8b929e!important}
+html[data-theme="light"] .github-auth-error{color:#d93a3a}
 </style>
 </head>
 <body class="frameby-auth-locked">
