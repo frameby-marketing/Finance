@@ -143,7 +143,15 @@ html[data-theme="dark"]{color-scheme:light!important}
 .cash-refresh-btn span{display:inline-block;margin-right:3px}
 .card-page-direct{padding-top:0}
 .finance-secondary.hidden{display:none}
-.module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
+
+.research-secondary{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:10px;padding-top:12px;padding-bottom:12px}
+.research-month-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
+.research-month-row.hidden{display:none}
+.research-year-btn,.research-month-btn{border:0;background:transparent;color:#6b7280;font-size:14px;font-weight:800;padding:7px 10px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.research-year-btn.active,.research-month-btn.active{background:#edf3ff;color:#2563eb}
+.research-months{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+@media(max-width:720px){.research-secondary{padding-top:10px;padding-bottom:10px}.research-month-row{gap:6px}.research-year-btn,.research-month-btn{font-size:13px;padding:6px 8px}}
+module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
 .module-tabs.hidden{display:none}
 .module-tab{border:1px solid transparent;background:transparent;color:#526071;padding:9px 13px;border-radius:8px;font-weight:800;cursor:pointer;white-space:nowrap}
 .module-tab:hover{background:#f5f7fb;color:var(--primary)}
@@ -287,6 +295,17 @@ body.frameby-auth-ready{overflow:auto}
           <button type="button" class="module-tab" data-page="trip">출장기록장</button>
           <button type="button" class="module-tab" data-page="vehicle">차량운행일지</button>
           <button type="button" class="module-tab" data-page="master">기초관리</button>
+        </div>
+      </div>
+      <div class="finance-secondary hidden research-secondary" id="researchSecondaryMenu">
+        <div class="module-tabs" id="researchModuleTabs" aria-label="연구개발 세부 메뉴">
+          <button type="button" class="module-tab" data-research-page="documents">연구문서</button>
+          <button type="button" class="module-tab active" data-research-page="notes">연구노트</button>
+          <button type="button" class="module-tab" data-research-page="write">연구노트 작성</button>
+        </div>
+        <div class="research-month-row" id="researchMonthRow">
+          <button type="button" class="research-year-btn active" id="researchYearBtn">2026년</button>
+          <div class="research-months" id="researchMonthBtns"></div>
         </div>
       </div>
     </nav>
@@ -720,6 +739,7 @@ function syncModuleHeader(module,id){
   document.getElementById('cardSecondaryMenu')?.classList.toggle('hidden',!isCard);
   document.getElementById('tripSecondaryMenu')?.classList.toggle('hidden',!isTrip);
   document.getElementById('cashSecondaryMenu')?.classList.toggle('hidden',!isCash);
+  document.getElementById('researchSecondaryMenu')?.classList.toggle('hidden',!isResearch);
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(b=>{
     const active=b.dataset.module===module;
     b.classList.toggle('active',active);
@@ -727,7 +747,10 @@ function syncModuleHeader(module,id){
   });
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',!isCash&&b.dataset.page===id));
   document.querySelectorAll('.module-tab[data-cash-page]').forEach(b=>b.classList.toggle('active',isCash&&b.dataset.cashPage===CASH_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-research-page]').forEach(b=>b.classList.toggle('active',isResearch&&b.dataset.researchPage===RESEARCH_ACTIVE_PAGE));
   document.querySelectorAll('.secondary-tool-group[data-tools-page]').forEach(g=>g.classList.toggle('active',isCard&&g.dataset.toolsPage===id));
+  document.getElementById('researchMonthRow')?.classList.toggle('hidden',!(isResearch&&RESEARCH_ACTIVE_PAGE==='notes'));
+  document.querySelectorAll('.research-month-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.month)===Number(RESEARCH_ACTIVE_MONTH)));
   document.body.dataset.activeModule=module;
 }
 function ensureCashflowFrame(page){
@@ -763,7 +786,16 @@ function ensureResearchFrame(){
   if(!frame)return;
   const loadingEl=document.getElementById('researchLoading');
 
-  if(frame.dataset.started==='1') return;
+  const sendNav=()=>{
+    try{
+      frame.contentWindow?.postMessage({type:'frameby-research-shell-nav',page:RESEARCH_ACTIVE_PAGE,year:RESEARCH_ACTIVE_YEAR,month:RESEARCH_ACTIVE_MONTH},'*');
+    }catch(e){}
+  };
+
+  if(frame.dataset.started==='1'){
+    sendNav();
+    return;
+  }
 
   const src=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
   if(!src){
@@ -779,10 +811,12 @@ function ensureResearchFrame(){
   frame.addEventListener('load',()=>{
     frame.dataset.loaded='1';
     if(loadingEl)loadingEl.classList.add('hidden');
+    setTimeout(sendNav,120);
   },{once:true});
 
   frame.dataset.started='1';
-  frame.src=src;
+  const sep=src.includes('?')?'&':'?';
+  frame.src=src+sep+'shell=1';
 }
 
 function showCashPage(page){
@@ -830,6 +864,33 @@ function showPage(id){
     try{renderTripSystemAll()}catch(e){}
   }
 }
+
+function initResearchShell(){
+  const wrap=document.getElementById('researchMonthBtns');
+  if(wrap && !wrap.dataset.ready){
+    wrap.innerHTML=Array.from({length:12},(_,i)=>`<button type="button" class="research-month-btn ${RESEARCH_ACTIVE_MONTH===i+1?'active':''}" data-month="${i+1}">${i+1}월</button>`).join('');
+    wrap.dataset.ready='1';
+  }
+  document.getElementById('researchYearBtn')?.addEventListener('click',()=>{
+    RESEARCH_ACTIVE_PAGE='notes';
+    RESEARCH_ACTIVE_MONTH=0;
+    syncModuleHeader('research','researchHost');
+    ensureResearchFrame();
+  });
+  document.querySelectorAll('.module-tab[data-research-page]').forEach(btn=>btn.addEventListener('click',()=>{
+    RESEARCH_ACTIVE_PAGE=btn.dataset.researchPage||'notes';
+    if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=RESEARCH_ACTIVE_MONTH||0;
+    syncModuleHeader('research','researchHost');
+    ensureResearchFrame();
+  }));
+  document.querySelectorAll('.research-month-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    RESEARCH_ACTIVE_PAGE='notes';
+    RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
+    syncModuleHeader('research','researchHost');
+    ensureResearchFrame();
+  }));
+}
+
 function bindEvents(){
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
   $('monthFilter').addEventListener('change',renderDashboard);$('cardFilter').addEventListener('change',renderDashboard);$('payMonth').addEventListener('change',renderPayment);$('allMonth').addEventListener('change',renderAll);$('allCard').addEventListener('change',renderAll);$('allSearch').addEventListener('input',renderAll);
@@ -1336,7 +1397,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-embed-v20';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-embed-v20';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
