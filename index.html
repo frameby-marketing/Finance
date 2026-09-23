@@ -20,7 +20,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Finance & Admin · 자금수지 / 법인카드 / 출장·차량 / 연구개발</title>
+<title>Finance & Admin · 자금수지 / 법인카드 / 출장·차량 / 연차관리 / 연구개발</title>
 <style>
 :root{color-scheme:light!important}
 html[data-theme="dark"]{color-scheme:light!important}
@@ -184,14 +184,16 @@ module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transpa
 .research-access-probe{position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none}
 @media(max-width:720px){.research-frame{height:calc(100vh - 90px);min-height:650px}}
 
-/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 → 연구개발 */
-#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
+/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 → 연차관리 → 연구개발 */
+#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#leavePrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
 #cashPrimaryTab{order:1!important}
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
-#researchPrimaryTab{order:4!important}
+#leavePrimaryTab{order:4!important}
+#researchPrimaryTab{order:5!important}
 /* 모듈별 공유 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
-#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#leavePrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+.leave-host{padding:0!important;overflow:visible;position:relative;background:#f6f7f9;min-height:calc(100vh - 108px)}
 
 /* 권한 확인 전에는 통합 화면을 DOM에 두더라도 화면에는 전혀 노출하지 않습니다. */
 body.frameby-auth-locked .integrated-content,
@@ -228,7 +230,7 @@ body.frameby-auth-ready{overflow:auto}
   <div class="github-auth-card">
     <div class="github-auth-icon">🔒</div>
     <h2>통합 관리 접근 권한 확인</h2>
-    <p>자금수지, 법인카드, 출장·차량 관리 또는 연구개발 문서 중 사용 권한이 있는 회사 Google 계정으로 로그인해 주세요.</p>
+    <p>자금수지, 법인카드, 출장·차량 관리, 연차관리 또는 연구개발 문서 중 사용 권한이 있는 회사 Google 계정으로 로그인해 주세요.</p>
     <button type="button" class="github-auth-btn" id="githubLoginBtn" disabled>로그인 준비 중...</button>
     <div class="github-auth-error" id="githubAuthError"></div>
     <p class="github-auth-note">한 번 로그인한 동일 Google 계정으로 각 스프레드시트와 연구개발 Google Docs의 실제 공유권한을 확인합니다.</p>
@@ -245,6 +247,7 @@ body.frameby-auth-ready{overflow:auto}
         <button type="button" class="finance-primary-btn" id="cashPrimaryTab" data-module="cash" role="tab" aria-selected="false">자금수지</button>
         <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
+        <button type="button" class="finance-primary-btn" id="leavePrimaryTab" data-module="leave" role="tab" aria-selected="false">연차관리</button>
         <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
@@ -297,6 +300,19 @@ body.frameby-auth-ready{overflow:auto}
           <button type="button" class="module-tab" data-page="master">기초관리</button>
         </div>
       </div>
+      <div class="finance-secondary hidden" id="leaveSecondaryMenu">
+        <div class="module-tabs" id="leaveModuleTabs" aria-label="연차관리 세부 메뉴">
+          <button type="button" class="module-tab active" data-leave-page="leave">연차 현황</button>
+          <button type="button" class="module-tab" data-leave-page="settle">정산</button>
+          <button type="button" class="module-tab" data-leave-page="employee">사원정보</button>
+        </div>
+        <div class="secondary-tools" id="leaveSecondaryTools" aria-label="연차관리 조회 조건">
+          <div class="secondary-tool-group active">
+            <div class="field"><label>연도</label><select id="leaveGlobalYear"></select></div>
+            <div class="field"><label>월</label><select id="leaveGlobalMonth"></select></div>
+          </div>
+        </div>
+      </div>
       <div class="finance-secondary hidden research-secondary" id="researchSecondaryMenu">
         <div class="module-tabs" id="researchModuleTabs" aria-label="연구개발 세부 메뉴">
           <button type="button" class="module-tab" data-research-page="documents">연구문서</button>
@@ -311,6 +327,9 @@ body.frameby-auth-ready{overflow:auto}
     </nav>
 <section class="page cashflow-host" id="cashflowHost">
       <iframe id="cashflowFrame" class="cashflow-frame" title="자금수지"></iframe>
+    </section>
+<section class="page leave-host" id="leaveHost">
+      <div id="leaveMount"></div>
     </section>
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
@@ -726,22 +745,24 @@ const CARD_PAGES=['dashboard','payment','all'];
 const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
+let LEAVE_ACTIVE_PAGE='leave';
 let RESEARCH_ACTIVE_PAGE='notes';
 let RESEARCH_ACTIVE_YEAR=2026;
 let RESEARCH_ACTIVE_MONTH=0;
 let CASHFLOW_FRAME_LOADED=false;
-window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,research:false};
+window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,leave:false,research:false};
 window.FRAMEBY_ACCESS_READY=false;
 function githubHasModuleAccess(module){return !window.FRAMEBY_ACCESS_READY || !!window.FRAMEBY_MODULE_ACCESS?.[module]}
-function githubFirstAccessibleModule(){return ['cash','card','trip','research'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
-function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':module==='research'?'research':'dashboard'}
-function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':id==='researchHost'?'research':ACTIVE_MODULE}
+function githubFirstAccessibleModule(){return ['cash','card','trip','leave','research'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
+function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':module==='leave'?'leave':module==='research'?'research':'dashboard'}
+function moduleForPage(id){return CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':id==='leaveHost'?'leave':id==='researchHost'?'research':ACTIVE_MODULE}
 function syncModuleHeader(module,id){
   ACTIVE_MODULE=module;
-  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash',isResearch=module==='research';
+  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash',isLeave=module==='leave',isResearch=module==='research';
   document.getElementById('cardSecondaryMenu')?.classList.toggle('hidden',!isCard);
   document.getElementById('tripSecondaryMenu')?.classList.toggle('hidden',!isTrip);
   document.getElementById('cashSecondaryMenu')?.classList.toggle('hidden',!isCash);
+  document.getElementById('leaveSecondaryMenu')?.classList.toggle('hidden',!isLeave);
   document.getElementById('researchSecondaryMenu')?.classList.toggle('hidden',!isResearch);
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(b=>{
     const active=b.dataset.module===module;
@@ -750,6 +771,7 @@ function syncModuleHeader(module,id){
   });
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',!isCash&&b.dataset.page===id));
   document.querySelectorAll('.module-tab[data-cash-page]').forEach(b=>b.classList.toggle('active',isCash&&b.dataset.cashPage===CASH_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-leave-page]').forEach(b=>b.classList.toggle('active',isLeave&&b.dataset.leavePage===LEAVE_ACTIVE_PAGE));
   document.querySelectorAll('.module-tab[data-research-page]').forEach(b=>b.classList.toggle('active',isResearch&&b.dataset.researchPage===RESEARCH_ACTIVE_PAGE));
   document.querySelectorAll('.secondary-tool-group[data-tools-page]').forEach(g=>g.classList.toggle('active',isCard&&g.dataset.toolsPage===id));
   document.getElementById('researchMonthRow')?.classList.toggle('hidden',!(isResearch&&RESEARCH_ACTIVE_PAGE==='notes'));
@@ -840,6 +862,14 @@ function showModule(module,page){
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='cashflowHost'));
     ensureCashflowFrame(CASH_ACTIVE_PAGE);
     try{history.replaceState(null,'','#cash')}catch(e){}
+    return;
+  }
+  if(module==='leave'){
+    LEAVE_ACTIVE_PAGE=page||LEAVE_ACTIVE_PAGE||'leave';
+    syncModuleHeader('leave','leaveHost');
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='leaveHost'));
+    ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));
+    try{history.replaceState(null,'','#leave')}catch(e){}
     return;
   }
   if(module==='research'){
@@ -1064,6 +1094,7 @@ const INTEGRATED_CONFIG={
   cardDataSheet:'사용내역',cardDataStartRow:3,
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
+  leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
   researchWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
@@ -1251,25 +1282,27 @@ async function githubVerifyIntegratedAccess(){
     .then(value=>({value:!!value,error:''}))
     .catch(error=>({value:false,error:(error&&error.message)||'연구개발 권한 확인 오류'}));
 
-  const [card,cash,trip,researchResult]=await Promise.all([
+  const [card,cash,trip,leave,researchResult]=await Promise.all([
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cardSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cashSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId),
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.leaveSpreadsheetId),
     researchPromise
   ]);
   RESEARCH_ACCESS_ERROR=researchResult.error||'';
-  return {cash,card,trip,research:researchResult.value,researchError:RESEARCH_ACCESS_ERROR};
+  return {cash,card,trip,leave,research:researchResult.value,researchError:RESEARCH_ACCESS_ERROR};
 }
 function githubApplyModuleAccess(access){
   window.FRAMEBY_MODULE_ACCESS={
     cash:!!access?.cash,
     card:!!access?.card,
     trip:!!access?.trip,
+    leave:!!access?.leave,
     research:!!access?.research
   };
   window.FRAMEBY_ACCESS_READY=true;
 
-  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab',research:'researchPrimaryTab'};
+  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab',leave:'leavePrimaryTab',research:'researchPrimaryTab'};
   Object.entries(ids).forEach(([module,id])=>{
     const el=document.getElementById(id);
     if(!el) return;
@@ -1283,9 +1316,10 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.cash) document.getElementById('cashSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.card) document.getElementById('cardSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
+  if(!window.FRAMEBY_MODULE_ACCESS.leave) document.getElementById('leaveSecondaryMenu')?.classList.add('hidden');
 }
 function githubOpenAuthorizedInitialModule(){
-  const requested=location.hash==='#research'?'research':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
+  const requested=location.hash==='#research'?'research':location.hash==='#leave'?'leave':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
   const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
   if(!target) return false;
   showModule(target,githubDefaultPageForModule(target));
@@ -1294,6 +1328,937 @@ function githubOpenAuthorizedInitialModule(){
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
 function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));cardMap[cardName]??={name:cardName,group};raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원'});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1);idBy[name]=id;return{id,name,group:cardMap[name].group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
 async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
+
+/* ===== 연차관리 · GitHub 직접 Sheets API 백엔드 ===== */
+const LEAVE_CONFIG={
+  spreadsheetId:INTEGRATED_CONFIG.leaveSpreadsheetId,
+  employeeSheet:'사원정보',
+  settlementSummarySheet:'연차수당정산내역',
+  statusSheet:'WEB_정산상태',
+  leaveStoreSheet:'WEB_연차기록',
+  employeeStoreSheet:'WEB_사원정보',
+  settingsSheet:'WEB_설정',
+  yearPrefix:'월별사용대장(',
+  yearSuffix:'년)'
+};
+const GH_LEAVE_CACHE=new Map();
+function ghLeaveClearCache(){GH_LEAVE_CACHE.clear()}
+async function ghLeaveCached(key,fn){
+  if(GH_LEAVE_CACHE.has(key)) return GH_LEAVE_CACHE.get(key);
+  const p=Promise.resolve().then(fn);
+  GH_LEAVE_CACHE.set(key,p);
+  try{return await p}catch(e){GH_LEAVE_CACHE.delete(key);throw e}
+}
+function ghLeaveRound2(n){return Math.round((Number(n)+Number.EPSILON)*100)/100}
+function ghLeavePad2(n){return String(n).padStart(2,'0')}
+function ghLeaveNormalizeDate(value){
+  if(value===null||value===undefined||value==='') return '';
+  const s=String(value).trim();
+  if(!s) return '';
+  const m=s.match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
+  return m?`${m[1]}-${ghLeavePad2(Number(m[2]))}-${ghLeavePad2(Number(m[3]))}`:s;
+}
+function ghLeaveParseYmd(s){
+  const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) throw new Error(`날짜 형식이 올바르지 않습니다: ${s}`);
+  return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+}
+function ghLeaveYmd(date){return `${date.getFullYear()}-${ghLeavePad2(date.getMonth()+1)}-${ghLeavePad2(date.getDate())}`}
+function ghLeaveToday(){
+  const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+  return `${p.year}-${p.month}-${p.day}`;
+}
+function ghLeaveNowText(){return ghNow().replace('T',' ')}
+function ghLeaveDateCountInclusive(startDate,endDate){return Math.floor((ghLeaveParseYmd(endDate)-ghLeaveParseYmd(startDate))/86400000)+1}
+function ghLeaveValue(row,i){return i>=0&&row?row[i]:''}
+function ghLeaveToNumber(v){return ghNum(String(v??'').replace(/\(원\)/g,''))}
+async function ghLeaveMeta(){
+  return ghLeaveCached('meta',async()=>{
+    const id=LEAVE_CONFIG.spreadsheetId;
+    const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?fields=sheets.properties(sheetId,title,hidden)`;
+    const data=await githubFetchJson(u);
+    const list=(data.sheets||[]).map(s=>s.properties||{});
+    const byTitle={};list.forEach(x=>byTitle[x.title]=x);
+    return {list,byTitle};
+  });
+}
+async function ghLeaveRequireStores(){
+  const meta=await ghLeaveMeta();
+  const missing=[LEAVE_CONFIG.leaveStoreSheet,LEAVE_CONFIG.employeeStoreSheet,LEAVE_CONFIG.statusSheet].filter(n=>!meta.byTitle[n]);
+  if(missing.length) throw new Error(`연차관리 저장소 시트가 없습니다: ${missing.join(', ')}. 기존 연차관리대장에서 WEB 저장소를 먼저 준비해 주세요.`);
+  return true;
+}
+async function ghLeaveValues(sheet,a1){return ghValuesGet(LEAVE_CONFIG.spreadsheetId,sheet,a1)}
+async function ghLeaveFormulaValues(sheet,a1){
+  const range=`${ghQ(sheet)}!${a1}`;
+  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(LEAVE_CONFIG.spreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMULA&majorDimension=ROWS`;
+  return (await githubFetchJson(u)).values||[];
+}
+async function ghLeaveAvailableYears(){
+  return ghLeaveCached('years',async()=>{
+    const meta=await ghLeaveMeta();
+    return meta.list.map(x=>{const m=String(x.title||'').match(/^월별사용대장\((\d{4})년\)$/);return m?Number(m[1]):null}).filter(Boolean).sort((a,b)=>b-a);
+  });
+}
+async function ghLeaveGetSourceEmployees(){
+  return ghLeaveCached('sourceEmployees',async()=>{
+    const [values,formulas]=await Promise.all([
+      ghLeaveValues(LEAVE_CONFIG.employeeSheet,'A:Z'),
+      ghLeaveFormulaValues(LEAVE_CONFIG.employeeSheet,'A:Z')
+    ]);
+    const headerRow=values.findIndex(r=>r.includes('성명')&&r.includes('사원번호')&&r.includes('입사일')&&r.includes('최종근무일'));
+    if(headerRow<0) throw new Error('사원정보 머리글을 찾을 수 없습니다.');
+    const h=values[headerRow]||[];
+    const cols={name:h.indexOf('성명'),employeeNo:h.indexOf('사원번호'),dept:h.indexOf('부서'),position:h.indexOf('직책'),joinDate:h.indexOf('입사일'),months:h.indexOf('재직월수'),finalWorkDate:h.indexOf('최종근무일'),avgPay:h.indexOf('월평균임금')};
+    const out=[];
+    for(let r=headerRow+1;r<values.length;r++){
+      const no=ghText(ghLeaveValue(values[r],cols.employeeNo)),name=ghText(ghLeaveValue(values[r],cols.name));
+      if(!no&&!name){if(out.length)break;continue}
+      if(!/^\d{2}-\d{4}$/.test(no)) continue;
+      const finalFormula=String(ghLeaveValue(formulas[r]||[],cols.finalWorkDate)||'');
+      const isDefault=/\b(?:NOW|TODAY)\s*\(/i.test(finalFormula);
+      out.push({row:r+1,employeeNo:no,name,dept:ghText(ghLeaveValue(values[r],cols.dept)),position:ghText(ghLeaveValue(values[r],cols.position)),joinDate:ghLeaveNormalizeDate(ghLeaveValue(values[r],cols.joinDate)),finalWorkDate:isDefault?'':ghLeaveNormalizeDate(ghLeaveValue(values[r],cols.finalWorkDate)),avgPay:ghLeaveToNumber(ghLeaveValue(values[r],cols.avgPay)),isDefaultFinalWorkDate:isDefault});
+    }
+    return out;
+  });
+}
+async function ghLeaveGetEmployeeInfo(){
+  return ghLeaveCached('employeeInfo',async()=>{
+    const meta=await ghLeaveMeta();
+    if(meta.byTitle[LEAVE_CONFIG.employeeStoreSheet]){
+      const rows=await ghLeaveValues(LEAVE_CONFIG.employeeStoreSheet,'A2:J');
+      const out=[];
+      rows.forEach((r,i)=>{
+        const employeeNo=ghText(r?.[0]),name=ghText(r?.[1]);
+        if(!employeeNo&&!name)return;
+        out.push({row:i+2,employeeNo,name,dept:ghText(r?.[2]),position:ghText(r?.[3]),joinDate:ghLeaveNormalizeDate(r?.[4]),finalWorkDate:ghLeaveNormalizeDate(r?.[5]),avgPay:ghLeaveToNumber(r?.[6]),webStatus:ghText(r?.[7]),createdAt:r?.[8]||'',updatedAt:r?.[9]||''});
+      });
+      if(out.length) return out;
+    }
+    return (await ghLeaveGetSourceEmployees()).map(e=>({...e,webStatus:e.finalWorkDate?'퇴사예정/완료':'재직'}));
+  });
+}
+async function ghLeaveStatusMap(){
+  return ghLeaveCached('statusMap',async()=>{
+    const meta=await ghLeaveMeta(); if(!meta.byTitle[LEAVE_CONFIG.statusSheet]) return {};
+    const rows=await ghLeaveValues(LEAVE_CONFIG.statusSheet,'A2:G'); const map={};
+    rows.forEach((r,i)=>{const no=ghText(r?.[0]);if(!no)return;map[no]={row:i+2,employeeNo:no,name:ghText(r?.[1]),status:ghText(r?.[2])||'정산예정',confirmedAt:ghText(r?.[3]),finalWorkDate:ghLeaveNormalizeDate(r?.[4]),snapshotJson:String(r?.[5]||''),memo:String(r?.[6]||'')}});
+    return map;
+  });
+}
+function ghLeaveResolveSettlementStatus(emp,statusRow){return statusRow&&statusRow.status==='정산완료'?'정산완료':'정산예정'}
+async function ghLeaveEmployeeDirectory(){
+  return ghLeaveCached('employeeDirectory',async()=>{
+    const [employees,statusMap]=await Promise.all([ghLeaveGetEmployeeInfo(),ghLeaveStatusMap()]); const today=ghLeaveToday();
+    return employees.map(emp=>{const statusRow=statusMap[emp.employeeNo],settlementStatus=ghLeaveResolveSettlementStatus(emp,statusRow),isRetired=!!emp.finalWorkDate&&emp.finalWorkDate<today;return{employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,avgPay:Number(emp.avgPay||0),settlementStatus,isFinalDateSet:!!emp.finalWorkDate,isRetired,isClosed:isRetired&&settlementStatus==='정산완료'}}).sort((a,b)=>a.isRetired!==b.isRetired?(a.isRetired?1:-1):a.isRetired?(a.finalWorkDate||'').localeCompare(b.finalWorkDate||''):(a.joinDate||'').localeCompare(b.joinDate||''));
+  });
+}
+function ghLeaveIsMonthSectionRow(values,row){const label=ghText(values?.[row]?.[1]);if(!/^\d{1,2}월$/.test(label))return false;return (values?.[row+1]||[]).some(v=>/^01일$/.test(ghText(v)))}
+async function ghLeaveBaseYearSummary(year){
+  return ghLeaveCached(`yearBase:${year}`,async()=>{
+    const sheet=`${LEAVE_CONFIG.yearPrefix}${year}${LEAVE_CONFIG.yearSuffix}`;
+    const values=await ghLeaveValues(sheet,'A:AZ');
+    const headerRow=values.findIndex(r=>(r||[]).includes('연차일수')&&(r||[]).includes('잔여일수'));
+    if(headerRow<0) throw new Error(`${year}년 연차 요약 머리글을 찾을 수 없습니다.`);
+    const h=values[headerRow]||[],joinCol=h.indexOf('입사일자'),codeCol=joinCol-1;
+    const cols={joinDate:joinCol,annualLeave:h.indexOf('연차일수'),paidLeave:h.indexOf('유급휴가일수'),used:h.indexOf('연차사용누계'),settledLeave:h.indexOf('연차수당처리일수'),remain:h.indexOf('잔여일수'),total:h.indexOf('누적 합계')};
+    const monthCols={};for(let m=1;m<=12;m++)monthCols[m]=h.findIndex(v=>v===`${m}월`||v===`${ghLeavePad2(m)}월`);
+    let summaryEnd=values.length;for(let r=headerRow+2;r<values.length-1;r++){if(ghLeaveIsMonthSectionRow(values,r)){summaryEnd=r;break}}
+    const out=[];
+    for(let r=headerRow+1;r<summaryEnd-1;r++){
+      const code=ghText(ghLeaveValue(values[r],codeCol));if(!/^\d{2}-\d{4}$/.test(code))continue;
+      const months={};for(let m=1;m<=12;m++)months[m]=monthCols[m]>=0?ghLeaveToNumber(ghLeaveValue(values[r],monthCols[m])):0;
+      out.push({employeeNo:code,name:ghText(ghLeaveValue(values[r+1]||[],codeCol)),joinDate:ghLeaveNormalizeDate(ghLeaveValue(values[r],cols.joinDate)),annualLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.annualLeave)),paidLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.paidLeave)),used:ghLeaveToNumber(ghLeaveValue(values[r],cols.used)),settledLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.settledLeave)),remain:ghLeaveToNumber(ghLeaveValue(values[r],cols.remain)),months,total:cols.total>=0?ghLeaveToNumber(ghLeaveValue(values[r],cols.total)):ghLeaveToNumber(ghLeaveValue(values[r],cols.used))});
+    }
+    return out;
+  });
+}
+async function ghLeaveRecords(){
+  return ghLeaveCached('leaveRecords',async()=>{
+    await ghLeaveRequireStores(); const rows=await ghLeaveValues(LEAVE_CONFIG.leaveStoreSheet,'A2:Q');
+    return rows.map((r,i)=>{const eventId=ghText(r?.[0]);if(!eventId)return null;return{row:i+2,eventId,employeeNo:ghText(r?.[1]),employeeName:ghText(r?.[2]),startDate:ghLeaveNormalizeDate(r?.[3]),endDate:ghLeaveNormalizeDate(r?.[4]),type:ghText(r?.[5]),detail:ghText(r?.[6]),token:ghText(r?.[7]),deductionPerDay:ghLeaveToNumber(r?.[8]),totalDeduction:ghLeaveToNumber(r?.[9]),memo:String(r?.[10]||''),status:ghText(r?.[11])||'ACTIVE',createdAt:r?.[12]||'',updatedAt:r?.[13]||'',deletedAt:r?.[14]||'',createdBy:ghText(r?.[15]),updatedBy:ghText(r?.[16])}}).filter(Boolean);
+  });
+}
+async function ghLeaveDeductionMap(){
+  return ghLeaveCached('deductionMap',async()=>{
+    const values=await ghLeaveValues(LEAVE_CONFIG.employeeSheet,'A:Z'); let headerRow=-1,itemCol=-1,valueCol=-1;
+    outer:for(let r=0;r<values.length;r++){for(let c=0;c<(values[r]||[]).length-1;c++){if(ghText(values[r][c])==='항목'&&ghText(values[r][c+1])==='차감수'){headerRow=r;itemCol=c;valueCol=c+1;break outer}}}
+    if(headerRow<0)return{연차:1,반차:.5,유급:0,지각10m:.17,지각30m:.5,지각1h:.13,지각2h:.25,지각3h:.38,조기40m:.67,'조기0.5':.06,'조기1.0':.13,'조기1.5':.19,'조기2.0':.25,'조기2.5':.31,'조기3.0':.38,'조기3.5':.44,'조기4.0':.52,'조기4.5':.59};
+    const map={};for(let r=headerRow+1;r<values.length;r++){const item=ghText(values[r]?.[itemCol]);if(!item){if(Object.keys(map).length)break;continue}map[item]=ghLeaveToNumber(values[r]?.[valueCol])}return map;
+  });
+}
+function ghLeaveToken(type,detail){if(type==='연차'||type==='반차'||type==='유급')return type;if(type==='지각'||type==='조기퇴근'){if(!detail)throw new Error(`${type} 시간을 선택해 주세요.`);return detail}throw new Error('지원하지 않는 연차 구분입니다.')}
+async function ghLeaveBuildYearSummary(year){
+  return ghLeaveCached(`webYear:${year}`,async()=>{
+    const [baseRows,directory,records,statusMap]=await Promise.all([ghLeaveBaseYearSummary(year),ghLeaveEmployeeDirectory(),ghLeaveRecords(),ghLeaveStatusMap()]);
+    const baseMap={};baseRows.forEach(x=>baseMap[x.employeeNo]=x);
+    const active=records.filter(r=>r.status==='ACTIVE'&&Number(String(r.startDate).slice(0,4))===Number(year));
+    return directory.map(emp=>{
+      const base=baseMap[emp.employeeNo]||{employeeNo:emp.employeeNo,name:emp.name,joinDate:emp.joinDate,annualLeave:0};
+      let used=0,paidLeave=0;const months={};for(let m=1;m<=12;m++)months[m]=0;
+      active.filter(r=>r.employeeNo===emp.employeeNo).forEach(record=>{const start=ghLeaveParseYmd(record.startDate),end=ghLeaveParseYmd(record.endDate);for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){const key=ghLeaveYmd(d);if(emp.finalWorkDate&&key>emp.finalWorkDate)continue;const m=d.getMonth()+1;if(record.type==='유급')paidLeave=ghLeaveRound2(paidLeave+1);else{const per=Number(record.deductionPerDay||0);used=ghLeaveRound2(used+per);months[m]=ghLeaveRound2(months[m]+per)}}});
+      const annualLeave=Number(base.annualLeave||0);const auto=emp.finalWorkDate?ghLeaveRound2(Math.max(0,annualLeave-used)):0;let settledLeave=auto;const status=statusMap[emp.employeeNo];if(status?.status==='정산완료'&&status.snapshotJson){try{const snap=JSON.parse(status.snapshotJson);if(snap.settlementProcessedDays!==undefined&&snap.settlementProcessedDays!==null)settledLeave=Number(snap.settlementProcessedDays)}catch(e){}}
+      return{employeeNo:emp.employeeNo,name:emp.name,joinDate:emp.joinDate,annualLeave,paidLeave,used,settledLeave:ghLeaveRound2(settledLeave),remain:ghLeaveRound2(Math.max(0,annualLeave-used-settledLeave)),months,total:used,finalWorkDate:emp.finalWorkDate,settlementStatus:emp.settlementStatus,isFinalDateSet:emp.isFinalDateSet,isRetired:emp.isRetired,isClosed:emp.isClosed};
+    }).sort((a,b)=>a.isRetired!==b.isRetired?(a.isRetired?1:-1):a.isRetired?(a.finalWorkDate||'').localeCompare(b.finalWorkDate||''):(a.joinDate||'').localeCompare(b.joinDate||''));
+  });
+}
+async function ghLeaveCalendarEvents(year,month){
+  const startDate=`${year}-${ghLeavePad2(month)}-01`,endDate=`${year}-${ghLeavePad2(month)}-${ghLeavePad2(new Date(year,month,0).getDate())}`;
+  return (await ghLeaveRecords()).filter(r=>r.status==='ACTIVE'&&r.endDate>=startDate&&r.startDate<=endDate).map(r=>({eventId:r.eventId,employeeNo:r.employeeNo,employeeName:r.employeeName,startDate:r.startDate,endDate:r.endDate,type:r.type,detail:r.detail,deduction:r.totalDeduction,memo:r.memo})).sort((a,b)=>a.startDate.localeCompare(b.startDate)||a.employeeName.localeCompare(b.employeeName));
+}
+async function ghLeaveSettlementSummaryMap(){
+  return ghLeaveCached('settlementSummary',async()=>{
+    const meta=await ghLeaveMeta();if(!meta.byTitle[LEAVE_CONFIG.settlementSummarySheet])return{};
+    const values=await ghLeaveValues(LEAVE_CONFIG.settlementSummarySheet,'A:Z');const headerRow=values.findIndex(r=>(r||[]).includes('사원번호')&&(r||[]).includes('연차수당'));if(headerRow<0)return{};
+    const h=values[headerRow]||[],cols={employeeNo:h.indexOf('사원번호'),dept:h.indexOf('부서'),name:h.indexOf('성명'),position:h.indexOf('직책'),joinDate:h.indexOf('입사일'),monthlyAvgPay:h.indexOf('월평균임금'),hourlyPay:h.indexOf('시간급여'),dayPay:h.indexOf('1일평균임금'),annualLeave:h.indexOf('연차 잔여 일수'),usedLeave:h.indexOf('사용일수'),unusedLeave:h.indexOf('미사용일수'),leavePay:h.indexOf('연차수당')};
+    const map={};for(let r=headerRow+1;r<values.length;r++){const no=ghText(ghLeaveValue(values[r],cols.employeeNo));if(!/^\d{2}-\d{4}$/.test(no)){if(Object.keys(map).length)break;continue}map[no]={employeeNo:no,dept:ghText(ghLeaveValue(values[r],cols.dept)),name:ghText(ghLeaveValue(values[r],cols.name)),position:ghText(ghLeaveValue(values[r],cols.position)),joinDate:ghLeaveNormalizeDate(ghLeaveValue(values[r],cols.joinDate)),monthlyAvgPay:ghLeaveToNumber(ghLeaveValue(values[r],cols.monthlyAvgPay)),hourlyPay:ghLeaveToNumber(ghLeaveValue(values[r],cols.hourlyPay)),dayPay:ghLeaveToNumber(ghLeaveValue(values[r],cols.dayPay)),annualLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.annualLeave)),usedLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.usedLeave)),unusedLeave:ghLeaveToNumber(ghLeaveValue(values[r],cols.unusedLeave)),leavePay:ghLeaveToNumber(ghLeaveValue(values[r],cols.leavePay))}}
+    return map;
+  });
+}
+function ghLeaveFindRowByText(values,text){for(let r=0;r<values.length;r++){if((values[r]||[]).some(v=>ghText(v)===text))return r}return-1}
+function ghLeaveValueByHeader(header,data,title){const i=(header||[]).indexOf(title);return i>=0?ghLeaveToNumber(data?.[i]):null}
+function ghLeaveValueByHeaderRaw(header,data,title){const i=(header||[]).indexOf(title);return i>=0?(data?.[i]??''):''}
+async function ghLeaveLegacySettlement(name){
+  return ghLeaveCached(`legacy:${name}`,async()=>{
+    const sheet=`연차수당정산서(${name})`,meta=await ghLeaveMeta();if(!meta.byTitle[sheet])return null;
+    const values=await ghLeaveValues(sheet,'A:Z'),result={};
+    let r=ghLeaveFindRowByText(values,'근로자 정보');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.dept=d[h.indexOf('부서')]||'';result.position=d[h.indexOf('직급/직책')]||'';result.joinDate=ghLeaveNormalizeDate(d[h.indexOf('입사일')])}
+    r=ghLeaveFindRowByText(values,'연차 발생 및 사용 현황');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.accruedLeave=ghLeaveValueByHeader(h,d,'발생 연차(일)');result.usedLeave=ghLeaveValueByHeader(h,d,'사용 연차(일)');result.remainingLeave=ghLeaveValueByHeader(h,d,'잔여 연차(일)');result.unusedLeave=ghLeaveValueByHeader(h,d,'미사용 연차(일)');result.finalWorkDate=ghLeaveNormalizeDate(ghLeaveValueByHeaderRaw(h,d,'정산기준일'))}
+    r=ghLeaveFindRowByText(values,'급여 산정 내역');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.monthlyAvgPay=ghLeaveValueByHeader(h,d,'월평균임금(원)');result.hourlyPay=ghLeaveValueByHeader(h,d,'시간급여(원)');result.dayPay=ghLeaveValueByHeader(h,d,'일할급여(원)');result.salary=ghLeaveValueByHeader(h,d,'급여액(원)');result.settlementDays=ghLeaveValueByHeader(h,d,'정산일수(일)')}
+    r=ghLeaveFindRowByText(values,'연차수당 산정 내역');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.monthlyAvgPay=result.monthlyAvgPay||ghLeaveValueByHeader(h,d,'월평균임금(원)');result.dayPay=result.dayPay||ghLeaveValueByHeader(h,d,'1일 통상임금(원)');result.unusedLeave=result.unusedLeave??ghLeaveValueByHeader(h,d,'미사용 연차일수(일)');result.leavePay=ghLeaveValueByHeader(h,d,'연차수당(원)');result.payDate=ghLeaveNormalizeDate(ghLeaveValueByHeaderRaw(h,d,'지급예정일'))}
+    r=ghLeaveFindRowByText(values,'급여 및 연차수당 지급 예정 금액');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.salary=result.salary||ghLeaveValueByHeader(h,d,'급여(원)');result.leavePay=result.leavePay||ghLeaveValueByHeader(h,d,'연차수당(원)');result.totalPay=ghLeaveValueByHeader(h,d,'총급여액(원)');result.insurance=ghLeaveValueByHeader(h,d,'사회보험료(원)')||ghLeaveValueByHeader(h,d,'급여공제액(원)');result.netBeforeExtra=ghLeaveValueByHeader(h,d,'차인지급액')}
+    r=ghLeaveFindRowByText(values,'추가 공제 내역');if(r>=0){const h=values[r+1]||[],d=values[r+2]||[];result.managementFee=ghLeaveValueByHeader(h,d,'건물관리비');result.incomeTax=ghLeaveValueByHeader(h,d,'소득세');result.finalPay=ghLeaveValueByHeader(h,d,'실지급액')}
+    for(const row of values){const idx=(row||[]).findIndex(v=>ghText(v)==='실지급액');if(idx>=0&&row[idx+1]){result.finalPay=result.finalPay||ghLeaveToNumber(row[idx+1]);const wi=row.findIndex(v=>ghText(v)==='일금');if(wi>=0)result.finalPayKorean=ghText(row[wi+1])}}
+    return result;
+  });
+}
+async function ghLeaveNormalizeSettlementDetail(detail,employeeNo){
+  const d={...(detail||{})},employees=await ghLeaveGetEmployeeInfo(),emp=employees.find(x=>x.employeeNo===employeeNo)||{},statusMap=await ghLeaveStatusMap();
+  const finalWorkDate=d.finalWorkDate||emp.finalWorkDate||'';const year=finalWorkDate?Number(String(finalWorkDate).slice(0,4)):new Date().getFullYear();const years=await ghLeaveAvailableYears();let annual={};if(years.includes(year)){const rows=await ghLeaveBuildYearSummary(year);annual=rows.find(x=>x.employeeNo===employeeNo)||{}}
+  const annualLeave=d.accruedLeave??annual.annualLeave??null,usedLeave=d.usedLeave??annual.used??null;const baseAvailable=annualLeave!==null&&annualLeave!==undefined&&usedLeave!==null&&usedLeave!==undefined?ghLeaveRound2(Math.max(0,Number(annualLeave)-Number(usedLeave))):(d.unusedLeave!==null&&d.unusedLeave!==undefined?Number(d.unusedLeave):null);
+  let processed=finalWorkDate&&baseAvailable!==null?baseAvailable:0;const status=statusMap[employeeNo];if(status?.status==='정산완료'&&status.snapshotJson){try{const snap=JSON.parse(status.snapshotJson);if(snap.settlementProcessedDays!==undefined&&snap.settlementProcessedDays!==null)processed=Number(snap.settlementProcessedDays)}catch(e){}}
+  d.employeeNo=employeeNo;d.finalWorkDate=finalWorkDate;d.accruedLeave=annualLeave;d.usedLeave=usedLeave;d.baseAvailableDays=baseAvailable;d.settlementProcessedDays=ghLeaveRound2(processed);d.remainingAfterSettlement=baseAvailable===null?null:ghLeaveRound2(Math.max(0,baseAvailable-d.settlementProcessedDays));d.remainingLeave=d.remainingAfterSettlement;d.unusedLeave=baseAvailable;if(d.dayPay!==null&&d.dayPay!==undefined)d.leavePay=Math.trunc(Number(d.dayPay)*d.settlementProcessedDays);return d;
+}
+async function ghLeaveSettlementDetail(employeeNo){
+  const employees=await ghLeaveGetEmployeeInfo(),emp=employees.find(x=>x.employeeNo===employeeNo);if(!emp)throw new Error('정산 대상자를 찾을 수 없습니다.');const statusMap=await ghLeaveStatusMap(),status=statusMap[employeeNo];
+  if(status?.snapshotJson){try{const snap=JSON.parse(status.snapshotJson);const n=await ghLeaveNormalizeSettlementDetail(snap,employeeNo);n.status=status.status||n.status||'정산예정';n.confirmedAt=status.confirmedAt||n.confirmedAt||'';return n}catch(e){}}
+  const legacy=await ghLeaveLegacySettlement(emp.name);if(legacy){legacy.employeeNo=emp.employeeNo;legacy.name=emp.name;legacy.dept=legacy.dept||emp.dept;legacy.position=legacy.position||emp.position;legacy.joinDate=legacy.joinDate||emp.joinDate;legacy.finalWorkDate=emp.finalWorkDate||legacy.finalWorkDate;legacy.status=ghLeaveResolveSettlementStatus(emp,status);return ghLeaveNormalizeSettlementDetail(legacy,employeeNo)}
+  const year=emp.finalWorkDate?Number(emp.finalWorkDate.slice(0,4)):new Date().getFullYear(),years=await ghLeaveAvailableYears();const webRows=years.includes(year)?await ghLeaveBuildYearSummary(year):[],annual=webRows.find(x=>x.employeeNo===employeeNo)||{},summary=(await ghLeaveSettlementSummaryMap())[employeeNo]||{};const unused=annual.remain!==undefined&&annual.remain!==null?Math.max(0,Number(annual.annualLeave||0)-Number(annual.used||0)):(summary.unusedLeave??0);const dayPay=summary.dayPay|| (emp.avgPay?emp.avgPay/209*8:null);
+  return ghLeaveNormalizeSettlementDetail({employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,accruedLeave:annual.annualLeave??null,usedLeave:annual.used??null,remainingLeave:annual.remain??null,unusedLeave:unused,monthlyAvgPay:emp.avgPay||summary.monthlyAvgPay||null,hourlyPay:summary.hourlyPay||(emp.avgPay?emp.avgPay/209:null),dayPay,leavePay:dayPay&&unused!==null?Math.trunc(dayPay*unused):null,payDate:emp.finalWorkDate||'',salary:null,totalPay:null,insurance:null,netBeforeExtra:null,managementFee:null,incomeTax:null,finalPay:null,finalPayKorean:'',status:status?status.status:'정산예정',calculationNote:'연차수당처리일수는 웹에서 자동 계산하며 원본 월별사용대장 셀은 변경하지 않습니다.'},employeeNo);
+}
+async function ghLeaveSettlementList(){
+  const employees=(await ghLeaveGetEmployeeInfo()).filter(e=>!!e.finalWorkDate),statusMap=await ghLeaveStatusMap(),today=ghLeaveToday();const rows=[];
+  for(const emp of employees){const detail=await ghLeaveSettlementDetail(emp.employeeNo),status=ghLeaveResolveSettlementStatus(emp,statusMap[emp.employeeNo]);rows.push({employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,unusedLeave:detail.baseAvailableDays??null,settlementProcessedDays:detail.settlementProcessedDays??null,leavePay:detail.leavePay??null,status,isPast:emp.finalWorkDate<=today})}
+  return{current:rows.filter(x=>!x.isPast).sort((a,b)=>(a.joinDate||'').localeCompare(b.joinDate||'')),history:rows.filter(x=>x.isPast).sort((a,b)=>(a.finalWorkDate||'').localeCompare(b.finalWorkDate||'')),today};
+}
+async function ghLeaveUpsertStatus(employeeNo,name,status,confirmedAt,finalWorkDate,snapshotJson,memo){
+  const map=await ghLeaveStatusMap(),row=map[employeeNo]?.row,values=[[employeeNo,name,status||'정산예정',confirmedAt||'',finalWorkDate||'',snapshotJson||'',memo||'']];if(row)await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.statusSheet,`A${row}:G${row}`,values);else await ghValuesAppend(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.statusSheet,'A:G',values);ghLeaveClearCache();
+}
+async function ghLeaveGetAppData(year,month){
+  await ghLeaveRequireStores();const years=await ghLeaveAvailableYears();const now=new Date();year=Number(year)||(years.includes(now.getFullYear())?now.getFullYear():Math.max(...years));month=Number(month)||(year===now.getFullYear()?now.getMonth()+1:1);if(!years.includes(year))year=Math.max(...years);if(month<1||month>12)month=1;
+  const [employees,directory,calendarEvents,deductionMap,settlementList]=await Promise.all([ghLeaveBuildYearSummary(year),ghLeaveEmployeeDirectory(),ghLeaveCalendarEvents(year,month),ghLeaveDeductionMap(),ghLeaveSettlementList()]);return{year,month,years,employees,employeeDirectory:directory,calendarEvents,deductionMap,settlementList};
+}
+async function ghLeaveSaveRecord(payload){
+  ghLeaveClearCache();await ghLeaveRequireStores();if(!payload)throw new Error('저장할 일정 정보가 없습니다.');const employeeNo=ghText(payload.employeeNo),startDate=ghText(payload.startDate),endDate=ghText(payload.endDate),type=ghText(payload.type),detail=ghText(payload.detail),memo=String(payload.memo||''),oldEventId=ghText(payload.eventId);if(!employeeNo||!startDate||!endDate||!type)throw new Error('사원, 시작일, 종료일, 구분을 모두 입력해 주세요.');if(endDate<startDate)throw new Error('종료일은 시작일보다 빠를 수 없습니다.');const start=ghLeaveParseYmd(startDate),end=ghLeaveParseYmd(endDate),year=start.getFullYear();if(end.getFullYear()!==year)throw new Error('연차 기간은 같은 연도 안에서 등록해 주세요.');const employee=(await ghLeaveGetEmployeeInfo()).find(x=>x.employeeNo===employeeNo);if(!employee)throw new Error('사원정보에서 해당 사원을 찾을 수 없습니다.');const token=ghLeaveToken(type,detail),deductionMap=await ghLeaveDeductionMap(),deductionPerDay=deductionMap[token]!==undefined?Number(deductionMap[token]):0,totalDeduction=ghLeaveRound2(deductionPerDay*ghLeaveDateCountInclusive(startDate,endDate));const records=await ghLeaveRecords();let old=null,eventId=oldEventId||`E${year}_${crypto.randomUUID()}`;if(oldEventId){old=records.find(r=>r.eventId===oldEventId&&r.status==='ACTIVE');if(!old)throw new Error('수정할 기존 연차기록을 저장소에서 찾을 수 없습니다.')}const conflict=records.find(r=>r.status==='ACTIVE'&&r.employeeNo===employeeNo&&r.eventId!==eventId&&!(endDate<r.startDate||startDate>r.endDate));if(conflict)throw new Error(`${conflict.startDate} ~ ${conflict.endDate}에 이미 '${conflict.token}' 일정이 등록되어 있습니다.`);const now=ghLeaveNowText(),actor=GITHUB_USER_EMAIL||'',record={eventId,employeeNo,employeeName:employee.name,startDate,endDate,type,detail,token,deductionPerDay,totalDeduction,memo,status:'ACTIVE',createdAt:old?old.createdAt:now,updatedAt:now,deletedAt:'',createdBy:old?old.createdBy:actor,updatedBy:actor};const vals=[[record.eventId,record.employeeNo,record.employeeName,record.startDate,record.endDate,record.type,record.detail,record.token,record.deductionPerDay,record.totalDeduction,record.memo,record.status,record.createdAt,record.updatedAt,record.deletedAt,record.createdBy,record.updatedBy]];if(old)await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.leaveStoreSheet,`A${old.row}:Q${old.row}`,vals);else await ghValuesAppend(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.leaveStoreSheet,'A:Q',vals);ghLeaveClearCache();return ghLeaveGetAppData(year,start.getMonth()+1);
+}
+async function ghLeaveDeleteRecord(eventId){
+  ghLeaveClearCache();await ghLeaveRequireStores();if(!eventId)throw new Error('삭제할 일정 ID가 없습니다.');const r=(await ghLeaveRecords()).find(x=>x.eventId===String(eventId)&&x.status==='ACTIVE');if(!r)throw new Error('삭제할 연차기록을 저장소에서 찾을 수 없습니다.');const now=ghLeaveNowText(),vals=[[r.eventId,r.employeeNo,r.employeeName,r.startDate,r.endDate,r.type,r.detail,r.token,r.deductionPerDay,r.totalDeduction,r.memo,'DELETED',r.createdAt,now,now,r.createdBy,GITHUB_USER_EMAIL||'']];await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.leaveStoreSheet,`A${r.row}:Q${r.row}`,vals);ghLeaveClearCache();return{ok:true};
+}
+async function ghLeaveSaveEmployee(payload){
+  ghLeaveClearCache();await ghLeaveRequireStores();if(!payload)throw new Error('사원정보가 없습니다.');const originalEmployeeNo=ghText(payload.originalEmployeeNo),employeeNo=ghText(payload.employeeNo),name=ghText(payload.name),dept=ghText(payload.dept),position=ghText(payload.position),joinDate=ghText(payload.joinDate),finalWorkDate=ghText(payload.finalWorkDate),avgPay=Number(payload.avgPay||0);if(!employeeNo||!name||!joinDate)throw new Error('사원번호, 성명, 입사일은 필수입니다.');if(finalWorkDate&&finalWorkDate<joinDate)throw new Error('최종근무일은 입사일보다 빠를 수 없습니다.');const employees=await ghLeaveGetEmployeeInfo();const duplicate=employees.find(e=>e.employeeNo===employeeNo&&(!originalEmployeeNo||e.employeeNo!==originalEmployeeNo));if(duplicate)throw new Error('이미 사용 중인 사원번호입니다.');let existing=null;if(originalEmployeeNo){existing=employees.find(e=>e.employeeNo===originalEmployeeNo);if(!existing)throw new Error('수정할 사원을 찾을 수 없습니다.');if(employeeNo!==originalEmployeeNo)throw new Error('기존 사원의 사원번호는 변경할 수 없습니다.')}const now=ghLeaveNowText(),created=existing?.createdAt||now,vals=[[employeeNo,name,dept,position,joinDate,finalWorkDate,avgPay,finalWorkDate?'웹입력':'재직',created,now]];if(existing?.row)await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.employeeStoreSheet,`A${existing.row}:J${existing.row}`,vals);else await ghValuesAppend(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.employeeStoreSheet,'A:J',vals);ghLeaveClearCache();const oldStatus=(await ghLeaveStatusMap())[employeeNo];if(finalWorkDate){const same=ghLeaveNormalizeDate(oldStatus?.finalWorkDate||'')===finalWorkDate,keep=same&&oldStatus?.status==='정산완료';await ghLeaveUpsertStatus(employeeNo,name,keep?'정산완료':'정산예정',keep?(oldStatus.confirmedAt||''):'',finalWorkDate,keep?(oldStatus.snapshotJson||''):'','사원정보에서 최종근무일 저장')}else await ghLeaveUpsertStatus(employeeNo,name,'정산예정','','','','최종근무일 없음');ghLeaveClearCache();return ghLeaveEmployeeDirectory();
+}
+async function ghLeaveSetFinalWorkDate(employeeNo,finalDate){
+  ghLeaveClearCache();const emp=(await ghLeaveGetEmployeeInfo()).find(x=>x.employeeNo===employeeNo);if(!emp)throw new Error('사원정보에서 해당 사원을 찾을 수 없습니다.');const map=await ghLeaveStatusMap(),old=map[employeeNo]||{};let status=old.status||'정산예정',snapshot=old.snapshotJson||'';if(ghLeaveNormalizeDate(old.finalWorkDate||'')!==String(finalDate||'')){status='정산예정';snapshot=''}await ghLeaveUpsertStatus(employeeNo,emp.name,status,status==='정산완료'?(old.confirmedAt||ghLeaveNowText()):'',finalDate||'',snapshot,'웹 최종근무일 저장 - 원본 사원정보 미변경');ghLeaveClearCache();return ghLeaveSettlementList();
+}
+async function ghLeaveConfirmSettlement(employeeNo){
+  ghLeaveClearCache();const detail=await ghLeaveSettlementDetail(employeeNo);if(!detail.finalWorkDate)throw new Error('사원정보에서 최종근무일을 먼저 입력해 주세요.');const processed=detail.baseAvailableDays===null?0:ghLeaveRound2(Math.max(0,Number(detail.baseAvailableDays)));detail.settlementProcessedDays=processed;detail.remainingAfterSettlement=detail.baseAvailableDays===null?null:ghLeaveRound2(Math.max(0,Number(detail.baseAvailableDays)-processed));detail.remainingLeave=detail.remainingAfterSettlement;if(detail.dayPay!==null&&detail.dayPay!==undefined)detail.leavePay=Math.trunc(Number(detail.dayPay)*processed);detail.status='정산완료';detail.confirmedAt=ghLeaveNowText();await ghLeaveUpsertStatus(detail.employeeNo,detail.name,'정산완료',detail.confirmedAt,detail.finalWorkDate,JSON.stringify(detail),'웹 자동 정산 확정 - 원본 시트 미변경');ghLeaveClearCache();return{list:await ghLeaveSettlementList(),detail};
+}
+const LeaveBackend={
+  getAppData:ghLeaveGetAppData,
+  saveLeave:ghLeaveSaveRecord,
+  deleteLeave:ghLeaveDeleteRecord,
+  saveEmployee:ghLeaveSaveEmployee,
+  getSettlementList:ghLeaveSettlementList,
+  setFinalWorkDate:ghLeaveSetFinalWorkDate,
+  getSettlementDetail:ghLeaveSettlementDetail,
+  confirmSettlement:ghLeaveConfirmSettlement
+};
+
+function createLeaveApp(root){
+const PALETTE = [
+  ['#5b8def','#eaf2ff'],['#e08b4f','#fff1e8'],['#65a66f','#eef9ef'],['#9b78d6','#f5edff'],
+  ['#d56f92','#fff0f5'],['#4aa49e','#eaf8f7'],['#c59a2e','#fff8df'],['#7891a8','#edf3f7'],
+  ['#b57575','#f8eded'],['#6f8a59','#f1f6ed']
+];
+
+let state = {year:null,month:null,years:[],employees:[],employeeDirectory:[],calendarEvents:[],deductionMap:{},settlementList:null};
+let colors = {};
+let editingEvent = null;
+let currentSettlement = null;
+const loading=root.getElementById('loading');
+const leaveNav=root.getElementById('leaveNav');
+const settleNav=root.getElementById('settleNav');
+const employeeNav=root.getElementById('employeeNav');
+const topActions=root.getElementById('topActions');
+const yearSelect=root.getElementById('yearSelect');
+const monthSelect=root.getElementById('monthSelect');
+const leavePage=root.getElementById('leavePage');
+const legend=root.getElementById('legend');
+const calendarTitle=root.getElementById('calendarTitle');
+const calendar=root.getElementById('calendar');
+const statusSub=root.getElementById('statusSub');
+const statusBody=root.getElementById('statusBody');
+const monthlyBody=root.getElementById('monthlyBody');
+const employeePage=root.getElementById('employeePage');
+const employeeBody=root.getElementById('employeeBody');
+const settlePage=root.getElementById('settlePage');
+const settlementRows=root.getElementById('settlementRows');
+const settlementDetail=root.getElementById('settlementDetail');
+const leaveOverlay=root.getElementById('leaveOverlay');
+const leaveModalTitle=root.getElementById('leaveModalTitle');
+const employeeSelect=root.getElementById('employeeSelect');
+const startDate=root.getElementById('startDate');
+const endDate=root.getElementById('endDate');
+const leaveType=root.getElementById('leaveType');
+const halfField=root.getElementById('halfField');
+const halfType=root.getElementById('halfType');
+const lateField=root.getElementById('lateField');
+const lateType=root.getElementById('lateType');
+const earlyField=root.getElementById('earlyField');
+const earlyType=root.getElementById('earlyType');
+const deductionField=root.getElementById('deductionField');
+const deductionPreview=root.getElementById('deductionPreview');
+const memo=root.getElementById('memo');
+const deleteLeaveBtn=root.getElementById('deleteLeaveBtn');
+const employeeOverlay=root.getElementById('employeeOverlay');
+const employeeModalTitle=root.getElementById('employeeModalTitle');
+const originalEmployeeNo=root.getElementById('originalEmployeeNo');
+const empNo=root.getElementById('empNo');
+const empName=root.getElementById('empName');
+const empDept=root.getElementById('empDept');
+const empPosition=root.getElementById('empPosition');
+const empJoinDate=root.getElementById('empJoinDate');
+const empFinalDate=root.getElementById('empFinalDate');
+const empAvgPay=root.getElementById('empAvgPay');
+const printOnly=root.getElementById('printOnly');
+
+
+
+function server(method,...args){const fn=LeaveBackend[method];if(typeof fn!=='function')return Promise.reject(new Error('지원하지 않는 연차관리 요청: '+method));return Promise.resolve(fn(...args));}
+function setLoading(v){root.getElementById('loading').classList.toggle('show',!!v)}
+function esc(s){return String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function n(v){const x=Number(v||0);return Number.isFinite(x)?x:0}
+function fmtDay(v){return n(v)===0?'-':n(v).toFixed(2)}
+function fmtMoney(v){return (v===null||v===undefined||v==='')?'-':Number(v).toLocaleString('ko-KR')+'원'}
+
+async function loadApp(year,month){
+  setLoading(true);
+  try{
+    state = await server('getAppData',year,month);
+
+    // Code.gs / Index.html 배포 버전이 순간적으로 어긋나도 화면이 죽지 않도록 기본값 보정
+    state.years = Array.isArray(state.years) ? state.years : [];
+    state.employees = Array.isArray(state.employees) ? state.employees : [];
+    state.employeeDirectory = Array.isArray(state.employeeDirectory)
+      ? state.employeeDirectory
+      : state.employees.map(e => ({
+          employeeNo:e.employeeNo,
+          name:e.name,
+          joinDate:e.joinDate||'',
+          finalWorkDate:e.finalWorkDate||'',
+          isFinalDateSet:!!e.finalWorkDate,
+          isRetired:!!e.isRetired,
+          isClosed:!!e.isClosed
+        }));
+    state.calendarEvents = Array.isArray(state.calendarEvents) ? state.calendarEvents : [];
+    state.settlementList = state.settlementList || {current:[],history:[]};
+
+    buildColorMap();
+    renderSelectors();
+    renderLeavePage();
+    renderEmployeeDirectory();
+    renderSettlementList(state.settlementList);
+  }catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+
+function isRetiredEmployee(e){
+  if(!e)return false;
+  if(typeof e.isRetired==='boolean')return e.isRetired;
+  if(!e.finalWorkDate)return false;
+  const now=new Date();
+  const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  return e.finalWorkDate<today;
+}
+
+function buildColorMap(){
+  colors={};
+  let idx=0;
+  state.employees.forEach(e=>{
+    if(isRetiredEmployee(e)){
+      colors[e.employeeNo]=['#6f7782','#e7e9ec'];
+      return;
+    }
+    colors[e.employeeNo]=PALETTE[idx%PALETTE.length];
+    idx++;
+  });
+}
+
+function renderSelectors(){
+  const ys=root.getElementById('yearSelect');
+  ys.innerHTML=state.years.map(y=>`<option value="${y}" ${y===state.year?'selected':''}>${y}년</option>`).join('');
+  const ms=root.getElementById('monthSelect');
+  ms.innerHTML=Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}" ${m===state.month?'selected':''}>${m}월</option>`).join('');
+  if(window.syncLeaveOuterSelectors)window.syncLeaveOuterSelectors(state);
+}
+async function changeYearMonth(){
+  await loadApp(Number(yearSelect.value),Number(monthSelect.value));
+}
+function renderLeavePage(){
+  renderLegend();renderCalendar();renderStatus();renderMonthly();renderLeaveOptions();
+}
+function renderLegend(){
+  const list=Array.isArray(state.employees)?state.employees:[];
+  legend.innerHTML=list.filter(e=>!isRetiredEmployee(e)).map(e=>{
+    const c=colors[e.employeeNo]||PALETTE[0];
+    return `<span><i class="dot" style="background:${c[0]}"></i>${esc(e.name)}</span>`;
+  }).join('');
+}
+function settlementForEmployee(employeeNo){
+  const list=state.settlementList;
+  if(!list)return null;
+  const all=[...(list.current||[]),...(list.history||[])];
+  return all.find(x=>x.employeeNo===employeeNo)||null;
+}
+function isSettledEmployee(employeeNo){
+  const s=settlementForEmployee(employeeNo);
+  return !!(s&&s.finalWorkDate&&s.status==='정산완료');
+}
+function employeesForDisplay(){
+  const list=Array.isArray(state.employees)?[...state.employees]:[];
+  return list.sort((a,b)=>{
+    const ar=isRetiredEmployee(a), br=isRetiredEmployee(b);
+    if(ar!==br)return ar?1:-1;
+    if(ar)return (a.finalWorkDate||'').localeCompare(b.finalWorkDate||'');
+    return (a.joinDate||'').localeCompare(b.joinDate||'');
+  });
+}
+function employeeRowClass(e){
+  return isRetiredEmployee(e) ? 'leave-closed' : '';
+}
+function renderStatus(){
+  statusSub.textContent=`${state.year}년 누적`;
+  statusBody.innerHTML=employeesForDisplay().map(e=>{
+    const c=colors[e.employeeNo]||['transparent','transparent'];
+    const rowClass=employeeRowClass(e);
+    const nameStyle=isRetiredEmployee(e)
+      ? ''
+      : `--person-soft:${c[1]};border-left-color:${c[0]}`;
+    return `<tr class="${rowClass}">
+      <td class="name person-cell" style="${nameStyle}">${esc(e.name)}</td>
+      <td>${esc(e.joinDate||'')}</td>
+      <td>${fmtDay(e.annualLeave)}</td>
+      <td>${fmtDay(e.paidLeave)}</td>
+      <td>${fmtDay(e.used)}</td>
+      <td>${fmtDay(e.settledLeave)}</td>
+      <td>${fmtDay(e.remain)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMonthly(){
+  monthlyBody.innerHTML=employeesForDisplay().map(e=>{
+    const c=colors[e.employeeNo]||['transparent','transparent'];
+    const rowClass=employeeRowClass(e);
+    const nameStyle=isRetiredEmployee(e)
+      ? ''
+      : `--person-soft:${c[1]};border-left-color:${c[0]}`;
+    let cells='';
+    for(let m=1;m<=12;m++) cells+=`<td>${fmtDay(e.months[m])}</td>`;
+    return `<tr class="${rowClass}">
+      <td class="name person-cell" style="${nameStyle}">${esc(e.name)}</td>
+      ${cells}<td class="total">${fmtDay(e.total)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCalendar(){
+  calendarTitle.textContent=`${state.year}년 ${state.month}월 일정`;
+
+  const first=new Date(state.year,state.month-1,1);
+  const last=new Date(state.year,state.month,0);
+  const startDow=first.getDay();
+  const cells=[];
+
+  for(let i=0;i<startDow;i++){
+    const d=new Date(state.year,state.month-1,1-(startDow-i));
+    cells.push({date:null,day:d.getDate(),outside:true});
+  }
+
+  for(let d=1;d<=last.getDate();d++){
+    cells.push({
+      date:`${state.year}-${String(state.month).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+      day:d,
+      outside:false
+    });
+  }
+
+  while(cells.length%7!==0){
+    const d=cells.length-startDow-last.getDate()+1;
+    cells.push({date:null,day:d,outside:true});
+  }
+
+  const today=new Date();
+  const todayKey=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const weeks=[];
+  for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+
+  calendar.innerHTML=weeks.map((week,weekIndex)=>{
+    const dayHtml=week.map(c=>{
+      if(c.outside){
+        return `<div class="day outside"><span class="n">${c.day}</span></div>`;
+      }
+      return `<div class="day ${c.date===todayKey?'today':''}" onclick="LeaveApp.openNewEvent('${c.date}')"><span class="n">${c.day}</span></div>`;
+    }).join('');
+
+    const weekStartDate=week.find(x=>!x.outside)?.date || null;
+    const weekEndDate=[...week].reverse().find(x=>!x.outside)?.date || null;
+
+    const weekEvents=state.calendarEvents
+      .filter(ev=>weekStartDate&&weekEndDate&&ev.endDate>=weekStartDate&&ev.startDate<=weekEndDate)
+      .sort((a,b)=>a.startDate.localeCompare(b.startDate)||a.employeeName.localeCompare(b.employeeName));
+
+    // same row에서 겹치는 일정이 있으면 아래 줄로 내려 배치
+    const lanes=[];
+    const bars=weekEvents.map(ev=>{
+      const clippedStart=ev.startDate<weekStartDate?weekStartDate:ev.startDate;
+      const clippedEnd=ev.endDate>weekEndDate?weekEndDate:ev.endDate;
+
+      const startIndex=week.findIndex(x=>x.date===clippedStart);
+      const endIndex=week.findIndex(x=>x.date===clippedEnd);
+      if(startIndex<0||endIndex<0)return '';
+
+      let lane=0;
+      while(true){
+        if(!lanes[lane]){lanes[lane]=[];break}
+        const conflict=lanes[lane].some(x=>!(endIndex<x.start||startIndex>x.end));
+        if(!conflict)break;
+        lane++;
+      }
+      lanes[lane].push({start:startIndex,end:endIndex});
+
+      const col=colors[ev.employeeNo]||PALETTE[0];
+      const detail=displayDetail(ev);
+
+      const startsBefore=ev.startDate<weekStartDate;
+      const endsAfter=ev.endDate>weekEndDate;
+      let continuationClass='';
+      if(startsBefore&&endsAfter) continuationClass='cont-mid';
+      else if(endsAfter) continuationClass='cont-start';
+      else if(startsBefore) continuationClass='cont-end';
+
+      const label=`${ev.employeeName} · ${ev.type}${detail?' '+detail:''}`;
+
+      return `<button
+        class="span-event ${continuationClass}"
+        style="
+          grid-column:${startIndex+1}/${endIndex+2};
+          grid-row:${lane+1};
+          background:${col[1]};
+          color:${col[0]};
+          border-left-color:${col[0]}
+        "
+        onclick="event.stopPropagation();LeaveApp.openEditEvent('${esc(ev.eventId)}')"
+        title="${esc(ev.memo||'')}"
+      >${esc(label)}</button>`;
+    }).join('');
+
+    return `<div class="week">${dayHtml}<div class="week-events">${bars}</div></div>`;
+  }).join('');
+}
+function displayDetail(ev){
+  const map={'지각10m':'10분','지각30m':'30분','지각1h':'1시간','지각2h':'2시간','지각3h':'3시간','조기40m':'40분','조기0.5':'0.5시간','조기1.0':'1.0시간','조기1.5':'1.5시간','조기2.0':'2.0시간','조기2.5':'2.5시간','조기3.0':'3.0시간','조기3.5':'3.5시간','조기4.0':'4.0시간','조기4.5':'4.5시간'};
+  if(ev.type==='반차') return ev.detail||'';
+  return map[ev.detail]||'';
+}
+function renderLeaveOptions(){
+  const directory=Array.isArray(state.employeeDirectory)?state.employeeDirectory:(Array.isArray(state.employees)?state.employees:[]);
+  employeeSelect.innerHTML=directory.filter(e=>!e.isClosed).map(e=>`<option value="${esc(e.employeeNo)}">${esc(e.name)}</option>`).join('');
+  const lateKeys=['지각10m','지각30m','지각1h','지각2h','지각3h'];
+  const earlyKeys=['조기40m','조기0.5','조기1.0','조기1.5','조기2.0','조기2.5','조기3.0','조기3.5','조기4.0','조기4.5'];
+  const labels={'지각10m':'10분','지각30m':'30분','지각1h':'1시간','지각2h':'2시간','지각3h':'3시간','조기40m':'40분','조기0.5':'0.5시간','조기1.0':'1.0시간','조기1.5':'1.5시간','조기2.0':'2.0시간','조기2.5':'2.5시간','조기3.0':'3.0시간','조기3.5':'3.5시간','조기4.0':'4.0시간','조기4.5':'4.5시간'};
+  lateType.innerHTML=lateKeys.map(k=>`<option value="${k}">${labels[k]}</option>`).join('');
+  earlyType.innerHTML=earlyKeys.map(k=>`<option value="${k}">${labels[k]}</option>`).join('');
+}
+function openNewEvent(date){
+  editingEvent=null;leaveModalTitle.textContent='연차 등록';deleteLeaveBtn.classList.add('hidden');
+  employeeSelect.value=state.employees[0]?.employeeNo||'';startDate.value=date;endDate.value=date;leaveType.value='연차';halfType.value='오전';memo.value='';
+  toggleLeaveDetail();leaveOverlay.classList.add('show');
+}
+function openEditEvent(id){
+  const ev=state.calendarEvents.find(x=>x.eventId===id);if(!ev)return;
+  editingEvent=ev;leaveModalTitle.textContent='일정 수정';deleteLeaveBtn.classList.remove('hidden');
+  employeeSelect.value=ev.employeeNo;startDate.value=ev.startDate;endDate.value=ev.endDate;leaveType.value=ev.type;
+  halfType.value=ev.detail||'오전';
+  if(ev.type==='지각') lateType.value=ev.detail||'지각10m';
+  if(ev.type==='조기퇴근') earlyType.value=ev.detail||'조기40m';
+  memo.value=ev.memo||'';LeaveApp.toggleLeaveDetail();leaveOverlay.classList.add('show');
+}
+function closeLeaveModal(){leaveOverlay.classList.remove('show');editingEvent=null}
+function toggleLeaveDetail(){
+  const t=leaveType.value;
+  halfField.classList.toggle('hidden',t!=='반차');
+  lateField.classList.toggle('hidden',t!=='지각');
+  earlyField.classList.toggle('hidden',t!=='조기퇴근');
+  deductionField.classList.toggle('hidden',!(t==='지각'||t==='조기퇴근'));
+  updateDeductionPreview();
+}
+function updateDeductionPreview(){
+  let token='';
+  if(leaveType.value==='지각')token=lateType.value;
+  if(leaveType.value==='조기퇴근')token=earlyType.value;
+  deductionPreview.value=token&&state.deductionMap[token]!==undefined?Number(state.deductionMap[token]).toFixed(2):'';
+}
+async function saveLeave(){
+  let detail='';
+  if(leaveType.value==='반차')detail=halfType.value;
+  if(leaveType.value==='지각')detail=lateType.value;
+  if(leaveType.value==='조기퇴근')detail=earlyType.value;
+  const payload={eventId:editingEvent?.eventId||'',employeeNo:employeeSelect.value,startDate:startDate.value,endDate:endDate.value,type:leaveType.value,detail,memo:memo.value};
+  setLoading(true);
+  try{state=await server('saveLeave',payload);buildColorMap();renderSelectors();renderLeavePage();LeaveApp.closeLeaveModal()}
+  catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+async function deleteLeave(){
+  if(!editingEvent||!confirm('이 일정을 삭제하시겠습니까?'))return;
+  const y=state.year,m=state.month;
+  setLoading(true);
+  try{
+    await server('deleteLeave',editingEvent.eventId);
+    closeLeaveModal();
+    state=await server('getAppData',y,m);
+    buildColorMap();renderSelectors();renderLeavePage();
+  }catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+
+function showPage(page){
+  const isLeave=page==='leave';
+  const isEmployee=page==='employee';
+  const isSettle=page==='settle';
+
+  leavePage.classList.toggle('active',isLeave);
+  employeePage.classList.toggle('active',isEmployee);
+  settlePage.classList.toggle('active',isSettle);
+
+  leaveNav.classList.toggle('active',isLeave);
+  employeeNav.classList.toggle('active',isEmployee);
+  settleNav.classList.toggle('active',isSettle);
+
+  topActions.style.visibility=isLeave?'visible':'hidden';
+  if(window.syncLeaveOuterTab)window.syncLeaveOuterTab(page);
+
+  // 메뉴 이동은 서버 재조회 없이 현재 메모리 데이터를 즉시 사용한다.
+  if(isEmployee){
+    renderEmployeeDirectory();
+  }
+
+  if(isSettle){
+    currentSettlement=null;
+    resetSettlementDetail();
+    renderSettlementList(
+      state.settlementList || {current:[],history:[],today:''}
+    );
+  }
+
+  window.scrollTo({top:0,behavior:'auto'});
+}
+function renderEmployeeDirectory(){
+  if(!root.getElementById('employeeBody'))return;
+
+  const list=Array.isArray(state.employeeDirectory)?[...state.employeeDirectory]:[];
+  list.sort((a,b)=>{
+    const ar=isRetiredEmployee(a), br=isRetiredEmployee(b);
+    if(ar!==br)return ar?1:-1;
+    if(ar)return (a.finalWorkDate||'').localeCompare(b.finalWorkDate||'');
+    return (a.joinDate||'').localeCompare(b.joinDate||'');
+  });
+
+  employeeBody.innerHTML=list.map(e=>{
+    const retired=isRetiredEmployee(e);
+    const cls=retired?'employee-row-closed':'';
+    const stateText=retired
+      ? (e.settlementStatus==='정산완료'?'정산완료':'퇴사 · 정산대상')
+      : (e.isFinalDateSet?'정산대상':'재직');
+
+    return `<tr class="${cls}">
+      <td>${esc(e.employeeNo)}</td>
+      <td class="name">${esc(e.name)}</td>
+      <td>${esc(e.dept||'-')}</td>
+      <td>${esc(e.position||'-')}</td>
+      <td>${esc(e.joinDate||'-')}</td>
+      <td class="num">${e.avgPay?Number(e.avgPay).toLocaleString('ko-KR')+'원':'-'}</td>
+      <td>${esc(e.finalWorkDate||'-')}</td>
+      <td>${stateText}</td>
+      <td><button class="action-btn" onclick="LeaveApp.openEditEmployee('${esc(e.employeeNo)}')">수정</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openNewEmployee(){
+  originalEmployeeNo.value='';
+  employeeModalTitle.textContent='사원 등록';
+  empNo.disabled=false;
+  empNo.value='';
+  empName.value='';
+  empDept.value='';
+  empPosition.value='';
+  empJoinDate.value='';
+  empFinalDate.value='';
+  empAvgPay.value='';
+  employeeOverlay.classList.add('show');
+}
+
+function openEditEmployee(employeeNo){
+  const e=(state.employeeDirectory||[]).find(x=>x.employeeNo===employeeNo);
+  if(!e)return;
+
+  originalEmployeeNo.value=e.employeeNo;
+  employeeModalTitle.textContent='사원정보 수정';
+  empNo.value=e.employeeNo;
+  empNo.disabled=true;
+  empName.value=e.name||'';
+  empDept.value=e.dept||'';
+  empPosition.value=e.position||'';
+  empJoinDate.value=e.joinDate||'';
+  empFinalDate.value=e.finalWorkDate||'';
+  empAvgPay.value=e.avgPay||'';
+  employeeOverlay.classList.add('show');
+}
+
+function closeEmployeeModal(){
+  employeeOverlay.classList.remove('show');
+}
+
+async function saveEmployee(){
+  const payload={
+    originalEmployeeNo:originalEmployeeNo.value,
+    employeeNo:empNo.value.trim(),
+    name:empName.value.trim(),
+    dept:empDept.value.trim(),
+    position:empPosition.value.trim(),
+    joinDate:empJoinDate.value,
+    finalWorkDate:empFinalDate.value,
+    avgPay:Number(empAvgPay.value||0)
+  };
+
+  setLoading(true);
+  try{
+    state.employeeDirectory=await server('saveEmployee',payload);
+    state=await server('getAppData',state.year,state.month);
+    buildColorMap();
+    renderSelectors();
+    renderLeavePage();
+    renderEmployeeDirectory();
+    renderSettlementList(state.settlementList);
+    closeEmployeeModal();
+  }catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+
+async function refreshSettlementList(){
+  setLoading(true);
+  try{
+    const list=await server('getSettlementList');
+    state.settlementList=list || {current:[],history:[],today:''};
+    renderSettlementList(state.settlementList);
+  }catch(e){
+    alert(e.message);
+  }finally{
+    setLoading(false);
+  }
+}
+
+function renderSettlementList(list){
+  if(!list)return;
+  let html='';
+  list.current.forEach(r=>html+=settlementRow(r));
+  if(list.history.length){
+    html+=`<tr class="history-divider"><td colspan="8">최종근무일 경과 · 정산 완료 이력</td></tr>`;
+    list.history.forEach(r=>html+=settlementRow(r));
+  }
+  settlementRows.innerHTML=html;
+}
+function settlementRow(r){
+  return `<tr>
+    <td class="name">${esc(r.name)}</td>
+    <td>${esc(r.joinDate||'')}</td>
+    <td>${esc(r.finalWorkDate||'-')}</td>
+    <td class="num">${r.unusedLeave===null?'-':fmtDay(r.unusedLeave)}</td>
+    <td class="num">${r.settlementProcessedDays===null?'-':fmtDay(r.settlementProcessedDays)}</td>
+    <td class="num">${r.leavePay===null?'-':fmtMoney(r.leavePay)}</td>
+    <td><span class="state ${r.status==='정산완료'?'done':'wait'}">${esc(r.status)}</span></td>
+    <td><button class="action-btn" onclick="LeaveApp.viewSettlement('${esc(r.employeeNo)}')">보기</button></td>
+  </tr>`;
+}
+async function updateFinalDate(no,value){
+  setLoading(true);
+  try{state.settlementList=await server('setFinalWorkDate',no,value);renderSettlementList(state.settlementList);resetSettlementDetail()}
+  catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+async function viewSettlement(no){
+  setLoading(true);
+  try{currentSettlement=await server('getSettlementDetail',no);renderSettlementDetail(currentSettlement)}
+  catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+function resetSettlementDetail(){currentSettlement=null;settlementDetail.innerHTML='<div class="empty-detail">정산 대상자의 <b>보기</b>를 누르면 상세내역이 표시됩니다.</div>'}
+function renderSettlementDetail(d){
+  currentSettlement=d;
+  const done=d.status==='정산완료';
+
+  settlementDetail.innerHTML=`
+    <div class="detail-head">
+      <div>
+        <h2>${esc(d.name)} 정산내역</h2>
+        <div class="meta">최종근무일 ${esc(d.finalWorkDate||'-')} · ${esc(d.status)}</div>
+      </div>
+      <div class="detail-actions">
+        <button class="action-btn ${done?'':'primary'}" ${done?'disabled':''} onclick="LeaveApp.confirmSettlement('${esc(d.employeeNo)}')">${done?'확정완료':'확정'}</button>
+        <button class="action-btn primary" onclick="LeaveApp.printSettlement()">인쇄</button>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="summary-row">
+        <div class="summary-box"><div class="k">처리 가능 연차</div><div class="v">${dayText(d.baseAvailableDays)}</div></div>
+        <div class="summary-box"><div class="k">연차수당처리일수</div><div class="v">${dayText(d.settlementProcessedDays)}</div><div class="calc-hint">최종근무일 기준 자동계산</div></div>
+        <div class="summary-box"><div class="k">처리 후 잔여</div><div class="v">${dayText(d.remainingAfterSettlement)}</div></div>
+        <div class="summary-box"><div class="k">예상 연차수당</div><div class="v">${fmtMoney(d.leavePay)}</div></div>
+      </div>
+
+      ${detailSection('근로자 정보',[
+        ['사번',d.employeeNo],['부서',d.dept],['직급/직책',d.position],['입사일',d.joinDate]
+      ])}
+
+      ${detailSection('연차 정산',[
+        ['발생 연차',dayText(d.accruedLeave)],
+        ['사용 연차',dayText(d.usedLeave)],
+        ['처리 가능 연차',dayText(d.baseAvailableDays)],
+        ['연차수당처리일수',dayText(d.settlementProcessedDays)],
+        ['처리 후 잔여',dayText(d.remainingAfterSettlement)],
+        ['1일 통상임금',fmtMoney(d.dayPay)]
+      ])}
+
+      ${detailSection('지급 정산',[
+        ['월평균임금',fmtMoney(d.monthlyAvgPay)],
+        ['연차수당',fmtMoney(d.leavePay)],
+        ['급여',fmtMoney(d.salary)],
+        ['총급여액',fmtMoney(d.totalPay)],
+        ['보험/급여공제',fmtMoney(d.insurance)],
+        ['차인지급액',fmtMoney(d.netBeforeExtra)]
+      ])}
+
+      <div class="detail-highlight">
+        <div class="label">자동 계산 연차수당</div>
+        <div class="amount">${fmtMoney(d.leavePay)}</div>
+      </div>
+      <div class="note" style="margin-top:14px;border:1px solid var(--line);border-radius:10px">
+        최종근무일 기준 남은 연차를 연차수당처리일수로 자동 계산합니다. 원본 월별사용대장 및 사원정보 셀은 변경하지 않습니다.
+      </div>
+    </div>`;
+}
+
+function dayText(v){return (v===null||v===undefined)?'-':fmtDay(v)+'일'}
+function detailSection(title,items){return `<div class="detail-section"><h3>${title}</h3><div class="detail-grid">${items.map(x=>`<div class="detail-item"><div class="label">${esc(x[0])}</div><div class="value">${esc(x[1]??'-')}</div></div>`).join('')}</div></div>`}
+async function confirmSettlement(no){
+  if(!confirm('최종근무일 기준 자동 계산된 연차수당처리일수로 정산을 확정하시겠습니까?\n원본 시트는 변경되지 않습니다.'))return;
+
+  setLoading(true);
+  try{
+    const res=await server('confirmSettlement',no);
+    currentSettlement=res.detail;
+
+    state=await server('getAppData',state.year,state.month);
+    buildColorMap();
+    renderSelectors();
+    renderLeavePage();
+    renderEmployeeDirectory();
+    renderSettlementList(state.settlementList);
+    renderSettlementDetail(currentSettlement);
+  }catch(e){alert(e.message)}
+  finally{setLoading(false)}
+}
+function printSettlement(){
+  if(!currentSettlement)return;
+  const w=window.open('','_blank','width=900,height=1100');
+  if(!w){alert('인쇄 창을 열 수 없습니다. 팝업 차단을 확인해 주세요.');return;}
+  w.document.open();
+  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>연차수당 정산서</title><style>@page{size:A4 portrait;margin:10mm}body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:#111}.print-title{text-align:center;font-size:18pt;font-weight:800;margin-bottom:8mm}.form-section{margin-top:5mm}.form-section-title{font-weight:800;font-size:10pt;padding:2mm 0;border-bottom:2px solid #222}.form-table{width:100%;border-collapse:collapse;table-layout:fixed}.form-table th,.form-table td{border:1px solid #222;padding:2.2mm 1.5mm;text-align:center;font-size:8.5pt}.form-table th{background:#f1f1f1}.form-table .money{text-align:right}.pay-highlight{margin-top:6mm;border-top:2px solid #222;border-bottom:2px solid #222;padding:4mm 2mm}.amount-row{display:grid;grid-template-columns:32mm 1fr;margin-bottom:2mm}.lab,.val{font-weight:800}.confirm-text{text-align:center;font-size:8.5pt;line-height:1.7;margin:8mm 0 7mm}.sign{text-align:right;font-size:9pt}</style></head><body>${buildPrintHtml(currentSettlement)}</body></html>`);
+  w.document.close();w.focus();setTimeout(()=>w.print(),150);
+}
+function buildPrintHtml(d){
+  return `<div class="print-title">급여 및 연차수당 정산서</div>
+  ${printSection('01  근로자 정보',['사번','부서','성명','직급/직책','입사일'],[d.employeeNo,d.dept,d.name,d.position,d.joinDate])}
+  ${printSection('02  연차 발생 및 사용 현황',['발생 연차(일)','사용 연차(일)','처리 가능 연차(일)','연차수당처리일수(일)','처리 후 잔여(일)'],[val(d.accruedLeave),val(d.usedLeave),val(d.baseAvailableDays),val(d.settlementProcessedDays),val(d.remainingAfterSettlement)])}
+  ${printSection('03  연차수당 산정 내역',['월평균임금(원)','1일 통상임금(원)','연차수당처리일수(일)','연차수당(원)','지급예정일'],[moneyRaw(d.monthlyAvgPay),moneyRaw(d.dayPay),val(d.settlementProcessedDays),moneyRaw(d.leavePay),d.payDate||d.finalWorkDate],['money','money','','money',''])}
+  ${printSection('04  급여 및 연차수당 지급 예정 금액',['급여(원)','연차수당(원)','총급여액(원)','급여/보험공제액(원)','차인지급액(원)'],[moneyRaw(d.salary),moneyRaw(d.leavePay),moneyRaw(d.totalPay),moneyRaw(d.insurance),moneyRaw(d.netBeforeExtra)],['money','money','money','money','money'])}
+  ${printSection('05  추가 공제 내역',['차인지급액(원)','건물관리비(원)','소득세(원)','실지급액(원)'],[moneyRaw(d.netBeforeExtra),moneyRaw(d.managementFee),moneyRaw(d.incomeTax),moneyRaw(d.finalPay)],['money','money','money','money'])}
+  <div class="pay-highlight"><div class="amount-row"><div class="lab">실 지 급 액</div><div class="val">${moneyRaw(d.finalPay)}원</div></div><div class="amount-row"><div class="lab">일금</div><div class="val">${esc(d.finalPayKorean||'')}</div></div></div>
+  <div class="confirm-text">본인은 위와 같이 급여 및 미사용 연차수당 산정 내역을 확인하였으며,<br>이에 동의하여 서명 날인합니다.</div>
+  <div class="sign">수령자 : ________________________ &nbsp;(인)</div>`;
+}
+function printSection(title,headers,values,classes=[]){
+  return `<div class="form-section"><div class="form-section-title">${esc(title)}</div><table class="form-table"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody><tr>${values.map((v,i)=>`<td class="${classes[i]||''}">${esc(v??'-')}</td>`).join('')}</tr></tbody></table></div>`;
+}
+function val(v){return (v===null||v===undefined)?'-':Number(v).toFixed(2)}
+function moneyRaw(v){return (v===null||v===undefined||v==='')?'-':Number(v).toLocaleString('ko-KR')}
+
+return {buildColorMap,buildPrintHtml,changeYearMonth,closeEmployeeModal,closeLeaveModal,confirmSettlement,dayText,deleteLeave,detailSection,displayDetail,employeeRowClass,employeesForDisplay,esc,fmtDay,fmtMoney,isRetiredEmployee,isSettledEmployee,loadApp,moneyRaw,n,openEditEmployee,openEditEvent,openNewEmployee,openNewEvent,printSection,printSettlement,renderCalendar,renderEmployeeDirectory,renderLeaveOptions,renderLeavePage,renderLegend,renderMonthly,renderSelectors,renderSettlementDetail,renderSettlementList,renderStatus,resetSettlementDetail,saveLeave,server,setLoading,settlementForEmployee,settlementRow,showPage,toggleLeaveDetail,updateDeductionPreview,updateFinalDate,val,viewSettlement,init:()=>loadApp(),setYearMonth:(y,m)=>loadApp(Number(y),Number(m)),showSubPage:showPage,getState:()=>state};
+}
+const LEAVE_SHADOW_STYLE="\n:root{\n  --bg:#f6f7f9;--card:#fff;--line:#e7eaf0;--text:#1f2937;--muted:#7a8596;\n  --accent:#2f6fed;--soft:#eef4ff;--thead:#f8fafc;--danger:#d84a4a;\n}\n*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Pretendard,\"Noto Sans KR\",Arial,sans-serif;color:var(--text)}\nbutton,input,select,textarea{font:inherit}.hidden{display:none!important}\n.topbar{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 28px;gap:20px;position:sticky;top:0;z-index:30}\n.brand{font-size:clamp(19px,1vw,23px);font-weight:800}.nav{display:flex;gap:8px}.nav button{border:0;background:transparent;padding:clamp(10px,.65vw,14px) clamp(14px,.9vw,20px);border-radius:10px;font-size:clamp(14px,.78vw,17px);font-weight:700;color:#667085;cursor:pointer}\n.nav button.active{background:var(--soft);color:var(--accent)}.top-actions{margin-left:auto;display:flex;gap:10px}.select,.btn{height:clamp(38px,2.2vw,46px);border:1px solid var(--line);background:#fff;border-radius:9px;padding:0 clamp(12px,.8vw,17px);font-size:clamp(13px,.75vw,16px);font-weight:700;color:#475467}\n.page{display:none}.page.active{display:block}.wrap{width:min(96vw,2300px);max-width:none;margin:0 auto;padding:clamp(20px,1.6vw,34px)}.heading{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px}.heading h1{margin:0;font-size:clamp(26px,1.5vw,34px)}.heading p{margin:6px 0 0;color:var(--muted);font-size:clamp(14px,.8vw,17px)}.tiny{font-size:12px;color:#98a2b3}\n.main-grid{display:grid;grid-template-columns:minmax(620px,.95fr) minmax(900px,1.35fr);gap:clamp(18px,1.2vw,28px);align-items:stretch}.right-stack{display:flex;flex-direction:column;gap:18px;height:100%}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.panel-h{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}.panel-h h2{margin:0;font-size:clamp(16px,.9vw,20px)}.sub{font-size:clamp(12px,.7vw,14px);color:var(--muted)}\n.calendar-panel{height:100%;display:flex;flex-direction:column}.calendar-wrap{padding:14px 16px 18px;display:flex;flex-direction:column;flex:1}.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px}.cal-head div{text-align:center;font-size:11px;color:#98a2b3;font-weight:700;padding:6px 0}.cal{display:flex;flex-direction:column;gap:8px;flex:1}\n.week{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:8px}\n.day{min-height:clamp(118px,8vw,175px);border:1px solid var(--line);border-radius:12px;background:#fff;padding:clamp(8px,.55vw,12px);display:flex;flex-direction:column;cursor:pointer;transition:.15s;position:relative;z-index:1}\n.day:hover{border-color:#b8c8e8;background:#fbfdff}.day.outside{background:#fafafa;color:#c3c8d0;cursor:default}.day.today{border:2px solid var(--accent);padding:7px}.n{font-size:clamp(12px,.72vw,15px);font-weight:800}\n.week-events{position:absolute;left:0;right:0;top:36px;bottom:8px;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(24px,auto);column-gap:8px;row-gap:4px;pointer-events:none;z-index:5}\n.span-event{align-self:start;border:0;text-align:left;padding:clamp(4px,.35vw,7px) clamp(8px,.55vw,12px);border-radius:7px;font-size:clamp(11px,.66vw,14px);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid;cursor:pointer;pointer-events:auto;min-height:24px}\n.span-event.cont-start{border-top-right-radius:0;border-bottom-right-radius:0}\n.span-event.cont-end{border-top-left-radius:0;border-bottom-left-radius:0}\n.span-event.cont-mid{border-radius:0}\ntable{width:100%;border-collapse:collapse}th{background:var(--thead);font-size:clamp(11px,.68vw,14px);color:#667085;text-align:left;padding:clamp(10px,.65vw,14px) clamp(7px,.48vw,10px);border-bottom:1px solid var(--line);white-space:nowrap}td{font-size:clamp(11.5px,.7vw,14.5px);padding:clamp(10px,.65vw,14px) clamp(7px,.48vw,10px);border-bottom:1px solid #eef1f4;white-space:nowrap;vertical-align:middle}tbody tr:last-child td{border-bottom:0}.num{text-align:right;font-variant-numeric:tabular-nums}.name{font-weight:800}\n.status-table{table-layout:fixed}.status-table th:nth-child(1),.status-table td:nth-child(1){width:11%;text-align:left}.status-table th:nth-child(2),.status-table td:nth-child(2){width:14%;text-align:center}.status-table th:nth-child(3),.status-table td:nth-child(3){width:14%;text-align:center}.status-table th:nth-child(4),.status-table td:nth-child(4){width:16%;text-align:center}.status-table th:nth-child(5),.status-table td:nth-child(5){width:14%;text-align:center}.status-table th:nth-child(6),.status-table td:nth-child(6){width:17%;text-align:center}.status-table th:nth-child(7),.status-table td:nth-child(7){width:14%;text-align:center}\n.monthly-table{table-layout:fixed}.monthly-table th,.monthly-table td{text-align:center;padding-left:clamp(3px,.25vw,6px);padding-right:clamp(3px,.25vw,6px);font-size:clamp(10.3px,.62vw,13px)}.monthly-table th:first-child,.monthly-table td:first-child{text-align:left;width:clamp(74px,5vw,105px);padding-left:clamp(8px,.5vw,12px);font-size:clamp(10.8px,.65vw,13.5px)}.monthly-table .total{font-weight:800;background:#fbfcfe}.person-cell{border-left:4px solid;background:linear-gradient(90deg,var(--person-soft),#fff 72%)}\n.legend{display:flex;gap:10px;flex-wrap:wrap}.legend span{font-size:11px;color:#667085;white-space:nowrap}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}\n.note{padding:11px 16px;font-size:11.5px;color:#98a2b3;border-top:1px solid var(--line);background:#fcfcfd}\n.overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.35);z-index:100;align-items:center;justify-content:center;padding:20px}.overlay.show{display:flex}.modal{width:480px;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.22);overflow:hidden}.modal-h{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.modal-h h3{margin:0;font-size:17px}.close{border:0;background:transparent;font-size:22px;color:#98a2b3;cursor:pointer}.modal-b{padding:18px 20px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;color:#667085;font-weight:700;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid #dfe3ea;border-radius:9px;padding:10px 11px;background:#fff;color:#344054}.date-row{display:grid;grid-template-columns:1fr 18px 1fr;gap:8px;align-items:end}.dash{text-align:center;color:#98a2b3;padding-bottom:11px}.type-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.help{font-size:11px;color:#98a2b3;margin-top:5px}.modal-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between}.mbtn{min-width:72px;height:38px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#475467;font-weight:700;cursor:pointer;padding:0 13px}.mbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.mbtn.danger{color:var(--danger);border-color:#f0caca}.mbtn:disabled{opacity:.55;cursor:default}\n.settle-wrap{width:min(94vw,2100px);max-width:none;margin:0 auto;padding:clamp(20px,1.6vw,34px)}.settle-table th,.settle-table td{font-size:clamp(12px,.72vw,15px);padding:clamp(12px,.7vw,16px) clamp(10px,.6vw,14px)}.final-date{width:clamp(122px,8vw,155px);height:clamp(32px,2vw,40px);border:1px solid #dfe3ea;border-radius:8px;padding:0 8px;font-size:clamp(11px,.68vw,14px)}.state{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.state.done{background:#edf8f1;color:#2f7c4a}.state.wait{background:#fff7e8;color:#9a6a17}.action-btn{height:clamp(31px,2vw,40px);border:1px solid #dfe3ea;border-radius:8px;background:#fff;color:#475467;font-size:clamp(11px,.68vw,14px);font-weight:800;padding:0 clamp(10px,.7vw,15px);cursor:pointer}.action-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.action-btn:disabled{opacity:.55;cursor:default}.history-divider td{background:#f3f5f8!important;color:#667085!important;font-size:11px!important;font-weight:800!important;text-align:left!important}\n.detail-card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:18px}.detail-head{min-height:58px;padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.detail-head h2{margin:0;font-size:16px}.detail-head .meta{font-size:12px;color:#98a2b3;margin-top:4px}.detail-actions{display:flex;gap:8px}.detail-body{padding:18px}.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.summary-box{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fbfcfe}.summary-box .k{font-size:11px;color:#7a8596;font-weight:700;margin-bottom:6px}.summary-box .v{font-size:clamp(17px,1vw,22px);font-weight:800;color:#25324b}.detail-section{margin-top:16px}.detail-section h3{font-size:13px;margin:0 0 8px}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}.detail-item{background:#fff;padding:11px 12px;display:grid;grid-template-columns:130px 1fr;gap:12px}.detail-item .label{font-size:clamp(11.5px,.7vw,14px);color:#667085}.detail-item .value{font-size:clamp(12.5px,.75vw,15px);font-weight:700;text-align:right}.detail-highlight{margin-top:16px;padding:14px 16px;border-radius:12px;background:#f7f9fc;display:flex;justify-content:space-between;align-items:center}.detail-highlight .label{font-size:13px;font-weight:800}.detail-highlight .amount{font-size:21px;font-weight:900;color:#1d4ed8}.empty-detail{padding:48px 20px;text-align:center;color:#98a2b3;font-size:13px}\n.loading{position:fixed;inset:0;background:rgba(255,255,255,.76);z-index:200;display:none;place-items:center;font-size:14px;font-weight:800;color:#475467}.loading.show{display:grid}\n#printOnly{display:none}\n@media(max-width:1400px){.main-grid{grid-template-columns:1fr}.calendar-panel{min-height:720px}}\n@media(max-width:900px){.summary-row{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.nav{gap:2px}.topbar{padding:0 12px}.wrap,.settle-wrap{padding:14px}}\n\n@media(min-width:1900px){\n  .topbar{height:76px;padding-left:clamp(32px,2vw,48px);padding-right:clamp(32px,2vw,48px)}\n  .panel{border-radius:18px}\n  .panel-h{min-height:64px;padding:16px 20px}\n  .calendar-wrap{padding:18px 20px 22px}\n  .cal-head{gap:10px;margin-bottom:10px}\n  .cal{gap:10px}.week{gap:10px}.week-events{column-gap:10px}\n  .right-stack{gap:22px}\n  .summary-row{gap:14px}\n  .summary-box{padding:16px 18px}\n}\n\n@media print{\n  @page{size:A4 portrait;margin:10mm}\n  body *{visibility:hidden!important}\n  #printOnly,#printOnly *{visibility:visible!important}\n  #printOnly{display:block!important;position:absolute;left:0;top:0;width:190mm;padding:7mm 8mm;background:#fff;color:#111;font-family:\"Noto Sans KR\",\"Malgun Gothic\",Arial,sans-serif}\n  .print-title{text-align:center;font-size:18pt;font-weight:800;margin-bottom:8mm}.form-section{margin-top:5mm}.form-section-title{font-weight:800;font-size:10pt;padding:2mm 0;border-bottom:2px solid #222}.form-table{width:100%;border-collapse:collapse;table-layout:fixed}.form-table th,.form-table td{border:1px solid #222;padding:2.2mm 1.5mm;text-align:center;font-size:8.5pt}.form-table th{background:#f1f1f1}.form-table .money{text-align:right}.pay-highlight{margin-top:6mm;border-top:2px solid #222;border-bottom:2px solid #222;padding:4mm 2mm}.amount-row{display:grid;grid-template-columns:32mm 1fr;margin-bottom:2mm}.lab,.val{font-weight:800}.confirm-text{text-align:center;font-size:8.5pt;line-height:1.7;margin:8mm 0 7mm}.sign{text-align:right;font-size:9pt}\n}\n\n.settled-muted td{\n  color:#98a2b3!important;\n  background:#fafbfc!important;\n  opacity:.66;\n}\n.settled-muted .person-cell{\n  filter:saturate(.35);\n  background:linear-gradient(90deg,#f0f1f3,#fafbfc 72%)!important;\n  border-left-color:#c4c9d1!important;\n}\n.settled-muted .name{\n  color:#7f8998!important;\n}\n.settled-muted:hover td{\n  opacity:.82;\n}\n\n\n.settlement-input-wrap{display:flex;align-items:center;justify-content:flex-end;gap:7px}\n.settlement-days-input{\n  width:105px;height:36px;border:1px solid #cfd6e1;border-radius:8px;\n  padding:0 10px;text-align:right;font-weight:800;color:#344054;background:#fff\n}\n.settlement-days-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,111,237,.10)}\n.calc-hint{font-size:11px;color:#98a2b3;margin-top:5px;text-align:right}\n\n\n.employee-table th,.employee-table td{font-size:12px;padding:12px 10px}\n.employee-row-closed td{\n  background:#f3f4f6!important;\n  opacity:.78;\n  color:#9aa1ab!important;\n  border-bottom-color:#e5e7eb!important;\n}\n.employee-row-closed .name{\n  color:#8d949e!important;\n  background:#f3f4f6!important;\n}\n.employee-row-closed .action-btn{\n  background:#f7f8fa!important;\n  color:#9aa1ab!important;\n  border-color:#dfe3e8!important;\n}\n.employee-row-closed:hover td{\n  background:#eef0f3!important;\n}\n.leave-final td{\n  background:inherit!important;\n  color:inherit!important;\n}\n.leave-closed td{\n  background:#f3f4f6!important;\n  opacity:.78;\n  color:#9aa1ab!important;\n  border-bottom-color:#e5e7eb!important;\n}\n.leave-closed .person-cell{\n  background:#f3f4f6!important;\n  border-left-color:transparent!important;\n  filter:none!important;\n}\n.leave-closed .name{\n  color:#8d949e!important;\n}\n.leave-closed .total{\n  background:#f3f4f6!important;\n  color:#9aa1ab!important;\n}\n.leave-closed:hover td{\n  background:#eef0f3!important;\n}\n\n\n/* ===== 퇴사자 표시 최종 강제 스타일 =====\n   진한 블록 금지 / 이름 포함 행 전체를 은은하게 흐림 처리 */\ntr.leave-closed > td,\ntr.employee-row-closed > td{\n  background:#f6f7f9 !important;\n  color:#a1a8b2 !important;\n  border-bottom-color:#e9ebef !important;\n  opacity:1 !important;\n}\n\ntr.leave-closed > td.name,\ntr.leave-closed > td.person-cell,\ntr.employee-row-closed > td.name{\n  background:#f6f7f9 !important;\n  color:#939aa5 !important;\n  border-left-color:transparent !important;\n  box-shadow:none !important;\n  filter:none !important;\n}\n\ntr.leave-closed > td.total{\n  background:#f6f7f9 !important;\n  color:#939aa5 !important;\n}\n\ntr.leave-closed:hover > td,\ntr.employee-row-closed:hover > td{\n  background:#f1f3f6 !important;\n}\n\ntr.employee-row-closed .action-btn{\n  background:#fafbfc !important;\n  color:#8f96a1 !important;\n  border-color:#e1e4e8 !important;\n}\n\n\n:host{display:block;background:#f6f7f9;color:#1f2937;font-family:Pretendard,\"Noto Sans KR\",Arial,sans-serif;min-height:calc(100vh - 110px)}\n.topbar{display:none!important}.wrap,.settle-wrap{padding-top:24px}.loading{z-index:1000}\n";
+const LEAVE_SHADOW_BODY="\n<div id=\"loading\" class=\"loading\">처리 중입니다…</div>\n\n<header class=\"topbar\">\n  <div class=\"brand\">연차관리</div>\n  <nav class=\"nav\">\n    <button id=\"leaveNav\" class=\"active\" onclick=\"LeaveApp.showPage('leave')\">연차 현황</button>\n    <button id=\"settleNav\" onclick=\"LeaveApp.showPage('settle')\">정산</button>\n    <button id=\"employeeNav\" onclick=\"LeaveApp.showPage('employee')\">사원정보</button>\n  </nav>\n  <div id=\"topActions\" class=\"top-actions\">\n    <select id=\"yearSelect\" class=\"select\" onchange=\"LeaveApp.changeYearMonth()\"></select>\n    <select id=\"monthSelect\" class=\"select\" onchange=\"LeaveApp.changeYearMonth()\"></select>\n  </div>\n</header>\n\n<div id=\"leavePage\" class=\"page active\">\n<main class=\"wrap\">\n  <div class=\"heading\">\n    <div>\n      <h1>연차 현황</h1>\n      <p>날짜를 눌러 연차를 등록하고, 등록된 일정을 다시 눌러 수정·삭제할 수 있습니다. 웹 저장소 기준으로 관리됩니다.</p>\n    </div>\n    <div id=\"legend\" class=\"legend\"></div>\n  </div>\n\n  <section class=\"main-grid\">\n    <div class=\"panel calendar-panel\">\n      <div class=\"panel-h\">\n        <h2 id=\"calendarTitle\">일정</h2>\n        <div class=\"sub\">날짜 클릭 → 등록</div>\n      </div>\n      <div class=\"calendar-wrap\">\n        <div class=\"cal-head\"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>\n        <div id=\"calendar\" class=\"cal\"></div>\n      </div>\n    </div>\n\n    <div class=\"right-stack\">\n      <div class=\"panel\">\n        <div class=\"panel-h\"><h2>사원별 연차 현황</h2><div class=\"sub\" id=\"statusSub\"></div></div>\n        <table class=\"status-table\">\n          <thead><tr><th>성명</th><th>입사일</th><th>연차일수</th><th>유급휴가일수</th><th>사용일수</th><th>연차수당처리일수</th><th>잔여</th></tr></thead>\n          <tbody id=\"statusBody\"></tbody>\n        </table>\n      </div>\n\n      <div class=\"panel\">\n        <div class=\"panel-h\"><h2>월별 사용대장</h2><div class=\"sub\">1월 ~ 12월</div></div>\n        <table class=\"monthly-table\">\n          <thead><tr><th>성명</th><th>1월</th><th>2월</th><th>3월</th><th>4월</th><th>5월</th><th>6월</th><th>7월</th><th>8월</th><th>9월</th><th>10월</th><th>11월</th><th>12월</th><th>누적</th></tr></thead>\n          <tbody id=\"monthlyBody\"></tbody>\n        </table>\n      </div>\n    </div>\n  </section>\n</main>\n</div>\n\n\n<div id=\"employeePage\" class=\"page\">\n<main class=\"settle-wrap\">\n  <div class=\"heading\">\n    <div>\n      <h1>사원정보</h1>\n      <p>입사자 등록과 근로자 정보를 관리합니다. 최종근무일을 입력하면 정산 대상자로 자동 전환됩니다.</p>\n    </div>\n    <button class=\"action-btn primary\" onclick=\"LeaveApp.openNewEmployee()\">+ 사원 등록</button>\n  </div>\n\n  <section class=\"panel\">\n    <div class=\"panel-h\">\n      <h2>근로자 정보</h2>\n      <div class=\"sub\">WEB_사원정보 저장소</div>\n    </div>\n    <table class=\"employee-table\">\n      <thead>\n        <tr>\n          <th>사원번호</th>\n          <th>성명</th>\n          <th>부서</th>\n          <th>직급/직책</th>\n          <th>입사일</th>\n          <th>월평균임금</th>\n          <th>최종근무일</th>\n          <th>상태</th>\n          <th></th>\n        </tr>\n      </thead>\n      <tbody id=\"employeeBody\"></tbody>\n    </table>\n  </section>\n</main>\n</div>\n\n<div id=\"settlePage\" class=\"page\">\n<main class=\"settle-wrap\">\n  <div class=\"heading\">\n    <div>\n      <h1>정산</h1>\n      <p>최종근무일을 입력하고 정산내역을 확인한 뒤 확정·인쇄합니다.</p>\n    </div>\n    <div class=\"tiny\">인쇄 시 A4 정산서만 출력</div>\n  </div>\n\n  <section class=\"panel\">\n    <div class=\"panel-h\"><h2>정산 대상자</h2><div class=\"sub\">현재 대상자: 입사일 순 / 종료자: 최종근무일 순</div></div>\n    <table class=\"settle-table\">\n      <thead><tr><th>성명</th><th>입사일</th><th>최종근무일</th><th class=\"num\">처리가능</th><th class=\"num\">수당처리</th><th class=\"num\">연차수당</th><th>상태</th><th></th></tr></thead>\n      <tbody id=\"settlementRows\"></tbody>\n    </table>\n  </section>\n\n  <section id=\"settlementDetail\" class=\"detail-card\">\n    <div class=\"empty-detail\">정산 대상자의 <b>보기</b>를 누르면 상세내역이 표시됩니다.</div>\n  </section>\n</main>\n</div>\n\n<div id=\"leaveOverlay\" class=\"overlay\" onclick=\"LeaveApp.closeLeaveModal()\">\n  <div class=\"modal\" onclick=\"event.stopPropagation()\">\n    <div class=\"modal-h\"><h3 id=\"leaveModalTitle\">연차 등록</h3><button class=\"close\" onclick=\"LeaveApp.closeLeaveModal()\">×</button></div>\n    <div class=\"modal-b\">\n      <div class=\"field\"><label>사원</label><select id=\"employeeSelect\"></select></div>\n      <div class=\"field\"><label>기간</label><div class=\"date-row\"><input id=\"startDate\" type=\"date\"><div class=\"dash\">~</div><input id=\"endDate\" type=\"date\"></div></div>\n      <div class=\"type-row\">\n        <div class=\"field\"><label>구분</label><select id=\"leaveType\" onchange=\"LeaveApp.toggleLeaveDetail()\"><option>연차</option><option>반차</option><option>유급</option><option>지각</option><option>조기퇴근</option></select></div>\n        <div id=\"halfField\" class=\"field hidden\"><label>반차 구분</label><select id=\"halfType\"><option>오전</option><option>오후</option></select></div>\n        <div id=\"lateField\" class=\"field hidden\"><label>지각 시간</label><select id=\"lateType\" onchange=\"LeaveApp.updateDeductionPreview()\"></select></div>\n        <div id=\"earlyField\" class=\"field hidden\"><label>조기퇴근 시간</label><select id=\"earlyType\" onchange=\"LeaveApp.updateDeductionPreview()\"></select></div>\n      </div>\n      <div id=\"deductionField\" class=\"field hidden\"><label>차감수</label><input id=\"deductionPreview\" readonly><div class=\"help\">사원정보 시트의 data 차감수 기준</div></div>\n      <div class=\"field\"><label>메모</label><textarea id=\"memo\" rows=\"3\" placeholder=\"개인 / 전사 휴가 / 기타 메모\"></textarea></div>\n    </div>\n    <div class=\"modal-f\">\n      <button id=\"deleteLeaveBtn\" class=\"mbtn danger hidden\" onclick=\"LeaveApp.deleteLeave()\">삭제</button>\n      <div style=\"margin-left:auto;display:flex;gap:8px\"><button class=\"mbtn\" onclick=\"LeaveApp.closeLeaveModal()\">취소</button><button class=\"mbtn primary\" onclick=\"LeaveApp.saveLeave()\">저장</button></div>\n    </div>\n  </div>\n</div>\n\n\n<div id=\"employeeOverlay\" class=\"overlay\" onclick=\"LeaveApp.closeEmployeeModal()\">\n  <div class=\"modal\" onclick=\"event.stopPropagation()\">\n    <div class=\"modal-h\">\n      <h3 id=\"employeeModalTitle\">사원 등록</h3>\n      <button class=\"close\" onclick=\"LeaveApp.closeEmployeeModal()\">×</button>\n    </div>\n    <div class=\"modal-b\">\n      <input id=\"originalEmployeeNo\" type=\"hidden\">\n      <div class=\"type-row\">\n        <div class=\"field\"><label>사원번호</label><input id=\"empNo\" placeholder=\"17-0023\"></div>\n        <div class=\"field\"><label>성명</label><input id=\"empName\"></div>\n      </div>\n      <div class=\"type-row\">\n        <div class=\"field\"><label>부서</label><input id=\"empDept\"></div>\n        <div class=\"field\"><label>직급/직책</label><input id=\"empPosition\"></div>\n      </div>\n      <div class=\"type-row\">\n        <div class=\"field\"><label>입사일</label><input id=\"empJoinDate\" type=\"date\"></div>\n        <div class=\"field\"><label>최종근무일</label><input id=\"empFinalDate\" type=\"date\"></div>\n      </div>\n      <div class=\"field\">\n        <label>월평균임금</label>\n        <input id=\"empAvgPay\" type=\"number\" min=\"0\" step=\"1\">\n        <div class=\"help\">연차수당 계산 시 1일 통상임금 산정 기준으로 사용합니다.</div>\n      </div>\n    </div>\n    <div class=\"modal-f\">\n      <div></div>\n      <div style=\"display:flex;gap:8px\">\n        <button class=\"mbtn\" onclick=\"LeaveApp.closeEmployeeModal()\">취소</button>\n        <button class=\"mbtn primary\" onclick=\"LeaveApp.saveEmployee()\">저장</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<div id=\"printOnly\"></div>\n\n";
+let LEAVE_APP_PROMISE=null;
+window.LeaveApp=null;
+window.syncLeaveOuterSelectors=function(state){
+  const ys=document.getElementById('leaveGlobalYear'),ms=document.getElementById('leaveGlobalMonth');
+  if(ys) ys.innerHTML=(state?.years||[]).map(y=>`<option value="${y}" ${Number(y)===Number(state.year)?'selected':''}>${y}년</option>`).join('');
+  if(ms) ms.innerHTML=Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}" ${Number(m)===Number(state?.month)?'selected':''}>${m}월</option>`).join('');
+};
+window.syncLeaveOuterTab=function(page){
+  LEAVE_ACTIVE_PAGE=page||'leave';
+  document.querySelectorAll('.module-tab[data-leave-page]').forEach(b=>b.classList.toggle('active',b.dataset.leavePage===LEAVE_ACTIVE_PAGE));
+  document.getElementById('leaveSecondaryTools')?.classList.toggle('hidden',LEAVE_ACTIVE_PAGE!=='leave');
+};
+async function ensureLeaveApp(){
+  if(window.LeaveApp) return window.LeaveApp;
+  if(LEAVE_APP_PROMISE) return LEAVE_APP_PROMISE;
+  LEAVE_APP_PROMISE=(async()=>{
+    const mount=document.getElementById('leaveMount');if(!mount)throw new Error('연차관리 화면 영역을 찾을 수 없습니다.');
+    const root=mount.shadowRoot||mount.attachShadow({mode:'open'});
+    if(!root.dataset?.ready){
+      root.innerHTML=`<style>${LEAVE_SHADOW_STYLE}</style><div class="leave-root">${LEAVE_SHADOW_BODY}</div>`;
+    }
+    window.LeaveApp=createLeaveApp(root);
+    await window.LeaveApp.init();
+    window.LeaveApp.showSubPage(LEAVE_ACTIVE_PAGE||'leave');
+    return window.LeaveApp;
+  })().catch(e=>{LEAVE_APP_PROMISE=null;throw e});
+  return LEAVE_APP_PROMISE;
+}
+function initLeaveShell(){
+  document.querySelectorAll('.module-tab[data-leave-page]').forEach(btn=>{
+    if(btn.dataset.leaveBound)return;btn.dataset.leaveBound='1';
+    btn.addEventListener('click',()=>{LEAVE_ACTIVE_PAGE=btn.dataset.leavePage||'leave';syncModuleHeader('leave','leaveHost');ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));});
+  });
+  const y=document.getElementById('leaveGlobalYear'),m=document.getElementById('leaveGlobalMonth');
+  const change=()=>ensureLeaveApp().then(app=>app.setYearMonth(Number(y?.value),Number(m?.value))).catch(e=>alert(e.message));
+  if(y&&!y.dataset.leaveBound){y.dataset.leaveBound='1';y.addEventListener('change',change)}
+  if(m&&!m.dataset.leaveBound){m.dataset.leaveBound='1';m.addEventListener('change',change)}
+}
+
 async function githubAfterLogin(){
   const btn=document.getElementById('githubLoginBtn');
   try{
@@ -1307,7 +2272,7 @@ async function githubAfterLogin(){
     // 각 스프레드시트의 실제 공유 권한을 따로 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
-    const allowedModules=['cash','card','trip','research'].filter(m=>access[m]);
+    const allowedModules=['cash','card','trip','leave','research'].filter(m=>access[m]);
     if(!allowedModules.length){
       if(access.researchError) throw new Error(access.researchError);
       throw new Error('공유받은 관리 자료가 없습니다. 스프레드시트 또는 연구개발 문서 공유 권한을 확인해 주세요.');
@@ -1341,7 +2306,7 @@ async function githubAfterLogin(){
       });
     }
 
-    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',research:'연구개발'};
+    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',leave:'연차관리',research:'연구개발'};
     const badge=document.getElementById('statusBadge');
     if(badge)badge.textContent='Google Workspace · '+allowedModules.map(m=>labelMap[m]).join(' · ')+' · '+GITHUB_USER_EMAIL;
   }catch(e){
@@ -1349,7 +2314,7 @@ async function githubAfterLogin(){
     GITHUB_ACCESS_TOKEN=null;
     RESEARCH_SESSION_KEY='';RESEARCH_AUTH_EMAIL='';RESEARCH_ACCESS_ERROR='';
     window.FRAMEBY_ACCESS_READY=false;
-    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,research:false};
+    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,leave:false,research:false};
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
@@ -1367,7 +2332,7 @@ function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}co
 function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubAuthError('Google 로그인 준비 중입니다. 잠시 후 다시 시도해 주세요.');return}const btn=document.getElementById('githubLoginBtn');const force=btn?.dataset.forceAccount==='1';if(btn){btn.disabled=true;btn.textContent='로그인 중...';btn.dataset.forceAccount=''}GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:force?'select_account':''})}
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
 function initIntegratedNav(){
-  ['cashPrimaryTab','cardPrimaryTab','tripPrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
+  ['cashPrimaryTab','cardPrimaryTab','tripPrimaryTab','leavePrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(btn=>{
     if(btn.dataset.moduleBound)return;
     btn.dataset.moduleBound='1';
@@ -1403,7 +2368,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v24';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v24';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
