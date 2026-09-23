@@ -1072,7 +1072,8 @@ const INTEGRATED_CONFIG={
 const RESEARCH_SHARED_EMAILS=Object.freeze([
   'account@frame-by.com',
   'marketing@frame-by.com',
-  'ygiho@frame-by.com'
+  'ygiho@frame-by.com',
+  'bill@frame-by.com'
 ]);
 const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접대비','교통비','숙박비','기타비','합계','출장자','구분','적요명','출장목적','방문지역','이동수단','결제수단','상태','삭제여부','생성일시','수정일시','유류비'];
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
@@ -1168,7 +1169,7 @@ async function githubGetResearchSharedEmails(){
       if(msg.type!=='frameby-research-share-list'||!Array.isArray(msg.emails)) return;
       cleanup();resolve(msg.emails.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
     };
-    const timer=setTimeout(()=>{cleanup();reject(new Error('share-list-timeout'))},1500);
+    const timer=setTimeout(()=>{cleanup();reject(new Error('share-list-timeout'))},7000);
     window.addEventListener('message',onMessage);
     const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
     frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=share-list&_='+Date.now();
@@ -1400,7 +1401,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-embed-v20';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-menu-share-v23';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
