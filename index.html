@@ -203,6 +203,9 @@ body.frameby-auth-locked #statusBadge{display:none!important}
 body.frameby-auth-locked{background:#0f1115!important;overflow:hidden}
 body.frameby-auth-ready{overflow:auto}
 </style>
+<style id="subscription-style">
+.subscription-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}.subscription-head h1{font-size:26px;margin:0}.subscription-head p{margin:6px 0 0;color:var(--muted)}.subscription-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.subscription-primary-btn{border:1px solid var(--primary);background:var(--primary);color:#fff;padding:9px 13px;border-radius:8px;font-weight:850;cursor:pointer}.subscription-primary-btn:hover{filter:brightness(.97)}.subscription-ghost-btn{border:1px solid #cbd6ef;background:#fff;color:var(--primary);padding:9px 12px;border-radius:8px;font-weight:800;cursor:pointer}.subscription-ghost-btn:hover{background:var(--soft)}.subscription-grid{display:grid;gap:14px}.subscription-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.subscription-table{min-width:1220px}.subscription-service{font-weight:850}.subscription-sub{font-size:10px;color:var(--muted);margin-top:3px}.subscription-center{text-align:center}.subscription-row-actions{display:flex;gap:5px;justify-content:center}.subscription-icon-btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;color:#526071;cursor:pointer}.subscription-icon-btn:hover{background:#f6f8fb}.subscription-icon-btn.danger{color:#c93c4a;border-color:#efcbd0}.subscription-summary{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px;margin-bottom:10px}.subscription-summary b{color:var(--text)}.subscription-help{margin-top:12px;padding:11px 13px;border:1px solid #dce5f5;background:#f8faff;border-radius:9px;color:#5b6677;font-size:11px;line-height:1.6}.subscription-modal-backdrop{position:fixed;inset:0;background:rgba(17,26,45,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:7000}.subscription-modal-backdrop.open{display:flex}.subscription-modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #dfe4ea;border-radius:16px;box-shadow:0 24px 70px rgba(17,26,45,.24)}.subscription-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.subscription-modal-head h3{margin:0;font-size:18px}.subscription-close{border:0;background:transparent;color:#667085;font-size:24px;line-height:1;cursor:pointer}.subscription-modal-body{padding:20px}.subscription-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.subscription-form-grid .wide{grid-column:1/-1}.subscription-form-grid .span2{grid-column:span 2}.subscription-form-grid textarea{min-height:78px;resize:vertical}.subscription-modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:15px 20px;border-top:1px solid var(--line);background:#fafbfd}.subscription-loading{padding:36px;text-align:center;color:var(--muted);font-weight:750}.subscription-error{padding:14px 16px;border:1px solid #f0b7b7;background:#fff4f4;color:#a12828;border-radius:10px;font-weight:700;margin-bottom:14px}.subscription-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:#edf2f8;font-size:10px;font-weight:800;white-space:nowrap}.subscription-pill.green{background:#eaf7f2;color:var(--success)}.subscription-pill.orange{background:#fff4e7;color:var(--warn)}.subscription-pill.gray{background:#f1f3f5;color:#667085}.subscription-pill.blue{background:var(--soft);color:var(--primary)}@media(max-width:1050px){.subscription-kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:720px){.subscription-kpis{grid-template-columns:1fr 1fr}.subscription-head{align-items:flex-start;flex-direction:column}.subscription-form-grid{grid-template-columns:1fr}.subscription-form-grid .wide,.subscription-form-grid .span2{grid-column:auto}}
+</style>
 
 <script>
 (function(){
@@ -277,6 +280,7 @@ body.frameby-auth-ready{overflow:auto}
           <button type="button" class="module-tab active" data-page="dashboard">대시보드</button>
           <button type="button" class="module-tab" data-page="payment">결제일별 내역</button>
           <button type="button" class="module-tab" data-page="all">전체 사용내역</button>
+          <button type="button" class="module-tab" data-page="subscription">정기구독</button>
         </div>
         <div class="secondary-tools" id="cardSecondaryTools" aria-label="법인카드 조회 조건">
           <div class="secondary-tool-group active" data-tools-page="dashboard">
@@ -290,6 +294,11 @@ body.frameby-auth-ready{overflow:auto}
             <div class="field"><label>월</label><select id="allMonth"><option value="">전체</option></select></div>
             <div class="field"><label>카드</label><select id="allCard"><option value="">전체 카드</option></select></div>
             <div class="field"><label>검색</label><input class="search" id="allSearch" placeholder="사용처·계정과목"/></div>
+          </div>
+          <div class="secondary-tool-group" data-tools-page="subscription">
+            <div class="field"><label>상태</label><select id="subscriptionStatusFilter"><option value="">전체</option><option value="사용중">사용중</option><option value="중지예정">중지예정</option><option value="종료">종료</option></select></div>
+            <div class="field"><label>카드</label><select id="subscriptionCardFilter"><option value="">전체 카드</option></select></div>
+            <div class="field"><label>검색</label><input class="search" id="subscriptionSearch" placeholder="서비스명·용도 검색"/></div>
           </div>
         </div>
       </div>
@@ -354,6 +363,38 @@ body.frameby-auth-ready{overflow:auto}
 </section>
 <section class="page card-page-direct" id="all">
 <div class="card"><div id="allTable"></div></div>
+</section>
+<section class="page card-page-direct" id="subscription">
+  <div class="subscription-head">
+    <div>
+      <h1>정기구독</h1>
+      <p>법인카드로 반복 결제되는 서비스와 다음 결제 일정을 관리합니다.</p>
+    </div>
+    <div class="subscription-actions">
+      <button class="subscription-primary-btn" id="subscriptionAddBtn" type="button">+ 정기구독 추가</button>
+    </div>
+  </div>
+  <div id="subscriptionError"></div>
+  <div class="subscription-grid subscription-kpis">
+    <div class="card kpi"><div class="label">월 예상 구독비</div><div class="value" id="subscriptionKpiMonthly">0원</div><div class="sub">사용중 항목 월 환산</div></div>
+    <div class="card kpi"><div class="label">연 환산 금액</div><div class="value" id="subscriptionKpiAnnual">0원</div><div class="sub">월 환산 × 12</div></div>
+    <div class="card kpi"><div class="label">사용중 구독</div><div class="value" id="subscriptionKpiActive">0건</div><div class="sub" id="subscriptionKpiPaused">중지예정 0건</div></div>
+    <div class="card kpi"><div class="label">30일 내 결제예정</div><div class="value" id="subscriptionKpiUpcoming">0건</div><div class="sub" id="subscriptionKpiUpcomingAmt">예정액 0원</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">
+      <h2>구독 목록</h2>
+      <div class="legend"><span class="subscription-pill green">사용중</span><span class="subscription-pill orange">중지예정</span><span class="subscription-pill gray">종료</span></div>
+    </div>
+    <div class="subscription-summary"><span>저장소</span><b>정기구독 저장소</b><span>·</span><b id="subscriptionVisibleCount">0건</b></div>
+    <div class="table-wrap">
+      <table class="table subscription-table">
+        <thead><tr><th>서비스명</th><th>결제카드</th><th>결제주기</th><th class="subscription-center">결제일</th><th class="num">실 결제금액</th><th class="num">월 환산금액</th><th>다음 결제일</th><th>계정과목</th><th>상태</th><th>용도 / 메모</th><th class="subscription-center">관리</th></tr></thead>
+        <tbody id="subscriptionBody"><tr><td colspan="11" class="subscription-loading">정기구독 저장소를 불러오지 않았습니다.</td></tr></tbody>
+      </table>
+    </div>
+    <div class="subscription-help">이 화면은 <b>정기구독 저장소</b>의 현재 상태만 사용합니다. 수정은 현재 행을 덮어쓰고, 삭제는 해당 행을 실제로 삭제하며, 변경하지 않은 항목은 저장소에 계속 유지됩니다.</div>
+  </div>
 </section>
     <section class="page" id="trip">
       <div class="head">
@@ -603,6 +644,25 @@ body.frameby-auth-ready{overflow:auto}
     </section>
   </main>
 </div>
+<div class="subscription-modal-backdrop" id="subscriptionModalBackdrop">
+  <div class="subscription-modal" role="dialog" aria-modal="true" aria-labelledby="subscriptionModalTitle">
+    <div class="subscription-modal-head"><h3 id="subscriptionModalTitle">정기구독 추가</h3><button class="subscription-close" id="subscriptionCloseBtn" type="button">×</button></div>
+    <div class="subscription-modal-body">
+      <div class="subscription-form-grid">
+        <div class="field span2"><label>서비스명 *</label><input id="subscriptionName" placeholder="예: 업무용 서비스"></div>
+        <div class="field"><label>상태</label><select id="subscriptionStatus"><option value="사용중">사용중</option><option value="중지예정">중지예정</option><option value="종료">종료</option></select></div>
+        <div class="field"><label>결제카드 *</label><select id="subscriptionCard"></select></div>
+        <div class="field"><label>결제주기</label><select id="subscriptionCycle"><option value="월간">월간</option><option value="연간">연간</option><option value="분기">분기</option></select></div>
+        <div class="field"><label>결제일</label><input id="subscriptionPayDay" type="number" min="1" max="31" placeholder="예: 15"></div>
+        <div class="field"><label>실 결제금액 *</label><input id="subscriptionAmount" type="number" min="0" step="1" placeholder="원 단위"></div>
+        <div class="field"><label>다음 결제일</label><input id="subscriptionNextDate" type="date"></div>
+        <div class="field"><label>계정과목</label><select id="subscriptionAccount"><option value="지급수수료">지급수수료</option><option value="소모품비">소모품비</option><option value="통신비">통신비</option><option value="광고선전비">광고선전비</option><option value="기타">기타</option></select></div>
+        <div class="field wide"><label>용도 / 메모</label><textarea id="subscriptionMemo" placeholder="사용 목적, 담당 서비스, 해지 예정 사유 등을 입력"></textarea></div>
+      </div>
+    </div>
+    <div class="subscription-modal-foot"><button class="subscription-ghost-btn" id="subscriptionCancelBtn" type="button">취소</button><button class="subscription-primary-btn" id="subscriptionSaveBtn" type="button">저장</button></div>
+  </div>
+</div>
 <style id="live-extra-style">
 .save-toast{position:fixed;right:22px;bottom:22px;z-index:5000;min-width:220px;max-width:420px;padding:12px 15px;border-radius:10px;background:#111a2d;color:white;box-shadow:0 12px 36px rgba(17,26,45,.2);font-size:12px;font-weight:750;opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s}.save-toast.show{opacity:1;transform:none}.save-toast.error{background:#a52a38}.save-toast.ok{background:#106e55}.loading-mask{position:fixed;inset:0;z-index:4500;background:rgba(244,246,249,.72);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;font-weight:850;color:#344054}.loading-mask.hidden{display:none}.saving-cell{box-shadow:inset 3px 0 0 #2757d7}.unsaved-note{font-size:10px;color:#c97916;font-weight:800}.vehicle-name-input{min-width:150px}.empty-row td{padding:24px!important;text-align:center;color:#8a94a3!important}
 </style>
@@ -627,7 +687,7 @@ function fillSelect(el,items,selected){
 function resetDynamicSelects(){
   ['monthFilter','payMonth'].forEach(id=>$(id).innerHTML='<option value="">전체</option>');
   $('allMonth').innerHTML='<option value="">전체</option>';
-  ['cardFilter','allCard'].forEach(id=>$(id).innerHTML='<option value="">전체 카드</option>');
+  ['cardFilter','allCard','subscriptionCardFilter'].forEach(id=>{const el=$(id);if(el)el.innerHTML='<option value="">전체 카드</option>'});
 }
 function initializeControls(){
   resetDynamicSelects();
@@ -636,7 +696,11 @@ function initializeControls(){
   fillSelect($('monthFilter'),months,preferred);
   fillSelect($('payMonth'),months,preferred);
   fillSelect($('allMonth'),months);
-  cards.forEach(c=>['cardFilter','allCard'].forEach(id=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$(id).appendChild(o)}));
+  cards.forEach(c=>{
+    ['cardFilter','allCard'].forEach(id=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$(id).appendChild(o)});
+    const sf=$('subscriptionCardFilter');if(sf){const o=document.createElement('option');o.value=c.name;o.textContent=c.name;sf.appendChild(o)}
+  });
+  subscriptionPopulateCardSelect();
 }
 
 const tableUi={all:{sortKey:'date',sortDir:'desc',filters:{}}};
@@ -741,7 +805,7 @@ function renderAll(){
   const m=$('allMonth').value,c=$('allCard').value,q=$('allSearch').value.trim().toLowerCase();let data=rows.filter(r=>(!m||r.date.startsWith(m))&&(!c||r.cardId===c)&&(!q||`${r.account} ${r.merchant}`.toLowerCase().includes(q)));data=applyTableState(data,'all');
   $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(card(r.cardId)?.name||'')}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
 }
-const CARD_PAGES=['dashboard','payment','all'];
+const CARD_PAGES=['dashboard','payment','all','subscription'];
 const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
@@ -895,6 +959,7 @@ function showPage(id){
   if(id==='dashboard')renderDashboard();
   if(id==='payment')renderPayment();
   if(id==='all')renderAll();
+  if(id==='subscription')loadSubscriptionsAndRender();
   if(id==='trip'||id==='vehicle'||id==='master'){
     try{renderTripSystemAll()}catch(e){}
   }
@@ -929,6 +994,15 @@ function initResearchShell(){
 function bindEvents(){
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
   $('monthFilter').addEventListener('change',renderDashboard);$('cardFilter').addEventListener('change',renderDashboard);$('payMonth').addEventListener('change',renderPayment);$('allMonth').addEventListener('change',renderAll);$('allCard').addEventListener('change',renderAll);$('allSearch').addEventListener('input',renderAll);
+  $('subscriptionStatusFilter')?.addEventListener('change',renderSubscriptions);
+  $('subscriptionCardFilter')?.addEventListener('change',renderSubscriptions);
+  $('subscriptionSearch')?.addEventListener('input',renderSubscriptions);
+  $('subscriptionAddBtn')?.addEventListener('click',()=>subscriptionOpenModal());
+  $('subscriptionCloseBtn')?.addEventListener('click',subscriptionCloseModal);
+  $('subscriptionCancelBtn')?.addEventListener('click',subscriptionCloseModal);
+  $('subscriptionSaveBtn')?.addEventListener('click',subscriptionSaveFromModal);
+  $('subscriptionModalBackdrop')?.addEventListener('click',e=>{if(e.target===$('subscriptionModalBackdrop'))subscriptionCloseModal()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')subscriptionCloseModal()});
 }
 function showFatal(message){
   $('loading').classList.add('hidden');$('statusBadge').textContent='데이터 접근 실패';
@@ -1092,6 +1166,7 @@ initSortableTables();initColumnReorder();updateSortIndicators();
 const INTEGRATED_CONFIG={
   cardSpreadsheetId:'1chQuy2l1QjA1fJCjZ7nEIZPuGn492WxDiKpVmu2dHA8',
   cardDataSheet:'사용내역',cardDataStartRow:3,
+  subscriptionSheet:'정기구독 저장소',
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
@@ -1328,6 +1403,37 @@ function githubOpenAuthorizedInitialModule(){
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
 function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));cardMap[cardName]??={name:cardName,group};raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원'});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1);idBy[name]=id;return{id,name,group:cardMap[name].group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
 async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
+
+/* ===== 법인카드 · 정기구독 저장소 직접 연동 ===== */
+let SUBSCRIPTION_ROWS=[];
+let SUBSCRIPTION_EDITING_ID='';
+function subscriptionMonthlyAmount(cycle,amount){amount=Number(amount||0);return cycle==='연간'?Math.round(amount/12):cycle==='분기'?Math.round(amount/3):amount}
+function subscriptionNowText(){const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`}
+function subscriptionToday(){const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`}
+function subscriptionDaysUntil(dateStr){if(!dateStr)return Infinity;const a=new Date(subscriptionToday()+'T00:00:00+09:00'),b=new Date(String(dateStr).slice(0,10)+'T00:00:00+09:00');return Math.ceil((b-a)/86400000)}
+function subscriptionCycleText(v){const s=ghText(v);if(s==='yearly')return'연간';if(s==='quarterly')return'분기';if(s==='monthly')return'월간';return s||'월간'}
+function subscriptionPill(status){const s=ghText(status)||'사용중',cls=s==='사용중'?'green':s==='중지예정'?'orange':'gray';return `<span class="subscription-pill ${cls}">${escapeHtml(s)}</span>`}
+function subscriptionPopulateCardSelect(){const el=document.getElementById('subscriptionCard');if(!el)return;const current=el.value;const names=cards.map(c=>c.name).filter(Boolean);el.innerHTML=names.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');if(current&&names.includes(current))el.value=current}
+async function githubGetSubscriptions(){const values=await ghValuesGet(INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.subscriptionSheet,'A2:M');return values.map((row,index)=>{row=(row||[]).slice();while(row.length<13)row.push('');const id=ghText(row[0]);if(!id)return null;return{rowNo:index+2,id,name:ghText(row[1]),card:ghText(row[2]),cycle:subscriptionCycleText(row[3]),payDay:ghText(row[4]),amount:ghNum(row[5]),monthlyAmount:ghNum(row[6])||subscriptionMonthlyAmount(subscriptionCycleText(row[3]),ghNum(row[5])),nextDate:ghDate(row[7])||ghText(row[7]),account:ghText(row[8]),status:ghText(row[9])||'사용중',memo:ghText(row[10]),createdAt:ghText(row[11]),updatedAt:ghText(row[12])}}).filter(Boolean)}
+async function githubGetSheetIdFor(spreadsheetId,sheetName){const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties`;const data=await githubFetchJson(u);const hit=(data.sheets||[]).find(s=>s.properties?.title===sheetName);if(!hit)throw new Error(`${sheetName} 시트를 찾을 수 없습니다.`);return hit.properties.sheetId}
+async function githubDeleteSubscriptionRow(rowNo){const sheetId=await githubGetSheetIdFor(INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.subscriptionSheet);const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}:batchUpdate`;return githubFetchJson(u,{method:'POST',body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId,dimension:'ROWS',startIndex:Number(rowNo)-1,endIndex:Number(rowNo)}}}]})})}
+async function githubSaveSubscription(payload){payload=payload||{};const latest=await githubGetSubscriptions();const id=ghText(payload.id)||('SUB-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():Date.now()));const old=latest.find(r=>r.id===id)||null;const name=ghText(payload.name),cardName=ghText(payload.card),cycle=subscriptionCycleText(payload.cycle),payDay=ghText(payload.payDay),amount=Number(payload.amount||0),nextDate=ghText(payload.nextDate),account=ghText(payload.account),status=ghText(payload.status)||'사용중',memo=ghText(payload.memo);if(!name)throw new Error('서비스명을 입력해 주세요.');if(!cardName)throw new Error('결제카드를 선택해 주세요.');if(!(amount>0))throw new Error('실 결제금액을 입력해 주세요.');const now=subscriptionNowText(),monthly=subscriptionMonthlyAmount(cycle,amount),values=[[id,name,cardName,cycle,payDay,amount,monthly,nextDate,account,status,memo,old?old.createdAt:now,now]];if(old)await ghValuesUpdate(INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.subscriptionSheet,`A${old.rowNo}:M${old.rowNo}`,values);else await ghValuesAppend(INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.subscriptionSheet,'A:M',values);return githubGetSubscriptions()}
+async function githubDeleteSubscription(id){const latest=await githubGetSubscriptions(),hit=latest.find(r=>r.id===ghText(id));if(!hit)return latest;await githubDeleteSubscriptionRow(hit.rowNo);return githubGetSubscriptions()}
+function subscriptionSetError(message){const el=document.getElementById('subscriptionError');if(!el)return;el.innerHTML=message?`<div class="subscription-error">${escapeHtml(message)}</div>`:''}
+function subscriptionFilteredRows(){const status=document.getElementById('subscriptionStatusFilter')?.value||'',cardName=document.getElementById('subscriptionCardFilter')?.value||'',q=(document.getElementById('subscriptionSearch')?.value||'').trim().toLowerCase();return SUBSCRIPTION_ROWS.filter(r=>(!status||r.status===status)&&(!cardName||r.card===cardName)&&(!q||`${r.name} ${r.memo} ${r.account}`.toLowerCase().includes(q)))}
+function renderSubscriptions(){const body=document.getElementById('subscriptionBody');if(!body)return;const active=SUBSCRIPTION_ROWS.filter(r=>r.status==='사용중'),monthly=active.reduce((s,r)=>s+subscriptionMonthlyAmount(r.cycle,r.amount),0),paused=SUBSCRIPTION_ROWS.filter(r=>r.status==='중지예정').length,upcoming=SUBSCRIPTION_ROWS.filter(r=>r.status!=='종료'&&subscriptionDaysUntil(r.nextDate)>=0&&subscriptionDaysUntil(r.nextDate)<=30);document.getElementById('subscriptionKpiMonthly').textContent=fmt(monthly);document.getElementById('subscriptionKpiAnnual').textContent=fmt(monthly*12);document.getElementById('subscriptionKpiActive').textContent=active.length+'건';document.getElementById('subscriptionKpiPaused').textContent='중지예정 '+paused+'건';document.getElementById('subscriptionKpiUpcoming').textContent=upcoming.length+'건';document.getElementById('subscriptionKpiUpcomingAmt').textContent='예정액 '+fmt(upcoming.reduce((s,r)=>s+r.amount,0));const data=subscriptionFilteredRows();document.getElementById('subscriptionVisibleCount').textContent=data.length+'건';body.innerHTML=data.length?data.map(r=>`<tr><td><div class="subscription-service">${escapeHtml(r.name)}</div><div class="subscription-sub">${escapeHtml(r.id)}</div></td><td>${escapeHtml(r.card)}</td><td><span class="subscription-pill blue">${escapeHtml(r.cycle)}</span></td><td class="subscription-center">${r.payDay?escapeHtml(r.payDay)+'일':'-'}</td><td class="num">${fmt(r.amount)}</td><td class="num"><strong>${fmt(subscriptionMonthlyAmount(r.cycle,r.amount))}</strong></td><td>${escapeHtml(r.nextDate||'-')}</td><td>${escapeHtml(r.account||'-')}</td><td>${subscriptionPill(r.status)}</td><td>${escapeHtml(r.memo||'-')}</td><td class="subscription-center"><div class="subscription-row-actions"><button class="subscription-icon-btn" type="button" onclick="subscriptionEditRow('${escapeHtml(r.id)}')">수정</button><button class="subscription-icon-btn danger" type="button" onclick="subscriptionDeleteRow('${escapeHtml(r.id)}')">삭제</button></div></td></tr>`).join(''):'<tr><td colspan="11" class="empty">등록된 정기구독이 없습니다.</td></tr>'}
+async function loadSubscriptionsAndRender(){const body=document.getElementById('subscriptionBody');if(body)body.innerHTML='<tr><td colspan="11" class="subscription-loading">정기구독 저장소를 불러오는 중...</td></tr>';subscriptionSetError('');try{SUBSCRIPTION_ROWS=await githubGetSubscriptions();renderSubscriptions()}catch(e){subscriptionSetError(e.message||'정기구독 저장소를 불러오지 못했습니다.');if(body)body.innerHTML='<tr><td colspan="11" class="empty">데이터를 불러오지 못했습니다.</td></tr>'}}
+function subscriptionOpenModal(row){SUBSCRIPTION_EDITING_ID=row?.id||'';document.getElementById('subscriptionModalTitle').textContent=SUBSCRIPTION_EDITING_ID?'정기구독 수정':'정기구독 추가';subscriptionPopulateCardSelect();document.getElementById('subscriptionName').value=row?.name||'';document.getElementById('subscriptionStatus').value=row?.status||'사용중';const cardEl=document.getElementById('subscriptionCard');if(row?.card&&[...cardEl.options].some(o=>o.value===row.card))cardEl.value=row.card;document.getElementById('subscriptionCycle').value=subscriptionCycleText(row?.cycle||'월간');document.getElementById('subscriptionPayDay').value=row?.payDay||'';document.getElementById('subscriptionAmount').value=row?.amount||'';document.getElementById('subscriptionNextDate').value=row?.nextDate||'';const accountEl=document.getElementById('subscriptionAccount');if(row?.account&&![...accountEl.options].some(o=>o.value===row.account)){const o=document.createElement('option');o.value=row.account;o.textContent=row.account;accountEl.appendChild(o)}accountEl.value=row?.account||'지급수수료';document.getElementById('subscriptionMemo').value=row?.memo||'';document.getElementById('subscriptionModalBackdrop').classList.add('open');setTimeout(()=>document.getElementById('subscriptionName')?.focus(),0)}
+function subscriptionCloseModal(){document.getElementById('subscriptionModalBackdrop')?.classList.remove('open');SUBSCRIPTION_EDITING_ID=''}
+function subscriptionEditRow(id){const row=SUBSCRIPTION_ROWS.find(r=>r.id===id);if(row)subscriptionOpenModal(row)}
+async function subscriptionDeleteRow(id){const row=SUBSCRIPTION_ROWS.find(r=>r.id===id);if(!row)return;if(!confirm(`'${row.name}' 항목을 삭제할까요?\n삭제하면 정기구독 저장소의 해당 행도 삭제됩니다.`))return;try{SUBSCRIPTION_ROWS=await githubDeleteSubscription(id);renderSubscriptions()}catch(e){alert(e.message||'삭제하지 못했습니다.')}}
+async function subscriptionSaveFromModal(){const btn=document.getElementById('subscriptionSaveBtn');if(btn){btn.disabled=true;btn.textContent='저장 중...'}try{SUBSCRIPTION_ROWS=await githubSaveSubscription({id:SUBSCRIPTION_EDITING_ID,name:document.getElementById('subscriptionName').value,status:document.getElementById('subscriptionStatus').value,card:document.getElementById('subscriptionCard').value,cycle:document.getElementById('subscriptionCycle').value,payDay:document.getElementById('subscriptionPayDay').value,amount:document.getElementById('subscriptionAmount').value,nextDate:document.getElementById('subscriptionNextDate').value,account:document.getElementById('subscriptionAccount').value,memo:document.getElementById('subscriptionMemo').value});subscriptionCloseModal();renderSubscriptions()}catch(e){alert(e.message||'저장하지 못했습니다.')}finally{if(btn){btn.disabled=false;btn.textContent='저장'}}}
+window.subscriptionEditRow=subscriptionEditRow;
+window.subscriptionDeleteRow=subscriptionDeleteRow;
+let SUBSCRIPTION_LAST_FOCUS_REFRESH=0;
+async function subscriptionRefreshOnFocus(){if(!window.FRAMEBY_ACCESS_READY||!window.FRAMEBY_MODULE_ACCESS?.card)return;const page=document.getElementById('subscription');if(!page?.classList.contains('active'))return;const now=Date.now();if(now-SUBSCRIPTION_LAST_FOCUS_REFRESH<3000)return;SUBSCRIPTION_LAST_FOCUS_REFRESH=now;await loadSubscriptionsAndRender()}
+window.addEventListener('focus',()=>subscriptionRefreshOnFocus().catch(()=>{}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)subscriptionRefreshOnFocus().catch(()=>{})});
 
 /* ===== 연차관리 · GitHub 직접 Sheets API 백엔드 ===== */
 const LEAVE_CONFIG={
