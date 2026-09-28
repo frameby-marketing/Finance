@@ -229,6 +229,24 @@ body.frameby-auth-ready{overflow:auto}
 @media(max-width:1050px){.subscription-kpis{grid-template-columns:repeat(2,1fr)}.subscription-insight-grid{grid-template-columns:1fr}}
 @media(max-width:720px){.subscription-kpis{grid-template-columns:1fr 1fr}.subscription-head{align-items:flex-start;flex-direction:column}.subscription-form-grid{grid-template-columns:1fr}.subscription-form-grid .wide,.subscription-form-grid .span2{grid-column:auto}.subscription-alert-row{grid-template-columns:minmax(0,1fr) 62px 92px}.subscription-alert-date{grid-column:1/-1;text-align:left;padding-left:0}.subscription-card-total-row{grid-template-columns:minmax(0,1fr) 105px}}
 </style>
+<style id="online-purchase-style">
+.online-purchase-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}
+.online-purchase-table{min-width:900px}
+.online-purchase-table .online-sort-only{padding-right:10px}
+.online-purchase-table .th-wrap{padding-left:10px}
+.online-purchase-table .th-sort{width:100%}
+.online-purchase-table tfoot td{background:#f7f9fc;font-weight:900;border-top:1px solid var(--line)}
+.online-purchase-table tfoot td:first-child{text-align:left}
+.online-purchase-title-count{font-size:11px;color:var(--muted);font-weight:750}
+.online-purchase-error{margin:0 0 14px;padding:13px 15px;border:1px solid #f0b7b7;background:#fff4f4;color:#a12828;border-radius:10px;font-weight:700}
+.online-purchase-category{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#f1f3f5;color:#667085;font-size:10px;font-weight:800;white-space:nowrap}
+.online-purchase-category.green{background:#eaf7f2;color:var(--success)}
+.online-purchase-category.orange{background:#fff4e7;color:var(--warn)}
+.online-purchase-category.blue{background:var(--soft);color:var(--primary)}
+.online-purchase-category.gray{background:#f1f3f5;color:#667085}
+@media(max-width:1050px){.online-purchase-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.online-purchase-kpis{grid-template-columns:1fr 1fr}}
+</style>
 
 <script>
 (function(){
@@ -304,6 +322,7 @@ body.frameby-auth-ready{overflow:auto}
           <button type="button" class="module-tab" data-page="payment">결제일별 내역</button>
           <button type="button" class="module-tab" data-page="all">전체 사용내역</button>
           <button type="button" class="module-tab" data-page="subscription">정기구독</button>
+          <button type="button" class="module-tab" data-page="onlinePurchase">온라인 구입내역</button>
         </div>
         <div class="secondary-tools" id="cardSecondaryTools" aria-label="법인카드 조회 조건">
           <div class="secondary-tool-group active" data-tools-page="dashboard">
@@ -322,6 +341,13 @@ body.frameby-auth-ready{overflow:auto}
             <div class="field"><label>상태</label><select id="subscriptionStatusFilter"><option value="">전체</option><option value="사용중">사용중</option><option value="중지예정">중지예정</option><option value="종료">종료</option></select></div>
             <div class="field"><label>카드</label><select id="subscriptionCardFilter"><option value="">전체 카드</option></select></div>
             <div class="field"><label>검색</label><input class="search" id="subscriptionSearch" placeholder="서비스명·사용처/용도 검색"/></div>
+          </div>
+          <div class="secondary-tool-group" data-tools-page="onlinePurchase">
+            <div class="field"><label>연도</label><select id="onlinePurchaseYear"><option value="2026" selected>2026년</option></select></div>
+            <div class="field"><label>조회 월</label><select id="onlinePurchaseMonth"><option value="">전체</option></select></div>
+            <div class="field"><label>구매처</label><select id="onlinePurchaseMerchant"><option value="">전체</option></select></div>
+            <div class="field"><label>구분</label><select id="onlinePurchaseCategory"><option value="">전체</option></select></div>
+            <div class="field"><label>검색</label><input class="search" id="onlinePurchaseSearch" placeholder="품목명 검색"/></div>
           </div>
         </div>
       </div>
@@ -437,6 +463,28 @@ body.frameby-auth-ready{overflow:auto}
       </table>
     </div>
     <div class="subscription-help">이 화면은 <b>정기구독 저장소</b>의 현재 상태만 사용합니다. 수정은 현재 행을 덮어쓰고, 삭제는 해당 행을 실제로 삭제하며, 변경하지 않은 항목은 저장소에 계속 유지됩니다.</div>
+  </div>
+</section>
+<section class="page card-page-direct" id="onlinePurchase">
+  <div id="onlinePurchaseError"></div>
+  <div class="grid kpis online-purchase-kpis">
+    <div class="card kpi"><div class="label">해당 월 구매금액</div><div class="value" id="onlinePurchaseKpiTotal">0원</div><div class="sub" id="onlinePurchaseKpiMonth">조회 조건 기준</div></div>
+    <div class="card kpi"><div class="label">구매 건수</div><div class="value" id="onlinePurchaseKpiCount">0건</div><div class="sub">조회 조건 기준</div></div>
+    <div class="card kpi"><div class="label">포장재</div><div class="value" id="onlinePurchaseKpiPackaging">0원</div><div class="sub" id="onlinePurchaseKpiPackagingRate">비중 0%</div></div>
+    <div class="card kpi"><div class="label">간식</div><div class="value" id="onlinePurchaseKpiSnack">0원</div><div class="sub" id="onlinePurchaseKpiSnackRate">비중 0%</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">
+      <h2 id="onlinePurchaseTitle">온라인 구입내역</h2>
+      <span class="online-purchase-title-count" id="onlinePurchaseVisibleCount">0건</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table online-purchase-table">
+        <thead><tr id="onlinePurchaseHead"></tr></thead>
+        <tbody id="onlinePurchaseBody"><tr><td colspan="7" class="empty">온라인 구입내역을 불러오지 않았습니다.</td></tr></tbody>
+        <tfoot id="onlinePurchaseFoot"></tfoot>
+      </table>
+    </div>
   </div>
 </section>
     <section class="page" id="trip">
@@ -848,7 +896,7 @@ function renderAll(){
   const m=$('allMonth').value,c=$('allCard').value,q=$('allSearch').value.trim().toLowerCase();let data=rows.filter(r=>(!m||r.date.startsWith(m))&&(!c||r.cardId===c)&&(!q||`${r.account} ${r.merchant}`.toLowerCase().includes(q)));data=applyTableState(data,'all');
   $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(card(r.cardId)?.name||'')}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
 }
-const CARD_PAGES=['dashboard','payment','all','subscription'];
+const CARD_PAGES=['dashboard','payment','all','subscription','onlinePurchase'];
 const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
@@ -1013,6 +1061,7 @@ function showPage(id){
   if(id==='payment')renderPayment();
   if(id==='all')renderAll();
   if(id==='subscription')loadSubscriptionsAndRender();
+  if(id==='onlinePurchase')loadOnlinePurchasesAndRender();
   if(id==='trip'||id==='vehicle'||id==='master'){
     try{renderTripSystemAll()}catch(e){}
   }
@@ -1067,6 +1116,11 @@ function bindEvents(){
   $('subscriptionStatusFilter')?.addEventListener('change',renderSubscriptions);
   $('subscriptionCardFilter')?.addEventListener('change',renderSubscriptions);
   $('subscriptionSearch')?.addEventListener('input',renderSubscriptions);
+  $('onlinePurchaseYear')?.addEventListener('change',()=>loadOnlinePurchasesAndRender(true));
+  $('onlinePurchaseMonth')?.addEventListener('change',renderOnlinePurchases);
+  $('onlinePurchaseMerchant')?.addEventListener('change',renderOnlinePurchases);
+  $('onlinePurchaseCategory')?.addEventListener('change',renderOnlinePurchases);
+  $('onlinePurchaseSearch')?.addEventListener('input',renderOnlinePurchases);
   $('subscriptionAddBtn')?.addEventListener('click',()=>subscriptionOpenModal());
   $('subscriptionCycle')?.addEventListener('change',subscriptionSyncNextDateField);
   $('subscriptionStatus')?.addEventListener('change',subscriptionSyncNextDateField);
@@ -1240,6 +1294,8 @@ const INTEGRATED_CONFIG={
   cardSpreadsheetId:'1chQuy2l1QjA1fJCjZ7nEIZPuGn492WxDiKpVmu2dHA8',
   cardDataSheet:'사용내역',cardDataStartRow:3,
   subscriptionSheet:'정기구독 저장소',
+  onlinePurchaseSpreadsheetId:'1tTn6JpMjwUv3u9byMk2eJC2pIv9sjQTxAwWKibZsGWc',
+  onlinePurchaseSheet:'2026',
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
@@ -1476,6 +1532,205 @@ function githubOpenAuthorizedInitialModule(){
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
 function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));cardMap[cardName]??={name:cardName,group};raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원'});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1);idBy[name]=id;return{id,name,group:cardMap[name].group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
 async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
+
+/* ===== 법인카드 · 온라인 구입내역 직접 조회 ===== */
+let ONLINE_PURCHASE_ROWS=[];
+let ONLINE_PURCHASE_LOADED=false;
+let ONLINE_PURCHASE_LOAD_PROMISE=null;
+let ONLINE_PURCHASE_FILTERS_READY=false;
+const ONLINE_PURCHASE_SORT={key:'date',dir:'desc'};
+
+function onlinePurchaseDate(raw,year,month){
+  const s=ghText(raw);
+  if(!s)return'';
+  const full=ghDate(s);
+  if(full)return full;
+  const m=s.match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})/);
+  if(!m)return'';
+  const mo=Number(m[1])||Number(month)||0;
+  const d=Number(m[2])||0;
+  if(!mo||!d)return'';
+  return `${year}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function onlinePurchaseFindHeader(headers,from,to,label){
+  for(let c=Math.max(0,from);c<=Math.min(headers.length-1,to);c++){
+    if(ghText(headers[c])===label)return c;
+  }
+  return -1;
+}
+function onlinePurchaseBlockMonth(titles,from,to){
+  for(let c=Math.max(0,from);c<=Math.min(titles.length-1,to);c++){
+    const m=ghText(titles[c]).match(/(\d{1,2})월\s*구매내역/);
+    if(m)return Number(m[1]);
+  }
+  return 0;
+}
+function onlinePurchaseParse(values,year){
+  const titles=values?.[1]||[],headers=values?.[2]||[],out=[];
+  const amountCols=[];
+  headers.forEach((v,i)=>{if(ghText(v)==='금액')amountCols.push(i)});
+  let sourceOrder=0;
+  amountCols.forEach(amountCol=>{
+    const from=Math.max(0,amountCol-7),to=Math.min(headers.length-1,amountCol);
+    const merchantCol=onlinePurchaseFindHeader(headers,from,to,'구매처');
+    const dateCol=onlinePurchaseFindHeader(headers,from,to,'구매일자');
+    const categoryCol=onlinePurchaseFindHeader(headers,from,to,'구분');
+    const itemCol=onlinePurchaseFindHeader(headers,from,to,'품목명');
+    const qtyCol=onlinePurchaseFindHeader(headers,from,to,'수량');
+    if([merchantCol,dateCol,categoryCol,itemCol,qtyCol].some(v=>v<0))return;
+    const month=onlinePurchaseBlockMonth(titles,from,Math.min(titles.length-1,amountCol+1));
+    if(!month)return;
+
+    let lastMerchant='',lastDate='';
+    for(let r=3;r<values.length;r++){
+      const row=values[r]||[];
+      const merchantRaw=ghText(row[merchantCol]);
+      const dateRaw=ghText(row[dateCol]);
+      if(merchantRaw)lastMerchant=merchantRaw;
+      if(dateRaw)lastDate=dateRaw;
+      const merchant=merchantRaw||lastMerchant;
+      const category=ghText(row[categoryCol]);
+      const item=ghText(row[itemCol]);
+      const qty=ghNum(row[qtyCol]);
+      const amount=ghNum(row[amountCol]);
+      if(!category&&!item)continue;
+      if(!amount&&!qty)continue;
+      sourceOrder+=1;
+      out.push({
+        id:`${year}-${month}-${r}-${amountCol}`,
+        sourceOrder,
+        year:Number(year),
+        month,
+        date:onlinePurchaseDate(dateRaw||lastDate,Number(year),month),
+        merchant,
+        category,
+        item,
+        qty,
+        amount
+      });
+    }
+  });
+  return out;
+}
+function onlinePurchaseCategoryClass(category){
+  const s=ghText(category);
+  if(s==='포장재')return'green';
+  if(s==='간식')return'orange';
+  if(s==='소모품')return'blue';
+  return'gray';
+}
+function onlinePurchasePopulateFilters(){
+  const monthEl=$('onlinePurchaseMonth'),merchantEl=$('onlinePurchaseMerchant'),categoryEl=$('onlinePurchaseCategory');
+  if(!monthEl||!merchantEl||!categoryEl)return;
+  const previousMonth=monthEl.value,previousMerchant=merchantEl.value,previousCategory=categoryEl.value;
+  const months=[...new Set(ONLINE_PURCHASE_ROWS.map(r=>r.month).filter(Boolean))].sort((a,b)=>a-b);
+  const merchants=[...new Set(ONLINE_PURCHASE_ROWS.map(r=>r.merchant).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+  const categories=[...new Set(ONLINE_PURCHASE_ROWS.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+  monthEl.innerHTML='<option value="">전체</option>'+months.map(m=>`<option value="${m}">${m}월</option>`).join('');
+  merchantEl.innerHTML='<option value="">전체</option>'+merchants.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  categoryEl.innerHTML='<option value="">전체</option>'+categories.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  const latest=months[months.length-1]||'';
+  monthEl.value=months.includes(Number(previousMonth))?String(previousMonth):String(latest);
+  merchantEl.value=merchants.includes(previousMerchant)?previousMerchant:'';
+  categoryEl.value=categories.includes(previousCategory)?previousCategory:'';
+  ONLINE_PURCHASE_FILTERS_READY=true;
+}
+function onlinePurchaseFiltered(){
+  const month=Number($('onlinePurchaseMonth')?.value||0);
+  const merchant=ghText($('onlinePurchaseMerchant')?.value);
+  const category=ghText($('onlinePurchaseCategory')?.value);
+  const q=ghText($('onlinePurchaseSearch')?.value).toLowerCase();
+  let data=ONLINE_PURCHASE_ROWS.filter(r=>
+    (!month||r.month===month)&&
+    (!merchant||r.merchant===merchant)&&
+    (!category||r.category===category)&&
+    (!q||`${r.item} ${r.merchant} ${r.category}`.toLowerCase().includes(q))
+  );
+  const key=ONLINE_PURCHASE_SORT.key,dir=ONLINE_PURCHASE_SORT.dir==='asc'?1:-1;
+  data=data.slice().sort((a,b)=>{
+    let av=a[key],bv=b[key];
+    if(key==='qty'||key==='amount'||key==='sourceOrder')return (Number(av||0)-Number(bv||0))*dir;
+    return String(av??'').localeCompare(String(bv??''),'ko',{numeric:true})*dir;
+  });
+  return data;
+}
+function onlinePurchaseSort(key){
+  if(ONLINE_PURCHASE_SORT.key===key)ONLINE_PURCHASE_SORT.dir=ONLINE_PURCHASE_SORT.dir==='asc'?'desc':'asc';
+  else{
+    ONLINE_PURCHASE_SORT.key=key;
+    ONLINE_PURCHASE_SORT.dir=(key==='amount'||key==='qty'||key==='date'||key==='sourceOrder')?'desc':'asc';
+  }
+  renderOnlinePurchases();
+}
+function onlinePurchaseTh(key,label,numeric){
+  const active=ONLINE_PURCHASE_SORT.key===key;
+  const mark=active?(ONLINE_PURCHASE_SORT.dir==='asc'?'▲':'▼'):'↕';
+  return `<th${numeric?' class="num"':''}><div class="th-wrap online-sort-only"><button type="button" class="th-sort${numeric?' num':''}" onclick="onlinePurchaseSort('${key}')">${label}<span class="sort-mark">${mark}</span></button></div></th>`;
+}
+function renderOnlinePurchases(){
+  if(!ONLINE_PURCHASE_LOADED)return;
+  const data=onlinePurchaseFiltered();
+  const total=data.reduce((s,r)=>s+Number(r.amount||0),0);
+  const packaging=data.filter(r=>r.category==='포장재').reduce((s,r)=>s+Number(r.amount||0),0);
+  const snack=data.filter(r=>r.category==='간식').reduce((s,r)=>s+Number(r.amount||0),0);
+  const month=Number($('onlinePurchaseMonth')?.value||0);
+  const year=Number($('onlinePurchaseYear')?.value||2026);
+
+  $('onlinePurchaseKpiTotal').textContent=fmt(total);
+  $('onlinePurchaseKpiCount').textContent=`${data.length.toLocaleString()}건`;
+  $('onlinePurchaseKpiPackaging').textContent=fmt(packaging);
+  $('onlinePurchaseKpiSnack').textContent=fmt(snack);
+  $('onlinePurchaseKpiPackagingRate').textContent=`비중 ${total?((packaging/total)*100).toFixed(1):'0.0'}%`;
+  $('onlinePurchaseKpiSnackRate').textContent=`비중 ${total?((snack/total)*100).toFixed(1):'0.0'}%`;
+  $('onlinePurchaseKpiMonth').textContent=month?`${year}년 ${month}월 기준`:`${year}년 전체 기준`;
+  $('onlinePurchaseTitle').textContent=month?`${month}월 온라인 구입내역`:`${year}년 온라인 구입내역`;
+  $('onlinePurchaseVisibleCount').textContent=`총 ${data.length.toLocaleString()}건`;
+
+  $('onlinePurchaseHead').innerHTML=
+    onlinePurchaseTh('sourceOrder','No.')+
+    onlinePurchaseTh('date','구매일자')+
+    onlinePurchaseTh('merchant','구매처')+
+    onlinePurchaseTh('category','구분')+
+    onlinePurchaseTh('item','품목명')+
+    onlinePurchaseTh('qty','수량',true)+
+    onlinePurchaseTh('amount','금액',true);
+
+  $('onlinePurchaseBody').innerHTML=data.length?data.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td>${escapeHtml(r.date||'-')}</td>
+    <td>${escapeHtml(r.merchant||'-')}</td>
+    <td><span class="online-purchase-category ${onlinePurchaseCategoryClass(r.category)}">${escapeHtml(r.category||'-')}</span></td>
+    <td>${escapeHtml(r.item||'-')}</td>
+    <td class="num">${Number(r.qty||0).toLocaleString('ko-KR')}</td>
+    <td class="num">${fmt(r.amount)}</td>
+  </tr>`).join(''):'<tr><td colspan="7" class="empty">조건에 맞는 온라인 구입내역이 없습니다.</td></tr>';
+  $('onlinePurchaseFoot').innerHTML=`<tr><td colspan="5">합계</td><td class="num">-</td><td class="num">${fmt(total)}</td></tr>`;
+}
+async function loadOnlinePurchasesAndRender(force=false){
+  const errorEl=$('onlinePurchaseError');
+  if(errorEl)errorEl.innerHTML='';
+  if(ONLINE_PURCHASE_LOADED&&!force){renderOnlinePurchases();return}
+  if(ONLINE_PURCHASE_LOAD_PROMISE&&!force){await ONLINE_PURCHASE_LOAD_PROMISE;renderOnlinePurchases();return}
+  const year=Number($('onlinePurchaseYear')?.value||2026);
+  const body=$('onlinePurchaseBody');
+  if(body)body.innerHTML='<tr><td colspan="7" class="empty">온라인 구입내역을 불러오는 중...</td></tr>';
+  ONLINE_PURCHASE_LOAD_PROMISE=(async()=>{
+    const values=await ghValuesGet(INTEGRATED_CONFIG.onlinePurchaseSpreadsheetId,INTEGRATED_CONFIG.onlinePurchaseSheet,'A1:CD');
+    ONLINE_PURCHASE_ROWS=onlinePurchaseParse(values,year);
+    ONLINE_PURCHASE_LOADED=true;
+    onlinePurchasePopulateFilters();
+  })();
+  try{
+    await ONLINE_PURCHASE_LOAD_PROMISE;
+    renderOnlinePurchases();
+  }catch(e){
+    ONLINE_PURCHASE_LOADED=false;
+    if(errorEl)errorEl.innerHTML=`<div class="online-purchase-error">${escapeHtml(e?.message||'온라인 구입내역을 불러올 수 없습니다.')}</div>`;
+    if(body)body.innerHTML='<tr><td colspan="7" class="empty">온라인 구입내역을 불러오지 못했습니다.</td></tr>';
+  }finally{
+    ONLINE_PURCHASE_LOAD_PROMISE=null;
+  }
+}
 
 /* ===== 법인카드 · 정기구독 저장소 직접 연동 ===== */
 let SUBSCRIPTION_ROWS=[];
