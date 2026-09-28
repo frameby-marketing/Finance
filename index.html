@@ -151,7 +151,7 @@ html[data-theme="dark"]{color-scheme:light!important}
 .research-year-btn.active,.research-month-btn.active{background:#edf3ff;color:#2563eb}
 .research-months{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 @media(max-width:720px){.research-secondary{padding-top:10px;padding-bottom:10px}.research-month-row{gap:6px}.research-year-btn,.research-month-btn{font-size:13px;padding:6px 8px}}
-module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
+.module-tabs{display:flex;align-items:center;gap:8px;padding:0;background:transparent;border:0;border-radius:0;max-width:100%;overflow:auto}
 .module-tabs.hidden{display:none}
 .module-tab{border:1px solid transparent;background:transparent;color:#526071;padding:9px 13px;border-radius:8px;font-weight:800;cursor:pointer;white-space:nowrap}
 .module-tab:hover{background:#f5f7fb;color:var(--primary)}
@@ -928,15 +928,22 @@ function ensureResearchFrame(forceReload){
     return;
   }
 
+  const page=['documents','notes','write'].includes(RESEARCH_ACTIVE_PAGE)
+    ? RESEARCH_ACTIVE_PAGE
+    : 'notes';
+  const year=Number(RESEARCH_ACTIVE_YEAR)||2026;
+  const month=page==='notes'
+    ? Math.max(0,Math.min(12,Number(RESEARCH_ACTIVE_MONTH)||0))
+    : 0;
+
   const params=new URLSearchParams();
   params.set('shell','1');
-  params.set('page',RESEARCH_ACTIVE_PAGE||'notes');
-  params.set('year',String(RESEARCH_ACTIVE_YEAR||2026));
-  params.set('month',String(RESEARCH_ACTIVE_MONTH||0));
-  params.set('_nav',String(Date.now()));
-  const src=base+(base.includes('?')?'&':'?')+params.toString();
+  params.set('page',page);
+  params.set('year',String(year));
+  params.set('month',String(month));
 
-  if(!forceReload && frame.dataset.currentView===src) return;
+  const viewKey=`${page}|${year}|${month}`;
+  if(!forceReload && frame.dataset.currentView===viewKey && frame.dataset.loaded==='1') return;
 
   if(loadingEl){
     loadingEl.textContent='연구개발 데이터를 불러오는 중...';
@@ -945,12 +952,14 @@ function ensureResearchFrame(forceReload){
 
   frame.onload=()=>{
     frame.dataset.loaded='1';
+    frame.dataset.currentView=viewKey;
     if(loadingEl)loadingEl.classList.add('hidden');
   };
 
   frame.dataset.started='1';
-  frame.dataset.currentView=src;
-  frame.src=src;
+  frame.dataset.loaded='0';
+  frame.dataset.currentView=viewKey;
+  frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
 }
 
 function showCashPage(page){
@@ -980,9 +989,10 @@ function showModule(module,page){
     return;
   }
   if(module==='research'){
+    if(['documents','notes','write'].includes(page)) RESEARCH_ACTIVE_PAGE=page;
     syncModuleHeader('research','researchHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
-    ensureResearchFrame();
+    ensureResearchFrame(false);
     try{history.replaceState(null,'','#research')}catch(e){}
     return;
   }
@@ -1014,24 +1024,41 @@ function initResearchShell(){
     wrap.innerHTML=Array.from({length:12},(_,i)=>`<button type="button" class="research-month-btn ${RESEARCH_ACTIVE_MONTH===i+1?'active':''}" data-month="${i+1}">${i+1}월</button>`).join('');
     wrap.dataset.ready='1';
   }
-  document.getElementById('researchYearBtn')?.addEventListener('click',()=>{
-    RESEARCH_ACTIVE_PAGE='notes';
-    RESEARCH_ACTIVE_MONTH=0;
-    syncModuleHeader('research','researchHost');
-    ensureResearchFrame(true);
+
+  const yearBtn=document.getElementById('researchYearBtn');
+  if(yearBtn && !yearBtn.dataset.bound){
+    yearBtn.dataset.bound='1';
+    yearBtn.addEventListener('click',()=>{
+      RESEARCH_ACTIVE_PAGE='notes';
+      RESEARCH_ACTIVE_YEAR=2026;
+      RESEARCH_ACTIVE_MONTH=0;
+      syncModuleHeader('research','researchHost');
+      ensureResearchFrame(true);
+    });
+  }
+
+  document.querySelectorAll('.module-tab[data-research-page]').forEach(btn=>{
+    if(btn.dataset.researchBound) return;
+    btn.dataset.researchBound='1';
+    btn.addEventListener('click',()=>{
+      RESEARCH_ACTIVE_PAGE=btn.dataset.researchPage||'notes';
+      if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=0;
+      syncModuleHeader('research','researchHost');
+      ensureResearchFrame(true);
+    });
   });
-  document.querySelectorAll('.module-tab[data-research-page]').forEach(btn=>btn.addEventListener('click',()=>{
-    RESEARCH_ACTIVE_PAGE=btn.dataset.researchPage||'notes';
-    if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=RESEARCH_ACTIVE_MONTH||0;
-    syncModuleHeader('research','researchHost');
-    ensureResearchFrame(true);
-  }));
-  document.querySelectorAll('.research-month-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    RESEARCH_ACTIVE_PAGE='notes';
-    RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
-    syncModuleHeader('research','researchHost');
-    ensureResearchFrame(true);
-  }));
+
+  document.querySelectorAll('.research-month-btn').forEach(btn=>{
+    if(btn.dataset.researchBound) return;
+    btn.dataset.researchBound='1';
+    btn.addEventListener('click',()=>{
+      RESEARCH_ACTIVE_PAGE='notes';
+      RESEARCH_ACTIVE_YEAR=2026;
+      RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
+      syncModuleHeader('research','researchHost');
+      ensureResearchFrame(true);
+    });
+  });
 }
 
 function bindEvents(){
@@ -2573,7 +2600,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v24';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v26';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
