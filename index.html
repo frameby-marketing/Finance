@@ -280,13 +280,27 @@ body.frameby-auth-ready{overflow:auto}
 .sales-month-chart{height:220px;display:flex;align-items:flex-end;gap:10px;padding:8px 4px 0}
 .sales-month-item{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:0}
 .sales-month-value,.sales-month-label{font-size:10px;color:var(--muted);white-space:nowrap}
+.sales-month-value{font-weight:800;color:#59657a}
 .sales-month-bar{width:68%;min-width:18px;background:#bdc9f5;border-radius:6px 6px 2px 2px}
 .sales-month-bar.current{background:var(--primary)}
 .sales-platform-bars{display:flex;flex-direction:column;gap:13px}
 .sales-platform-row{display:grid;grid-template-columns:70px 1fr 110px;gap:11px;align-items:center}
 .sales-platform-name{font-size:12px;font-weight:750}
 .sales-platform-amount{text-align:right;font-weight:850;font-variant-numeric:tabular-nums}
+.sales-top5-card{margin-bottom:14px}
+.sales-top5-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.sales-top5-item{border:1px solid var(--line);background:#fafbfd;border-radius:11px;padding:14px;text-align:left;cursor:pointer;transition:.15s;min-width:0}
+.sales-top5-item:hover{border-color:#b9c9ef;background:#f7f9ff;transform:translateY(-1px)}
+.sales-top5-rank{font-size:10px;color:var(--primary);font-weight:900}
+.sales-top5-name{font-size:14px;font-weight:900;margin-top:7px;min-height:36px;line-height:1.35}
+.sales-top5-qty{font-size:24px;font-weight:900;margin-top:8px}
+.sales-top5-sales{font-size:16px;font-weight:900;color:#39465c;margin-top:7px}
 .sales-search-card{position:relative}
+.sales-section-title{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.sales-section-title h2{margin:0;font-size:16px}
+.sales-result-total{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.sales-result-total span{font-size:11px;color:var(--muted);font-weight:750}
+.sales-result-total strong{font-size:19px;color:var(--primary);font-variant-numeric:tabular-nums}
 .sales-search-wrap{position:relative}
 .sales-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#8a94a5;font-size:18px;pointer-events:none}
 .sales-search-input{width:100%;height:46px;padding-left:40px;padding-right:40px;font-size:14px}
@@ -312,13 +326,37 @@ body.frameby-auth-ready{overflow:auto}
 .sales-reset-btn{height:36px;border:1px solid #cbd6ef;background:#fff;color:var(--primary);padding:0 11px;border-radius:8px;font-weight:850;font-size:11px;cursor:pointer}
 .sales-reset-btn:hover{background:var(--soft)}
 .sales-search-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:11px}
-.sales-table{min-width:1180px}
-.sales-table .sales-product{font-weight:850}
-.sales-item-code{font-size:10px;color:#9aa3b1;margin-top:3px}
-.sales-none{color:#a0a8b4}
+.sales-table{min-width:1040px}
+.sales-table th{text-align:center}
+.sales-table th:first-child{text-align:left}
+.sales-product-name{font-weight:900;vertical-align:middle!important;background:#fbfcfe}
+.sales-metric-label{font-size:11px;font-weight:850;color:#526071;white-space:nowrap}
+.sales-metric-label.sales{color:var(--primary)}
+.sales-product-pair-start td{border-top:2px solid #dde3ec}
+.sales-ratio-head{text-align:center!important}
+.sales-ratio-cell{text-align:center!important;vertical-align:middle!important;font-weight:850;color:#4f5c70}
+.sales-num{text-align:right!important;font-variant-numeric:tabular-nums}
+.sales-zero{color:#a5adb9}
 .sales-no-result{padding:32px!important;text-align:center!important;color:var(--muted)}
-@media(max-width:1180px){.sales-filter-bar{grid-template-columns:repeat(3,1fr)}.sales-two{grid-template-columns:1fr}}
-@media(max-width:720px){.sales-kpis{grid-template-columns:1fr 1fr}.sales-head{align-items:flex-start;flex-direction:column}.sales-filter-bar{grid-template-columns:1fr 1fr}.sales-platform-row{grid-template-columns:60px 1fr 90px}}
+.sales-data-state{display:none;margin-bottom:14px;padding:12px 14px;border:1px solid #dce5f5;background:#f8faff;border-radius:10px;color:#536177;font-size:12px;font-weight:700}
+.sales-data-state.error{display:block;border-color:#f0b7b7;background:#fff4f4;color:#a12828}
+.sales-data-state.loading{display:block}
+.sales-modal-backdrop{position:fixed;inset:0;background:rgba(17,26,45,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:7500}
+.sales-modal-backdrop.open{display:flex}
+.sales-modal{width:min(680px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 70px rgba(17,26,45,.25);overflow:hidden}
+.sales-modal-head{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--line)}
+.sales-modal-head h3{margin:0;font-size:18px}.sales-modal-head p{margin:5px 0 0;font-size:11px;color:var(--muted)}
+.sales-modal-close{border:0;background:transparent;color:#667085;font-size:24px;cursor:pointer}
+.sales-modal-body{padding:20px}
+.sales-modal-total{display:flex;justify-content:space-between;gap:12px;padding:14px;border-radius:11px;background:#f7f9fc;margin-bottom:14px}
+.sales-modal-total b{font-size:22px}
+.sales-modal-platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.sales-modal-platform{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+.sales-modal-platform span{display:block;font-size:11px;color:var(--muted)}
+.sales-modal-platform b{display:block;font-size:21px;margin-top:6px}
+.sales-modal-platform small{display:block;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+@media(max-width:1180px){.sales-filter-bar{grid-template-columns:repeat(3,1fr)}.sales-two{grid-template-columns:1fr}.sales-top5-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:720px){.sales-kpis{grid-template-columns:1fr 1fr}.sales-head{align-items:flex-start;flex-direction:column}.sales-filter-bar{grid-template-columns:1fr 1fr}.sales-platform-row{grid-template-columns:60px 1fr 90px}.sales-top5-grid{grid-template-columns:1fr 1fr}.sales-modal-platforms{grid-template-columns:1fr 1fr}}
 </style>
 
 
@@ -336,10 +374,10 @@ body.frameby-auth-ready{overflow:auto}
   <div class="github-auth-card">
     <div class="github-auth-icon">🔒</div>
     <h2>통합 관리 접근 권한 확인</h2>
-    <p>자금수지, 법인카드, 출장·차량 관리, 연차관리 또는 연구개발 문서 중 사용 권한이 있는 회사 Google 계정으로 로그인해 주세요.</p>
+    <p>매출현황 또는 회사 관리 자료를 확인할 수 있는 @frame-by.com Google 계정으로 로그인해 주세요.</p>
     <button type="button" class="github-auth-btn" id="githubLoginBtn" disabled>로그인 준비 중...</button>
     <div class="github-auth-error" id="githubAuthError"></div>
-    <p class="github-auth-note">한 번 로그인한 동일 Google 계정으로 각 스프레드시트와 연구개발 Google Docs의 실제 공유권한을 확인합니다.</p>
+    <p class="github-auth-note">매출현황은 @frame-by.com 계정에 제공되며, 나머지 메뉴는 기존 스프레드시트/문서 공유권한을 그대로 확인합니다.</p>
   </div>
 </div>
 <div id="loading" class="loading"><div class="loading-box">법인카드 데이터를 불러오는 중...</div></div>
@@ -461,88 +499,112 @@ body.frameby-auth-ready{overflow:auto}
   <div class="sales-head">
     <div>
       <h1>매출현황</h1>
-      <p>전체 매출 요약과 품목번호 기준 제품 · 옵션 · 색상 매출을 한 화면에서 조회합니다.</p>
+      <p>전체 제품매출과 플랫폼별 매출, 제품별 판매현황을 월별로 조회합니다.</p>
     </div>
     <div class="sales-head-actions">
       <div class="field"><label>연도</label><select id="salesYear"><option value="2026" selected>2026년</option></select></div>
       <div class="field"><label>조회 월</label>
         <select id="salesMonth">
-          <option value="08" selected>8월</option><option value="07">7월</option><option value="06">6월</option>
-          <option value="05">5월</option><option value="04">4월</option><option value="03">3월</option>
-          <option value="02">2월</option><option value="01">1월</option>
+          <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
+          <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
+          <option value="07">7월</option><option value="08" selected>8월</option><option value="09">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
         </select>
       </div>
       <button type="button" class="excel-btn" id="salesRefreshBtn">↻ 새로고침</button>
     </div>
   </div>
 
+  <div id="salesDataState" class="sales-data-state loading">매출 데이터를 불러오는 중...</div>
+
   <div class="grid sales-kpis">
-    <div class="card kpi"><div class="label">제품매출</div><div class="value" id="salesKpiRevenue">98,322,583원</div><div class="sub" id="salesKpiRevenueSub">8월 기준</div></div>
-    <div class="card kpi"><div class="label">판매수량</div><div class="value" id="salesKpiQty">2,989개</div><div class="sub">전체 플랫폼 합계</div></div>
-    <div class="card kpi"><div class="label">최대 판매 플랫폼</div><div class="value" id="salesKpiPlatform">네이버</div><div class="sub" id="salesKpiPlatformSub">51,142,250원</div></div>
-    <div class="card kpi"><div class="label">매출 1위 제품</div><div class="value" id="salesKpiTopProduct">PH STAND</div><div class="sub" id="salesKpiTopProductSub">29,337,074원 · 29.84%</div></div>
+    <div class="card kpi"><div class="label">제품매출</div><div class="value" id="salesKpiRevenue">-</div><div class="sub" id="salesKpiRevenueSub">조회 월 기준</div></div>
+    <div class="card kpi"><div class="label">기타매출</div><div class="value" id="salesKpiOther">-</div><div class="sub" id="salesKpiOtherSub">운임료 및 기타 수수료 매출</div></div>
+    <div class="card kpi"><div class="label">판매수량</div><div class="value" id="salesKpiQty">-</div><div class="sub">전체 플랫폼 합계</div></div>
+    <div class="card kpi"><div class="label">최대 판매 플랫폼</div><div class="value" id="salesKpiPlatform">-</div><div class="sub" id="salesKpiPlatformSub">-</div></div>
   </div>
 
   <div class="grid sales-two">
     <div class="card">
-      <div class="section-title"><h2>월별 제품매출 추이</h2><span class="note">2026.01 ~ 08</span></div>
+      <div class="section-title"><h2>월별 제품매출 추이</h2><span class="note">단위: 백만원</span></div>
       <div class="sales-month-chart" id="salesMonthlyChart"></div>
     </div>
     <div class="card">
-      <div class="section-title"><h2>플랫폼별 매출</h2><span class="note" id="salesPlatformMonthLabel">8월</span></div>
+      <div class="section-title"><h2>플랫폼별 매출</h2><span class="note" id="salesPlatformMonthLabel">-</span></div>
       <div class="sales-platform-bars" id="salesPlatformBars"></div>
     </div>
   </div>
 
-  <div class="card sales-search-card">
+  <div class="card sales-top5-card">
     <div class="section-title">
-      <h2>전체 제품별 매출현황</h2>
-      <span class="note">품목번호 → 제품 / 옵션 / 색상 자동 분리</span>
+      <div><h2>가장 많이 판매된 제품 TOP 5</h2><div class="note" style="margin-top:4px">대분류 기준 · 판매수량 순 · 제품 클릭 시 플랫폼별 판매수량/매출액 확인</div></div>
+      <span class="note" id="salesTop5MonthLabel">-</span>
+    </div>
+    <div class="sales-top5-grid" id="salesTop5Grid"></div>
+  </div>
+
+  <div class="card sales-search-card">
+    <div class="sales-section-title">
+      <div><h2>전체 제품별 매출현황</h2><div class="note" style="margin-top:4px">판매 중/미판매 제품을 모두 포함하며 검색 조건에 따라 합계가 변경됩니다.</div></div>
+      <div class="sales-result-total"><span>검색 결과 합계금액</span><strong id="salesResultSales">0원</strong></div>
     </div>
 
     <div class="sales-search-wrap">
       <span class="sales-search-icon">⌕</span>
       <input type="search" id="salesSearchInput" class="sales-search-input" autocomplete="off"
-             placeholder="제품명 · 옵션 · 색상 검색  예) 맥세이프 / DW PRO / 15프로 / 화이트">
+             placeholder="제품명 · 옵션 · 색상 검색  예) 맥세이프 / DW PRO / 17프로 / 화이트">
       <button type="button" id="salesSearchClear" class="sales-search-clear" aria-label="검색 초기화">×</button>
     </div>
-
-    <!-- 연관검색어는 검색창 바로 아래에 표시 -->
     <div id="salesSuggestions" class="sales-suggestions"></div>
     <div id="salesSelectedChips" class="sales-selected-chips"></div>
 
     <div class="sales-filter-bar">
-      <div class="field"><label>제품</label><select id="salesProductFilter"><option value="">전체</option></select></div>
-      <div class="field"><label>옵션</label><select id="salesOptionFilter"><option value="">전체</option></select></div>
-      <div class="field"><label>색상</label><select id="salesColorFilter"><option value="">전체</option></select></div>
+      <div class="field"><label>제품</label><select id="salesProductFilter"><option value="">전체 제품</option></select></div>
+      <div class="field"><label>옵션</label><select id="salesOptionFilter"><option value="">전체 옵션</option></select></div>
+      <div class="field"><label>색상</label><select id="salesColorFilter"><option value="">전체 색상</option></select></div>
       <div class="field"><label>플랫폼</label>
         <select id="salesPlatformFilter">
-          <option value="">전체</option><option value="own">자사</option><option value="naver">네이버</option>
+          <option value="">전체 플랫폼</option><option value="own">자사</option><option value="naver">네이버</option>
           <option value="mmall">엠몰</option><option value="coupang">쿠팡</option>
         </select>
       </div>
-      <div class="field"><label>0수량 포함</label><label class="sales-zero-wrap"><input id="salesZeroFilter" type="checkbox" checked>판매수량 0 포함</label></div>
+      <div class="field"><label>0수량 포함</label><label class="sales-zero-wrap"><input id="salesZeroFilter" type="checkbox" checked>미판매 제품 포함</label></div>
       <button type="button" class="sales-reset-btn" id="salesResetBtn">전체 초기화</button>
     </div>
 
     <div class="sales-search-meta">
       <span>검색창의 연관검색과 필터를 함께 사용할 수 있습니다.</span>
-      <strong id="salesResultCount">0개 품목 표시</strong>
+      <strong id="salesResultCount">0개 제품</strong>
     </div>
 
     <div class="table-wrap" style="margin-top:12px">
       <table class="table sales-table">
         <thead>
           <tr>
-            <th>제품명</th><th>옵션</th><th>색상</th>
-            <th class="num">판매수량</th><th class="num">매출액</th>
+            <th>제품명</th><th>구분</th><th class="num">전체플랫폼</th>
+            <th class="sales-ratio-head">전체플랫폼 매출 비율</th>
             <th class="num">자사</th><th class="num">네이버</th><th class="num">엠몰</th><th class="num">쿠팡</th>
           </tr>
         </thead>
         <tbody id="salesTableBody"></tbody>
       </table>
     </div>
-    <div class="inline-note">DEF는 화면에서 ‘색상 없음’으로 표시하고, 내부 품목번호는 원본 코드를 유지합니다.</div>
+  </div>
+
+  <div class="sales-modal-backdrop" id="salesTop5Modal">
+    <div class="sales-modal" role="dialog" aria-modal="true" aria-labelledby="salesTop5ModalTitle">
+      <div class="sales-modal-head">
+        <div><h3 id="salesTop5ModalTitle"></h3><p id="salesTop5ModalSub"></p></div>
+        <button type="button" class="sales-modal-close" id="salesTop5ModalClose" aria-label="닫기">×</button>
+      </div>
+      <div class="sales-modal-body">
+        <div class="sales-modal-total">
+          <div><span class="note">총 판매수량</span><br><b id="salesTop5ModalQty"></b></div>
+          <div style="text-align:right"><span class="note">총 매출액</span><br><b id="salesTop5ModalSales"></b></div>
+        </div>
+        <div class="sales-modal-platforms" id="salesTop5ModalPlatforms"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1177,7 +1239,7 @@ function showModule(module,page){
   if(module==='sales'){
     syncModuleHeader('sales','salesHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='salesHost'));
-    try{salesInitDashboard()}catch(e){console.error(e)}
+    salesInitDashboard().catch(e=>console.error(e))
     try{history.replaceState(null,'','#sales')}catch(e){}
     return;
   }
@@ -1689,10 +1751,11 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.leave) document.getElementById('leaveSecondaryMenu')?.classList.add('hidden');
 }
 function githubOpenAuthorizedInitialModule(){
+  if(location.hash==='#sales'){showModule('sales');return true;}
   const requested=location.hash==='#research'?'research':location.hash==='#leave'?'leave':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
   const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
-  if(!target) return false;
-  showModule(target,githubDefaultPageForModule(target));
+  if(target){showModule(target,githubDefaultPageForModule(target));return true;}
+  showModule('sales');
   return true;
 }
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
@@ -2922,16 +2985,12 @@ async function githubAfterLogin(){
       throw new Error('허용된 회사 계정(@'+INTEGRATED_CONFIG.allowedDomain+')으로 로그인해 주세요.');
     }
 
-    // 각 스프레드시트의 실제 공유 권한을 따로 확인합니다.
+    // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
     const allowedModules=['cash','card','trip','leave','research'].filter(m=>access[m]);
-    if(!allowedModules.length){
-      if(access.researchError) throw new Error(access.researchError);
-      throw new Error('공유받은 관리 자료가 없습니다. 스프레드시트 또는 연구개발 문서 공유 권한을 확인해 주세요.');
-    }
 
-    // 법인카드는 권한이 있을 때만 데이터를 조회합니다.
+    // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
     let cardPayload=null;
     if(access.card) cardPayload=await githubLoadCardData();
 
@@ -2943,13 +3002,15 @@ async function githubAfterLogin(){
       if(loadingEl) loadingEl.classList.add('hidden');
     }
 
-    // 출장·차량 전용 로딩 마스크는 실제 출장 데이터를 읽을 때만 표시합니다.
     loading(false);
-
     githubUnlockApp();
-    githubOpenAuthorizedInitialModule();
 
-    // 출장·차량도 권한이 있을 때만 초기 데이터를 조회합니다.
+    // @frame-by.com 계정은 최소 매출현황에 접근할 수 있습니다.
+    // 기존 관리 자료 권한이 하나도 없으면 다른 메뉴는 githubApplyModuleAccess()가 숨긴 상태로 매출현황만 엽니다.
+    if(!allowedModules.length || location.hash==='#sales') showModule('sales');
+    else githubOpenAuthorizedInitialModule();
+
+    // 출장·차량은 기존과 동일하게 해당 권한이 있을 때만 초기 데이터를 조회합니다.
     if(access.trip){
       loadData(true).catch(e=>{
         if(e?.status===401){
@@ -2961,7 +3022,10 @@ async function githubAfterLogin(){
 
     const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',leave:'연차관리',research:'연구개발'};
     const badge=document.getElementById('statusBadge');
-    if(badge)badge.textContent='Google Workspace · '+allowedModules.map(m=>labelMap[m]).join(' · ')+' · '+GITHUB_USER_EMAIL;
+    if(badge){
+      const labels=['매출현황',...allowedModules.map(m=>labelMap[m])];
+      badge.textContent='Google Workspace · '+labels.join(' · ')+' · '+GITHUB_USER_EMAIL;
+    }
   }catch(e){
     githubTokenCacheClear();
     GITHUB_ACCESS_TOKEN=null;
@@ -2971,7 +3035,7 @@ async function githubAfterLogin(){
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
-    githubAuthError(e?.message||'회사 자료 공유 권한을 확인해 주세요.');
+    githubAuthError(e?.message||'회사 계정 또는 자료 공유 권한을 확인해 주세요.');
     if(btn){
       btn.disabled=false;
       btn.textContent='다른 Google 계정으로 로그인';
@@ -2986,54 +3050,148 @@ function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubA
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
 
 /* ===== 매출현황 화면 =====
-   기존 Google Workspace 권한/기존 모듈 접근 제어 코드는 수정하지 않습니다.
-   현재 데이터는 화면 동작 확인용이며, 이후 매출 시트 API 연결 지점만 교체할 수 있습니다. */
-const SALES_MONTH_TOTALS=[
-  {month:'01',sales:196018317},{month:'02',sales:148731202},{month:'03',sales:155604278},{month:'04',sales:150830859},
-  {month:'05',sales:130975527},{month:'06',sales:105776268},{month:'07',sales:88950885},{month:'08',sales:98322583}
-];
-const SALES_PLATFORM_TOTALS={
-  '08':{own:25488633,naver:51142250,mmall:7553408,coupang:14138292},
-  '07':{own:23999659,naver:40844890,mmall:9472860,coupang:14633476},
-  '06':{own:33474737,naver:44831720,mmall:14162501,coupang:13307310}
+   기존 5개 관리 모듈의 권한 배열/공유권한 판정은 변경하지 않습니다.
+   매출현황만 @frame-by.com 로그인 사용자에게 열고, 데이터는 [회계]매출 및 재고현황의 제품매출(2026) 시트에서 읽습니다. */
+const SALES_CONFIG={
+  spreadsheetId:'1y5fpg-qT485lE47HdSPvx5-8P6H9zJBpwBWzgPYOjnA',
+  sheetName:'제품매출(2026)',
+  range:'A2:EF408'
 };
-const SALES_ITEMS=[
-  {code:'MCS-15프로-화이트',product:'맥세이프 실리콘',option:'15프로',color:'화이트',qty:24,sales:468000,own:118500,naver:197500,mmall:79000,coupang:73000},
-  {code:'MCS-15프로-핑크',product:'맥세이프 실리콘',option:'15프로',color:'핑크',qty:18,sales:351000,own:79000,naver:197500,mmall:0,coupang:74500},
-  {code:'MCS-16-블랙',product:'맥세이프 실리콘',option:'16',color:'블랙',qty:31,sales:604500,own:158000,naver:237000,mmall:79000,coupang:130500},
-  {code:'MCB-13미니-DEF',product:'맥세이프 에어범퍼',option:'13미니',color:'색상 없음',qty:20,sales:320000,own:80000,naver:160000,mmall:48000,coupang:32000},
-  {code:'MCB-17PRO-DEF',product:'맥세이프 에어범퍼',option:'17PRO',color:'색상 없음',qty:7,sales:112000,own:28000,naver:56000,mmall:14000,coupang:14000},
-  {code:'FCA-16E-DEF',product:'에어',option:'16E',color:'색상 없음',qty:42,sales:378000,own:90000,naver:144000,mmall:54000,coupang:90000},
-  {code:'FCS-12프로-블루',product:'실리콘',option:'12프로',color:'블루',qty:35,sales:682500,own:175500,naver:292500,mmall:97500,coupang:117000},
-  {code:'FCC-14-블루',product:'클래식/울트라',option:'14',color:'블루',qty:9,sales:175500,own:39000,naver:97500,mmall:39000,coupang:0},
-  {code:'FCB-S25U-DEF',product:'에어범퍼 갤럭시',option:'S25U',color:'색상 없음',qty:15,sales:148500,own:29700,naver:59400,mmall:29700,coupang:29700},
-  {code:'PHS-실버-DEF',product:'PH STAND',option:'실버',color:'색상 없음',qty:48,sales:1896000,own:316000,naver:1185000,mmall:395000,coupang:0},
-  {code:'PHS-블랙-DEF',product:'PH STAND',option:'블랙',color:'색상 없음',qty:36,sales:1422000,own:316000,naver:790000,mmall:158000,coupang:158000},
-  {code:'DWP-블랙-DEF',product:'DW PRO',option:'블랙',color:'색상 없음',qty:0,sales:0,own:0,naver:0,mmall:0,coupang:0},
-  {code:'DWP-실버-DEF',product:'DW PRO',option:'실버',color:'색상 없음',qty:0,sales:0,own:0,naver:0,mmall:0,coupang:0},
-  {code:'DWS-블랙-DEF',product:'DW PLUS',option:'블랙',color:'색상 없음',qty:0,sales:0,own:0,naver:0,mmall:0,coupang:0}
-];
+let SALES_RAW_VALUES=[];
+let SALES_MASTER_ITEMS=[];
 let SALES_SELECTED=[];
 let SALES_INITIALIZED=false;
+let SALES_DATA_LOADED=false;
+let SALES_DATA_LOADING=null;
+
+function salesFmt(n){return Math.round(Number(n)||0).toLocaleString('ko-KR')}
+function salesNum(v){
+  if(v===null||v===undefined||v==='') return 0;
+  if(typeof v==='number') return Number.isFinite(v)?v:0;
+  const n=Number(String(v).replace(/,/g,'').replace(/[^\d.-]/g,''));
+  return Number.isFinite(n)?n:0;
+}
 function salesNorm(v){return String(v??'').toLowerCase().replace(/\s+/g,' ').trim()}
-function salesFmt(v){return Number(v||0).toLocaleString('ko-KR')}
-function salesUnique(arr){return [...new Set(arr.filter(Boolean))]}
-function salesSetOptions(id,values){
-  const el=document.getElementById(id); if(!el)return;
-  const old=el.value, first=el.options[0]?.outerHTML||'<option value="">전체</option>';
-  el.innerHTML=first+values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-  if(values.includes(old))el.value=old;
+function salesUnique(arr){return [...new Set(arr.filter(v=>String(v??'').trim()!=='').map(v=>String(v).trim()))]}
+function salesMonthNo(){return Math.min(12,Math.max(1,Number(document.getElementById('salesMonth')?.value||8)))}
+function salesMonthStart(monthNo){return 4+(monthNo-1)*10}
+function salesRow(excelRow){return SALES_RAW_VALUES[excelRow-2]||[]}
+function salesSetState(type,msg){
+  const el=document.getElementById('salesDataState');if(!el)return;
+  el.className='sales-data-state'+(type?' '+type:'');
+  el.textContent=msg||'';
+  if(!type)el.style.display='none';else el.style.removeProperty('display');
 }
-function salesRefreshFilterOptions(){
-  salesSetOptions('salesProductFilter',salesUnique(SALES_ITEMS.map(x=>x.product)).sort((a,b)=>a.localeCompare(b,'ko')));
-  salesSetOptions('salesOptionFilter',salesUnique(SALES_ITEMS.map(x=>x.option)).sort((a,b)=>a.localeCompare(b,'ko')));
-  salesSetOptions('salesColorFilter',salesUnique(SALES_ITEMS.map(x=>x.color)).sort((a,b)=>a.localeCompare(b,'ko')));
+function salesMajorProduct(code,itemNo,name){
+  const c=String(code||'').trim().toUpperCase();
+  const item=String(itemNo||'').trim().toUpperCase();
+  const map={
+    FTS:'프레임팁 숏타입',FTL:'프레임팁 롱타입',BSC:'에어범퍼 베이직',
+    FCA:'에어',FCS:'실리콘',FIL:'액정보호필름',MCA:'맥세이프 에어',
+    MCB:'맥세이프 에어범퍼',MCS:'맥세이프 실리콘',MFR:'맥세이프 프레임',
+    MGR:'맥세이프 그립',MAT:'맥세이프 아크톡',PHS:'PH STAND',
+    DPR:'DW PRO',DSP:'DW PLUS',DSB:'DW BASIC',STC:'스탠드케이스',
+    IDB:'아이디바이',MXS:'MXSTATION',FLC:'플랩체어'
+  };
+  if(c==='FCB') return /^FCB-(S\d|N\d)/i.test(String(itemNo||''))?'에어범퍼 갤럭시':'에어범퍼 아이폰';
+  if(c==='FCC'||c==='FCU') return '클래식/울트라';
+  if(c==='FSK'||c==='MTB') return '스파클로즈/매트블랙';
+  if(c==='MKF') return item.startsWith('MKFM-')?'맥세이프 킥프레임 메탈':'맥세이프 킥프레임 일반';
+  return map[c]||String(name||code||'기타').trim()||'기타';
 }
+function salesParseOptionColor(itemNo,name,major){
+  const item=String(itemNo||'').trim();
+  const parts=item.split('-').filter(Boolean);
+  let option='',color='색상 없음';
+  if(parts.length>=2) option=parts[1]||'';
+  if(parts.length>=3){
+    const last=parts[parts.length-1];
+    color=/^DEF$/i.test(last)?'색상 없음':last;
+  }
+  if(parts.length<=1){
+    let text=String(name||'').trim();
+    const removeWords={
+      '클래식/울트라':['클래식','울트라'],
+      '스파클로즈/매트블랙':['스파클로즈','매트블랙']
+    }[major]||[major];
+    removeWords.forEach(w=>{text=text.replace(new RegExp(String(w).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig'),' ')});
+    const toks=text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+    if(toks.length){option=toks[0]||'';if(toks.length>1)color=toks[toks.length-1]||'색상 없음'}
+  }
+  if(!option)option='기본';
+  return {option,color};
+}
+function salesBuildMasterItems(){
+  const items=[];
+  for(let excelRow=7;excelRow<=408;excelRow++){
+    const row=salesRow(excelRow);
+    const code=String(row[1]??'').trim(),itemNo=String(row[2]??'').trim(),name=String(row[3]??'').trim();
+    if(!code&&!itemNo&&!name)continue;
+    const major=salesMajorProduct(code,itemNo,name);
+    const parsed=salesParseOptionColor(itemNo,name,major);
+    items.push({excelRow,code,itemNo,name,major,option:parsed.option,color:parsed.color});
+  }
+  SALES_MASTER_ITEMS=items;
+}
+function salesMonthItem(base,monthNo){
+  const row=salesRow(base.excelRow),s=salesMonthStart(monthNo);
+  return {...base,
+    qty:salesNum(row[s]),sales:salesNum(row[s+1]),
+    ownQty:salesNum(row[s+2]),ownSales:salesNum(row[s+3]),
+    naverQty:salesNum(row[s+4]),naverSales:salesNum(row[s+5]),
+    mmallQty:salesNum(row[s+6]),mmallSales:salesNum(row[s+7]),
+    coupangQty:salesNum(row[s+8]),coupangSales:salesNum(row[s+9])
+  };
+}
+function salesMonthSummary(monthNo){
+  const other=salesRow(4),total=salesRow(6),s=salesMonthStart(monthNo);
+  return {
+    month:monthNo,
+    productQty:salesNum(total[s]),productSales:salesNum(total[s+1]),
+    otherSales:salesNum(other[s]),
+    ownSales:salesNum(total[s+3]),naverSales:salesNum(total[s+5]),
+    mmallSales:salesNum(total[s+7]),coupangSales:salesNum(total[s+9])
+  };
+}
+function salesAllMonthSummaries(){return Array.from({length:12},(_,i)=>salesMonthSummary(i+1))}
+function salesAggregate(items){
+  const map=new Map();
+  items.forEach(it=>{
+    if(!map.has(it.major))map.set(it.major,{name:it.major,qty:0,sales:0,ownQty:0,ownSales:0,naverQty:0,naverSales:0,mmallQty:0,mmallSales:0,coupangQty:0,coupangSales:0,itemCount:0});
+    const g=map.get(it.major);g.itemCount++;
+    ['qty','sales','ownQty','ownSales','naverQty','naverSales','mmallQty','mmallSales','coupangQty','coupangSales'].forEach(k=>g[k]+=salesNum(it[k]));
+  });
+  return [...map.values()].sort((a,b)=>b.sales-a.sales||b.qty-a.qty||a.name.localeCompare(b.name,'ko'));
+}
+async function salesFetchData(force=false){
+  if(SALES_DATA_LOADED&&!force)return SALES_RAW_VALUES;
+  if(SALES_DATA_LOADING&&!force)return SALES_DATA_LOADING;
+  SALES_DATA_LOADING=(async()=>{
+    salesSetState('loading','매출 데이터를 불러오는 중...');
+    const range=`${SALES_CONFIG.sheetName}!${SALES_CONFIG.range}`;
+    const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SALES_CONFIG.spreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=UNFORMATTED_VALUE&majorDimension=ROWS`;
+    const json=await githubFetchJson(url);
+    SALES_RAW_VALUES=Array.isArray(json.values)?json.values:[];
+    if(!SALES_RAW_VALUES.length)throw new Error('제품매출(2026) 시트에서 데이터를 찾지 못했습니다.');
+    salesBuildMasterItems();
+    SALES_DATA_LOADED=true;
+    salesSetState('','');
+    return SALES_RAW_VALUES;
+  })().catch(e=>{
+    SALES_DATA_LOADED=false;
+    salesSetState('error','매출 데이터를 불러오지 못했습니다. [회계]매출 및 재고현황 시트를 @frame-by.com 계정에 공유했는지 확인해 주세요. · '+(e?.message||''));
+    throw e;
+  }).finally(()=>{SALES_DATA_LOADING=null});
+  return SALES_DATA_LOADING;
+}
+function salesCurrentItems(){const m=salesMonthNo();return SALES_MASTER_ITEMS.map(x=>salesMonthItem(x,m))}
 function salesMatchesSelected(it){
-  const hay=salesNorm([it.product,it.option,it.color,it.code].join(' '));
+  if(!SALES_SELECTED.length)return true;
+  const hay=salesNorm([it.major,it.name,it.itemNo,it.option,it.color,it.code].join(' '));
   return SALES_SELECTED.every(x=>hay.includes(salesNorm(x.value)));
 }
-function salesFilteredItems(ignoreSearch){
+function salesFilteredItems(ignoreSearch=false){
+  const all=salesCurrentItems();
   const q=salesNorm(document.getElementById('salesSearchInput')?.value||'');
   const terms=q?q.split(' ').filter(Boolean):[];
   const product=document.getElementById('salesProductFilter')?.value||'';
@@ -3041,113 +3199,156 @@ function salesFilteredItems(ignoreSearch){
   const color=document.getElementById('salesColorFilter')?.value||'';
   const platform=document.getElementById('salesPlatformFilter')?.value||'';
   const includeZero=document.getElementById('salesZeroFilter')?.checked!==false;
-  return SALES_ITEMS.filter(it=>{
-    const hay=salesNorm([it.product,it.option,it.color,it.code].join(' '));
+  return all.filter(it=>{
+    const hay=salesNorm([it.major,it.name,it.itemNo,it.option,it.color,it.code].join(' '));
     const okSearch=ignoreSearch||!terms.length||terms.every(t=>hay.includes(t));
     const okSelected=salesMatchesSelected(it);
-    const okProduct=!product||it.product===product;
+    const okProduct=!product||it.major===product;
     const okOption=!option||it.option===option;
     const okColor=!color||it.color===color;
     const okZero=includeZero||it.qty>0;
-    const okPlatform=!platform||Number(it[platform]||0)>0;
+    const okPlatform=!platform||(salesNum(it[platform+'Qty'])>0||salesNum(it[platform+'Sales'])>0);
     return okSearch&&okSelected&&okProduct&&okOption&&okColor&&okZero&&okPlatform;
   });
 }
+function salesSetOptions(select,values,placeholder,current){
+  if(!select)return;
+  const uniq=salesUnique(values).sort((a,b)=>a.localeCompare(b,'ko'));
+  select.innerHTML=`<option value="">${escapeHtml(placeholder)}</option>`+uniq.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  if(current&&uniq.includes(current))select.value=current;
+}
+function salesRefreshFilterOptions(){
+  const productEl=document.getElementById('salesProductFilter'),optionEl=document.getElementById('salesOptionFilter'),colorEl=document.getElementById('salesColorFilter');
+  const pCur=productEl?.value||'',oCur=optionEl?.value||'',cCur=colorEl?.value||'';
+  salesSetOptions(productEl,SALES_MASTER_ITEMS.map(x=>x.major),'전체 제품',pCur);
+  const p=productEl?.value||'';
+  const subset=SALES_MASTER_ITEMS.filter(x=>!p||x.major===p);
+  salesSetOptions(optionEl,subset.map(x=>x.option),'전체 옵션',oCur);
+  const o=optionEl?.value||'';
+  const subset2=subset.filter(x=>!o||x.option===o);
+  salesSetOptions(colorEl,subset2.map(x=>x.color),'전체 색상',cCur);
+}
+function salesRenderSummary(){
+  if(!SALES_DATA_LOADED)return;
+  const month=salesMonthNo(),s=salesMonthSummary(month);
+  const label=month+'월';
+  const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text};
+  set('salesKpiRevenue',salesFmt(s.productSales)+'원');set('salesKpiRevenueSub',label+' 기준');
+  set('salesKpiOther',salesFmt(s.otherSales)+'원');set('salesKpiOtherSub',label+' 기준 · 운임료 및 기타 수수료 매출');
+  set('salesKpiQty',salesFmt(s.productQty)+'개');
+  const platforms=[['자사',s.ownSales],['네이버',s.naverSales],['엠몰',s.mmallSales],['쿠팡',s.coupangSales]].sort((a,b)=>b[1]-a[1]);
+  set('salesKpiPlatform',platforms[0]?.[1]>0?platforms[0][0]:'-');set('salesKpiPlatformSub',platforms[0]?.[1]>0?salesFmt(platforms[0][1])+'원':'-');
+  set('salesPlatformMonthLabel',label);set('salesTop5MonthLabel',label);
+
+  const max=Math.max(...platforms.map(x=>x[1]),1),bars=document.getElementById('salesPlatformBars');
+  if(bars)bars.innerHTML=platforms.map(([name,val])=>`<div class="sales-platform-row"><div class="sales-platform-name">${name}</div><div class="track"><div class="fill" style="width:${(val/max*100).toFixed(1)}%"></div></div><div class="sales-platform-amount">${salesFmt(val)}</div></div>`).join('');
+
+  const summaries=salesAllMonthSummaries(),lastNonZero=Math.max(1,...summaries.filter(x=>x.productSales>0).map(x=>x.month)),end=Math.max(lastNonZero,month);
+  const trend=summaries.filter(x=>x.month<=end),maxSale=Math.max(...trend.map(x=>x.productSales),1),chart=document.getElementById('salesMonthlyChart');
+  if(chart)chart.innerHTML=trend.map(x=>`<div class="sales-month-item"><div class="sales-month-value">${Math.floor(x.productSales/1000000)}</div><div class="sales-month-bar ${x.month===month?'current':''}" style="height:${Math.max(3,x.productSales/maxSale*88)}%"></div><div class="sales-month-label">${x.month}월</div></div>`).join('');
+}
+function salesRenderTop5(){
+  if(!SALES_DATA_LOADED)return;
+  const groups=salesAggregate(salesCurrentItems()).filter(x=>x.qty>0).sort((a,b)=>b.qty-a.qty||b.sales-a.sales).slice(0,5);
+  const grid=document.getElementById('salesTop5Grid');
+  if(!grid)return;
+  grid.innerHTML=groups.length?groups.map((g,i)=>`<button type="button" class="sales-top5-item" data-sales-top5="${escapeHtml(g.name)}"><div class="sales-top5-rank">TOP ${i+1}</div><div class="sales-top5-name">${escapeHtml(g.name)}</div><div class="sales-top5-qty">${salesFmt(g.qty)}개</div><div class="sales-top5-sales">${salesFmt(g.sales)}원</div></button>`).join(''):'<div class="sales-no-result" style="grid-column:1/-1">해당 월 판매 데이터가 없습니다.</div>';
+  grid.querySelectorAll('[data-sales-top5]').forEach(btn=>btn.addEventListener('click',()=>salesOpenTop5(btn.dataset.salesTop5)));
+}
+function salesOpenTop5(name){
+  const g=salesAggregate(salesCurrentItems()).find(x=>x.name===name);if(!g)return;
+  const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text};
+  set('salesTop5ModalTitle',g.name);set('salesTop5ModalSub',salesMonthNo()+'월 플랫폼별 판매수량 및 매출액');
+  set('salesTop5ModalQty',salesFmt(g.qty)+'개');set('salesTop5ModalSales',salesFmt(g.sales)+'원');
+  const platforms=[['자사',g.ownQty,g.ownSales],['네이버',g.naverQty,g.naverSales],['엠몰',g.mmallQty,g.mmallSales],['쿠팡',g.coupangQty,g.coupangSales]];
+  const box=document.getElementById('salesTop5ModalPlatforms');
+  if(box)box.innerHTML=platforms.map(x=>`<div class="sales-modal-platform"><span>${x[0]}</span><b>${salesFmt(x[1])}개</b><small>${salesFmt(x[2])}원</small></div>`).join('');
+  document.getElementById('salesTop5Modal')?.classList.add('open');
+}
 function salesRenderTable(){
-  const data=salesFilteredItems(false);
-  const body=document.getElementById('salesTableBody');
+  if(!SALES_DATA_LOADED)return;
+  const items=salesFilteredItems(false),groups=salesAggregate(items),summary=salesMonthSummary(salesMonthNo()),body=document.getElementById('salesTableBody');
   if(body){
-    body.innerHTML=data.length?data.map(it=>`<tr>
-      <td><div class="sales-product">${escapeHtml(it.product)}</div><div class="sales-item-code">${escapeHtml(it.code)}</div></td>
-      <td>${escapeHtml(it.option)}</td>
-      <td>${it.color==='색상 없음'?'<span class="sales-none">색상 없음</span>':escapeHtml(it.color)}</td>
-      <td class="num">${salesFmt(it.qty)}</td><td class="num">${salesFmt(it.sales)}</td>
-      <td class="num">${salesFmt(it.own)}</td><td class="num">${salesFmt(it.naver)}</td>
-      <td class="num">${salesFmt(it.mmall)}</td><td class="num">${salesFmt(it.coupang)}</td>
-    </tr>`).join(''):'<tr><td colspan="9" class="sales-no-result">조건에 맞는 품목이 없습니다.</td></tr>';
+    body.innerHTML=groups.length?groups.map(g=>{
+      const ratio=summary.productSales>0?g.sales/summary.productSales*100:0;
+      return `<tr class="sales-product-pair-start">
+        <td class="sales-product-name" rowspan="2">${escapeHtml(g.name)}</td>
+        <td><span class="sales-metric-label">판매수량</span></td>
+        <td class="sales-num">${salesFmt(g.qty)}개</td>
+        <td class="sales-ratio-cell" rowspan="2">${ratio.toFixed(2)}%</td>
+        <td class="sales-num">${salesFmt(g.ownQty)}개</td><td class="sales-num">${salesFmt(g.naverQty)}개</td>
+        <td class="sales-num">${salesFmt(g.mmallQty)}개</td><td class="sales-num">${salesFmt(g.coupangQty)}개</td>
+      </tr>
+      <tr>
+        <td><span class="sales-metric-label sales">매출액</span></td>
+        <td class="sales-num ${g.sales===0?'sales-zero':''}">${salesFmt(g.sales)}원</td>
+        <td class="sales-num ${g.ownSales===0?'sales-zero':''}">${salesFmt(g.ownSales)}원</td><td class="sales-num ${g.naverSales===0?'sales-zero':''}">${salesFmt(g.naverSales)}원</td>
+        <td class="sales-num ${g.mmallSales===0?'sales-zero':''}">${salesFmt(g.mmallSales)}원</td><td class="sales-num ${g.coupangSales===0?'sales-zero':''}">${salesFmt(g.coupangSales)}원</td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="8" class="sales-no-result">조건에 맞는 제품이 없습니다.</td></tr>';
   }
-  const c=document.getElementById('salesResultCount'); if(c)c.textContent=`${data.length}개 품목 표시`;
+  const sumSales=items.reduce((a,b)=>a+salesNum(b.sales),0),sumQty=items.reduce((a,b)=>a+salesNum(b.qty),0);
+  const total=document.getElementById('salesResultSales');if(total)total.textContent=salesFmt(sumSales)+'원';
+  const count=document.getElementById('salesResultCount');if(count)count.textContent=`${groups.length}개 제품 · ${items.length}개 품목 · ${salesFmt(sumQty)}개 판매`;
 }
 function salesRenderChips(){
-  const wrap=document.getElementById('salesSelectedChips'); if(!wrap)return;
+  const wrap=document.getElementById('salesSelectedChips');if(!wrap)return;
   wrap.innerHTML=SALES_SELECTED.map((x,i)=>`<span class="sales-chip">${escapeHtml(x.label)}: ${escapeHtml(x.value)}<button type="button" data-sales-chip="${i}">×</button></span>`).join('');
   wrap.querySelectorAll('[data-sales-chip]').forEach(btn=>btn.addEventListener('click',()=>{
-    SALES_SELECTED.splice(Number(btn.dataset.salesChip),1);
-    salesRenderChips();salesRenderTable();salesRenderSuggestions();
+    SALES_SELECTED.splice(Number(btn.dataset.salesChip),1);salesRenderChips();salesRenderTable();salesRenderSuggestions();
   }));
 }
 function salesSuggestionBlock(values,label,type){
-  if(!values.length)return '';
-  return `<div class="sales-suggest-group">${escapeHtml(label)} 추천</div>`+
-    values.slice(0,10).map(v=>`<button type="button" class="sales-suggest-item" data-sales-type="${type}" data-sales-value="${escapeHtml(v)}">
-      <span class="sales-suggest-main"><span class="sales-suggest-type">${escapeHtml(label)}</span><span class="sales-suggest-text">${escapeHtml(v)}</span></span>
-      <span class="sales-suggest-arrow">›</span>
-    </button>`).join('');
+  if(!values.length)return'';
+  return `<div class="sales-suggest-group">${escapeHtml(label)} 추천</div>`+values.slice(0,10).map(v=>`<button type="button" class="sales-suggest-item" data-sales-type="${type}" data-sales-value="${escapeHtml(v)}"><span class="sales-suggest-main"><span class="sales-suggest-type">${escapeHtml(label)}</span><span class="sales-suggest-text">${escapeHtml(v)}</span></span><span class="sales-suggest-arrow">›</span></button>`).join('');
 }
 function salesRenderSuggestions(){
-  const box=document.getElementById('salesSuggestions'), input=document.getElementById('salesSearchInput');
-  if(!box||!input)return;
-  const q=salesNorm(input.value);
-  if(!q){box.classList.remove('open');box.innerHTML='';return;}
-  const pool=salesFilteredItems(true);
-  const terms=q.split(' ').filter(Boolean);
-  const itemHay=it=>salesNorm([it.product,it.option,it.color,it.code].join(' '));
-  const matched=pool.filter(it=>terms.every(t=>itemHay(it).includes(t)));
-  const source=matched.length?matched:pool.filter(it=>terms.some(t=>itemHay(it).includes(t)));
-  let products=salesUnique(source.map(x=>x.product)).filter(v=>terms.some(t=>salesNorm(v).includes(t))||source.some(it=>it.product===v));
-  let options=salesUnique(source.map(x=>x.option)).filter(v=>terms.some(t=>salesNorm(v).includes(t))||source.some(it=>it.option===v));
-  let colors=salesUnique(source.map(x=>x.color)).filter(v=>terms.some(t=>salesNorm(v).includes(t))||source.some(it=>it.color===v));
-  let html=salesSuggestionBlock(products,'제품','product')+salesSuggestionBlock(options,'옵션','option')+salesSuggestionBlock(colors,'색상','color');
-  if(!html)html='<div class="sales-no-result">일치하는 연관검색어가 없습니다.</div>';
-  box.innerHTML=html;box.classList.add('open');
+  const box=document.getElementById('salesSuggestions'),input=document.getElementById('salesSearchInput');if(!box||!input||!SALES_DATA_LOADED)return;
+  const q=salesNorm(input.value);if(!q){box.classList.remove('open');box.innerHTML='';return}
+  const terms=q.split(' ').filter(Boolean),pool=salesCurrentItems();
+  const matched=pool.filter(it=>{const hay=salesNorm([it.major,it.name,it.itemNo,it.option,it.color,it.code].join(' '));return terms.every(t=>hay.includes(t))});
+  const source=matched.length?matched:pool.filter(it=>{const hay=salesNorm([it.major,it.name,it.itemNo,it.option,it.color,it.code].join(' '));return terms.some(t=>hay.includes(t))});
+  const products=salesUnique(source.map(x=>x.major)),options=salesUnique(source.map(x=>x.option)),colors=salesUnique(source.map(x=>x.color));
+  let out=salesSuggestionBlock(products,'제품','product')+salesSuggestionBlock(options,'옵션','option')+salesSuggestionBlock(colors,'색상','color');
+  if(!out)out='<div class="sales-no-result">일치하는 연관검색어가 없습니다.</div>';
+  box.innerHTML=out;box.classList.add('open');
   box.querySelectorAll('[data-sales-value]').forEach(btn=>btn.addEventListener('click',()=>{
     const type=btn.dataset.salesType,value=btn.dataset.salesValue,label=type==='product'?'제품':type==='option'?'옵션':'색상';
     if(!SALES_SELECTED.some(x=>x.type===type&&x.value===value))SALES_SELECTED.push({type,label,value});
     const map={product:'salesProductFilter',option:'salesOptionFilter',color:'salesColorFilter'};
-    const filter=document.getElementById(map[type]); if(filter)filter.value=value;
-    input.value='';
-    box.classList.remove('open');
-    salesRenderChips();salesRenderTable();
+    const el=document.getElementById(map[type]);if(el)el.value=value;
+    input.value='';box.classList.remove('open');salesRefreshFilterOptions();salesRenderChips();salesRenderTable();
   }));
-}
-function salesRenderSummary(){
-  const month=document.getElementById('salesMonth')?.value||'08';
-  const totals=SALES_PLATFORM_TOTALS[month]||SALES_PLATFORM_TOTALS['08'];
-  const labels={own:'자사',naver:'네이버',mmall:'엠몰',coupang:'쿠팡'};
-  const entries=Object.entries(totals).sort((a,b)=>b[1]-a[1]),max=Math.max(...entries.map(x=>x[1]),1);
-  const bars=document.getElementById('salesPlatformBars');
-  if(bars)bars.innerHTML=entries.map(([k,v])=>`<div class="sales-platform-row"><div class="sales-platform-name">${labels[k]}</div><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div></div><div class="sales-platform-amount">${salesFmt(v)}</div></div>`).join('');
-  const pl=document.getElementById('salesPlatformMonthLabel');if(pl)pl.textContent=Number(month)+'월';
-  const chart=document.getElementById('salesMonthlyChart'),maxSale=Math.max(...SALES_MONTH_TOTALS.map(x=>x.sales),1);
-  if(chart)chart.innerHTML=SALES_MONTH_TOTALS.map(x=>`<div class="sales-month-item"><div class="sales-month-value">${(x.sales/1000000).toFixed(1)}M</div><div class="sales-month-bar ${x.month===month?'current':''}" style="height:${Math.max(8,x.sales/maxSale*88)}%"></div><div class="sales-month-label">${Number(x.month)}월</div></div>`).join('');
 }
 function salesResetAll(){
   SALES_SELECTED=[];
-  const ids=['salesSearchInput','salesProductFilter','salesOptionFilter','salesColorFilter','salesPlatformFilter'];
-  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  const input=document.getElementById('salesSearchInput');if(input)input.value='';
+  ['salesProductFilter','salesOptionFilter','salesColorFilter','salesPlatformFilter'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   const z=document.getElementById('salesZeroFilter');if(z)z.checked=true;
   document.getElementById('salesSuggestions')?.classList.remove('open');
-  salesRenderChips();salesRenderTable();
+  salesRefreshFilterOptions();salesRenderChips();salesRenderTable();
 }
-function salesInitDashboard(){
+function salesRenderAll(){
+  salesRefreshFilterOptions();salesRenderSummary();salesRenderTop5();salesRenderChips();salesRenderTable();
+}
+async function salesInitDashboard(force=false){
   if(!SALES_INITIALIZED){
     SALES_INITIALIZED=true;
-    salesRefreshFilterOptions();
     const input=document.getElementById('salesSearchInput');
     input?.addEventListener('input',()=>{salesRenderTable();salesRenderSuggestions()});
     input?.addEventListener('focus',()=>{if(input.value.trim())salesRenderSuggestions()});
     document.getElementById('salesSearchClear')?.addEventListener('click',salesResetAll);
     document.getElementById('salesResetBtn')?.addEventListener('click',salesResetAll);
-    ['salesProductFilter','salesOptionFilter','salesColorFilter','salesPlatformFilter','salesZeroFilter'].forEach(id=>{
-      document.getElementById(id)?.addEventListener('change',()=>{salesRenderTable();salesRenderSuggestions()});
-    });
-    document.getElementById('salesMonth')?.addEventListener('change',()=>{salesRenderSummary();salesRenderTable()});
-    document.getElementById('salesRefreshBtn')?.addEventListener('click',()=>{salesRenderSummary();salesRenderTable()});
-    document.addEventListener('click',e=>{
-      if(!e.target.closest('.sales-search-card'))document.getElementById('salesSuggestions')?.classList.remove('open');
-    });
+    document.getElementById('salesProductFilter')?.addEventListener('change',()=>{salesRefreshFilterOptions();salesRenderTable();salesRenderSuggestions()});
+    document.getElementById('salesOptionFilter')?.addEventListener('change',()=>{salesRefreshFilterOptions();salesRenderTable();salesRenderSuggestions()});
+    ['salesColorFilter','salesPlatformFilter','salesZeroFilter'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{salesRenderTable();salesRenderSuggestions()}));
+    document.getElementById('salesMonth')?.addEventListener('change',()=>{salesRenderAll()});
+    document.getElementById('salesRefreshBtn')?.addEventListener('click',async()=>{try{await salesFetchData(true);salesRenderAll()}catch(e){}});
+    document.getElementById('salesTop5ModalClose')?.addEventListener('click',()=>document.getElementById('salesTop5Modal')?.classList.remove('open'));
+    document.getElementById('salesTop5Modal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')});
+    document.addEventListener('click',e=>{if(!e.target.closest('.sales-search-card'))document.getElementById('salesSuggestions')?.classList.remove('open')});
   }
-  salesRenderSummary();salesRenderChips();salesRenderTable();
+  try{await salesFetchData(force);salesRenderAll()}catch(e){}
 }
 
 function initIntegratedNav(){
