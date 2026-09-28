@@ -3054,10 +3054,9 @@ function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const i
    매출현황은 @frame-by.com 로그인 사용자에게 열고, 전용 Apps Script 웹앱이 배포자 권한으로
    [회계]매출 및 재고현황 > 제품매출(2026) 시트를 읽어 전달합니다. */
 const SALES_CONFIG={
-  /* 매출현황 전용 Apps Script 웹앱 /exec URL을 넣어 주세요.
-     웹앱은 '실행 사용자: 나', '액세스: frame-by.com 조직 사용자'로 배포합니다. */
-  webAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbxMRACKXehYXCMCq9tt3OJuqEYiPP3hTTwKB8ST4Ffsj5BcuRzkXBxgF4kfoSTu2vBw/exec',
-  sheetName:'제품매출(2026)'
+  spreadsheetId:'1y5fpg-qT485lE47HdSPvx5-8P6H9zJBpwBWzgPYOjnA',
+  sheetName:'제품매출(2026)',
+  rangeA1:'A2:DT408'
 };
 let SALES_RAW_VALUES=[];
 let SALES_MASTER_ITEMS=[];
@@ -3165,70 +3164,23 @@ function salesAggregate(items){
   });
   return [...map.values()].sort((a,b)=>b.sales-a.sales||b.qty-a.qty||a.name.localeCompare(b.name,'ko'));
 }
-function salesBridgeUrl(){
-  const base=String(SALES_CONFIG.webAppUrl||'').trim();
-  if(!base || base==='PASTE_SALES_WEB_APP_URL_HERE'){
-    throw new Error('매출현황 전용 Apps Script 웹앱 URL이 아직 설정되지 않았습니다.');
+async function salesRequestBridgeData(){
+  const spreadsheetId=String(SALES_CONFIG.spreadsheetId||'').trim();
+  const sheetName=String(SALES_CONFIG.sheetName||'제품매출(2026)').trim();
+  const rangeA1=String(SALES_CONFIG.rangeA1||'A2:DT408').trim();
+
+  if(!spreadsheetId){
+    throw new Error('매출현황 스프레드시트 ID가 설정되지 않았습니다.');
   }
-  const sep=base.includes('?')?'&':'?';
-  return base+sep+'mode=popup&_='+Date.now();
-}
-function salesRequestBridgeData(){
-  return new Promise((resolve,reject)=>{
-    let popup=null;
 
-    const cleanup=()=>{
-      window.removeEventListener('message',onMessage);
-      clearTimeout(timer);
-      try{
-        if(popup && !popup.closed) popup.close();
-      }catch(e){}
-    };
+  const range=`'${sheetName.replace(/'/g,"''")}'!${rangeA1}`;
+  const url=
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}`+
+    `/values/${encodeURIComponent(range)}`+
+    `?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;
 
-    const onMessage=event=>{
-      if(!githubIsResearchOrigin(event.origin)) return;
-      if(popup && event.source!==popup) return;
-
-      const msg=event.data||{};
-      if(msg.type!=='frameby-sales-data') return;
-
-      cleanup();
-
-      if(!msg.ok){
-        reject(new Error(msg.message||'매출 데이터를 불러오지 못했습니다.'));
-        return;
-      }
-
-      resolve(Array.isArray(msg.values)?msg.values:[]);
-    };
-
-    window.addEventListener('message',onMessage);
-
-    try{
-      popup=window.open(
-        salesBridgeUrl(),
-        'framebySalesBridge',
-        'popup=yes,width=520,height=260,left=120,top=120,resizable=yes,scrollbars=yes'
-      );
-    }catch(e){
-      cleanup();
-      reject(new Error('매출현황 인증창을 열지 못했습니다.'));
-      return;
-    }
-
-    if(!popup){
-      cleanup();
-      reject(new Error('브라우저에서 매출현황 인증창이 차단되었습니다. 상단 새로고침 버튼을 한 번 눌러 주세요.'));
-      return;
-    }
-
-    try{popup.focus()}catch(e){}
-
-    const timer=setTimeout(()=>{
-      cleanup();
-      reject(new Error('매출현황 연결 시간이 초과되었습니다. Apps Script 배포가 "실행 사용자: 나 / 액세스: frame-by.com 조직 사용자"인지 확인해 주세요.'));
-    },20000);
-  });
+  const payload=await githubFetchJson(url);
+  return Array.isArray(payload?.values)?payload.values:[];
 }
 async function salesFetchData(force=false){
   if(SALES_DATA_LOADED&&!force)return SALES_RAW_VALUES;
@@ -3243,7 +3195,7 @@ async function salesFetchData(force=false){
     return SALES_RAW_VALUES;
   })().catch(e=>{
     SALES_DATA_LOADED=false;
-    salesSetState('error','매출 데이터를 불러오지 못했습니다. @frame-by.com 계정 로그인 및 매출현황 전용 Apps Script 배포 상태를 확인해 주세요. · '+(e?.message||''));
+    salesSetState('error','매출 데이터를 불러오지 못했습니다. [회계]매출현황 스프레드시트 공유권한과 @frame-by.com 로그인 계정을 확인해 주세요. · '+(e?.message||''));
     throw e;
   }).finally(()=>{SALES_DATA_LOADING=null});
   return SALES_DATA_LOADING;
