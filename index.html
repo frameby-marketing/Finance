@@ -3167,7 +3167,7 @@ function salesAggregate(items){
 }
 function salesBridgeUrl(){
   const base=String(SALES_CONFIG.webAppUrl||'').trim();
-  if(!base || base==='https://script.google.com/a/macros/frame-by.com/s/AKfycbxMRACKXehYXCMCq9tt3OJuqEYiPP3hTTwKB8ST4Ffsj5BcuRzkXBxgF4kfoSTu2vBw/exec'){
+  if(!base || base==='PASTE_SALES_WEB_APP_URL_HERE'){
     throw new Error('매출현황 전용 Apps Script 웹앱 URL이 아직 설정되지 않았습니다.');
   }
   const sep=base.includes('?')?'&':'?';
