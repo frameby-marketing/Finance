@@ -402,7 +402,7 @@ body.frameby-auth-ready{overflow:auto}
 </div>
 <div class="grid two">
 <div class="card"><div class="section-title"><h2>계정과목별 사용금액</h2><span class="note">금액이 큰 순</span></div><div class="bars" id="accountBars"></div></div>
-<div class="card"><div class="section-title"><h2>카드별 사용금액</h2><span class="note">카드명만 표시</span></div><div class="card-grid" id="cardSummary"></div></div>
+<div class="card"><div class="section-title"><h2>카드별 사용금액</h2><span class="note">카드명 · 사용자명</span></div><div class="card-grid" id="cardSummary"></div></div>
 </div>
 <div class="card" style="margin-bottom:14px"><div class="section-title"><h2>카드별 월 사용현황</h2><span class="note">2026년 누적 · 조회 월과 무관하게 항상 표시</span></div><div id="yearCardTable"></div></div>
 <div class="card"><div class="section-title"><h2>일자별 사용현황</h2><span class="note">카드별 합계</span></div><div id="dailyTable"></div></div>
@@ -764,6 +764,11 @@ let cards=[];
 let rows=[];
 const $=id=>document.getElementById(id), fmt=n=>Number(n||0).toLocaleString('ko-KR')+'원';
 const card=id=>cards.find(c=>c.id===id);
+const cardDisplay=c=>c?.displayName||c?.name||'';
+const cardDisplayByName=name=>{
+  const c=cards.find(x=>x.name===name);
+  return c?cardDisplay(c):(name||'');
+};
 
 function escapeHtml(v){
   return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -788,8 +793,8 @@ function initializeControls(){
   fillSelect($('payMonth'),months,preferred);
   fillSelect($('allMonth'),months);
   cards.forEach(c=>{
-    ['cardFilter','allCard'].forEach(id=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$(id).appendChild(o)});
-    const sf=$('subscriptionCardFilter');if(sf){const o=document.createElement('option');o.value=c.name;o.textContent=c.name;sf.appendChild(o)}
+    ['cardFilter','allCard'].forEach(id=>{const o=document.createElement('option');o.value=c.id;o.textContent=cardDisplay(c);$(id).appendChild(o)});
+    const sf=$('subscriptionCardFilter');if(sf){const o=document.createElement('option');o.value=c.name;o.textContent=cardDisplay(c);sf.appendChild(o)}
   });
   subscriptionPopulateCardSelect();
 }
@@ -800,7 +805,7 @@ function getTableState(table){
   return tableUi[table];
 }
 function refreshTable(table){if(table.startsWith('payment_')) renderPayment();else renderAll()}
-function valueFor(r,key){if(key==='card') return card(r.cardId)?.name||'';return r[key]??''}
+function valueFor(r,key){if(key==='card') return cardDisplay(card(r.cardId));return r[key]??''}
 function hasFilter(table,key){const f=getTableState(table).filters[key];if(key==='total'){if(f==null||f==='')return false;if(typeof f==='object')return !!(f&&(f.min!==''||f.max!==''));return true}return !!String(f||'').trim()}
 function applyTableState(data,table){
   const state=getTableState(table);
@@ -855,9 +860,9 @@ function renderDashboard(){
   $('kpiTotal').textContent=fmt(total);$('kpiCount').textContent=data.length.toLocaleString()+'건';$('kpiBad').textContent=fmt(bad);$('kpiBadRate').textContent=total?((bad/total)*100).toFixed(1)+'%':'0%';$('kpiExec').textContent=fmt(data.filter(r=>card(r.cardId)?.group==='임원').reduce((s,r)=>s+r.total,0));$('kpiStaff').textContent=fmt(data.filter(r=>card(r.cardId)?.group==='임직원').reduce((s,r)=>s+r.total,0));
   const ac={};data.forEach(r=>ac[r.account]=(ac[r.account]||0)+r.total);const list=Object.entries(ac).sort((a,b)=>b[1]-a[1]),max=list[0]?.[1]||1;
   $('accountBars').innerHTML=list.length?list.map(([n,v])=>`<div class="bar-row"><div>${escapeHtml(n)}</div><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><div class="amount">${fmt(v)}</div></div>`).join(''):'<div class="empty">내역 없음</div>';
-  $('cardSummary').innerHTML=cards.map(c=>{const cr=data.filter(r=>r.cardId===c.id),sum=cr.reduce((s,r)=>s+r.total,0);return `<div class="mini"><div class="name">${escapeHtml(c.name)}</div><div class="money">${fmt(sum)}</div><div class="meta">${escapeHtml(c.group)} · ${cr.length}건</div></div>`}).join('');
+  $('cardSummary').innerHTML=cards.map(c=>{const cr=data.filter(r=>r.cardId===c.id),sum=cr.reduce((s,r)=>s+r.total,0);return `<div class="mini"><div class="name">${escapeHtml(cardDisplay(c))}</div><div class="money">${fmt(sum)}</div><div class="meta">${escapeHtml(c.group)} · ${cr.length}건</div></div>`}).join('');
   const daily={};data.forEach(r=>{daily[r.date]??={};daily[r.date][r.cardId]=(daily[r.date][r.cardId]||0)+r.total});const ds=Object.keys(daily).sort();
-  $('dailyTable').innerHTML=`<div class="table-wrap"><table class="table daily-table"><thead><tr><th>일자</th>${cards.map(c=>`<th class="num">${escapeHtml(c.name)}</th>`).join('')}<th class="num">합계</th></tr></thead><tbody>${ds.map(d=>{const t=cards.reduce((s,c)=>s+(daily[d][c.id]||0),0);return `<tr><td>${escapeHtml(d)}</td>${cards.map(c=>`<td class="num">${fmt(daily[d][c.id]||0)}</td>`).join('')}<td class="num"><strong>${fmt(t)}</strong></td></tr>`}).join('')||`<tr><td colspan="${cards.length+2}" class="empty">내역 없음</td></tr>`}</tbody></table></div>`;
+  $('dailyTable').innerHTML=`<div class="table-wrap"><table class="table daily-table"><thead><tr><th>일자</th>${cards.map(c=>`<th class="num">${escapeHtml(cardDisplay(c))}</th>`).join('')}<th class="num">합계</th></tr></thead><tbody>${ds.map(d=>{const t=cards.reduce((s,c)=>s+(daily[d][c.id]||0),0);return `<tr><td>${escapeHtml(d)}</td>${cards.map(c=>`<td class="num">${fmt(daily[d][c.id]||0)}</td>`).join('')}<td class="num"><strong>${fmt(t)}</strong></td></tr>`}).join('')||`<tr><td colspan="${cards.length+2}" class="empty">내역 없음</td></tr>`}</tbody></table></div>`;
   renderYearCardTable();
 }
 function renderYearCardTable(){
@@ -870,7 +875,7 @@ function renderYearCardTable(){
     const cr=yearRows.filter(r=>r.cardId===c.id);
     const cumulative=cr.reduce((s,r)=>s+r.total,0);
     const monthly=months.map(m=>cr.filter(r=>r.date.startsWith(`${year}-${m}`)).reduce((s,r)=>s+r.total,0));
-    return `<tr><td><strong>${escapeHtml(c.name)}</strong></td><td class="num"><strong>${fmt(cumulative)}</strong></td>${monthly.map(v=>`<td class="num">${fmt(v)}</td>`).join('')}</tr>`;
+    return `<tr><td><strong>${escapeHtml(cardDisplay(c))}</strong></td><td class="num"><strong>${fmt(cumulative)}</strong></td>${monthly.map(v=>`<td class="num">${fmt(v)}</td>`).join('')}</tr>`;
   }).join('');
   $('yearCardTable').innerHTML=`<div class="table-wrap"><table class="table year-table"><thead><tr><th>카드</th><th class="num">${year}년 누적합계</th>${months.map((m,i)=>`<th class="num">${i+1}월</th>`).join('')}</tr></thead><tbody>${body}<tr class="year-total-row"><td>합계</td><td class="num">${fmt(grandTotal)}</td>${monthTotals.map(v=>`<td class="num">${fmt(v)}</td>`).join('')}</tr></tbody></table></div>`;
 }
@@ -889,12 +894,12 @@ function renderPayment(){
   }
   const total=base.reduce((a,r)=>a+r.total,0),exec=base.filter(r=>card(r.cardId)?.group==='임원').reduce((a,r)=>a+r.total,0),staff=total-exec;
   let html=`<div class="pay-total"><div>${escapeHtml(title)}</div><div class="big">${fmt(total)}</div><div style="opacity:.8;margin-bottom:10px">${escapeHtml(periodText)}</div><div class="split"><div>임원<strong>${fmt(exec)}</strong></div><div>임직원<strong>${fmt(staff)}</strong></div></div></div>`;
-  cards.forEach(c=>{const tableId=`payment_${c.id}`,original=base.filter(r=>r.cardId===c.id),sum=original.reduce((a,r)=>a+r.total,0),cr=applyTableState(original,tableId);html+=`<div class="pay-card"><div class="pay-head"><h3>${escapeHtml(c.name)}</h3><strong>${fmt(sum)}</strong></div><div class="table-wrap"><table class="table"><thead><tr>${th(tableId,'date','사용일')}${th(tableId,'account','계정과목')}${th(tableId,'merchant','사용처')}${th(tableId,'type','유형')}${th(tableId,'total','금액',true)}</tr></thead><tbody>${cr.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div></div>`});
+  cards.forEach(c=>{const tableId=`payment_${c.id}`,original=base.filter(r=>r.cardId===c.id),sum=original.reduce((a,r)=>a+r.total,0),cr=applyTableState(original,tableId);html+=`<div class="pay-card"><div class="pay-head"><h3>${escapeHtml(cardDisplay(c))}</h3><strong>${fmt(sum)}</strong></div><div class="table-wrap"><table class="table"><thead><tr>${th(tableId,'date','사용일')}${th(tableId,'account','계정과목')}${th(tableId,'merchant','사용처')}${th(tableId,'type','유형')}${th(tableId,'total','금액',true)}</tr></thead><tbody>${cr.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div></div>`});
   $('paymentBody').innerHTML=html;
 }
 function renderAll(){
   const m=$('allMonth').value,c=$('allCard').value,q=$('allSearch').value.trim().toLowerCase();let data=rows.filter(r=>(!m||r.date.startsWith(m))&&(!c||r.cardId===c)&&(!q||`${r.account} ${r.merchant}`.toLowerCase().includes(q)));data=applyTableState(data,'all');
-  $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(card(r.cardId)?.name||'')}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
+  $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(cardDisplay(card(r.cardId)))}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
 }
 const CARD_PAGES=['dashboard','payment','all','subscription','onlinePurchase'];
 const TRIP_PAGES=['trip','vehicle','master'];
@@ -1530,7 +1535,7 @@ function githubOpenAuthorizedInitialModule(){
   return true;
 }
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
-function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));cardMap[cardName]??={name:cardName,group};raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원'});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1);idBy[name]=id;return{id,name,group:cardMap[name].group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
+function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);const userMatch=rawCard.match(/\[\s*([^\]]+?)\s*\]/),userName=userMatch?ghText(userMatch[1]):'';let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));if(!cardMap[cardName])cardMap[cardName]={name:cardName,group,userName};else if(!cardMap[cardName].userName&&userName)cardMap[cardName].userName=userName;raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원',userName:''});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1),info=cardMap[name],userName=info.userName||'';idBy[name]=id;return{id,name,userName,displayName:userName?`${name} [${userName}]`:name,group:info.group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
 async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
 
 /* ===== 법인카드 · 온라인 구입내역 직접 조회 ===== */
@@ -1752,7 +1757,7 @@ function subscriptionToday(){const p=Object.fromEntries(new Intl.DateTimeFormat(
 function subscriptionDaysUntil(dateStr){if(!dateStr)return Infinity;const a=new Date(subscriptionToday()+'T00:00:00+09:00'),b=new Date(String(dateStr).slice(0,10)+'T00:00:00+09:00');return Math.ceil((b-a)/86400000)}
 function subscriptionCycleText(v){const s=ghText(v);if(s==='yearly')return'연간';if(s==='quarterly')return'분기';if(s==='monthly')return'월간';return s||'월간'}
 function subscriptionPill(status){const s=ghText(status)||'사용중',cls=s==='사용중'?'green':s==='중지예정'?'orange':'gray';return `<span class="subscription-pill ${cls}">${escapeHtml(s)}</span>`}
-function subscriptionPopulateCardSelect(){const el=document.getElementById('subscriptionCard');if(!el)return;const current=el.value;const names=cards.map(c=>c.name).filter(Boolean);el.innerHTML=names.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');if(current&&names.includes(current))el.value=current}
+function subscriptionPopulateCardSelect(){const el=document.getElementById('subscriptionCard');if(!el)return;const current=el.value;const items=cards.filter(c=>c.name);const names=items.map(c=>c.name);el.innerHTML=items.map(c=>`<option value="${escapeHtml(c.name)}">${escapeHtml(cardDisplay(c))}</option>`).join('');if(current&&names.includes(current))el.value=current}
 function subscriptionPopulateAccountSelect(currentValue=''){const el=document.getElementById('subscriptionAccount');if(!el)return;const current=ghText(currentValue||el.value);const list=SUBSCRIPTION_ACCOUNTS.slice();if(current&&!list.includes(current))list.push(current);el.innerHTML=list.length?list.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''):'<option value="">계정과목 목록 없음</option>';if(current&&list.includes(current))el.value=current;else if(list.length)el.value=list[0]}
 async function githubGetSubscriptionSnapshot(){const values=await ghValuesGet(INTEGRATED_CONFIG.cardSpreadsheetId,INTEGRATED_CONFIG.subscriptionSheet,'A2:N');const rows=[],accounts=[],seen=new Set();values.forEach((raw,index)=>{const row=(raw||[]).slice();while(row.length<14)row.push('');const accountItem=ghText(row[13]);if(accountItem&&!seen.has(accountItem)){seen.add(accountItem);accounts.push(accountItem)}const id=ghText(row[0]);if(!id)return;rows.push({rowNo:index+2,id,name:ghText(row[1]),card:ghText(row[2]),cycle:subscriptionCycleText(row[3]),payDay:subscriptionNormalizePayDay(row[4]),amount:ghNum(row[5]),nextDate:ghDate(row[7])||ghText(row[7]),account:ghText(row[8]),status:ghText(row[9])||'사용중',memo:ghText(row[10]),createdAt:ghText(row[11]),updatedAt:ghText(row[12])})});return{rows,accounts}}
 async function githubGetSubscriptionSheetId(){if(SUBSCRIPTION_SHEET_ID!=null)return SUBSCRIPTION_SHEET_ID;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}?fields=sheets.properties`;const data=await githubFetchJson(u);const hit=(data.sheets||[]).find(s=>s.properties?.title===INTEGRATED_CONFIG.subscriptionSheet);if(!hit)throw new Error(`${INTEGRATED_CONFIG.subscriptionSheet} 시트를 찾을 수 없습니다.`);SUBSCRIPTION_SHEET_ID=hit.properties.sheetId;return SUBSCRIPTION_SHEET_ID}
@@ -1785,7 +1790,7 @@ function renderSubscriptions(){
       const d=subscriptionDaysUntil(r.effectiveNextDate);
       const dText=d===0?'D-DAY':`D-${d}`;
       const cls=d<=3?'urgent':'soon';
-      return `<div class="subscription-alert-row"><div><div class="subscription-alert-service">${escapeHtml(r.name)}</div><div class="subscription-alert-sub">${escapeHtml(r.card)}</div></div><span class="subscription-dday ${cls}">${dText}</span><div class="subscription-alert-amount">${fmt(r.amount)}</div><div class="subscription-alert-date">${escapeHtml(r.effectiveNextDate)}</div></div>`;
+      return `<div class="subscription-alert-row"><div><div class="subscription-alert-service">${escapeHtml(r.name)}</div><div class="subscription-alert-sub">${escapeHtml(cardDisplayByName(r.card))}</div></div><span class="subscription-dday ${cls}">${dText}</span><div class="subscription-alert-amount">${fmt(r.amount)}</div><div class="subscription-alert-date">${escapeHtml(r.effectiveNextDate)}</div></div>`;
     }).join(''):'<div class="subscription-insight-empty">10일 이내 결제 예정인 사용중 구독이 없습니다.</div>';
   }
 
@@ -1796,7 +1801,7 @@ function renderSubscriptions(){
     const preferred=cards.map(c=>c.name).filter(Boolean);
     const extra=[...totals.keys()].filter(n=>!preferred.includes(n)).sort((a,b)=>a.localeCompare(b,'ko'));
     const names=[...preferred,...extra];
-    cardTotalsEl.innerHTML=names.length?names.map(name=>`<div class="subscription-card-total-row"><div class="subscription-card-total-name">${escapeHtml(name)}</div><div class="subscription-card-total-amount">${fmt(totals.get(name)||0)}</div></div>`).join(''):'<div class="subscription-insight-empty">등록된 카드가 없습니다.</div>';
+    cardTotalsEl.innerHTML=names.length?names.map(name=>`<div class="subscription-card-total-row"><div class="subscription-card-total-name">${escapeHtml(cardDisplayByName(name))}</div><div class="subscription-card-total-amount">${fmt(totals.get(name)||0)}</div></div>`).join(''):'<div class="subscription-insight-empty">등록된 카드가 없습니다.</div>';
   }
 
   const filteredIds=new Set(subscriptionFilteredRows().map(r=>r.id));
@@ -1804,7 +1809,7 @@ function renderSubscriptions(){
   document.getElementById('subscriptionVisibleCount').textContent=data.length+'건';
   body.innerHTML=data.length?data.map(r=>{
     const payDay=subscriptionNormalizePayDay(r.payDay);
-    return `<tr><td><div class="subscription-service">${escapeHtml(r.name)}</div><div class="subscription-sub">${escapeHtml(r.id)}</div></td><td>${escapeHtml(r.card)}</td><td><span class="subscription-pill blue">${escapeHtml(r.cycle)}</span></td><td class="subscription-center">${payDay?escapeHtml(payDay)+'일':'-'}</td><td class="num">${fmt(r.amount)}</td><td>${escapeHtml(r.effectiveNextDate||'-')}</td><td>${escapeHtml(r.account||'-')}</td><td>${subscriptionPill(r.status)}</td><td>${escapeHtml(r.memo||'-')}</td><td class="subscription-center"><div class="subscription-row-actions"><button class="subscription-icon-btn" type="button" onclick="subscriptionEditRow('${escapeHtml(r.id)}')">수정</button><button class="subscription-icon-btn danger" type="button" onclick="subscriptionDeleteRow('${escapeHtml(r.id)}')">삭제</button></div></td></tr>`;
+    return `<tr><td><div class="subscription-service">${escapeHtml(r.name)}</div><div class="subscription-sub">${escapeHtml(r.id)}</div></td><td>${escapeHtml(cardDisplayByName(r.card))}</td><td><span class="subscription-pill blue">${escapeHtml(r.cycle)}</span></td><td class="subscription-center">${payDay?escapeHtml(payDay)+'일':'-'}</td><td class="num">${fmt(r.amount)}</td><td>${escapeHtml(r.effectiveNextDate||'-')}</td><td>${escapeHtml(r.account||'-')}</td><td>${subscriptionPill(r.status)}</td><td>${escapeHtml(r.memo||'-')}</td><td class="subscription-center"><div class="subscription-row-actions"><button class="subscription-icon-btn" type="button" onclick="subscriptionEditRow('${escapeHtml(r.id)}')">수정</button><button class="subscription-icon-btn danger" type="button" onclick="subscriptionDeleteRow('${escapeHtml(r.id)}')">삭제</button></div></td></tr>`;
   }).join(''):'<tr><td colspan="10" class="empty">등록된 정기구독이 없습니다.</td></tr>';
 }
 async function loadSubscriptionsAndRender(force=false){if(!force&&SUBSCRIPTION_LOADED_AT&&Date.now()-SUBSCRIPTION_LOADED_AT<SUBSCRIPTION_CACHE_MS){renderSubscriptions();return}if(SUBSCRIPTION_LOAD_PROMISE)return SUBSCRIPTION_LOAD_PROMISE;const body=document.getElementById('subscriptionBody'),hadData=SUBSCRIPTION_LOADED_AT>0||SUBSCRIPTION_ROWS.length>0;if(!hadData&&body)body.innerHTML='<tr><td colspan="10" class="subscription-loading">정기구독 저장소를 불러오는 중...</td></tr>';subscriptionSetError();SUBSCRIPTION_LOAD_PROMISE=(async()=>{try{const snapshot=await githubGetSubscriptionSnapshot();subscriptionApplySnapshot(snapshot);renderSubscriptions()}catch(e){console.warn('정기구독 조회 실패',e);if(!hadData&&body)body.innerHTML='<tr><td colspan="10" class="empty">데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</td></tr>'}finally{SUBSCRIPTION_LOAD_PROMISE=null}})();return SUBSCRIPTION_LOAD_PROMISE}
