@@ -3171,69 +3171,63 @@ function salesBridgeUrl(){
     throw new Error('매출현황 전용 Apps Script 웹앱 URL이 아직 설정되지 않았습니다.');
   }
   const sep=base.includes('?')?'&':'?';
-  return base+sep+'mode=bridge&_='+Date.now();
+  return base+sep+'mode=popup&_='+Date.now();
 }
 function salesRequestBridgeData(){
   return new Promise((resolve,reject)=>{
-    if(!GITHUB_ACCESS_TOKEN){
-      reject(new Error('Google 로그인 토큰을 확인할 수 없습니다. 다시 로그인해 주세요.'));
-      return;
-    }
-
-    const frame=document.createElement('iframe');
-    frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
-    frame.setAttribute('aria-hidden','true');
-
-    let requested=false;
+    let popup=null;
 
     const cleanup=()=>{
       window.removeEventListener('message',onMessage);
       clearTimeout(timer);
-      try{frame.remove()}catch(e){}
+      try{
+        if(popup && !popup.closed) popup.close();
+      }catch(e){}
     };
 
     const onMessage=event=>{
-      if(event.source!==frame.contentWindow) return;
       if(!githubIsResearchOrigin(event.origin)) return;
+      if(popup && event.source!==popup) return;
 
       const msg=event.data||{};
+      if(msg.type!=='frameby-sales-data') return;
 
-      if(msg.type==='frameby-sales-bridge-ready'){
-        if(requested) return;
-        requested=true;
+      cleanup();
 
-        try{
-          frame.contentWindow.postMessage({
-            type:'frameby-sales-auth-request',
-            accessToken:GITHUB_ACCESS_TOKEN
-          },event.origin);
-        }catch(e){
-          cleanup();
-          reject(new Error('매출현황 로그인 정보를 전달하지 못했습니다.'));
-        }
+      if(!msg.ok){
+        reject(new Error(msg.message||'매출 데이터를 불러오지 못했습니다.'));
         return;
       }
 
-      if(msg.type==='frameby-sales-data'){
-        cleanup();
-
-        if(!msg.ok){
-          reject(new Error(msg.message||'매출 데이터를 불러오지 못했습니다.'));
-          return;
-        }
-
-        resolve(Array.isArray(msg.values)?msg.values:[]);
-      }
+      resolve(Array.isArray(msg.values)?msg.values:[]);
     };
+
+    window.addEventListener('message',onMessage);
+
+    try{
+      popup=window.open(
+        salesBridgeUrl(),
+        'framebySalesBridge',
+        'popup=yes,width=520,height=260,left=120,top=120,resizable=yes,scrollbars=yes'
+      );
+    }catch(e){
+      cleanup();
+      reject(new Error('매출현황 인증창을 열지 못했습니다.'));
+      return;
+    }
+
+    if(!popup){
+      cleanup();
+      reject(new Error('브라우저에서 매출현황 인증창이 차단되었습니다. 상단 새로고침 버튼을 한 번 눌러 주세요.'));
+      return;
+    }
+
+    try{popup.focus()}catch(e){}
 
     const timer=setTimeout(()=>{
       cleanup();
-      reject(new Error('매출현황 API에 연결하지 못했습니다. Apps Script 최신 배포 상태를 확인해 주세요.'));
-    },8000);
-
-    window.addEventListener('message',onMessage);
-    frame.src=salesBridgeUrl();
-    document.body.appendChild(frame);
+      reject(new Error('매출현황 연결 시간이 초과되었습니다. Apps Script 배포가 "실행 사용자: 나 / 액세스: frame-by.com 조직 사용자"인지 확인해 주세요.'));
+    },20000);
   });
 }
 async function salesFetchData(force=false){
@@ -3249,7 +3243,7 @@ async function salesFetchData(force=false){
     return SALES_RAW_VALUES;
   })().catch(e=>{
     SALES_DATA_LOADED=false;
-    salesSetState('error','매출 데이터를 불러오지 못했습니다. 매출현황 전용 Apps Script 웹앱 배포와 @frame-by.com 로그인 상태를 확인해 주세요. · '+(e?.message||''));
+    salesSetState('error','매출 데이터를 불러오지 못했습니다. @frame-by.com 계정 로그인 및 매출현황 전용 Apps Script 배포 상태를 확인해 주세요. · '+(e?.message||''));
     throw e;
   }).finally(()=>{SALES_DATA_LOADING=null});
   return SALES_DATA_LOADING;
