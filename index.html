@@ -1318,7 +1318,13 @@ function initResearchShell(){
     if(btn.dataset.researchBound) return;
     btn.dataset.researchBound='1';
     btn.addEventListener('click',()=>{
-      RESEARCH_ACTIVE_PAGE=btn.dataset.researchPage||'notes';
+      const nextPage=btn.dataset.researchPage||'notes';
+
+      if(nextPage==='write' && !window.FRAMEBY_RESEARCH_WRITE_ACCESS){
+        return;
+      }
+
+      RESEARCH_ACTIVE_PAGE=nextPage;
       if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=0;
       syncModuleHeader('research','researchHost');
       ensureResearchFrame(true);
@@ -1528,18 +1534,13 @@ const INTEGRATED_CONFIG={
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
+  researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
   researchWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
-  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
 };
-const RESEARCH_SHARED_EMAILS=Object.freeze([
-  'account@frame-by.com',
-  'marketing@frame-by.com',
-  'ygiho@frame-by.com',
-  'bill@frame-by.com'
-]);
 const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접대비','교통비','숙박비','기타비','합계','출장자','구분','적요명','출장목적','방문지역','이동수단','결제수단','상태','삭제여부','생성일시','수정일시','유류비'];
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
 const GH_VEHICLE_HEADERS=['vehicle_id','차량명','기초키로수','누적거리','취득일','처분일','사용여부','수정일시'];
@@ -1642,15 +1643,36 @@ async function githubGetResearchSharedEmails(){
   });
 }
 async function githubCheckResearchAccess(){
-  const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
-  if(!email) return false;
-  try{
-    const live=await githubGetResearchSharedEmails();
-    return Array.isArray(live) && live.includes(email);
-  }catch(e){
-    // 연구개발 공유목록을 확인하지 못한 경우에는 권한을 추정하지 않고 메뉴를 숨깁니다.
-    return false;
+  if(!INTEGRATED_CONFIG.researchDocumentId||!GITHUB_ACCESS_TOKEN) return false;
+
+  const url=
+    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
+    `?fields=id&supportsAllDrives=true`;
+
+  const response=await fetch(url,{
+    method:'GET',
+    headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
+  });
+
+  if(response.status===401){
+    githubTokenCacheClear();
+    GITHUB_ACCESS_TOKEN=null;
+    throw Object.assign(
+      new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),
+      {status:401}
+    );
   }
+
+  if(response.status===403||response.status===404) return false;
+
+  if(!response.ok){
+    throw Object.assign(
+      new Error(`연구개발 Google Docs 공유권한 확인 실패 (HTTP ${response.status})`),
+      {status:response.status}
+    );
+  }
+
+  return true;
 }
 async function githubCreateResearchSession(){
   if(!INTEGRATED_CONFIG.researchWebAppUrl||!GITHUB_ACCESS_TOKEN) return false;
@@ -1710,19 +1732,30 @@ async function githubCreateResearchSession(){
   });
 }
 async function githubVerifyIntegratedAccess(){
-  const researchPromise=githubCreateResearchSession()
+  const researchPromise=githubCheckResearchAccess()
     .then(value=>({value:!!value,error:''}))
     .catch(error=>({value:false,error:(error&&error.message)||'연구개발 권한 확인 오류'}));
 
-  const [card,cash,trip,leave,researchResult]=await Promise.all([
+  const [card,cash,trip,leave,researchResult,researchWrite]=await Promise.all([
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cardSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cashSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.leaveSpreadsheetId),
-    researchPromise
+    researchPromise,
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.researchWriteSpreadsheetId)
   ]);
+
   RESEARCH_ACCESS_ERROR=researchResult.error||'';
-  return {cash,card,trip,leave,research:researchResult.value,researchError:RESEARCH_ACCESS_ERROR};
+
+  return {
+    cash,
+    card,
+    trip,
+    leave,
+    research:researchResult.value,
+    researchWrite:!!researchWrite,
+    researchError:RESEARCH_ACCESS_ERROR
+  };
 }
 function githubApplyModuleAccess(access){
   window.FRAMEBY_MODULE_ACCESS={
@@ -1749,6 +1782,19 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.card) document.getElementById('cardSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.leave) document.getElementById('leaveSecondaryMenu')?.classList.add('hidden');
+
+  window.FRAMEBY_RESEARCH_WRITE_ACCESS=!!access?.researchWrite;
+  const researchWriteBtn=document.querySelector('.module-tab[data-research-page="write"]');
+  if(researchWriteBtn){
+    const canWrite=!!window.FRAMEBY_MODULE_ACCESS.research && !!window.FRAMEBY_RESEARCH_WRITE_ACCESS;
+    researchWriteBtn.hidden=!canWrite;
+    researchWriteBtn.setAttribute('aria-hidden',canWrite?'false':'true');
+    researchWriteBtn.tabIndex=canWrite?0:-1;
+  }
+
+  if(!window.FRAMEBY_RESEARCH_WRITE_ACCESS && RESEARCH_ACTIVE_PAGE==='write'){
+    RESEARCH_ACTIVE_PAGE='notes';
+  }
 }
 function githubOpenAuthorizedInitialModule(){
   if(location.hash==='#sales'){showModule('sales');return true;}
@@ -3404,7 +3450,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-nav-fixed-v26';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-doc-access-write-sheet-v28';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
