@@ -307,6 +307,39 @@ body.frameby-auth-ready{overflow:auto}
 .sales-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}
 .sales-head h1{font-size:26px;margin:0}.sales-head p{margin:6px 0 0;color:var(--muted)}
 .sales-head-actions{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}
+.sales-range-btn{height:36px;border:1px solid #cbd6ef;background:#fff;color:#405476;padding:0 12px;border-radius:8px;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+.sales-range-btn:hover,.sales-range-btn.active{background:var(--soft);border-color:#b9c9ef;color:var(--primary)}
+.sales-range-backdrop{position:fixed;inset:0;z-index:7600;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,26,45,.34)}
+.sales-range-backdrop.open{display:flex}
+.sales-range-modal{width:min(930px,96vw);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 70px rgba(17,26,45,.24);overflow:hidden}
+.sales-range-calendars{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:25px 26px 18px}
+.sales-range-month{min-width:0}
+.sales-range-month-head{display:flex;align-items:center;justify-content:space-between;min-height:40px;margin-bottom:10px}
+.sales-range-month-title{font-size:22px;font-weight:900;color:#343b47}
+.sales-range-nav{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sales-range-nav button{width:36px;height:34px;border:0;background:#fff;color:#8a94a3;font-size:23px;line-height:1;cursor:pointer}
+.sales-range-nav button+button{border-left:1px solid var(--line)}
+.sales-range-nav button:hover{background:#f6f8fc;color:var(--primary)}
+.sales-range-week,.sales-range-days{display:grid;grid-template-columns:repeat(7,1fr)}
+.sales-range-week span{padding:8px 0;text-align:center;font-size:12px;font-weight:800;color:#49515d}
+.sales-range-week span:first-child{color:#ef4444}
+.sales-range-day{position:relative;height:46px;border:0;background:transparent;color:#38404d;font-size:14px;cursor:pointer}
+.sales-range-day:hover:not(:disabled)::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#eef3ff;z-index:0}
+.sales-range-day span{position:relative;z-index:2}
+.sales-range-day.other{color:#a8b0bc}
+.sales-range-day.in-range{background:#f1f4f8}
+.sales-range-day.range-start,.sales-range-day.range-end{color:#fff;font-weight:900}
+.sales-range-day.range-start::after,.sales-range-day.range-end::after{content:"";position:absolute;left:50%;top:50%;width:38px;height:38px;transform:translate(-50%,-50%);border-radius:50%;background:#3478ef;z-index:1}
+.sales-range-day.today span::after{content:"";position:absolute;left:50%;bottom:-8px;width:4px;height:4px;border-radius:50%;background:#3478ef;transform:translateX(-50%)}
+.sales-range-day.range-start.today span::after,.sales-range-day.range-end.today span::after{background:#fff}
+.sales-range-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 24px 20px;border-top:1px solid #eef1f5}
+.sales-range-selected{font-size:12px;color:#687386;font-weight:750}
+.sales-range-actions{display:flex;gap:8px}
+.sales-range-actions button{height:38px;border-radius:9px;padding:0 15px;font-size:12px;font-weight:850;cursor:pointer}
+.sales-range-cancel{border:1px solid var(--line);background:#f3f5f8;color:#505865}
+.sales-range-confirm{border:1px solid var(--primary);background:var(--primary);color:#fff}
+.sales-range-confirm:disabled{opacity:.42;cursor:default}
+@media(max-width:760px){.sales-range-calendars{grid-template-columns:1fr;gap:14px;padding:18px}.sales-range-modal{max-height:92vh;overflow:auto}.sales-range-month-title{font-size:18px}.sales-range-foot{align-items:flex-start;flex-direction:column}.sales-range-actions{width:100%;justify-content:flex-end}}
 .sales-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}
 .sales-two{grid-template-columns:minmax(0,1.3fr) minmax(350px,.7fr);margin-bottom:14px}
 .sales-month-chart{height:220px;display:flex;align-items:flex-end;gap:10px;padding:8px 4px 0}
@@ -412,6 +445,10 @@ body.frameby-auth-ready{overflow:auto}
 .vat-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.vat-kpis .vat-total{background:linear-gradient(135deg,#17233f,#2757d7);color:#fff;border-color:#20345e}.vat-kpis .vat-total .label,.vat-kpis .vat-total .sub{color:#d8e2fa}
 .vat-tax-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vat-tax-month{border:1px solid var(--line);border-radius:10px;background:#fafbfd;padding:14px}.vat-tax-month .month{font-size:13px;font-weight:900;margin-bottom:10px}.vat-tax-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12px}.vat-tax-line span{color:var(--muted)}.vat-tax-line strong{font-variant-numeric:tabular-nums}.vat-tax-line.total{margin-top:5px;padding-top:10px;border-top:1px solid var(--line)}
 .vat-section{margin-top:22px}.vat-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}.vat-section-head h2{font-size:18px;margin:0}.vat-section-head .note{white-space:nowrap}
+.vat-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.vat-detail-grid .vat-section{margin-top:22px;min-width:0}
+.vat-detail-grid .table-wrap{max-width:100%}
+@media(max-width:1279px){.vat-detail-grid{grid-template-columns:1fr}}
 .vat-filter-box{background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:10px}.vat-filter-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line)}.vat-filter-row:last-child{border-bottom:0}.vat-filter-label{width:64px;flex:0 0 64px;font-size:11px;color:var(--muted);font-weight:850}.vat-chips{display:flex;gap:6px;flex-wrap:wrap}.vat-chip{border:1px solid var(--line);background:#fff;color:#59657a;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer}.vat-chip:hover{background:#f6f8fc;color:var(--primary)}.vat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
 .vat-table-card{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}.vat-table-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#fafbfc;border-bottom:1px solid var(--line)}.vat-table-head strong{font-size:13px}.vat-table-head span{font-size:11px;color:var(--muted)}.vat-table{min-width:820px}.vat-table td,.vat-table th{font-size:12px}.vat-table .vat-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#eef3ff;color:#2757d7;font-size:10px;font-weight:850;white-space:nowrap}.vat-purchase .vat-badge{background:#edf7f0;color:#4b7659}.vat-blocked .vat-badge{background:#fff0f0;color:#b04444}.vat-empty{padding:28px!important;text-align:center!important;color:var(--muted)}.vat-divider{height:1px;background:var(--line);margin:28px 0}.vat-negative{color:#b42332}.vat-positive{color:#172033}
 @media(max-width:1050px){.vat-kpis{grid-template-columns:repeat(2,1fr)}.vat-tax-grid{grid-template-columns:1fr}}
@@ -581,6 +618,7 @@ body.frameby-auth-ready{overflow:auto}
           <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
         </select>
       </div>
+      <div class="field"><label>기간별 조회</label><button type="button" class="sales-range-btn" id="salesRangeBtn">기간 선택</button></div>
       <button type="button" class="excel-btn" id="salesRefreshBtn">↻ 새로고침</button>
     </div>
   </div>
@@ -676,6 +714,19 @@ body.frameby-auth-ready{overflow:auto}
       </div>
     </div>
   </div>
+
+  <div class="sales-range-backdrop" id="salesRangeBackdrop">
+    <div class="sales-range-modal" role="dialog" aria-modal="true" aria-label="매출현황 기간 선택">
+      <div class="sales-range-calendars" id="salesRangeCalendars"></div>
+      <div class="sales-range-foot">
+        <div class="sales-range-selected" id="salesRangeSelected">시작일과 종료일을 선택하세요.</div>
+        <div class="sales-range-actions">
+          <button type="button" class="sales-range-cancel" id="salesRangeCancel">닫기</button>
+          <button type="button" class="sales-range-confirm" id="salesRangeConfirm" disabled>확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="page vat-host" id="vatHost">
@@ -699,6 +750,7 @@ body.frameby-auth-ready{overflow:auto}
     <div class="vat-tax-grid" id="vatTaxSummary"></div>
   </div>
 
+  <div class="vat-detail-grid">
   <section class="vat-section vat-sales">
     <div class="vat-section-head"><h2>과세매출 상세</h2><span class="note">자료구분과 월을 선택하면 해당 내역만 표시합니다.</span></div>
     <div class="vat-filter-box">
@@ -711,8 +763,6 @@ body.frameby-auth-ready{overflow:auto}
     </div>
   </section>
 
-  <div class="vat-divider"></div>
-
   <section class="vat-section vat-purchase">
     <div class="vat-section-head"><h2>과세매입 상세</h2><span class="note">고정자산 매입을 포함합니다.</span></div>
     <div class="vat-filter-box">
@@ -724,6 +774,7 @@ body.frameby-auth-ready{overflow:auto}
       <div class="table-wrap" style="border:0;border-radius:0"><table class="table vat-table" id="vatPurchaseTable"></table></div>
     </div>
   </section>
+  </div>
 
   <div class="vat-divider"></div>
 
@@ -3658,13 +3709,15 @@ function vatRenderFilters(report){
 function vatRenderSales(report){
   let rows=(report.sales||[]).filter(r=>VAT_STATE.salesCategory==='전체'||r.category===VAT_STATE.salesCategory);
   if(VAT_STATE.salesMonth!=='전체기간'){const m=parseInt(VAT_STATE.salesMonth,10);rows=rows.filter(r=>r.month===m)}else rows=vatAggregate(rows,['category','counterparty'],['count','supply','tax']);
-  document.getElementById('vatSalesCaption').textContent=`${VAT_STATE.salesCategory} · ${VAT_STATE.salesMonth} · ${rows.length.toLocaleString('ko-KR')}건`;
+  const taxTotal=rows.reduce((sum,r)=>sum+Number(r.tax||0),0);
+  document.getElementById('vatSalesCaption').textContent=`세액 합계 ${vatFmt(taxTotal)}`;
   document.getElementById('vatSalesTable').innerHTML=`<thead><tr><th>구분</th><th>거래처명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td><span class="vat-badge">${vatEsc(r.category)}</span></td><td>${vatEsc(r.counterparty)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td></tr>`).join(''):`<tr><td colspan="5" class="vat-empty">해당 조건의 자료가 없습니다.</td></tr>`}</tbody>`;
 }
 function vatRenderPurchases(report){
   let rows=(report.purchases||[]).filter(r=>VAT_STATE.purchaseCategory==='전체'||r.category===VAT_STATE.purchaseCategory);
   if(VAT_STATE.purchaseMonth!=='전체기간'){const m=parseInt(VAT_STATE.purchaseMonth,10);rows=rows.filter(r=>r.month===m)}else rows=vatAggregate(rows,['category','source','account','counterparty'],['count','supply','tax']);
-  document.getElementById('vatPurchaseCaption').textContent=`${VAT_STATE.purchaseCategory} · ${VAT_STATE.purchaseMonth} · ${rows.length.toLocaleString('ko-KR')}건`;
+  const taxTotal=rows.reduce((sum,r)=>sum+Number(r.tax||0),0);
+  document.getElementById('vatPurchaseCaption').textContent=`세액 합계 ${vatFmt(taxTotal)}`;
   document.getElementById('vatPurchaseTable').innerHTML=`<thead><tr><th>구분</th><th>카드/증빙</th><th>계정과목</th><th>거래처명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td><span class="vat-badge">${vatEsc(r.category)}</span></td><td>${vatEsc(r.source||'-')}</td><td>${vatEsc(r.account||'-')}</td><td>${vatEsc(r.counterparty)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">해당 조건의 자료가 없습니다.</td></tr>`}</tbody>`;
 }
 function vatRenderBlocked(report){
@@ -3705,6 +3758,70 @@ let SALES_SELECTED=[];
 let SALES_INITIALIZED=false;
 let SALES_DATA_LOADED=false;
 let SALES_DATA_LOADING=null;
+let SALES_RANGE_START=null;
+let SALES_RANGE_END=null;
+let SALES_RANGE_VIEW=null;
+
+function salesDateKey(d){
+  if(!(d instanceof Date)||Number.isNaN(d.getTime()))return'';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function salesDateLabel(d){return d?`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`:''}
+function salesDateOnly(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function salesSameDate(a,b){return !!(a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate())}
+function salesRangeOpen(){
+  const y=Number(document.getElementById('salesYear')?.value||2026),m=Math.max(0,salesMonthNo()-1);
+  SALES_RANGE_VIEW=SALES_RANGE_START?new Date(SALES_RANGE_START.getFullYear(),SALES_RANGE_START.getMonth(),1):new Date(y,m,1);
+  document.getElementById('salesRangeBackdrop')?.classList.add('open');
+  salesRangeRender();
+}
+function salesRangeClose(){document.getElementById('salesRangeBackdrop')?.classList.remove('open')}
+function salesRangeShift(delta){if(!SALES_RANGE_VIEW)return;SALES_RANGE_VIEW=new Date(SALES_RANGE_VIEW.getFullYear(),SALES_RANGE_VIEW.getMonth()+delta,1);salesRangeRender()}
+function salesRangePick(date){
+  const d=salesDateOnly(date);
+  if(!SALES_RANGE_START || (SALES_RANGE_START&&SALES_RANGE_END)){
+    SALES_RANGE_START=d;SALES_RANGE_END=null;
+  }else{
+    if(d<SALES_RANGE_START){SALES_RANGE_END=SALES_RANGE_START;SALES_RANGE_START=d}else SALES_RANGE_END=d;
+  }
+  salesRangeRender();
+}
+function salesRangeMonthHtml(base,nav){
+  const year=base.getFullYear(),month=base.getMonth(),first=new Date(year,month,1),last=new Date(year,month+1,0),startDay=first.getDay();
+  const gridStart=new Date(year,month,1-startDay),today=salesDateOnly(new Date()),cells=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+i);
+    const other=d.getMonth()!==month,inRange=SALES_RANGE_START&&SALES_RANGE_END&&d>=SALES_RANGE_START&&d<=SALES_RANGE_END;
+    const cls=['sales-range-day',other?'other':'',inRange?'in-range':'',salesSameDate(d,SALES_RANGE_START)?'range-start':'',salesSameDate(d,SALES_RANGE_END)?'range-end':'',salesSameDate(d,today)?'today':''].filter(Boolean).join(' ');
+    cells.push(`<button type="button" class="${cls}" data-sales-range-date="${salesDateKey(d)}"><span>${d.getDate()}</span></button>`);
+  }
+  return `<div class="sales-range-month">
+    <div class="sales-range-month-head">
+      <div class="sales-range-month-title">${year}년 ${month+1}월</div>
+      ${nav?`<div class="sales-range-nav"><button type="button" data-sales-range-nav="-1" aria-label="이전 달">‹</button><button type="button" data-sales-range-nav="1" aria-label="다음 달">›</button></div>`:''}
+    </div>
+    <div class="sales-range-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+    <div class="sales-range-days">${cells.join('')}</div>
+  </div>`;
+}
+function salesRangeRender(){
+  const box=document.getElementById('salesRangeCalendars');if(!box||!SALES_RANGE_VIEW)return;
+  const left=new Date(SALES_RANGE_VIEW.getFullYear(),SALES_RANGE_VIEW.getMonth(),1),right=new Date(left.getFullYear(),left.getMonth()+1,1);
+  box.innerHTML=salesRangeMonthHtml(left,false)+salesRangeMonthHtml(right,true);
+  box.querySelectorAll('[data-sales-range-date]').forEach(btn=>btn.addEventListener('click',()=>{
+    const [y,m,d]=btn.dataset.salesRangeDate.split('-').map(Number);salesRangePick(new Date(y,m-1,d));
+  }));
+  box.querySelectorAll('[data-sales-range-nav]').forEach(btn=>btn.addEventListener('click',()=>salesRangeShift(Number(btn.dataset.salesRangeNav)||0)));
+  const selected=document.getElementById('salesRangeSelected');
+  if(selected)selected.textContent=SALES_RANGE_START?(SALES_RANGE_END?`${salesDateLabel(SALES_RANGE_START)} ~ ${salesDateLabel(SALES_RANGE_END)}`:`시작일 ${salesDateLabel(SALES_RANGE_START)} · 종료일을 선택하세요.`):'시작일과 종료일을 선택하세요.';
+  const confirm=document.getElementById('salesRangeConfirm');if(confirm)confirm.disabled=!(SALES_RANGE_START&&SALES_RANGE_END);
+}
+function salesRangeConfirm(){
+  if(!(SALES_RANGE_START&&SALES_RANGE_END))return;
+  const btn=document.getElementById('salesRangeBtn');
+  if(btn){btn.textContent=`${String(SALES_RANGE_START.getMonth()+1).padStart(2,'0')}.${String(SALES_RANGE_START.getDate()).padStart(2,'0')} ~ ${String(SALES_RANGE_END.getMonth()+1).padStart(2,'0')}.${String(SALES_RANGE_END.getDate()).padStart(2,'0')}`;btn.classList.add('active')}
+  salesRangeClose();
+}
 
 function salesFmt(n){return Math.round(Number(n)||0).toLocaleString('ko-KR')}
 function salesNum(v){
@@ -4000,6 +4117,10 @@ async function salesInitDashboard(force=false){
     document.getElementById('salesOptionFilter')?.addEventListener('change',()=>{salesRefreshFilterOptions();salesRenderTable();salesRenderSuggestions()});
     ['salesColorFilter','salesPlatformFilter','salesZeroFilter'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{salesRenderTable();salesRenderSuggestions()}));
     document.getElementById('salesMonth')?.addEventListener('change',()=>{salesRenderAll()});
+    document.getElementById('salesRangeBtn')?.addEventListener('click',salesRangeOpen);
+    document.getElementById('salesRangeCancel')?.addEventListener('click',salesRangeClose);
+    document.getElementById('salesRangeConfirm')?.addEventListener('click',salesRangeConfirm);
+    document.getElementById('salesRangeBackdrop')?.addEventListener('click',e=>{if(e.target===e.currentTarget)salesRangeClose()});
     document.getElementById('salesRefreshBtn')?.addEventListener('click',async()=>{try{await salesFetchData(true);salesRenderAll()}catch(e){}});
     document.getElementById('salesTop5ModalClose')?.addEventListener('click',()=>document.getElementById('salesTop5Modal')?.classList.remove('open'));
     document.getElementById('salesTop5Modal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')});
