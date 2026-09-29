@@ -307,6 +307,39 @@ body.frameby-auth-ready{overflow:auto}
 .sales-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}
 .sales-head h1{font-size:26px;margin:0}.sales-head p{margin:6px 0 0;color:var(--muted)}
 .sales-head-actions{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}
+.sales-range-btn{height:36px;border:1px solid #cbd6ef;background:#fff;color:#405476;padding:0 12px;border-radius:8px;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+.sales-range-btn:hover,.sales-range-btn.active{background:var(--soft);border-color:#b9c9ef;color:var(--primary)}
+.sales-range-backdrop{position:fixed;inset:0;z-index:7600;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,26,45,.34)}
+.sales-range-backdrop.open{display:flex}
+.sales-range-modal{width:min(930px,96vw);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 70px rgba(17,26,45,.24);overflow:hidden}
+.sales-range-calendars{display:grid;grid-template-columns:1fr 1fr;gap:34px;padding:25px 26px 18px}
+.sales-range-month{min-width:0}
+.sales-range-month-head{display:flex;align-items:center;justify-content:space-between;min-height:40px;margin-bottom:10px}
+.sales-range-month-title{font-size:22px;font-weight:900;color:#343b47}
+.sales-range-nav{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sales-range-nav button{width:36px;height:34px;border:0;background:#fff;color:#8a94a3;font-size:23px;line-height:1;cursor:pointer}
+.sales-range-nav button+button{border-left:1px solid var(--line)}
+.sales-range-nav button:hover{background:#f6f8fc;color:var(--primary)}
+.sales-range-week,.sales-range-days{display:grid;grid-template-columns:repeat(7,1fr)}
+.sales-range-week span{padding:8px 0;text-align:center;font-size:12px;font-weight:800;color:#49515d}
+.sales-range-week span:first-child{color:#ef4444}
+.sales-range-day{position:relative;height:46px;border:0;background:transparent;color:#38404d;font-size:14px;cursor:pointer}
+.sales-range-day:hover:not(:disabled)::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#eef3ff;z-index:0}
+.sales-range-day span{position:relative;z-index:2}
+.sales-range-day.other{color:#a8b0bc}
+.sales-range-day.in-range{background:#f1f4f8}
+.sales-range-day.range-start,.sales-range-day.range-end{color:#fff;font-weight:900}
+.sales-range-day.range-start::after,.sales-range-day.range-end::after{content:"";position:absolute;left:50%;top:50%;width:38px;height:38px;transform:translate(-50%,-50%);border-radius:50%;background:#3478ef;z-index:1}
+.sales-range-day.today span::after{content:"";position:absolute;left:50%;bottom:-8px;width:4px;height:4px;border-radius:50%;background:#3478ef;transform:translateX(-50%)}
+.sales-range-day.range-start.today span::after,.sales-range-day.range-end.today span::after{background:#fff}
+.sales-range-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 24px 20px;border-top:1px solid #eef1f5}
+.sales-range-selected{font-size:12px;color:#687386;font-weight:750}
+.sales-range-actions{display:flex;gap:8px}
+.sales-range-actions button{height:38px;border-radius:9px;padding:0 15px;font-size:12px;font-weight:850;cursor:pointer}
+.sales-range-cancel{border:1px solid var(--line);background:#f3f5f8;color:#505865}
+.sales-range-confirm{border:1px solid var(--primary);background:var(--primary);color:#fff}
+.sales-range-confirm:disabled{opacity:.42;cursor:default}
+@media(max-width:760px){.sales-range-calendars{grid-template-columns:1fr;gap:14px;padding:18px}.sales-range-modal{max-height:92vh;overflow:auto}.sales-range-month-title{font-size:18px}.sales-range-foot{align-items:flex-start;flex-direction:column}.sales-range-actions{width:100%;justify-content:flex-end}}
 .sales-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}
 .sales-two{grid-template-columns:minmax(0,1.3fr) minmax(350px,.7fr);margin-bottom:14px}
 .sales-month-chart{height:220px;display:flex;align-items:flex-end;gap:10px;padding:8px 4px 0}
@@ -400,6 +433,28 @@ body.frameby-auth-ready{overflow:auto}
 #researchPrimaryTab{order:6!important}
 </style>
 
+<style id="vat-dashboard-style">
+#vatPrimaryTab{order:7!important;flex:0 0 auto!important}
+#vatPrimaryTab[hidden],#vatPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+.vat-host{padding-top:0}
+.vat-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}
+.vat-head h1{font-size:26px;margin:0}.vat-head p{margin:6px 0 0;color:var(--muted)}
+.vat-head-actions{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}
+.vat-data-state{display:none;margin:0 0 14px;padding:12px 14px;border:1px solid #dce5f5;background:#f8faff;border-radius:10px;color:#536177;font-size:12px;font-weight:700}
+.vat-data-state.loading{display:block}.vat-data-state.error{display:block;border-color:#f0b7b7;background:#fff4f4;color:#a12828}
+.vat-kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.vat-kpis .vat-total{background:linear-gradient(135deg,#17233f,#2757d7);color:#fff;border-color:#20345e}.vat-kpis .vat-total .label,.vat-kpis .vat-total .sub{color:#d8e2fa}
+.vat-tax-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vat-tax-month{border:1px solid var(--line);border-radius:10px;background:#fafbfd;padding:14px}.vat-tax-month .month{font-size:13px;font-weight:900;margin-bottom:10px}.vat-tax-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12px}.vat-tax-line span{color:var(--muted)}.vat-tax-line strong{font-variant-numeric:tabular-nums}.vat-tax-line.total{margin-top:5px;padding-top:10px;border-top:1px solid var(--line)}
+.vat-section{margin-top:22px}.vat-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}.vat-section-head h2{font-size:18px;margin:0}.vat-section-head .note{white-space:nowrap}
+.vat-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.vat-detail-grid .vat-section{margin-top:22px;min-width:0}
+.vat-detail-grid .table-wrap{max-width:100%}
+@media(max-width:1279px){.vat-detail-grid{grid-template-columns:1fr}}
+.vat-filter-box{background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:10px}.vat-filter-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line)}.vat-filter-row:last-child{border-bottom:0}.vat-filter-label{width:64px;flex:0 0 64px;font-size:11px;color:var(--muted);font-weight:850}.vat-chips{display:flex;gap:6px;flex-wrap:wrap}.vat-chip{border:1px solid var(--line);background:#fff;color:#59657a;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer}.vat-chip:hover{background:#f6f8fc;color:var(--primary)}.vat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.vat-table-card{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}.vat-table-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#fafbfc;border-bottom:1px solid var(--line)}.vat-table-head strong{font-size:13px}.vat-table-head span{font-size:11px;color:var(--muted)}.vat-table{min-width:820px}.vat-table td,.vat-table th{font-size:12px}.vat-table .vat-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#eef3ff;color:#2757d7;font-size:10px;font-weight:850;white-space:nowrap}.vat-purchase .vat-badge{background:#edf7f0;color:#4b7659}.vat-blocked .vat-badge{background:#fff0f0;color:#b04444}.vat-empty{padding:28px!important;text-align:center!important;color:var(--muted)}.vat-divider{height:1px;background:var(--line);margin:28px 0}.vat-negative{color:#b42332}.vat-positive{color:#172033}
+@media(max-width:1050px){.vat-kpis{grid-template-columns:repeat(2,1fr)}.vat-tax-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.vat-head{align-items:flex-start;flex-direction:column}.vat-kpis{grid-template-columns:1fr 1fr}.vat-filter-row{align-items:flex-start;flex-direction:column}.vat-filter-label{width:auto;flex-basis:auto}}
+</style>
+
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -426,6 +481,7 @@ body.frameby-auth-ready{overflow:auto}
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
         <button type="button" class="finance-primary-btn" id="leavePrimaryTab" data-module="leave" role="tab" aria-selected="false">연차관리</button>
         <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
+        <button type="button" class="finance-primary-btn" id="vatPrimaryTab" data-module="vat" role="tab" aria-selected="false" hidden>부가세신고자료</button>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
         <div class="module-tabs" id="cashModuleTabs" aria-label="자금수지 세부 메뉴">
@@ -562,6 +618,7 @@ body.frameby-auth-ready{overflow:auto}
           <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
         </select>
       </div>
+      <div class="field"><label>기간별 조회</label><button type="button" class="sales-range-btn" id="salesRangeBtn">기간 선택</button></div>
       <button type="button" class="excel-btn" id="salesRefreshBtn">↻ 새로고침</button>
     </div>
   </div>
@@ -657,6 +714,80 @@ body.frameby-auth-ready{overflow:auto}
       </div>
     </div>
   </div>
+
+  <div class="sales-range-backdrop" id="salesRangeBackdrop">
+    <div class="sales-range-modal" role="dialog" aria-modal="true" aria-label="매출현황 기간 선택">
+      <div class="sales-range-calendars" id="salesRangeCalendars"></div>
+      <div class="sales-range-foot">
+        <div class="sales-range-selected" id="salesRangeSelected">시작일과 종료일을 선택하세요.</div>
+        <div class="sales-range-actions">
+          <button type="button" class="sales-range-cancel" id="salesRangeCancel">닫기</button>
+          <button type="button" class="sales-range-confirm" id="salesRangeConfirm" disabled>확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page vat-host" id="vatHost">
+  <div class="vat-head">
+    <div>
+      <h1>부가세 신고자료</h1>
+      <p>신고기간별 납부세액과 과세 매출·매입, 불공제 자료를 조회합니다.</p>
+    </div>
+    <div class="vat-head-actions">
+      <div class="field"><label>신고기간</label><select id="vatPeriodSelect"></select></div>
+      <button type="button" class="excel-btn" id="vatRefreshBtn">↻ 새로고침</button>
+    </div>
+  </div>
+
+  <div id="vatDataState" class="vat-data-state loading">부가세 신고자료를 불러오는 중...</div>
+
+  <div class="grid vat-kpis" id="vatKpiGrid"></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="section-title"><h2>월별 매출 · 매입 세액</h2><span class="note">매출세액 · 매입세액 · 납부세액</span></div>
+    <div class="vat-tax-grid" id="vatTaxSummary"></div>
+  </div>
+
+  <div class="vat-detail-grid">
+  <section class="vat-section vat-sales">
+    <div class="vat-section-head"><h2>과세매출 상세</h2><span class="note">자료구분과 월을 선택하면 해당 내역만 표시합니다.</span></div>
+    <div class="vat-filter-box">
+      <div class="vat-filter-row"><div class="vat-filter-label">자료구분</div><div class="vat-chips" id="vatSalesCategory"></div></div>
+      <div class="vat-filter-row"><div class="vat-filter-label">조회월</div><div class="vat-chips" id="vatSalesMonth"></div></div>
+    </div>
+    <div class="vat-table-card">
+      <div class="vat-table-head"><strong>과세매출 내역</strong><span id="vatSalesCaption"></span></div>
+      <div class="table-wrap" style="border:0;border-radius:0"><table class="table vat-table" id="vatSalesTable"></table></div>
+    </div>
+  </section>
+
+  <section class="vat-section vat-purchase">
+    <div class="vat-section-head"><h2>과세매입 상세</h2><span class="note">고정자산 매입을 포함합니다.</span></div>
+    <div class="vat-filter-box">
+      <div class="vat-filter-row"><div class="vat-filter-label">자료구분</div><div class="vat-chips" id="vatPurchaseCategory"></div></div>
+      <div class="vat-filter-row"><div class="vat-filter-label">조회월</div><div class="vat-chips" id="vatPurchaseMonth"></div></div>
+    </div>
+    <div class="vat-table-card">
+      <div class="vat-table-head"><strong>과세매입 내역</strong><span id="vatPurchaseCaption"></span></div>
+      <div class="table-wrap" style="border:0;border-radius:0"><table class="table vat-table" id="vatPurchaseTable"></table></div>
+    </div>
+  </section>
+  </div>
+
+  <div class="vat-divider"></div>
+
+  <section class="vat-section vat-blocked">
+    <div class="vat-section-head"><h2>불공제 자료 상세</h2><span class="note">신용카드 불공제 매입내역</span></div>
+    <div class="vat-filter-box" id="vatBlockedFilterBox">
+      <div class="vat-filter-row"><div class="vat-filter-label">카드</div><div class="vat-chips" id="vatBlockedCard"></div></div>
+    </div>
+    <div class="vat-table-card">
+      <div class="vat-table-head"><strong>불공제 매입내역</strong><span id="vatBlockedCaption"></span></div>
+      <div class="table-wrap" style="border:0;border-radius:0"><table class="table vat-table" id="vatBlockedTable"></table></div>
+    </div>
+  </section>
 </section>
 
 <section class="page active card-page-direct" id="dashboard">
@@ -1964,6 +2095,7 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
     throw e;
   }
 }
+
 function githubIsResearchOrigin(origin){
   try{
     const host=new URL(origin).hostname;
@@ -2003,16 +2135,9 @@ async function githubCheckResearchAccess(){
   const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
   if(!email) return false;
 
-  // 연구개발 메뉴는 Google Docs에 실제로 공유된 이메일 목록과 로그인 계정을 직접 대조합니다.
-  // 단순히 Drive API에서 파일이 열리는지 여부만으로는 메뉴를 표시하지 않습니다.
-  const sharedEmails=await githubGetResearchSharedEmails();
-  const allowed=sharedEmails.includes(email);
-  if(!allowed){
-    RESEARCH_COMMENT_CAPABILITY=false;
-    return false;
-  }
-
-  // 메뉴 접근이 확인된 뒤 댓글 작성 가능 여부만 별도로 조회합니다.
+  // 연구개발 메뉴 권한은 로그인한 Google 계정이 원본 Google Docs를
+  // 실제로 열 수 있는지를 Drive API로 직접 확인합니다.
+  // Apps Script의 share-list 응답 실패 때문에 메뉴가 사라지지 않도록 합니다.
   try{
     const url=
       `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
@@ -2021,22 +2146,42 @@ async function githubCheckResearchAccess(){
       method:'GET',
       headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
     });
+
     if(response.status===401){
       githubTokenCacheClear();
       GITHUB_ACCESS_TOKEN=null;
       throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
     }
+
     if(response.ok){
       const data=await response.json();
       RESEARCH_COMMENT_CAPABILITY=!!(data?.capabilities?.canComment||data?.capabilities?.canEdit);
-    }else{
+      RESEARCH_ACCESS_ERROR='';
+      return true;
+    }
+
+    // 403/404면 현재 로그인 계정에 원본 Google Docs 접근권한이 없는 것으로 처리합니다.
+    if(response.status===403||response.status===404){
       RESEARCH_COMMENT_CAPABILITY=false;
+      RESEARCH_ACCESS_ERROR='';
+      return false;
     }
   }catch(e){
     if(e?.status===401) throw e;
-    RESEARCH_COMMENT_CAPABILITY=false;
+    // Drive API 일시 오류일 때만 기존 share-list 확인을 보조수단으로 사용합니다.
   }
-  return true;
+
+  try{
+    const sharedEmails=await githubGetResearchSharedEmails();
+    const allowed=sharedEmails.includes(email);
+    RESEARCH_COMMENT_CAPABILITY=false;
+    RESEARCH_ACCESS_ERROR='';
+    return allowed;
+  }catch(e){
+    RESEARCH_COMMENT_CAPABILITY=false;
+    RESEARCH_ACCESS_ERROR=(e&&e.message)||'연구개발 권한 확인 오류';
+    return false;
+  }
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -3401,6 +3546,197 @@ function githubSilentLogin(){if(!GITHUB_TOKEN_CLIENT){githubShowGate();return}co
 function githubLoginClick(){githubAuthError('');if(!GITHUB_TOKEN_CLIENT){githubAuthError('Google 로그인 준비 중입니다. 잠시 후 다시 시도해 주세요.');return}const btn=document.getElementById('githubLoginBtn');const force=btn?.dataset.forceAccount==='1';if(btn){btn.disabled=true;btn.textContent='로그인 중...';btn.dataset.forceAccount=''}GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:force?'select_account':''})}
 function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const iv=setInterval(()=>{if(githubInitTokenClient()){clearInterval(iv);cb()}},200)}
 
+/* ===== 부가세 신고자료 =====
+   [회계]종합보고서 스프레드시트의 실제 공유권한을 기존 모듈과 동일하게 확인합니다.
+   권한이 없으면 메뉴를 숨기고 데이터 요청도 하지 않습니다. */
+const VAT_SPREADSHEET_ID='1F-_AVGKSvXckyRpqSLUuXqNW6ZU8PsNvRshc71PfqCs';
+const VAT_CONFIG={
+  sheetPattern:/^(\d{2})년\s*([12])기\s*(예정|확정)\s*부가세$/,
+  cardUsers:Object.freeze({'3728':'대표자','5301':'대표자2','0501':'장경옥','3403':'전태준'})
+};
+let VAT_PERIODS=[];
+let VAT_REPORT_CACHE=new Map();
+let VAT_INITIALIZED=false;
+let VAT_LOADING=null;
+let VAT_STATE={salesCategory:'전체',salesMonth:'전체기간',purchaseCategory:'전체',purchaseMonth:'전체기간',blockedCard:'전체'};
+
+function vatEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function vatNum(v){
+  if(v===null||v===undefined)return null;
+  let s=String(v).trim();if(!s||s==='-')return null;
+  let neg=false;if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1)}
+  s=s.replace(/[,\s원]/g,'');if(!s||s==='-')return null;
+  const n=Number(s);if(!Number.isFinite(n))return null;return neg?-n:n;
+}
+function vatFmt(v,suffix='원'){return v===null||v===undefined?'-':Number(v).toLocaleString('ko-KR')+suffix}
+function vatClean(v){return String(v==null?'':v).trim()}
+function vatPaymentClass(v){return Number(v)<0?'vat-negative':'vat-positive'}
+function vatSetState(message,type='loading'){
+  const el=document.getElementById('vatDataState');if(!el)return;
+  if(!message){el.className='vat-data-state';el.textContent='';return}
+  el.className='vat-data-state '+type;el.textContent=message;
+}
+function vatSheetLabel(sheetName){
+  const m=String(sheetName||'').trim().match(VAT_CONFIG.sheetPattern);if(!m)return sheetName;
+  return `${2000+Number(m[1])}년 ${Number(m[2])}기 ${m[3]}`;
+}
+function vatQuoteSheet(name){return `'${String(name).replace(/'/g,"''")}'`}
+async function vatFetchPeriods(force=false){
+  if(VAT_PERIODS.length&&!force)return VAT_PERIODS;
+  const id=VAT_SPREADSHEET_ID;
+  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?fields=sheets.properties(title,index,hidden,sheetId)`;
+  const meta=await githubFetchJson(u);
+  VAT_PERIODS=(meta.sheets||[]).map(s=>{
+    const name=vatClean(s?.properties?.title),m=name.match(VAT_CONFIG.sheetPattern);if(!m)return null;
+    const year=2000+Number(m[1]),half=Number(m[2]),status=m[3];
+    return{sheetName:name,label:`${year}년 ${half}기 ${status}`,year,half,status,sortKey:year*100+half*10+(status==='확정'?1:0)};
+  }).filter(Boolean).sort((a,b)=>b.sortKey-a.sortKey);
+  return VAT_PERIODS;
+}
+async function vatFetchSheetValues(sheetName,force=false){
+  if(!force&&VAT_REPORT_CACHE.has(sheetName))return VAT_REPORT_CACHE.get(sheetName);
+  const range=`${vatQuoteSheet(sheetName)}!A:AZ`;
+  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(VAT_SPREADSHEET_ID)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;
+  const data=await githubFetchJson(u),values=data.values||[];
+  const report=vatParseReport(sheetName,values);VAT_REPORT_CACHE.set(sheetName,report);return report;
+}
+function vatFindCell(values,label,start=0,end=values.length){
+  for(let r=Math.max(0,start);r<Math.min(values.length,end);r++)for(let c=0;c<(values[r]||[]).length;c++)if(vatClean(values[r][c])===label)return{r,c};
+  return null;
+}
+function vatFindRow(values,label,start=0,end=values.length){const hit=vatFindCell(values,label,start,end);return hit?hit.r:-1}
+function vatDetectMonths(values,headerRow){
+  const row=values[headerRow]||[],sub=values[headerRow+1]||[],out=[];
+  for(let c=0;c<row.length;c++){
+    const m=vatClean(row[c]).match(/^0?(\d{1,2})월$/);if(!m)continue;
+    let countCol=-1,supplyCol=-1,taxCol=-1;
+    for(let x=c;x<=Math.min(c+2,sub.length-1);x++){
+      const h=vatClean(sub[x]);if(h==='건수')countCol=x;if(h==='공급가액')supplyCol=x;if(h==='세액')taxCol=x;
+    }
+    if(countCol>=0&&supplyCol>=0&&taxCol>=0)out.push({month:Number(m[1]),label:`${Number(m[1])}월`,countCol,supplyCol,taxCol});
+  }
+  return out;
+}
+function vatFirstNumberAfter(row,startCol){for(let c=startCol+1;c<(row||[]).length;c++){const n=vatNum(row[c]);if(n!==null)return n}return null}
+function vatCardLabel(raw){
+  const s=vatClean(raw).replace('_','');const m=s.match(/(\d{4})\)?$/);if(!m)return s;
+  const last4=m[1],user=VAT_CONFIG.cardUsers[last4]||'';return `롯데카드(${last4})${user?' '+user:''}`;
+}
+function vatIsCard(raw){return /롯데카드[_\s]?\(?\d{4}\)?/.test(vatClean(raw))}
+function vatRowHasMonthData(row,m){return [m.countCol,m.supplyCol,m.taxCol].some(c=>vatNum(row?.[c])!==null)}
+function vatParseSales(values,startRow,endRow,months){
+  const out=[],categories=new Set(['세금계산서','현금영수증','신용카드','기타']);let category='';
+  for(let r=startRow+2;r<endRow;r++){
+    const row=values[r]||[],label=vatClean(row[1]),counterparty=vatClean(row[2]);
+    if(label==='매출 계')continue;if(categories.has(label))category=label;if(!category||!counterparty)continue;
+    months.forEach(m=>{if(!vatRowHasMonthData(row,m))return;out.push({category,counterparty,month:m.month,monthLabel:m.label,count:vatNum(row[m.countCol])||0,supply:vatNum(row[m.supplyCol])||0,tax:vatNum(row[m.taxCol])||0})});
+  }
+  return out;
+}
+function vatParsePurchases(values,startRow,months){
+  const out=[];let section='',card='';
+  for(let r=startRow+2;r<values.length;r++){
+    const row=values[r]||[],account=vatClean(row[1]),counterparty=vatClean(row[2]);
+    if(/^과세\s*매입\s*계/.test(account)){section='세금계산서';card='';continue}
+    if(/^과세\s*불공매입\s*계/.test(account)){section='skip';card='';continue}
+    if(/^고[정장]자산\s*매입\s*계/.test(account)){section='고정자산';card='';continue}
+    if(/^고[정장]자산\s*불공매입\s*계/.test(account)){section='skip';card='';continue}
+    if(/^신용카드\s*매입\s*계/.test(account)){section='신용카드';card='';continue}
+    if(/^현금영수증\s*매입\s*계/.test(account)){section='현금영수증';card='';continue}
+    if(section==='신용카드'&&vatIsCard(account)&&!counterparty){card=vatCardLabel(account);continue}
+    if(!section||section==='skip'||!counterparty)continue;
+    months.forEach(m=>{if(!vatRowHasMonthData(row,m))return;const source=section==='신용카드'?(card||'신용카드'):section==='고정자산'?'세금계산서':section;out.push({category:section,source,account,counterparty,month:m.month,monthLabel:m.label,count:vatNum(row[m.countCol])||0,supply:vatNum(row[m.supplyCol])||0,tax:vatNum(row[m.taxCol])||0})});
+  }
+  return out;
+}
+function vatFindHeaderCol(row,label,start,end){for(let c=Math.max(0,start);c<=Math.min((row||[]).length-1,end);c++)if(vatClean(row[c])===label)return c;return-1}
+function vatParseBlocked(values){
+  const title=vatFindCell(values,'신용카드 불공제 매입내역',0,Math.min(values.length,120));if(!title)return[];
+  const hrow=title.r+1,hdr=values[hrow]||{},from=title.c,to=title.c+10;
+  const cols={account:vatFindHeaderCol(hdr,'계정과목',from,to),merchant:vatFindHeaderCol(hdr,'가맹점명',from,to),count:vatFindHeaderCol(hdr,'건수',from,to),supply:vatFindHeaderCol(hdr,'공급가액',from,to),tax:vatFindHeaderCol(hdr,'세액',from,to),total:vatFindHeaderCol(hdr,'합계',from,to)};
+  if(Object.values(cols).some(v=>v<0))return[];
+  const out=[];let card='';
+  for(let r=hrow+1;r<values.length;r++){
+    const row=values[r]||[],account=vatClean(row[cols.account]),merchant=vatClean(row[cols.merchant]);
+    if(vatIsCard(account)&&!merchant){card=vatCardLabel(account);continue}
+    if(!merchant)continue;
+    out.push({card:card||'-',account,merchant,count:vatNum(row[cols.count])||0,supply:vatNum(row[cols.supply])||0,tax:vatNum(row[cols.tax])||0,total:vatNum(row[cols.total])||0});
+  }
+  return out;
+}
+function vatParseReport(sheetName,values){
+  const salesHeader=vatFindRow(values,'매출 구분',0,Math.min(values.length,120)),purchaseHeader=vatFindRow(values,'매입 구분',0,values.length);
+  if(salesHeader<0||purchaseHeader<0)throw new Error('매출·매입 구간을 찾지 못했습니다. 부가세 시트 형식을 확인해 주세요.');
+  const months=vatDetectMonths(values,salesHeader);if(!months.length)throw new Error('월별 건수·공급가액·세액 열을 찾지 못했습니다.');
+  const paymentHit=vatFindCell(values,'부가세 납부세액',0,salesHeader+1),totalHit=vatFindCell(values,'총 납부세액',0,salesHeader+1),salesTotalRow=vatFindRow(values,'매출 계',salesHeader,purchaseHeader);
+  const monthly=months.map(m=>{
+    const payment=paymentHit?vatNum(values[paymentHit.r]?.[m.countCol]):null;
+    const salesTax=salesTotalRow>=0?vatNum(values[salesTotalRow]?.[m.taxCol]):null;
+    const purchaseTax=(salesTax!==null&&payment!==null)?salesTax-payment:null;
+    return{month:m.month,label:m.label,payment,salesTax,purchaseTax};
+  });
+  let totalPayment=totalHit?vatFirstNumberAfter(values[totalHit.r],totalHit.c):null;
+  if(totalPayment===null){const nums=monthly.map(x=>x.payment).filter(v=>v!==null);if(nums.length)totalPayment=nums.reduce((a,b)=>a+b,0)}
+  return{sheetName,periodLabel:vatSheetLabel(sheetName),totalPayment,months:months.map(m=>({month:m.month,label:m.label})),monthly,sales:vatParseSales(values,salesHeader,purchaseHeader,months),purchases:vatParsePurchases(values,purchaseHeader,months),blocked:vatParseBlocked(values)};
+}
+function vatAggregate(rows,keys,sums){
+  const map=new Map();rows.forEach(row=>{const key=keys.map(k=>row[k]||'').join('¦');if(!map.has(key)){const x={};keys.forEach(k=>x[k]=row[k]||'');sums.forEach(k=>x[k]=0);map.set(key,x)}const x=map.get(key);sums.forEach(k=>x[k]+=Number(row[k]||0))});return[...map.values()];
+}
+function vatBuildChips(id,items,selected,onClick){
+  const box=document.getElementById(id);if(!box)return;box.innerHTML='';items.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='vat-chip'+(item===selected?' active':'');b.textContent=item;b.onclick=()=>{[...box.children].forEach(x=>x.classList.remove('active'));b.classList.add('active');onClick(item)};box.appendChild(b)});
+}
+function vatRenderKpis(report){
+  const cards=[{label:'총 납부세액',value:report.totalPayment,sub:'신고기간 합계',total:true},...(report.monthly||[]).map(m=>({label:`${m.label} 납부세액`,value:m.payment,sub:m.payment===null?'자료 없음':m.payment<0?'환급 방향':'납부'}))];
+  document.getElementById('vatKpiGrid').innerHTML=cards.map(c=>`<div class="card kpi ${c.total?'vat-total':''}"><div class="label">${vatEsc(c.label)}</div><div class="value ${c.total?'':vatPaymentClass(c.value)}">${vatFmt(c.value)}</div><div class="sub">${vatEsc(c.sub)}</div></div>`).join('');
+}
+function vatRenderTaxSummary(report){document.getElementById('vatTaxSummary').innerHTML=(report.monthly||[]).map(m=>`<div class="vat-tax-month"><div class="month">${vatEsc(m.label)}</div><div class="vat-tax-line"><span>매출세액</span><strong>${vatFmt(m.salesTax)}</strong></div><div class="vat-tax-line"><span>매입세액</span><strong>${vatFmt(m.purchaseTax)}</strong></div><div class="vat-tax-line total"><span>납부세액</span><strong class="${vatPaymentClass(m.payment)}">${vatFmt(m.payment)}</strong></div></div>`).join('')}
+function vatRenderFilters(report){
+  vatBuildChips('vatSalesCategory',['전체','세금계산서','현금영수증','신용카드','기타'],VAT_STATE.salesCategory,v=>{VAT_STATE.salesCategory=v;vatRenderSales(report)});
+  vatBuildChips('vatPurchaseCategory',['전체','세금계산서','현금영수증','신용카드','기타','고정자산'],VAT_STATE.purchaseCategory,v=>{VAT_STATE.purchaseCategory=v;vatRenderPurchases(report)});
+  const months=['전체기간',...(report.months||[]).map(x=>x.label)];
+  vatBuildChips('vatSalesMonth',months,VAT_STATE.salesMonth,v=>{VAT_STATE.salesMonth=v;vatRenderSales(report)});
+  vatBuildChips('vatPurchaseMonth',months,VAT_STATE.purchaseMonth,v=>{VAT_STATE.purchaseMonth=v;vatRenderPurchases(report)});
+  const cards=['전체',...[...new Set((report.blocked||[]).map(x=>x.card).filter(x=>x&&x!=='-'))]];
+  vatBuildChips('vatBlockedCard',cards,VAT_STATE.blockedCard,v=>{VAT_STATE.blockedCard=v;vatRenderBlocked(report)});
+  document.getElementById('vatBlockedFilterBox')?.classList.toggle('hidden',cards.length<=1);
+}
+function vatRenderSales(report){
+  let rows=(report.sales||[]).filter(r=>VAT_STATE.salesCategory==='전체'||r.category===VAT_STATE.salesCategory);
+  if(VAT_STATE.salesMonth!=='전체기간'){const m=parseInt(VAT_STATE.salesMonth,10);rows=rows.filter(r=>r.month===m)}else rows=vatAggregate(rows,['category','counterparty'],['count','supply','tax']);
+  const taxTotal=rows.reduce((sum,r)=>sum+Number(r.tax||0),0);
+  document.getElementById('vatSalesCaption').textContent=`세액 합계 ${vatFmt(taxTotal)}`;
+  document.getElementById('vatSalesTable').innerHTML=`<thead><tr><th>구분</th><th>거래처명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td><span class="vat-badge">${vatEsc(r.category)}</span></td><td>${vatEsc(r.counterparty)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td></tr>`).join(''):`<tr><td colspan="5" class="vat-empty">해당 조건의 자료가 없습니다.</td></tr>`}</tbody>`;
+}
+function vatRenderPurchases(report){
+  let rows=(report.purchases||[]).filter(r=>VAT_STATE.purchaseCategory==='전체'||r.category===VAT_STATE.purchaseCategory);
+  if(VAT_STATE.purchaseMonth!=='전체기간'){const m=parseInt(VAT_STATE.purchaseMonth,10);rows=rows.filter(r=>r.month===m)}else rows=vatAggregate(rows,['category','source','account','counterparty'],['count','supply','tax']);
+  const taxTotal=rows.reduce((sum,r)=>sum+Number(r.tax||0),0);
+  document.getElementById('vatPurchaseCaption').textContent=`세액 합계 ${vatFmt(taxTotal)}`;
+  document.getElementById('vatPurchaseTable').innerHTML=`<thead><tr><th>구분</th><th>카드/증빙</th><th>계정과목</th><th>거래처명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td><span class="vat-badge">${vatEsc(r.category)}</span></td><td>${vatEsc(r.source||'-')}</td><td>${vatEsc(r.account||'-')}</td><td>${vatEsc(r.counterparty)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">해당 조건의 자료가 없습니다.</td></tr>`}</tbody>`;
+}
+function vatRenderBlocked(report){
+  let rows=report.blocked||[];if(VAT_STATE.blockedCard!=='전체')rows=rows.filter(r=>r.card===VAT_STATE.blockedCard);
+  document.getElementById('vatBlockedCaption').textContent=`${VAT_STATE.blockedCard} · ${rows.length.toLocaleString('ko-KR')}건`;
+  document.getElementById('vatBlockedTable').innerHTML=`<thead><tr><th>카드</th><th>계정과목</th><th>가맹점명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th><th class="num">합계</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${vatEsc(r.card)}</td><td>${vatEsc(r.account)}</td><td>${vatEsc(r.merchant)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td><td class="num">${vatFmt(r.total,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">불공제 상세자료가 없습니다.</td></tr>`}</tbody>`;
+}
+function vatRenderReport(report){vatRenderKpis(report);vatRenderTaxSummary(report);vatRenderFilters(report);vatRenderSales(report);vatRenderPurchases(report);vatRenderBlocked(report);vatSetState('')}
+async function vatLoadPeriod(sheetName,force=false){
+  vatSetState('부가세 신고자료를 불러오는 중...','loading');
+  try{if(force)VAT_REPORT_CACHE.delete(sheetName);const report=await vatFetchSheetValues(sheetName,force);VAT_STATE={salesCategory:'전체',salesMonth:'전체기간',purchaseCategory:'전체',purchaseMonth:'전체기간',blockedCard:'전체'};vatRenderReport(report);return report}catch(e){vatSetState(e?.message||'부가세 신고자료를 불러오지 못했습니다.','error');throw e}
+}
+async function vatInitDashboard(force=false){
+  if(VAT_LOADING)return VAT_LOADING;
+  VAT_LOADING=(async()=>{
+    if(!githubHasModuleAccess('vat'))return;
+    const periods=await vatFetchPeriods(force);if(!periods.length)throw new Error('부가세 신고 시트를 찾을 수 없습니다.');
+    const select=document.getElementById('vatPeriodSelect');const previous=select?.value||'';
+    if(select){select.innerHTML=periods.map(p=>`<option value="${vatEsc(p.sheetName)}">${vatEsc(p.label)}</option>`).join('');select.value=periods.some(p=>p.sheetName===previous)?previous:periods[0].sheetName}
+    const target=select?.value||periods[0].sheetName;await vatLoadPeriod(target,force);
+    if(!VAT_INITIALIZED){VAT_INITIALIZED=true;select?.addEventListener('change',()=>vatLoadPeriod(select.value,false).catch(()=>{}));document.getElementById('vatRefreshBtn')?.addEventListener('click',async()=>{VAT_PERIODS=[];const ps=await vatFetchPeriods(true);const current=select?.value;select.innerHTML=ps.map(p=>`<option value="${vatEsc(p.sheetName)}">${vatEsc(p.label)}</option>`).join('');select.value=ps.some(p=>p.sheetName===current)?current:ps[0]?.sheetName||'';if(select.value)await vatLoadPeriod(select.value,true)})}
+  })().catch(e=>{vatSetState(e?.message||'부가세 신고자료를 불러오지 못했습니다.','error');throw e}).finally(()=>{VAT_LOADING=null});
+  return VAT_LOADING;
+}
+
 /* ===== 매출현황 화면 =====
    기존 5개 관리 모듈의 권한 배열/공유권한 판정은 변경하지 않습니다.
    매출현황은 @frame-by.com 로그인 사용자에게 열고, 전용 Apps Script 웹앱이 배포자 권한으로
@@ -3416,6 +3752,70 @@ let SALES_SELECTED=[];
 let SALES_INITIALIZED=false;
 let SALES_DATA_LOADED=false;
 let SALES_DATA_LOADING=null;
+let SALES_RANGE_START=null;
+let SALES_RANGE_END=null;
+let SALES_RANGE_VIEW=null;
+
+function salesDateKey(d){
+  if(!(d instanceof Date)||Number.isNaN(d.getTime()))return'';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function salesDateLabel(d){return d?`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`:''}
+function salesDateOnly(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function salesSameDate(a,b){return !!(a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate())}
+function salesRangeOpen(){
+  const y=Number(document.getElementById('salesYear')?.value||2026),m=Math.max(0,salesMonthNo()-1);
+  SALES_RANGE_VIEW=SALES_RANGE_START?new Date(SALES_RANGE_START.getFullYear(),SALES_RANGE_START.getMonth(),1):new Date(y,m,1);
+  document.getElementById('salesRangeBackdrop')?.classList.add('open');
+  salesRangeRender();
+}
+function salesRangeClose(){document.getElementById('salesRangeBackdrop')?.classList.remove('open')}
+function salesRangeShift(delta){if(!SALES_RANGE_VIEW)return;SALES_RANGE_VIEW=new Date(SALES_RANGE_VIEW.getFullYear(),SALES_RANGE_VIEW.getMonth()+delta,1);salesRangeRender()}
+function salesRangePick(date){
+  const d=salesDateOnly(date);
+  if(!SALES_RANGE_START || (SALES_RANGE_START&&SALES_RANGE_END)){
+    SALES_RANGE_START=d;SALES_RANGE_END=null;
+  }else{
+    if(d<SALES_RANGE_START){SALES_RANGE_END=SALES_RANGE_START;SALES_RANGE_START=d}else SALES_RANGE_END=d;
+  }
+  salesRangeRender();
+}
+function salesRangeMonthHtml(base,nav){
+  const year=base.getFullYear(),month=base.getMonth(),first=new Date(year,month,1),last=new Date(year,month+1,0),startDay=first.getDay();
+  const gridStart=new Date(year,month,1-startDay),today=salesDateOnly(new Date()),cells=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+i);
+    const other=d.getMonth()!==month,inRange=SALES_RANGE_START&&SALES_RANGE_END&&d>=SALES_RANGE_START&&d<=SALES_RANGE_END;
+    const cls=['sales-range-day',other?'other':'',inRange?'in-range':'',salesSameDate(d,SALES_RANGE_START)?'range-start':'',salesSameDate(d,SALES_RANGE_END)?'range-end':'',salesSameDate(d,today)?'today':''].filter(Boolean).join(' ');
+    cells.push(`<button type="button" class="${cls}" data-sales-range-date="${salesDateKey(d)}"><span>${d.getDate()}</span></button>`);
+  }
+  return `<div class="sales-range-month">
+    <div class="sales-range-month-head">
+      <div class="sales-range-month-title">${year}년 ${month+1}월</div>
+      ${nav?`<div class="sales-range-nav"><button type="button" data-sales-range-nav="-1" aria-label="이전 달">‹</button><button type="button" data-sales-range-nav="1" aria-label="다음 달">›</button></div>`:''}
+    </div>
+    <div class="sales-range-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+    <div class="sales-range-days">${cells.join('')}</div>
+  </div>`;
+}
+function salesRangeRender(){
+  const box=document.getElementById('salesRangeCalendars');if(!box||!SALES_RANGE_VIEW)return;
+  const left=new Date(SALES_RANGE_VIEW.getFullYear(),SALES_RANGE_VIEW.getMonth(),1),right=new Date(left.getFullYear(),left.getMonth()+1,1);
+  box.innerHTML=salesRangeMonthHtml(left,false)+salesRangeMonthHtml(right,true);
+  box.querySelectorAll('[data-sales-range-date]').forEach(btn=>btn.addEventListener('click',()=>{
+    const [y,m,d]=btn.dataset.salesRangeDate.split('-').map(Number);salesRangePick(new Date(y,m-1,d));
+  }));
+  box.querySelectorAll('[data-sales-range-nav]').forEach(btn=>btn.addEventListener('click',()=>salesRangeShift(Number(btn.dataset.salesRangeNav)||0)));
+  const selected=document.getElementById('salesRangeSelected');
+  if(selected)selected.textContent=SALES_RANGE_START?(SALES_RANGE_END?`${salesDateLabel(SALES_RANGE_START)} ~ ${salesDateLabel(SALES_RANGE_END)}`:`시작일 ${salesDateLabel(SALES_RANGE_START)} · 종료일을 선택하세요.`):'시작일과 종료일을 선택하세요.';
+  const confirm=document.getElementById('salesRangeConfirm');if(confirm)confirm.disabled=!(SALES_RANGE_START&&SALES_RANGE_END);
+}
+function salesRangeConfirm(){
+  if(!(SALES_RANGE_START&&SALES_RANGE_END))return;
+  const btn=document.getElementById('salesRangeBtn');
+  if(btn){btn.textContent=`${String(SALES_RANGE_START.getMonth()+1).padStart(2,'0')}.${String(SALES_RANGE_START.getDate()).padStart(2,'0')} ~ ${String(SALES_RANGE_END.getMonth()+1).padStart(2,'0')}.${String(SALES_RANGE_END.getDate()).padStart(2,'0')}`;btn.classList.add('active')}
+  salesRangeClose();
+}
 
 function salesFmt(n){return Math.round(Number(n)||0).toLocaleString('ko-KR')}
 function salesNum(v){
@@ -3711,6 +4111,10 @@ async function salesInitDashboard(force=false){
     document.getElementById('salesOptionFilter')?.addEventListener('change',()=>{salesRefreshFilterOptions();salesRenderTable();salesRenderSuggestions()});
     ['salesColorFilter','salesPlatformFilter','salesZeroFilter'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>{salesRenderTable();salesRenderSuggestions()}));
     document.getElementById('salesMonth')?.addEventListener('change',()=>{salesRenderAll()});
+    document.getElementById('salesRangeBtn')?.addEventListener('click',salesRangeOpen);
+    document.getElementById('salesRangeCancel')?.addEventListener('click',salesRangeClose);
+    document.getElementById('salesRangeConfirm')?.addEventListener('click',salesRangeConfirm);
+    document.getElementById('salesRangeBackdrop')?.addEventListener('click',e=>{if(e.target===e.currentTarget)salesRangeClose()});
     document.getElementById('salesRefreshBtn')?.addEventListener('click',async()=>{try{await salesFetchData(true);salesRenderAll()}catch(e){}});
     document.getElementById('salesTop5ModalClose')?.addEventListener('click',()=>document.getElementById('salesTop5Modal')?.classList.remove('open'));
     document.getElementById('salesTop5Modal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')});
@@ -3762,6 +4166,60 @@ if(document.readyState==='loading'){
 }else{
   initIntegrated();
 }
+</script>
+
+
+<script id="vat-isolated-access">
+(function(){
+  function vatSetAccess(allowed){
+    window.FRAMEBY_MODULE_ACCESS=window.FRAMEBY_MODULE_ACCESS||{};
+    window.FRAMEBY_MODULE_ACCESS.vat=!!allowed;
+    const el=document.getElementById('vatPrimaryTab');
+    if(!el)return;
+    el.hidden=!allowed;
+    el.classList.toggle('frameby-no-access',!allowed);
+    el.setAttribute('aria-hidden',allowed?'false':'true');
+    el.tabIndex=allowed?0:-1;
+  }
+
+  const fixedShowModule=window.showModule;
+  window.showModule=function(module,page){
+    if(module!=='vat') return fixedShowModule(module,page);
+    if(!window.FRAMEBY_MODULE_ACCESS?.vat) return;
+    syncModuleHeader('vat','vatHost');
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='vatHost'));
+    vatInitDashboard().catch(e=>console.error(e));
+    try{history.replaceState(null,'','#vat')}catch(e){}
+  };
+
+  let checking=false;
+  async function checkVatAccess(){
+    if(checking||!GITHUB_ACCESS_TOKEN||!document.body?.classList.contains('frameby-auth-ready'))return;
+    checking=true;
+    try{
+      let allowed=false;
+      try{allowed=await githubCheckSpreadsheetAccess(VAT_SPREADSHEET_ID)}catch(e){allowed=false}
+      vatSetAccess(allowed);
+      if(allowed&&location.hash==='#vat')window.showModule('vat');
+    }finally{
+      checking=false;
+    }
+  }
+
+  function start(){
+    const body=document.body;
+    if(!body)return;
+    new MutationObserver(()=>checkVatAccess()).observe(body,{attributes:true,attributeFilter:['class']});
+    checkVatAccess();
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
+
+  window.addEventListener('hashchange',()=>{
+    if(location.hash==='#vat')checkVatAccess();
+  });
+})();
 </script>
 
 <textarea id="cashflowSource" style="display:none" aria-hidden="true"><!doctype html>
