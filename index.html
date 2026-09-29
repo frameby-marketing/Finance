@@ -3489,9 +3489,19 @@ async function githubAfterLogin(){
 
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
-    access.vat=await githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.vatSpreadsheetId);
+
+    // 기존 메뉴 권한은 고정본 로직대로 먼저 적용합니다.
+    // VAT 권한 확인 실패가 연구개발 등 기존 메뉴 표시를 막지 않도록 완전히 분리합니다.
     githubApplyModuleAccess(access);
-    vatApplyAccess(access.vat);
+
+    let vatAllowed=false;
+    try{
+      vatAllowed=await githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.vatSpreadsheetId);
+    }catch(e){
+      vatAllowed=false;
+    }
+    access.vat=vatAllowed;
+    vatApplyAccess(vatAllowed);
     const allowedModules=['cash','card','trip','leave','research'].filter(m=>access[m]);
 
     // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
