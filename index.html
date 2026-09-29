@@ -10884,6 +10884,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 </script>
+</body>
+</html></textarea>
 <script id="work-record-module">
 /* =========================================================
    인사관리 > 근무기록
@@ -10950,29 +10952,11 @@ async function wrReadPayroll(year,month){
   const sheet=`급여대장(${month}월)`;
   try{
     const rows=await ghValuesGet(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,'B4:T100');
-    if(rows.length<3)return[];
-    const top=(rows[0]||[]).map(v=>ghText(v).replace(/\s/g,''));
-    const sub=(rows[1]||[]).map(v=>ghText(v).replace(/\s/g,''));
-    const idx=(label,fallback)=>{
-      let i=sub.findIndex(v=>v===label);
-      if(i<0)i=top.findIndex(v=>v===label);
-      return i>=0?i:fallback;
-    };
-    const col={
-      totalWork:idx('총근무',2),actualWork:idx('실근무시간',3),basePay:idx('기본급',4),weeklyPay:idx('주휴',5),extraPay:idx('추가',6),grossPay:idx('계',7),
-      pension:idx('국민연금',8),health:idx('건강보험',9),employment:idx('고용보험',10),care:idx('장기요양',11),incomeTax:idx('근로소득세',12),localTax:idx('지방소득세',13),salaryDeduction:idx('급여공제',14),netPay:idx('실지급액',15)
-    };
     const out=[];
     for(let i=2;i<rows.length;i++){
       const r=rows[i]||[],no=ghText(r[0]),name=ghText(r[1]);
       if(!name)continue;if(no==='합계'||name==='합계')break;
-      out.push({
-        number:no,name,
-        totalWork:r[col.totalWork]||'',actualWork:r[col.actualWork]||'',
-        basePay:ghNum(r[col.basePay]),weeklyPay:ghNum(r[col.weeklyPay]),extraPay:ghNum(r[col.extraPay]),grossPay:ghNum(r[col.grossPay]),
-        pension:ghNum(r[col.pension]),health:ghNum(r[col.health]),employment:ghNum(r[col.employment]),care:ghNum(r[col.care]),
-        incomeTax:ghNum(r[col.incomeTax]),localTax:ghNum(r[col.localTax]),salaryDeduction:ghNum(r[col.salaryDeduction]),netPay:ghNum(r[col.netPay])
-      });
+      out.push({number:no,name,totalWork:r[2]||'',actualWork:r[3]||'',basePay:ghNum(r[4]),weeklyPay:ghNum(r[5]),extraPay:ghNum(r[6]),grossPay:ghNum(r[7]),pension:ghNum(r[8]),health:ghNum(r[9]),employment:ghNum(r[10]),care:ghNum(r[11]),incomeTax:ghNum(r[12]),localTax:ghNum(r[13]),salaryDeduction:ghNum(r[14]),netPay:ghNum(r[15])});
     }
     return out;
   }catch(e){return[]}
