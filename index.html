@@ -3565,7 +3565,7 @@ function vatDetectMonths(values,headerRow){
   for(let c=0;c<row.length;c++){
     const m=vatClean(row[c]).match(/^0?(\d{1,2})월$/);if(!m)continue;
     let countCol=-1,supplyCol=-1,taxCol=-1;
-    for(let x=c;x<=Math.min(c+4,sub.length-1);x++){
+    for(let x=c;x<=Math.min(c+2,sub.length-1);x++){
       const h=vatClean(sub[x]);if(h==='건수')countCol=x;if(h==='공급가액')supplyCol=x;if(h==='세액')taxCol=x;
     }
     if(countCol>=0&&supplyCol>=0&&taxCol>=0)out.push({month:Number(m[1]),label:`${Number(m[1])}월`,countCol,supplyCol,taxCol});
@@ -3600,7 +3600,7 @@ function vatParsePurchases(values,startRow,months){
     if(/^현금영수증\s*매입\s*계/.test(account)){section='현금영수증';card='';continue}
     if(section==='신용카드'&&vatIsCard(account)&&!counterparty){card=vatCardLabel(account);continue}
     if(!section||section==='skip'||!counterparty)continue;
-    months.forEach(m=>{if(!vatRowHasMonthData(row,m))return;out.push({category:section,source:section==='신용카드'?card:'',account,counterparty,month:m.month,monthLabel:m.label,count:vatNum(row[m.countCol])||0,supply:vatNum(row[m.supplyCol])||0,tax:vatNum(row[m.taxCol])||0})});
+    months.forEach(m=>{if(!vatRowHasMonthData(row,m))return;const source=section==='신용카드'?(card||'신용카드'):section==='고정자산'?'세금계산서':section;out.push({category:section,source,account,counterparty,month:m.month,monthLabel:m.label,count:vatNum(row[m.countCol])||0,supply:vatNum(row[m.supplyCol])||0,tax:vatNum(row[m.taxCol])||0})});
   }
   return out;
 }
