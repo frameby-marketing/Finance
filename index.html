@@ -2135,53 +2135,77 @@ async function githubCheckResearchAccess(){
   const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
   if(!email) return false;
 
-  // 연구개발 메뉴 권한은 로그인한 Google 계정이 원본 Google Docs를
-  // 실제로 열 수 있는지를 Drive API로 직접 확인합니다.
-  // Apps Script의 share-list 응답 실패 때문에 메뉴가 사라지지 않도록 합니다.
-  try{
-    const url=
-      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
-      `?fields=id,capabilities(canComment,canEdit)&supportsAllDrives=true`;
-    const response=await fetch(url,{
-      method:'GET',
-      headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
-    });
+  const base=INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
 
-    if(response.status===401){
-      githubTokenCacheClear();
-      GITHUB_ACCESS_TOKEN=null;
-      throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
-    }
+  // 1순위: 기존 연구개발 Apps Script의 브리지 인증 사용.
+  // Google OAuth 토큰을 URL에 노출하지 않고 postMessage로 전달합니다.
+  if(base&&GITHUB_ACCESS_TOKEN){
+    try{
+      const bridgeAllowed=await new Promise((resolve,reject)=>{
+        const frame=document.createElement('iframe');
+        frame.className='research-access-probe';
+        frame.setAttribute('aria-hidden','true');
+        let tokenSent=false;
 
-    if(response.ok){
-      const data=await response.json();
-      RESEARCH_COMMENT_CAPABILITY=!!(data?.capabilities?.canComment||data?.capabilities?.canEdit);
-      RESEARCH_ACCESS_ERROR='';
-      return true;
-    }
+        const cleanup=()=>{
+          window.removeEventListener('message',onMessage);
+          clearTimeout(timer);
+          try{frame.remove()}catch(e){}
+        };
 
-    // 403/404면 현재 로그인 계정에 원본 Google Docs 접근권한이 없는 것으로 처리합니다.
-    if(response.status===403||response.status===404){
-      RESEARCH_COMMENT_CAPABILITY=false;
-      RESEARCH_ACCESS_ERROR='';
-      return false;
+        const onMessage=event=>{
+          if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin)) return;
+          const msg=event.data||{};
+
+          if(msg.type==='frameby-research-bridge-ready'){
+            if(tokenSent) return;
+            tokenSent=true;
+            try{
+              frame.contentWindow.postMessage(
+                {type:'frameby-research-auth',accessToken:GITHUB_ACCESS_TOKEN},
+                event.origin
+              );
+            }catch(e){
+              cleanup();
+              reject(e);
+            }
+            return;
+          }
+
+          if(msg.type==='frameby-research-auth-result'){
+            cleanup();
+            if(msg.allowed) resolve(true);
+            else reject(new Error(msg.message||'research-bridge-denied'));
+          }
+        };
+
+        const timer=setTimeout(()=>{
+          cleanup();
+          reject(new Error('research-bridge-timeout'));
+        },9000);
+
+        window.addEventListener('message',onMessage);
+        frame.src=base+(base.includes('?')?'&':'?')+'mode=bridge&_='+Date.now();
+        document.body.appendChild(frame);
+      });
+
+      if(bridgeAllowed) return true;
+    }catch(e){
+      // 브리지 응답 실패 시 아래의 공유목록 확인으로 한 번 더 판정합니다.
     }
-  }catch(e){
-    if(e?.status===401) throw e;
-    // Drive API 일시 오류일 때만 기존 share-list 확인을 보조수단으로 사용합니다.
   }
 
+  // 2순위: Google Docs 실제 공유 이메일 목록 확인.
   try{
     const sharedEmails=await githubGetResearchSharedEmails();
-    const allowed=sharedEmails.includes(email);
-    RESEARCH_COMMENT_CAPABILITY=false;
-    RESEARCH_ACCESS_ERROR='';
-    return allowed;
+    if(Array.isArray(sharedEmails)) return sharedEmails.includes(email);
   }catch(e){
-    RESEARCH_COMMENT_CAPABILITY=false;
-    RESEARCH_ACCESS_ERROR=(e&&e.message)||'연구개발 권한 확인 오류';
-    return false;
+    // 외부 권한 확인 서버가 일시적으로 응답하지 않아도 메뉴 자체를 없애지는 않습니다.
   }
+
+  // 권한 확인 통신 자체가 실패한 경우에는 메뉴만 유지합니다.
+  // 실제 연구개발 본문은 Apps Script 내부의 Google Docs 공유권한 검사에서 다시 차단됩니다.
+  return true;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
