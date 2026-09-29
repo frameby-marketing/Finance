@@ -184,6 +184,38 @@ html[data-theme="dark"]{color-scheme:light!important}
 .research-access-probe{position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none}
 @media(max-width:720px){.research-frame{height:calc(100vh - 90px);min-height:650px}}
 
+/* 연구개발: Google Docs 직접 열람 + Drive 댓글 검토 저장 */
+.research-direct-shell{padding:18px 22px 42px;min-height:calc(100vh - 108px);background:#f6f7f9}
+.research-direct-shell.hidden,.research-frame.hidden{display:none!important}
+.research-direct-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.research-direct-title{display:flex;align-items:center;gap:10px;min-width:0}
+.research-direct-title h2{margin:0;font-size:18px}.research-direct-title span{color:var(--muted);font-size:11px}
+.research-direct-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.research-direct-btn{border:1px solid #cbd6ef;background:#fff;color:#405476;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:850;cursor:pointer}
+.research-direct-btn:hover{background:#f6f8ff}.research-direct-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.research-direct-btn:disabled{opacity:.45;cursor:not-allowed}
+.research-doc-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
+.research-doc-nav{position:sticky;top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px;box-shadow:var(--shadow)}
+.research-doc-nav button{width:100%;border:0;background:transparent;color:#59667a;padding:9px 10px;border-radius:8px;text-align:left;font-size:11px;font-weight:800;cursor:pointer}
+.research-doc-nav button:hover{background:#f6f8fc}.research-doc-nav button.active{background:var(--soft);color:var(--primary)}
+.research-month-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.research-month-card{border:1px solid var(--line);background:#fff;border-radius:12px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 3px 12px rgba(22,36,67,.04)}
+.research-month-card:hover{border-color:#b9c9ef;background:#fbfcff}.research-month-card.empty{opacity:.48;cursor:default}.research-month-card b{display:block;font-size:17px}.research-month-card span{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+.research-doc-stack{display:grid;gap:14px}
+.research-doc-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.research-doc-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #e8ecf2;background:#fbfcfe}
+.research-doc-card-title{min-width:0}.research-doc-card-title h3{margin:0;font-size:15px}.research-doc-card-title p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.research-review-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.research-review-btn{border:1px solid #cbd6ef;background:#fff;color:#405476;padding:6px 9px;border-radius:7px;font-size:10px;font-weight:850;cursor:pointer}.research-review-btn:hover{background:#f3f6ff}.research-review-btn.after{border-color:#bedfce;color:#267452}.research-review-btn:disabled{opacity:.4;cursor:not-allowed}
+.research-doc-paper{max-width:980px;margin:0 auto;padding:24px 28px 34px;color:#20242c;font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;line-height:1.62;background:#fff}
+.research-doc-paper p{margin:0 0 7px;white-space:pre-wrap}.research-doc-paper h1,.research-doc-paper h2,.research-doc-paper h3,.research-doc-paper h4{margin:18px 0 9px;line-height:1.35}.research-doc-paper h1{font-size:22px}.research-doc-paper h2{font-size:18px}.research-doc-paper h3{font-size:16px}.research-doc-paper h4{font-size:14px}
+.research-doc-paper .doc-list-item{display:flex;gap:7px;margin:0 0 5px}.research-doc-paper .doc-list-bullet{flex:0 0 auto;color:#58667a}
+.research-doc-table-wrap{overflow:auto;margin:8px 0 14px}.research-doc-table{width:100%;border-collapse:collapse;table-layout:auto;font-size:12px}.research-doc-table td{border:1px solid #b8b8b8;padding:6px 8px;vertical-align:middle}.research-doc-table td p{margin:0}.research-doc-image{display:block;max-width:100%;height:auto;margin:12px auto;border-radius:2px}
+.research-review-list{border-top:1px solid #edf0f4;background:#fcfdff;padding:10px 16px;display:grid;gap:7px}.research-review-list:empty{display:none}.research-review-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:start;padding:9px 10px;border:1px solid #e2e7ef;border-radius:9px;background:#fff}.research-review-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;background:#fff1dc;color:#a96507;font-size:9px;font-weight:900;white-space:nowrap}.research-review-item.resolved .research-review-badge{background:#eaf7f2;color:#267452}.research-review-text{font-size:11px;line-height:1.55;white-space:pre-wrap;min-width:0}.research-review-meta{font-size:9px;color:#8a94a5;white-space:nowrap}.research-review-reply{margin-top:5px;padding-left:9px;border-left:2px solid #dce4f2;color:#59667a}
+.research-empty{padding:34px;text-align:center;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:12px}
+.research-review-modal-backdrop{position:fixed;inset:0;z-index:7800;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,26,45,.45)}.research-review-modal-backdrop.open{display:flex}.research-review-modal{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:0 24px 70px rgba(17,26,45,.25);overflow:hidden}.research-review-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}.research-review-modal-head h3{margin:0;font-size:17px}.research-review-modal-close{border:0;background:transparent;font-size:24px;color:#6e7888;cursor:pointer}.research-review-modal-body{padding:18px;display:grid;gap:11px}.research-review-modal-body label{font-size:11px;font-weight:800;color:#5f6b7d}.research-review-modal-body select,.research-review-modal-body textarea{width:100%}.research-review-modal-body textarea{min-height:120px;resize:vertical}.research-review-target{padding:10px 12px;border:1px solid #dce5f5;background:#f8faff;border-radius:9px;color:#536177;font-size:11px;line-height:1.5}.research-review-modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);background:#fafbfd}
+@media(max-width:980px){.research-doc-layout{grid-template-columns:1fr}.research-doc-nav{position:static;display:flex;overflow:auto;gap:4px}.research-doc-nav button{width:auto;white-space:nowrap}.research-month-overview{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:720px){.research-direct-shell{padding:12px}.research-direct-toolbar{align-items:flex-start;flex-direction:column}.research-month-overview{grid-template-columns:repeat(2,1fr)}.research-doc-paper{padding:18px 14px 26px}.research-doc-card-head{align-items:flex-start;flex-direction:column}.research-review-actions{width:100%}}
+
 /* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 → 연차관리 → 연구개발 */
 #cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#leavePrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
 #cashPrimaryTab{order:1!important}
@@ -492,8 +524,27 @@ body.frameby-auth-ready{overflow:auto}
     </section>
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
-      <iframe id="researchFrame" class="research-frame" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
+      <div id="researchDirectShell" class="research-direct-shell hidden">
+        <div class="research-direct-toolbar">
+          <div class="research-direct-title"><h2 id="researchDirectTitle">연구개발</h2><span id="researchDirectSub">Google Docs 직접 열람</span></div>
+          <div class="research-direct-actions"><button type="button" class="research-direct-btn" id="researchDirectRefreshBtn">↻ 새로고침</button></div>
+        </div>
+        <div id="researchDirectMount"></div>
+      </div>
+      <iframe id="researchFrame" class="research-frame hidden" title="연구노트 작성"></iframe>
     </section>
+
+    <div class="research-review-modal-backdrop" id="researchReviewModal">
+      <div class="research-review-modal" role="dialog" aria-modal="true" aria-labelledby="researchReviewModalTitle">
+        <div class="research-review-modal-head"><h3 id="researchReviewModalTitle">검토 코멘트</h3><button type="button" class="research-review-modal-close" id="researchReviewModalClose">×</button></div>
+        <div class="research-review-modal-body">
+          <div class="research-review-target" id="researchReviewTarget"></div>
+          <div id="researchReviewThreadWrap" style="display:none"><label for="researchReviewThread">검토 전 코멘트 선택</label><select id="researchReviewThread"></select></div>
+          <div><label for="researchReviewText">코멘트</label><textarea id="researchReviewText" placeholder="검토 내용을 입력하세요."></textarea></div>
+        </div>
+        <div class="research-review-modal-foot"><button type="button" class="research-direct-btn" id="researchReviewCancel">취소</button><button type="button" class="research-direct-btn primary" id="researchReviewSave">저장</button></div>
+      </div>
+    </div>
 
 <section class="page sales-host" id="salesHost">
   <div class="sales-head">
@@ -1177,57 +1228,305 @@ function ensureCashflowFrame(page){
   }else send();
 }
 function githubSendResearchSession(){
-  // v20: 별도 임베드 세션을 사용하지 않습니다.
+  // 연구문서/연구노트는 Google Docs API를 직접 사용합니다.
 }
 function githubInitResearchMessaging(){
-  // v20: 연구개발 웹앱 자체의 기존 Google Workspace 인증을 그대로 사용합니다.
+  // Apps Script 메시징은 연구노트 작성 화면에서만 사용하며 별도 브리지는 두지 않습니다.
 }
-function ensureResearchFrame(forceReload){
-  const frame=document.getElementById('researchFrame');
-  if(!frame)return;
-  const loadingEl=document.getElementById('researchLoading');
 
-  const base=frame.dataset.src||INTEGRATED_CONFIG.researchWebAppUrl||'';
-  if(!base){
-    if(loadingEl){
-      loadingEl.textContent='연구개발 연결 주소를 확인할 수 없습니다.';
-      loadingEl.classList.remove('hidden');
+let RESEARCH_DOC_CACHE=null;
+let RESEARCH_DOC_FLAT=[];
+let RESEARCH_COMMENTS_CACHE=[];
+let RESEARCH_COMMENT_CAPABILITY=null;
+let RESEARCH_ACTIVE_DOC_TAB_ID='';
+let RESEARCH_REVIEW_MODAL_STATE={mode:'before',tabId:'',targetTitle:''};
+
+function researchEsc(value){
+  return String(value==null?'':value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function researchRgb(color){
+  const rgb=color?.color?.rgbColor||color?.rgbColor||null;
+  if(!rgb)return '';
+  const c=n=>Math.max(0,Math.min(255,Math.round((n==null?0:n)*255)));
+  return `rgb(${c(rgb.red)},${c(rgb.green)},${c(rgb.blue)})`;
+}
+function researchSafeUrl(url){
+  try{
+    const u=new URL(String(url||''),location.href);
+    if(['http:','https:','mailto:'].includes(u.protocol)) return u.href;
+  }catch(e){}
+  return '';
+}
+async function researchApiJson(url,options={}){
+  const headers=new Headers(options.headers||{});
+  headers.set('Authorization',`Bearer ${GITHUB_ACCESS_TOKEN}`);
+  if(options.body&&!headers.has('Content-Type'))headers.set('Content-Type','application/json');
+  const response=await fetch(url,{...options,headers});
+  if(response.status===401){
+    githubTokenCacheClear();GITHUB_ACCESS_TOKEN=null;
+    throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
+  }
+  if(!response.ok){
+    let msg=`Google 연구개발 자료 요청 실패 (HTTP ${response.status})`;
+    try{const data=await response.json();msg=data?.error?.message||msg}catch(e){}
+    throw Object.assign(new Error(msg),{status:response.status});
+  }
+  if(response.status===204)return{};
+  return response.json();
+}
+function researchFlattenTabs(tabs,parentId='',depth=0,out=[]){
+  (tabs||[]).forEach(tab=>{
+    const p=tab.tabProperties||{};
+    const item={
+      id:String(p.tabId||''),title:String(p.title||'제목 없음'),parentId:String(parentId||''),depth,index:Number(p.index||0),
+      documentTab:tab.documentTab||null
+    };
+    out.push(item);
+    researchFlattenTabs(tab.childTabs||[],item.id,depth+1,out);
+  });
+  return out;
+}
+function researchNoteInfo(tab){
+  const m=String(tab?.title||'').match(/^(\d{1,2})월\s*(\d+)주차\s*연구노트/);
+  return m?{month:Number(m[1]),week:Number(m[2])}:null;
+}
+function researchTopTabs(){return RESEARCH_DOC_FLAT.filter(t=>t.depth===0)}
+function researchNoteTabs(month){
+  return RESEARCH_DOC_FLAT.filter(t=>{
+    const info=researchNoteInfo(t);
+    return info && (!month||info.month===Number(month));
+  }).sort((a,b)=>{const x=researchNoteInfo(a),y=researchNoteInfo(b);return x.month-y.month||x.week-y.week});
+}
+async function researchLoadDocument(force=false){
+  if(RESEARCH_DOC_CACHE&&!force)return RESEARCH_DOC_CACHE;
+  const id=encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId);
+  const url=`https://docs.googleapis.com/v1/documents/${id}?includeTabsContent=true`;
+  const doc=await researchApiJson(url);
+  RESEARCH_DOC_CACHE=doc;
+  RESEARCH_DOC_FLAT=researchFlattenTabs(doc.tabs||[]);
+  if(!RESEARCH_ACTIVE_DOC_TAB_ID){
+    RESEARCH_ACTIVE_DOC_TAB_ID=(researchTopTabs()[0]||{}).id||'';
+  }
+  return doc;
+}
+async function researchLoadCapabilities(force=false){
+  if(RESEARCH_COMMENT_CAPABILITY!==null&&!force)return RESEARCH_COMMENT_CAPABILITY;
+  try{
+    const id=encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId);
+    const f=await researchApiJson(`https://www.googleapis.com/drive/v3/files/${id}?fields=id,capabilities(canComment,canEdit)&supportsAllDrives=true`);
+    RESEARCH_COMMENT_CAPABILITY=!!(f?.capabilities?.canComment||f?.capabilities?.canEdit);
+  }catch(e){
+    RESEARCH_COMMENT_CAPABILITY=false;
+  }
+  return RESEARCH_COMMENT_CAPABILITY;
+}
+async function researchLoadComments(force=false){
+  if(RESEARCH_COMMENTS_CACHE.length&&!force)return RESEARCH_COMMENTS_CACHE;
+  const id=encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId);
+  const fields='nextPageToken,comments(id,content,createdTime,modifiedTime,resolved,anchor,author(displayName),replies(id,content,createdTime,modifiedTime,action,author(displayName)))';
+  let token='',all=[];
+  do{
+    const url=`https://www.googleapis.com/drive/v3/files/${id}/comments?includeDeleted=false&pageSize=100&fields=${encodeURIComponent(fields)}${token?`&pageToken=${encodeURIComponent(token)}`:''}`;
+    const data=await researchApiJson(url);
+    all=all.concat(data.comments||[]);token=data.nextPageToken||'';
+  }while(token);
+  RESEARCH_COMMENTS_CACHE=all;
+  return all;
+}
+function researchCommentMeta(comment){
+  try{
+    const a=JSON.parse(comment?.anchor||'{}');
+    return a&&a.r==='frameby-review'?a:null;
+  }catch(e){return null}
+}
+function researchCommentsForTab(tabId){
+  return RESEARCH_COMMENTS_CACHE.filter(c=>researchCommentMeta(c)?.tabId===String(tabId||''));
+}
+function researchDisplayCommentText(content){
+  return String(content||'').replace(/^\[(검토 전|검토 후)\]\s*[^\n]*\n?/,'').trim();
+}
+function researchFormatWhen(value){
+  if(!value)return '';
+  try{return new Intl.DateTimeFormat('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value))}catch(e){return ''}
+}
+function researchReviewListHtml(tabId){
+  const items=researchCommentsForTab(tabId);
+  if(!items.length)return '';
+  return `<div class="research-review-list">${items.map(c=>{
+    const replies=(c.replies||[]).filter(r=>!r.deleted);
+    const after=[...replies].reverse().find(r=>String(r.content||'').startsWith('[검토 후]'));
+    const body=researchDisplayCommentText(c.content);
+    const reply=after?researchDisplayCommentText(after.content):'';
+    return `<div class="research-review-item ${c.resolved?'resolved':''}">
+      <span class="research-review-badge">${c.resolved?'검토 완료':'검토 전'}</span>
+      <div class="research-review-text">${researchEsc(body)}${reply?`<div class="research-review-reply"><b>검토 후</b><br>${researchEsc(reply)}</div>`:''}</div>
+      <span class="research-review-meta">${researchEsc(c.author?.displayName||'')} ${researchEsc(researchFormatWhen(c.modifiedTime||c.createdTime))}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+function researchTextRunHtml(textRun){
+  const text=researchEsc(textRun?.content||'').replace(/\n$/,'');
+  if(!text)return '';
+  const st=textRun?.textStyle||{};const css=[];
+  if(st.bold)css.push('font-weight:700');if(st.italic)css.push('font-style:italic');if(st.underline)css.push('text-decoration:underline');if(st.strikethrough)css.push('text-decoration:line-through');
+  const fg=researchRgb(st.foregroundColor);if(fg)css.push(`color:${fg}`);
+  const bg=researchRgb(st.backgroundColor);if(bg)css.push(`background:${bg}`);
+  if(st.fontSize?.magnitude)css.push(`font-size:${Math.max(9,Number(st.fontSize.magnitude)*1.3333).toFixed(1)}px`);
+  let html=`<span${css.length?` style="${css.join(';')}"`:''}>${text}</span>`;
+  const link=researchSafeUrl(st.link?.url||'');if(link)html=`<a href="${researchEsc(link)}" target="_blank" rel="noopener">${html}</a>`;
+  return html;
+}
+function researchInlineImageHtml(id,docTab){
+  const obj=docTab?.inlineObjects?.[id]?.inlineObjectProperties?.embeddedObject;
+  const uri=researchSafeUrl(obj?.imageProperties?.contentUri||'');
+  if(!uri)return '';
+  const w=Math.min(1000,Math.max(120,Number(obj?.size?.width?.magnitude||450)*1.3333));
+  return `<img class="research-doc-image" src="${researchEsc(uri)}" style="width:${w}px" alt="연구개발 문서 이미지">`;
+}
+function researchParagraphHtml(paragraph,docTab){
+  const style=paragraph?.paragraphStyle||{};const named=style.namedStyleType||'NORMAL_TEXT';
+  const parts=(paragraph?.elements||[]).map(el=>{
+    if(el.textRun)return researchTextRunHtml(el.textRun);
+    if(el.inlineObjectElement)return researchInlineImageHtml(el.inlineObjectElement.inlineObjectId,docTab);
+    return '';
+  }).join('');
+  if(!parts.replace(/<[^>]+>/g,'').trim()&&!parts.includes('<img'))return '';
+  const tag=named==='TITLE'?'h1':named==='SUBTITLE'?'h2':named==='HEADING_1'?'h2':named==='HEADING_2'?'h3':named==='HEADING_3'?'h4':'p';
+  const css=[];if(style.alignment==='CENTER')css.push('text-align:center');else if(style.alignment==='END')css.push('text-align:right');
+  if(style.indentStart?.magnitude)css.push(`padding-left:${Math.min(80,Number(style.indentStart.magnitude)*1.3333).toFixed(0)}px`);
+  if(style.borderBottom?.width?.magnitude)css.push('border-bottom:1px solid #20242c','padding-bottom:5px');
+  if(paragraph.bullet)return `<div class="doc-list-item"${css.length?` style="${css.join(';')}"`:''}><span class="doc-list-bullet">•</span><div>${parts}</div></div>`;
+  return `<${tag}${css.length?` style="${css.join(';')}"`:''}>${parts}</${tag}>`;
+}
+function researchTableHtml(table,docTab){
+  const rows=table?.tableRows||[];
+  return `<div class="research-doc-table-wrap"><table class="research-doc-table"><tbody>${rows.map(row=>`<tr>${(row.tableCells||[]).map(cell=>{
+    const cs=cell.tableCellStyle||{};const attrs=[];if(cs.columnSpan>1)attrs.push(`colspan="${Number(cs.columnSpan)}"`);if(cs.rowSpan>1)attrs.push(`rowspan="${Number(cs.rowSpan)}"`);
+    const styles=[];const bg=researchRgb(cs.backgroundColor);if(bg)styles.push(`background:${bg}`);if(cs.contentAlignment==='MIDDLE')styles.push('vertical-align:middle');
+    const inner=researchStructuralHtml(cell.content||[],docTab);
+    return `<td ${attrs.join(' ')}${styles.length?` style="${styles.join(';')}"`:''}>${inner}</td>`;
+  }).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function researchStructuralHtml(content,docTab){
+  return (content||[]).map(el=>{
+    if(el.paragraph)return researchParagraphHtml(el.paragraph,docTab);
+    if(el.table)return researchTableHtml(el.table,docTab);
+    if(el.tableOfContents)return researchStructuralHtml(el.tableOfContents.content||[],docTab);
+    return '';
+  }).join('');
+}
+function researchReviewButtons(tab){
+  const disabled=!RESEARCH_COMMENT_CAPABILITY?' disabled title="Google Docs 댓글 권한이 필요합니다."':'';
+  const unresolved=researchCommentsForTab(tab.id).some(c=>!c.resolved);
+  return `<div class="research-review-actions"><button type="button" class="research-review-btn" data-research-review="before" data-tab-id="${researchEsc(tab.id)}"${disabled}>검토 전</button><button type="button" class="research-review-btn after" data-research-review="after" data-tab-id="${researchEsc(tab.id)}"${disabled||(!unresolved?' disabled title="검토 전 코멘트가 없습니다."':'')}>검토 후</button></div>`;
+}
+function researchTabCardHtml(tab,label='Google Docs'){
+  const docTab=tab.documentTab||{};const body=docTab.body?.content||[];
+  return `<article class="research-doc-card" data-research-tab-card="${researchEsc(tab.id)}"><div class="research-doc-card-head"><div class="research-doc-card-title"><h3>${researchEsc(tab.title)}</h3><p>${researchEsc(label)}</p></div>${researchReviewButtons(tab)}</div>${researchReviewListHtml(tab.id)}<div class="research-doc-paper">${researchStructuralHtml(body,docTab)||'<div class="research-empty">표시할 내용이 없습니다.</div>'}</div></article>`;
+}
+function researchBindRenderedActions(){
+  document.querySelectorAll('[data-research-review]').forEach(btn=>{
+    btn.addEventListener('click',()=>researchOpenReviewModal(btn.dataset.researchReview,btn.dataset.tabId));
+  });
+  document.querySelectorAll('[data-research-doc-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{RESEARCH_ACTIVE_DOC_TAB_ID=btn.dataset.researchDocTab||'';researchRenderCurrent()});
+  });
+  document.querySelectorAll('[data-research-month-card]').forEach(btn=>{
+    btn.addEventListener('click',()=>{const m=Number(btn.dataset.researchMonthCard)||0;if(!m)return;RESEARCH_ACTIVE_MONTH=m;syncModuleHeader('research','researchHost');researchRenderCurrent()});
+  });
+}
+function researchRenderDocuments(){
+  const mount=document.getElementById('researchDirectMount');if(!mount)return;
+  const tabs=researchTopTabs();
+  if(!tabs.length){mount.innerHTML='<div class="research-empty">연구문서를 찾지 못했습니다.</div>';return}
+  if(!tabs.some(t=>t.id===RESEARCH_ACTIVE_DOC_TAB_ID))RESEARCH_ACTIVE_DOC_TAB_ID=tabs[0].id;
+  const active=tabs.find(t=>t.id===RESEARCH_ACTIVE_DOC_TAB_ID)||tabs[0];
+  mount.innerHTML=`<div class="research-doc-layout"><div class="research-doc-nav">${tabs.map(t=>`<button type="button" class="${t.id===active.id?'active':''}" data-research-doc-tab="${researchEsc(t.id)}">${researchEsc(t.title)}</button>`).join('')}</div><div>${researchTabCardHtml(active,'연구문서 · Google Docs')}</div></div>`;
+  document.getElementById('researchDirectTitle').textContent='연구문서';document.getElementById('researchDirectSub').textContent='Google Docs 직접 열람';researchBindRenderedActions();
+}
+function researchRenderNotes(){
+  const mount=document.getElementById('researchDirectMount');if(!mount)return;
+  const month=Number(RESEARCH_ACTIVE_MONTH)||0;
+  document.getElementById('researchDirectTitle').textContent=month?`연구노트 · ${month}월`:'연구노트 · 2026년';document.getElementById('researchDirectSub').textContent='Google Docs 주차별 연구노트';
+  if(!month){
+    const cards=Array.from({length:12},(_,i)=>{const m=i+1,c=researchNoteTabs(m).length;return `<button type="button" class="research-month-card ${c?'':'empty'}" ${c?`data-research-month-card="${m}"`:''}><b>${m}월</b><span>${c?`${c}개 주차 연구노트`:'등록된 연구노트 없음'}</span></button>`}).join('');
+    mount.innerHTML=`<div class="research-month-overview">${cards}</div>`;researchBindRenderedActions();return;
+  }
+  const tabs=researchNoteTabs(month);
+  mount.innerHTML=tabs.length?`<div class="research-doc-stack">${tabs.map(t=>researchTabCardHtml(t,`${month}월 연구노트 · Google Docs`)).join('')}</div>`:'<div class="research-empty">해당 월의 연구노트가 없습니다.</div>';
+  researchBindRenderedActions();
+}
+function researchRenderCurrent(){
+  if(RESEARCH_ACTIVE_PAGE==='documents')researchRenderDocuments();else researchRenderNotes();
+}
+async function researchRefreshDirect(force=false){
+  const loading=document.getElementById('researchLoading');const shell=document.getElementById('researchDirectShell');const frame=document.getElementById('researchFrame');
+  frame?.classList.add('hidden');shell?.classList.remove('hidden');if(loading){loading.textContent='Google Docs 연구개발 자료를 불러오는 중...';loading.classList.remove('hidden')}
+  if(force){RESEARCH_DOC_CACHE=null;RESEARCH_DOC_FLAT=[];RESEARCH_COMMENTS_CACHE=[];RESEARCH_COMMENT_CAPABILITY=null}
+  try{
+    await Promise.all([researchLoadDocument(force),researchLoadCapabilities(force)]);
+    try{await researchLoadComments(force)}catch(e){RESEARCH_COMMENTS_CACHE=[];console.warn(e)}
+    researchRenderCurrent();if(loading)loading.classList.add('hidden');
+  }catch(e){
+    if(loading){loading.textContent=e?.message||'연구개발 자료를 불러오지 못했습니다.';loading.classList.remove('hidden')}
+  }
+}
+function ensureResearchWriteFrame(forceReload){
+  const frame=document.getElementById('researchFrame');const shell=document.getElementById('researchDirectShell');const loading=document.getElementById('researchLoading');if(!frame)return;
+  shell?.classList.add('hidden');frame.classList.remove('hidden');
+  const base=INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
+  if(!base){if(loading){loading.textContent='연구노트 작성 연결 주소를 확인할 수 없습니다.';loading.classList.remove('hidden')}return}
+  const params=new URLSearchParams({shell:'1',page:'write',year:String(Number(RESEARCH_ACTIVE_YEAR)||2026),month:'0'});
+  const viewKey='write|'+String(Number(RESEARCH_ACTIVE_YEAR)||2026);
+  if(!forceReload&&frame.dataset.currentView===viewKey&&frame.dataset.loaded==='1'){if(loading)loading.classList.add('hidden');return}
+  if(loading){loading.textContent='연구노트 작성 화면을 불러오는 중...';loading.classList.remove('hidden')}
+  frame.onload=()=>{frame.dataset.loaded='1';frame.dataset.currentView=viewKey;if(loading)loading.classList.add('hidden')};
+  frame.dataset.loaded='0';frame.dataset.currentView=viewKey;frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
+}
+function ensureResearchView(forceReload){
+  if(RESEARCH_ACTIVE_PAGE==='write')ensureResearchWriteFrame(forceReload);else researchRefreshDirect(!!forceReload);
+}
+function researchTargetTab(tabId){return RESEARCH_DOC_FLAT.find(t=>t.id===String(tabId||''))||null}
+function researchOpenReviewModal(mode,tabId){
+  if(!RESEARCH_COMMENT_CAPABILITY){alert('이 Google Docs에 댓글을 작성할 수 있는 권한이 필요합니다. 공유 권한을 댓글 작성자 또는 편집자로 설정해 주세요.');return}
+  const tab=researchTargetTab(tabId);if(!tab)return;
+  const modal=document.getElementById('researchReviewModal');const threadWrap=document.getElementById('researchReviewThreadWrap');const thread=document.getElementById('researchReviewThread');const text=document.getElementById('researchReviewText');
+  RESEARCH_REVIEW_MODAL_STATE={mode,tabId:tab.id,targetTitle:tab.title};
+  document.getElementById('researchReviewModalTitle').textContent=mode==='after'?'검토 후 코멘트':'검토 전 코멘트';
+  document.getElementById('researchReviewTarget').textContent=tab.title;text.value='';
+  if(mode==='after'){
+    const open=researchCommentsForTab(tab.id).filter(c=>!c.resolved);
+    if(!open.length){alert('먼저 검토 전 코멘트를 작성해 주세요.');return}
+    thread.innerHTML=open.map(c=>`<option value="${researchEsc(c.id)}">${researchEsc(researchDisplayCommentText(c.content).slice(0,90)||'검토 전 코멘트')}</option>`).join('');threadWrap.style.display='block';
+  }else{threadWrap.style.display='none';thread.innerHTML=''}
+  modal.classList.add('open');setTimeout(()=>text.focus(),30);
+}
+function researchCloseReviewModal(){document.getElementById('researchReviewModal')?.classList.remove('open')}
+async function researchSaveReview(){
+  const state=RESEARCH_REVIEW_MODAL_STATE;const textEl=document.getElementById('researchReviewText');const body=String(textEl?.value||'').trim();if(!body){alert('코멘트를 입력해 주세요.');return}
+  const save=document.getElementById('researchReviewSave');if(save){save.disabled=true;save.textContent='저장 중...'}
+  try{
+    const fileId=encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId);const tab=researchTargetTab(state.tabId);if(!tab)throw new Error('검토 대상을 찾지 못했습니다.');
+    if(state.mode==='before'){
+      const info=researchNoteInfo(tab);const anchor={r:'frameby-review',phase:'before',page:RESEARCH_ACTIVE_PAGE,year:Number(RESEARCH_ACTIVE_YEAR)||2026,month:info?.month||0,week:info?.week||0,tabId:tab.id,title:tab.title};
+      const content=`[검토 전] ${tab.title}\n${body}`;
+      const fields='id,content,createdTime,modifiedTime,resolved,anchor,author(displayName),replies(id,content,createdTime,modifiedTime,action,author(displayName))';
+      await researchApiJson(`https://www.googleapis.com/drive/v3/files/${fileId}/comments?fields=${encodeURIComponent(fields)}`,{method:'POST',body:JSON.stringify({content,anchor:JSON.stringify(anchor)})});
+    }else{
+      const commentId=document.getElementById('researchReviewThread')?.value;if(!commentId)throw new Error('검토 전 코멘트를 선택해 주세요.');
+      const fields='id,content,createdTime,modifiedTime,action,author(displayName)';
+      await researchApiJson(`https://www.googleapis.com/drive/v3/files/${fileId}/comments/${encodeURIComponent(commentId)}/replies?fields=${encodeURIComponent(fields)}`,{method:'POST',body:JSON.stringify({action:'resolve',content:`[검토 후] ${body}`})});
     }
-    return;
-  }
-
-  const page=['documents','notes','write'].includes(RESEARCH_ACTIVE_PAGE)
-    ? RESEARCH_ACTIVE_PAGE
-    : 'notes';
-  const year=Number(RESEARCH_ACTIVE_YEAR)||2026;
-  const month=page==='notes'
-    ? Math.max(0,Math.min(12,Number(RESEARCH_ACTIVE_MONTH)||0))
-    : 0;
-
-  const params=new URLSearchParams();
-  params.set('shell','1');
-  params.set('page',page);
-  params.set('year',String(year));
-  params.set('month',String(month));
-
-  const viewKey=`${page}|${year}|${month}`;
-  if(!forceReload && frame.dataset.currentView===viewKey && frame.dataset.loaded==='1') return;
-
-  if(loadingEl){
-    loadingEl.textContent='연구개발 데이터를 불러오는 중...';
-    loadingEl.classList.remove('hidden');
-  }
-
-  frame.onload=()=>{
-    frame.dataset.loaded='1';
-    frame.dataset.currentView=viewKey;
-    if(loadingEl)loadingEl.classList.add('hidden');
-  };
-
-  frame.dataset.started='1';
-  frame.dataset.loaded='0';
-  frame.dataset.currentView=viewKey;
-  frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
+    RESEARCH_COMMENTS_CACHE=[];await researchLoadComments(true);researchCloseReviewModal();researchRenderCurrent();
+  }catch(e){alert(e?.message||'코멘트를 저장하지 못했습니다.')}finally{if(save){save.disabled=false;save.textContent='저장'}}
+}
+function researchBindDirectUi(){
+  const refresh=document.getElementById('researchDirectRefreshBtn');if(refresh&&!refresh.dataset.bound){refresh.dataset.bound='1';refresh.addEventListener('click',()=>researchRefreshDirect(true))}
+  const close=document.getElementById('researchReviewModalClose'),cancel=document.getElementById('researchReviewCancel'),save=document.getElementById('researchReviewSave'),modal=document.getElementById('researchReviewModal');
+  if(close&&!close.dataset.bound){close.dataset.bound='1';close.addEventListener('click',researchCloseReviewModal)}
+  if(cancel&&!cancel.dataset.bound){cancel.dataset.bound='1';cancel.addEventListener('click',researchCloseReviewModal)}
+  if(save&&!save.dataset.bound){save.dataset.bound='1';save.addEventListener('click',researchSaveReview)}
+  if(modal&&!modal.dataset.bound){modal.dataset.bound='1';modal.addEventListener('click',e=>{if(e.target===modal)researchCloseReviewModal()})}
 }
 
 function showCashPage(page){
@@ -1268,7 +1567,7 @@ function showModule(module,page){
     if(['documents','notes','write'].includes(page)) RESEARCH_ACTIVE_PAGE=page;
     syncModuleHeader('research','researchHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
-    ensureResearchFrame(false);
+    ensureResearchView(false);
     try{history.replaceState(null,'','#research')}catch(e){}
     return;
   }
@@ -1296,6 +1595,7 @@ function showPage(id){
 }
 
 function initResearchShell(){
+  researchBindDirectUi();
   const wrap=document.getElementById('researchMonthBtns');
   if(wrap && !wrap.dataset.ready){
     wrap.innerHTML=Array.from({length:12},(_,i)=>`<button type="button" class="research-month-btn ${RESEARCH_ACTIVE_MONTH===i+1?'active':''}" data-month="${i+1}">${i+1}월</button>`).join('');
@@ -1310,7 +1610,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_YEAR=2026;
       RESEARCH_ACTIVE_MONTH=0;
       syncModuleHeader('research','researchHost');
-      ensureResearchFrame(true);
+      ensureResearchView(true);
     });
   }
 
@@ -1327,7 +1627,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_PAGE=nextPage;
       if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=0;
       syncModuleHeader('research','researchHost');
-      ensureResearchFrame(true);
+      ensureResearchView(true);
     });
   });
 
@@ -1339,7 +1639,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_YEAR=2026;
       RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
       syncModuleHeader('research','researchHost');
-      ensureResearchFrame(true);
+      ensureResearchView(true);
     });
   });
 }
@@ -1535,11 +1835,11 @@ const INTEGRATED_CONFIG={
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
   researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
-  researchWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
+  researchWriteWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
-  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+  oauthScope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
 };
 const GH_TRIP_HEADERS=['record_id','source_keys','출장일자','경상비','접대비','교통비','숙박비','기타비','합계','출장자','구분','적요명','출장목적','방문지역','이동수단','결제수단','상태','삭제여부','생성일시','수정일시','유류비'];
 const GH_DRIVE_HEADERS=['drive_id','trip_record_id','일자','차량명','운행구분','출발지','도착지','왕복편도','실제거리_km','기초주행거리_km','현재누적거리_km','상태','삭제여부','생성일시','수정일시'];
@@ -1621,115 +1921,6 @@ function githubIsResearchOrigin(origin){
     const host=new URL(origin).hostname;
     return host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com');
   }catch(e){return false}
-}
-async function githubGetResearchSharedEmails(){
-  if(!INTEGRATED_CONFIG.researchWebAppUrl) return null;
-  return new Promise((resolve,reject)=>{
-    const frame=document.createElement('iframe');
-    frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
-    frame.setAttribute('aria-hidden','true');
-    const cleanup=()=>{window.removeEventListener('message',onMessage);clearTimeout(timer);try{frame.remove()}catch(e){}};
-    const onMessage=event=>{
-      if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin)) return;
-      const msg=event.data||{};
-      if(msg.type!=='frameby-research-share-list'||!Array.isArray(msg.emails)) return;
-      cleanup();resolve(msg.emails.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
-    };
-    const timer=setTimeout(()=>{cleanup();reject(new Error('share-list-timeout'))},7000);
-    window.addEventListener('message',onMessage);
-    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
-    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=share-list&_='+Date.now();
-    document.body.appendChild(frame);
-  });
-}
-async function githubCheckResearchAccess(){
-  if(!INTEGRATED_CONFIG.researchDocumentId||!GITHUB_ACCESS_TOKEN) return false;
-
-  const url=
-    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
-    `?fields=id&supportsAllDrives=true`;
-
-  const response=await fetch(url,{
-    method:'GET',
-    headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
-  });
-
-  if(response.status===401){
-    githubTokenCacheClear();
-    GITHUB_ACCESS_TOKEN=null;
-    throw Object.assign(
-      new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),
-      {status:401}
-    );
-  }
-
-  if(response.status===403||response.status===404) return false;
-
-  if(!response.ok){
-    throw Object.assign(
-      new Error(`연구개발 Google Docs 공유권한 확인 실패 (HTTP ${response.status})`),
-      {status:response.status}
-    );
-  }
-
-  return true;
-}
-async function githubCreateResearchSession(){
-  if(!INTEGRATED_CONFIG.researchWebAppUrl||!GITHUB_ACCESS_TOKEN) return false;
-  RESEARCH_SESSION_KEY='';
-  RESEARCH_AUTH_EMAIL='';
-  RESEARCH_ACCESS_ERROR='';
-
-  return new Promise((resolve,reject)=>{
-    const frame=document.createElement('iframe');
-    frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
-    frame.setAttribute('aria-hidden','true');
-    let tokenSent=false;
-
-    const cleanup=()=>{
-      window.removeEventListener('message',onMessage);
-      clearTimeout(timer);
-      try{frame.remove()}catch(e){}
-    };
-    const onMessage=event=>{
-      if(event.source!==frame.contentWindow) return;
-      if(!githubIsResearchOrigin(event.origin)) return;
-      const msg=event.data||{};
-
-      if(msg.type==='frameby-research-bridge-ready'){
-        if(tokenSent) return;
-        tokenSent=true;
-        try{
-          frame.contentWindow.postMessage({type:'frameby-research-auth',accessToken:GITHUB_ACCESS_TOKEN},event.origin);
-        }catch(e){
-          cleanup();
-          reject(new Error('연구개발 로그인 계정을 전달하지 못했습니다.'));
-        }
-        return;
-      }
-
-      if(msg.type==='frameby-research-auth-result'){
-        cleanup();
-        if(msg.allowed && msg.sessionKey){
-          RESEARCH_SESSION_KEY=String(msg.sessionKey||'');
-          RESEARCH_AUTH_EMAIL=String(msg.email||'').toLowerCase();
-          resolve(true);
-        }else{
-          // 서버가 명시적으로 공유권한 없음이라고 답한 경우에만 false 처리합니다.
-          resolve(false);
-        }
-      }
-    };
-    const timer=setTimeout(()=>{
-      cleanup();
-      reject(new Error('연구개발 권한 확인 서버에 연결하지 못했습니다. Apps Script 웹앱 배포 설정을 확인해 주세요.'));
-    },12000);
-
-    window.addEventListener('message',onMessage);
-    const sep=INTEGRATED_CONFIG.researchWebAppUrl.includes('?')?'&':'?';
-    frame.src=INTEGRATED_CONFIG.researchWebAppUrl+sep+'mode=bridge&_='+Date.now();
-    document.body.appendChild(frame);
-  });
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -3450,7 +3641,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-doc-access-write-sheet-v28';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-docs-direct-comments-v29';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
