@@ -1970,47 +1970,73 @@ function githubIsResearchOrigin(origin){
     return host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com');
   }catch(e){return false}
 }
-async function githubCheckResearchAccess(){
-  if(!INTEGRATED_CONFIG.researchDocumentId||!GITHUB_ACCESS_TOKEN) return false;
-
-  const url=
-    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
-    `?fields=id,name,mimeType,capabilities(canComment,canEdit)&supportsAllDrives=true`;
-
-  const response=await fetch(url,{
-    method:'GET',
-    headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
+async function githubGetResearchSharedEmails(){
+  const base=INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
+  if(!base) throw new Error('연구개발 공유권한 확인 주소가 없습니다.');
+  return new Promise((resolve,reject)=>{
+    const frame=document.createElement('iframe');
+    frame.className='research-access-probe';
+    frame.setAttribute('aria-hidden','true');
+    const cleanup=()=>{
+      window.removeEventListener('message',onMessage);
+      clearTimeout(timer);
+      try{frame.remove()}catch(e){}
+    };
+    const onMessage=event=>{
+      if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin)) return;
+      const msg=event.data||{};
+      if(msg.type!=='frameby-research-share-list'||!Array.isArray(msg.emails)) return;
+      const emails=msg.emails.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean);
+      cleanup();
+      resolve(emails);
+    };
+    const timer=setTimeout(()=>{
+      cleanup();
+      reject(new Error('연구개발 공유권한 목록을 확인하지 못했습니다.'));
+    },7000);
+    window.addEventListener('message',onMessage);
+    frame.src=base+(base.includes('?')?'&':'?')+'mode=share-list&_='+Date.now();
+    document.body.appendChild(frame);
   });
+}
+async function githubCheckResearchAccess(){
+  const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
+  if(!email) return false;
 
-  if(response.status===401){
-    githubTokenCacheClear();
-    GITHUB_ACCESS_TOKEN=null;
-    throw Object.assign(
-      new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),
-      {status:401}
-    );
-  }
-
-  if(response.status===404) return false;
-
-  if(response.status===403){
-    // Drive API 자체 권한/활성화 문제를 '문서 미공유'로 오판해 메뉴를 숨기지 않습니다.
-    // 실제 문서 열람 가능 여부는 연구개발 화면을 열 때 Google Docs가 다시 확인합니다.
-    RESEARCH_ACCESS_ERROR='Drive API 권한 확인이 제한되어 문서 자체 접근으로 확인합니다.';
+  // 연구개발 메뉴는 Google Docs에 실제로 공유된 이메일 목록과 로그인 계정을 직접 대조합니다.
+  // 단순히 Drive API에서 파일이 열리는지 여부만으로는 메뉴를 표시하지 않습니다.
+  const sharedEmails=await githubGetResearchSharedEmails();
+  const allowed=sharedEmails.includes(email);
+  if(!allowed){
     RESEARCH_COMMENT_CAPABILITY=false;
-    return true;
+    return false;
   }
 
-  if(!response.ok){
-    throw Object.assign(
-      new Error(`연구개발 Google Docs 공유권한 확인 실패 (HTTP ${response.status})`),
-      {status:response.status}
-    );
+  // 메뉴 접근이 확인된 뒤 댓글 작성 가능 여부만 별도로 조회합니다.
+  try{
+    const url=
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}`+
+      `?fields=id,capabilities(canComment,canEdit)&supportsAllDrives=true`;
+    const response=await fetch(url,{
+      method:'GET',
+      headers:{'Authorization':`Bearer ${GITHUB_ACCESS_TOKEN}`}
+    });
+    if(response.status===401){
+      githubTokenCacheClear();
+      GITHUB_ACCESS_TOKEN=null;
+      throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
+    }
+    if(response.ok){
+      const data=await response.json();
+      RESEARCH_COMMENT_CAPABILITY=!!(data?.capabilities?.canComment||data?.capabilities?.canEdit);
+    }else{
+      RESEARCH_COMMENT_CAPABILITY=false;
+    }
+  }catch(e){
+    if(e?.status===401) throw e;
+    RESEARCH_COMMENT_CAPABILITY=false;
   }
-
-  const data=await response.json();
-  RESEARCH_COMMENT_CAPABILITY=!!(data?.capabilities?.canComment||data?.capabilities?.canEdit);
-  return !!data?.id;
+  return true;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
