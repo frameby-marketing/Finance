@@ -1725,14 +1725,6 @@ function showModule(module,page){
     try{history.replaceState(null,'','#sales')}catch(e){}
     return;
   }
-  if(module==='vat'){
-    if(window.FRAMEBY_ACCESS_READY && !githubHasModuleAccess('vat')) return;
-    syncModuleHeader('vat','vatHost');
-    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='vatHost'));
-    vatInitDashboard().catch(e=>console.error(e));
-    try{history.replaceState(null,'','#vat')}catch(e){}
-    return;
-  }
   if(window.FRAMEBY_ACCESS_READY && !githubHasModuleAccess(module)){
     const fallback=githubFirstAccessibleModule();
     if(fallback && fallback!==module) return showModule(fallback,githubDefaultPageForModule(fallback));
@@ -2020,7 +2012,6 @@ const INTEGRATED_CONFIG={
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
-  vatSpreadsheetId:'1F-_AVGKSvXckyRpqSLUuXqNW6ZU8PsNvRshc71PfqCs',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
   researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
   researchWriteWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
@@ -2104,16 +2095,7 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
     throw e;
   }
 }
-function vatApplyAccess(allowed){
-  window.FRAMEBY_MODULE_ACCESS=window.FRAMEBY_MODULE_ACCESS||{};
-  window.FRAMEBY_MODULE_ACCESS.vat=!!allowed;
-  const el=document.getElementById('vatPrimaryTab');
-  if(!el)return;
-  el.hidden=!allowed;
-  el.classList.toggle('frameby-no-access',!allowed);
-  el.setAttribute('aria-hidden',allowed?'false':'true');
-  el.tabIndex=allowed?0:-1;
-}
+
 function githubIsResearchOrigin(origin){
   try{
     const host=new URL(origin).hostname;
@@ -2254,7 +2236,7 @@ function githubApplyModuleAccess(access){
 }
 function githubOpenAuthorizedInitialModule(){
   if(location.hash==='#sales'){showModule('sales');return true;}
-  const requested=location.hash==='#vat'?'vat':location.hash==='#research'?'research':location.hash==='#leave'?'leave':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
+  const requested=location.hash==='#research'?'research':location.hash==='#leave'?'leave':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
   const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
   if(target){showModule(target,githubDefaultPageForModule(target));return true;}
   showModule('sales');
@@ -3489,19 +3471,7 @@ async function githubAfterLogin(){
 
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
-
-    // 기존 메뉴 권한은 고정본 로직대로 먼저 적용합니다.
-    // VAT 권한 확인 실패가 연구개발 등 기존 메뉴 표시를 막지 않도록 완전히 분리합니다.
     githubApplyModuleAccess(access);
-
-    let vatAllowed=false;
-    try{
-      vatAllowed=await githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.vatSpreadsheetId);
-    }catch(e){
-      vatAllowed=false;
-    }
-    access.vat=vatAllowed;
-    vatApplyAccess(vatAllowed);
     const allowedModules=['cash','card','trip','leave','research'].filter(m=>access[m]);
 
     // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
@@ -3566,6 +3536,7 @@ function githubWaitForGoogle(cb){if(githubInitTokenClient()){cb();return}const i
 /* ===== 부가세 신고자료 =====
    [회계]종합보고서 스프레드시트의 실제 공유권한을 기존 모듈과 동일하게 확인합니다.
    권한이 없으면 메뉴를 숨기고 데이터 요청도 하지 않습니다. */
+const VAT_SPREADSHEET_ID='1F-_AVGKSvXckyRpqSLUuXqNW6ZU8PsNvRshc71PfqCs';
 const VAT_CONFIG={
   sheetPattern:/^(\d{2})년\s*([12])기\s*(예정|확정)\s*부가세$/,
   cardUsers:Object.freeze({'3728':'대표자','5301':'대표자2','0501':'장경옥','3403':'전태준'})
@@ -3599,7 +3570,7 @@ function vatSheetLabel(sheetName){
 function vatQuoteSheet(name){return `'${String(name).replace(/'/g,"''")}'`}
 async function vatFetchPeriods(force=false){
   if(VAT_PERIODS.length&&!force)return VAT_PERIODS;
-  const id=INTEGRATED_CONFIG.vatSpreadsheetId;
+  const id=VAT_SPREADSHEET_ID;
   const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}?fields=sheets.properties(title,index,hidden,sheetId)`;
   const meta=await githubFetchJson(u);
   VAT_PERIODS=(meta.sheets||[]).map(s=>{
@@ -3612,7 +3583,7 @@ async function vatFetchPeriods(force=false){
 async function vatFetchSheetValues(sheetName,force=false){
   if(!force&&VAT_REPORT_CACHE.has(sheetName))return VAT_REPORT_CACHE.get(sheetName);
   const range=`${vatQuoteSheet(sheetName)}!A:AZ`;
-  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.vatSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;
+  const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(VAT_SPREADSHEET_ID)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;
   const data=await githubFetchJson(u),values=data.values||[];
   const report=vatParseReport(sheetName,values);VAT_REPORT_CACHE.set(sheetName,report);return report;
 }
@@ -4182,6 +4153,60 @@ if(document.readyState==='loading'){
 }else{
   initIntegrated();
 }
+</script>
+
+
+<script id="vat-isolated-access">
+(function(){
+  function vatSetAccess(allowed){
+    window.FRAMEBY_MODULE_ACCESS=window.FRAMEBY_MODULE_ACCESS||{};
+    window.FRAMEBY_MODULE_ACCESS.vat=!!allowed;
+    const el=document.getElementById('vatPrimaryTab');
+    if(!el)return;
+    el.hidden=!allowed;
+    el.classList.toggle('frameby-no-access',!allowed);
+    el.setAttribute('aria-hidden',allowed?'false':'true');
+    el.tabIndex=allowed?0:-1;
+  }
+
+  const fixedShowModule=window.showModule;
+  window.showModule=function(module,page){
+    if(module!=='vat') return fixedShowModule(module,page);
+    if(!window.FRAMEBY_MODULE_ACCESS?.vat) return;
+    syncModuleHeader('vat','vatHost');
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='vatHost'));
+    vatInitDashboard().catch(e=>console.error(e));
+    try{history.replaceState(null,'','#vat')}catch(e){}
+  };
+
+  let checking=false;
+  async function checkVatAccess(){
+    if(checking||!GITHUB_ACCESS_TOKEN||!document.body?.classList.contains('frameby-auth-ready'))return;
+    checking=true;
+    try{
+      let allowed=false;
+      try{allowed=await githubCheckSpreadsheetAccess(VAT_SPREADSHEET_ID)}catch(e){allowed=false}
+      vatSetAccess(allowed);
+      if(allowed&&location.hash==='#vat')window.showModule('vat');
+    }finally{
+      checking=false;
+    }
+  }
+
+  function start(){
+    const body=document.body;
+    if(!body)return;
+    new MutationObserver(()=>checkVatAccess()).observe(body,{attributes:true,attributeFilter:['class']});
+    checkVatAccess();
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
+
+  window.addEventListener('hashchange',()=>{
+    if(location.hash==='#vat')checkVatAccess();
+  });
+})();
 </script>
 
 <textarea id="cashflowSource" style="display:none" aria-hidden="true"><!doctype html>
