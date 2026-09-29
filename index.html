@@ -531,7 +531,7 @@ body.frameby-auth-ready{overflow:auto}
         </div>
         <div id="researchDirectMount"></div>
       </div>
-      <iframe id="researchFrame" class="research-frame hidden" title="연구노트 작성"></iframe>
+      <iframe id="researchFrame" class="research-frame hidden" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 
     <div class="research-review-modal-backdrop" id="researchReviewModal">
@@ -1481,20 +1481,62 @@ async function researchRefreshDirect(force=false){
     if(loading){loading.textContent=e?.message||'연구개발 자료를 불러오지 못했습니다.';loading.classList.remove('hidden')}
   }
 }
-function ensureResearchWriteFrame(forceReload){
-  const frame=document.getElementById('researchFrame');const shell=document.getElementById('researchDirectShell');const loading=document.getElementById('researchLoading');if(!frame)return;
-  shell?.classList.add('hidden');frame.classList.remove('hidden');
-  const base=INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
-  if(!base){if(loading){loading.textContent='연구노트 작성 연결 주소를 확인할 수 없습니다.';loading.classList.remove('hidden')}return}
-  const params=new URLSearchParams({shell:'1',page:'write',year:String(Number(RESEARCH_ACTIVE_YEAR)||2026),month:'0'});
-  const viewKey='write|'+String(Number(RESEARCH_ACTIVE_YEAR)||2026);
-  if(!forceReload&&frame.dataset.currentView===viewKey&&frame.dataset.loaded==='1'){if(loading)loading.classList.add('hidden');return}
-  if(loading){loading.textContent='연구노트 작성 화면을 불러오는 중...';loading.classList.remove('hidden')}
-  frame.onload=()=>{frame.dataset.loaded='1';frame.dataset.currentView=viewKey;if(loading)loading.classList.add('hidden')};
-  frame.dataset.loaded='0';frame.dataset.currentView=viewKey;frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
+function ensureResearchFrame(forceReload){
+  const frame=document.getElementById('researchFrame');
+  const shell=document.getElementById('researchDirectShell');
+  const loading=document.getElementById('researchLoading');
+  if(!frame)return;
+
+  // 권한 판정은 현재 GitHub 통합 권한 로직을 그대로 사용하고,
+  // 실제 연구개발 화면은 기존 Apps Script 디자인을 shell 모드로 표시합니다.
+  shell?.classList.add('hidden');
+  frame.classList.remove('hidden');
+
+  const base=frame.dataset.src||INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
+  if(!base){
+    if(loading){
+      loading.textContent='연구개발 연결 주소를 확인할 수 없습니다.';
+      loading.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const page=['documents','notes','write'].includes(RESEARCH_ACTIVE_PAGE)
+    ? RESEARCH_ACTIVE_PAGE
+    : 'notes';
+  const year=Number(RESEARCH_ACTIVE_YEAR)||2026;
+  const month=page==='notes'
+    ? Math.max(0,Math.min(12,Number(RESEARCH_ACTIVE_MONTH)||0))
+    : 0;
+
+  const params=new URLSearchParams();
+  params.set('shell','1');
+  params.set('page',page);
+  params.set('year',String(year));
+  params.set('month',String(month));
+
+  const viewKey=`${page}|${year}|${month}`;
+  if(!forceReload && frame.dataset.currentView===viewKey && frame.dataset.loaded==='1'){
+    if(loading)loading.classList.add('hidden');
+    return;
+  }
+
+  if(loading){
+    loading.textContent='연구개발 데이터를 불러오는 중...';
+    loading.classList.remove('hidden');
+  }
+
+  frame.onload=()=>{
+    frame.dataset.loaded='1';
+    frame.dataset.currentView=viewKey;
+    if(loading)loading.classList.add('hidden');
+  };
+  frame.dataset.loaded='0';
+  frame.dataset.currentView=viewKey;
+  frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
 }
 function ensureResearchView(forceReload){
-  if(RESEARCH_ACTIVE_PAGE==='write')ensureResearchWriteFrame(forceReload);else researchRefreshDirect(!!forceReload);
+  ensureResearchFrame(!!forceReload);
 }
 function researchTargetTab(tabId){return RESEARCH_DOC_FLAT.find(t=>t.id===String(tabId||''))||null}
 function researchOpenReviewModal(mode,tabId){
@@ -1629,10 +1671,6 @@ function initResearchShell(){
     btn.dataset.researchBound='1';
     btn.addEventListener('click',()=>{
       const nextPage=btn.dataset.researchPage||'notes';
-
-      if(nextPage==='write' && !window.FRAMEBY_RESEARCH_WRITE_ACCESS){
-        return;
-      }
 
       RESEARCH_ACTIVE_PAGE=nextPage;
       if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=0;
@@ -2026,17 +2064,16 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.leave) document.getElementById('leaveSecondaryMenu')?.classList.add('hidden');
 
-  window.FRAMEBY_RESEARCH_WRITE_ACCESS=!!access?.researchWrite;
+  // 연구개발 메뉴 접근 여부는 Google Docs 공유권한 기준을 그대로 사용합니다.
+  // 작성 가능 여부는 Apps Script 내부의 기존 WRITER/ADMIN 권한에서 판정하므로,
+  // 저장소 스프레드시트 공유 여부로 "연구노트 작성" 메뉴 자체를 숨기지 않습니다.
+  window.FRAMEBY_RESEARCH_WRITE_ACCESS=!!window.FRAMEBY_MODULE_ACCESS.research;
   const researchWriteBtn=document.querySelector('.module-tab[data-research-page="write"]');
   if(researchWriteBtn){
-    const canWrite=!!window.FRAMEBY_MODULE_ACCESS.research && !!window.FRAMEBY_RESEARCH_WRITE_ACCESS;
-    researchWriteBtn.hidden=!canWrite;
-    researchWriteBtn.setAttribute('aria-hidden',canWrite?'false':'true');
-    researchWriteBtn.tabIndex=canWrite?0:-1;
-  }
-
-  if(!window.FRAMEBY_RESEARCH_WRITE_ACCESS && RESEARCH_ACTIVE_PAGE==='write'){
-    RESEARCH_ACTIVE_PAGE='notes';
+    const canOpenResearch=!!window.FRAMEBY_MODULE_ACCESS.research;
+    researchWriteBtn.hidden=!canOpenResearch;
+    researchWriteBtn.setAttribute('aria-hidden',canOpenResearch?'false':'true');
+    researchWriteBtn.tabIndex=canOpenResearch?0:-1;
   }
 }
 function githubOpenAuthorizedInitialModule(){
