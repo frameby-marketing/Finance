@@ -4469,6 +4469,14 @@ function initIntegratedNav(){
     btn.dataset.moduleBound='1';
     btn.addEventListener('click',()=>showCashPage(btn.dataset.cashPage));
   });
+  document.querySelectorAll('.module-tab[data-hr-page]').forEach(btn=>{
+    if(btn.dataset.hrBound)return;
+    btn.dataset.hrBound='1';
+    btn.addEventListener('click',()=>{
+      HR_ACTIVE_PAGE=btn.dataset.hrPage||'leave';
+      showModule('hr',HR_ACTIVE_PAGE);
+    });
+  });
   const cashYear=document.getElementById('cashGlobalYear');
   if(cashYear && !cashYear.dataset.bound){
     cashYear.dataset.bound='1';
