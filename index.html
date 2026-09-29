@@ -20,7 +20,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Finance & Admin · 자금수지 / 법인카드 / 매출현황 / 출장·차량 / 연차관리 / 연구개발</title>
+<title>Finance & Admin · 자금수지 / 법인카드 / 매출현황 / 출장·차량 / 인사관리 / 연구개발</title>
 <style>
 :root{color-scheme:light!important}
 html[data-theme="dark"]{color-scheme:light!important}
@@ -216,15 +216,15 @@ html[data-theme="dark"]{color-scheme:light!important}
 @media(max-width:980px){.research-doc-layout{grid-template-columns:1fr}.research-doc-nav{position:static;display:flex;overflow:auto;gap:4px}.research-doc-nav button{width:auto;white-space:nowrap}.research-month-overview{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:720px){.research-direct-shell{padding:12px}.research-direct-toolbar{align-items:flex-start;flex-direction:column}.research-month-overview{grid-template-columns:repeat(2,1fr)}.research-doc-paper{padding:18px 14px 26px}.research-doc-card-head{align-items:flex-start;flex-direction:column}.research-review-actions{width:100%}}
 
-/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 출장·차량 관리 → 연차관리 → 연구개발 */
-#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#leavePrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
+/* 1차 통합 메뉴 표시 고정: 자금수지 → 법인카드 → 매출현황 → 출장·차량 관리 → 인사관리 → 연구개발 */
+#cashPrimaryTab,#cardPrimaryTab,#tripPrimaryTab,#hrPrimaryTab,#researchPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
 #cashPrimaryTab{order:1!important}
 #cardPrimaryTab{order:2!important}
 #tripPrimaryTab{order:3!important}
-#leavePrimaryTab{order:4!important}
+#hrPrimaryTab{order:4!important}
 #researchPrimaryTab{order:5!important}
 /* 모듈별 공유 권한이 없으면 해당 1차 메뉴 자체를 숨깁니다. */
-#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#leavePrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+#cashPrimaryTab.frameby-no-access,#cardPrimaryTab.frameby-no-access,#tripPrimaryTab.frameby-no-access,#hrPrimaryTab.frameby-no-access,#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 .leave-host{padding:0!important;overflow:visible;position:relative;background:#f6f7f9;min-height:calc(100vh - 108px)}
 
 /* 권한 확인 전에는 통합 화면을 DOM에 두더라도 화면에는 전혀 노출하지 않습니다. */
@@ -429,7 +429,7 @@ body.frameby-auth-ready{overflow:auto}
 /* 기존 메뉴 권한 선택자는 수정하지 않고, 매출현황의 표시 순서만 별도 지정 */
 #salesPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;order:3!important}
 #tripPrimaryTab{order:4!important}
-#leavePrimaryTab{order:5!important}
+#hrPrimaryTab{order:5!important}
 #researchPrimaryTab{order:6!important}
 </style>
 
@@ -455,6 +455,57 @@ body.frameby-auth-ready{overflow:auto}
 @media(max-width:720px){.vat-head{align-items:flex-start;flex-direction:column}.vat-kpis{grid-template-columns:1fr 1fr}.vat-filter-row{align-items:flex-start;flex-direction:column}.vat-filter-label{width:auto;flex-basis:auto}}
 </style>
 
+
+<style id="hr-work-record-style">
+/* 인사관리: 기존 통합 사이트 디자인 시스템을 그대로 사용 */
+#hrPrimaryTab{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important}
+#hrPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
+.hr-inner-nav{padding:18px 30px 0;background:#f6f7f9}
+.hr-inner-nav .module-tabs{width:max-content}
+.work-record-host{padding:0!important;position:relative;background:#f6f7f9;min-height:calc(100vh - 108px)}
+.work-record-shell{padding:18px 30px 48px}
+.wr-inner-tabs{display:flex;align-items:center;gap:8px;margin:0 0 18px;max-width:100%;overflow:auto}
+.wr-view{display:none}.wr-view.active{display:block}
+.wr-head{align-items:flex-end}
+.wr-kpis,.wr-settlement-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.wr-calendar-card{overflow:visible}
+.wr-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;overflow:hidden;background:#f7f9fc}
+.wr-weekdays>div{text-align:center;padding:9px 5px;font-size:11px;font-weight:800;color:#7c8797;border-right:1px solid #edf0f4}.wr-weekdays>div:last-child{border-right:0}
+.wr-calendar{border:1px solid var(--line);border-radius:0 0 10px 10px;overflow:hidden;background:#fff}
+.wr-week{position:relative;display:grid;grid-template-columns:repeat(7,1fr);min-height:132px;border-bottom:1px solid var(--line)}
+.wr-week:last-child{border-bottom:0}
+.wr-day{position:relative;min-width:0;min-height:132px;padding:9px;border-right:1px solid var(--line);background:#fff;cursor:pointer;transition:.12s}
+.wr-day:last-of-type{border-right:0}.wr-day:hover{background:#fbfcff}.wr-day.outside{background:#fafbfc;color:#c2c8d1;cursor:default}
+.wr-day.today{box-shadow:inset 0 0 0 2px var(--primary)}
+.wr-day-number{font-size:12px;font-weight:850;position:relative;z-index:2}
+.wr-period-layer{position:absolute;left:0;right:0;top:34px;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:22px;gap:3px 0;pointer-events:none;z-index:3;padding:0 3px}
+.wr-period{margin:0 2px;border-left:3px solid #7c9ce5;background:#eef3ff;color:#355184;border-radius:5px;padding:4px 6px;font-size:10px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-period.mid{border-radius:0}.wr-period.start{border-top-right-radius:0;border-bottom-right-radius:0}.wr-period.end{border-top-left-radius:0;border-bottom-left-radius:0}
+.wr-day-events{position:absolute;left:7px;right:7px;bottom:7px;display:grid;gap:4px;z-index:4}
+.wr-event{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:4px 6px;border-radius:6px;background:#fff5e7;border:1px solid #f0d5a8;color:#935b12;font-size:9.5px;font-weight:800;min-width:0}
+.wr-event.gray{background:#f1f3f5;border-color:#e1e5ea;color:#707782}.wr-event span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-payroll-table{min-width:1500px}.wr-employee-table{min-width:1750px}.wr-settlement-table{min-width:1050px}
+.wr-employee-table td{vertical-align:middle}.wr-employee-table input,.wr-employee-table select{height:31px;padding:5px 7px;border-radius:6px;font-size:11px;min-width:82px}
+.wr-row-actions{display:flex;gap:5px;align-items:center}.wr-editing td{background:#fffdf6!important}
+.wr-loading{position:absolute;inset:0;z-index:100;display:grid;place-items:center;background:rgba(246,247,249,.78);backdrop-filter:blur(2px)}.wr-loading.hidden{display:none}
+.wr-error{margin-bottom:14px;padding:13px 15px;border:1px solid #f0b7b7;background:#fff4f4;color:#a12828;border-radius:10px;font-weight:700}
+.wr-toast{position:fixed;right:24px;bottom:24px;z-index:9000;padding:11px 15px;border-radius:9px;background:#111a2d;color:#fff;font-size:11px;font-weight:800;box-shadow:0 10px 30px rgba(17,26,45,.2)}
+.wr-modal-backdrop{position:fixed;inset:0;z-index:8000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,26,45,.42)}
+.wr-modal-backdrop.open{display:flex}.wr-modal{width:min(720px,96vw);max-height:92vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 70px rgba(17,26,45,.25)}
+.wr-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.wr-modal-head h3{margin:0;font-size:18px}.wr-modal-head p{margin:5px 0 0;color:var(--muted);font-size:11px}.wr-modal-body{padding:20px}
+.wr-worker-list>label{display:block;font-size:11px;font-weight:800;color:#667085;margin-bottom:7px}
+#wrWorkerCards{display:grid;gap:7px;margin-bottom:8px}
+.wr-worker-card{width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+.wr-worker-card:hover,.wr-worker-card.active{background:var(--soft);border-color:#b9c9ef}.wr-worker-name{font-weight:850;font-size:12px}.wr-worker-sub{margin-top:3px;color:var(--muted);font-size:10px}
+.wr-default-box{margin:13px 0;padding:11px 13px;border:1px solid #dce5f5;background:#f8faff;border-radius:9px;color:#536177;font-size:11px;line-height:1.55}
+.wr-work-form{grid-template-columns:1fr 1fr}.wr-scope{margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}.wr-scope-title{font-size:11px;font-weight:850;margin-bottom:8px}
+.wr-radio-card{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin-top:7px;cursor:pointer}.wr-radio-card input{margin-top:2px}.wr-radio-card span{display:flex;flex-direction:column;gap:3px}.wr-radio-card b{font-size:11px}.wr-radio-card small{font-size:10px;color:var(--muted)}
+.wr-empty{padding:28px;text-align:center;color:var(--muted);font-size:11px}
+.wr-status-dot{display:inline-flex;align-items:center;gap:5px}.wr-status-dot:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+@media(max-width:1050px){.wr-kpis,.wr-settlement-kpis{grid-template-columns:repeat(2,1fr)}.work-record-shell{padding:16px 20px 40px}.hr-inner-nav{padding:16px 20px 0}}
+@media(max-width:720px){.work-record-shell{padding:12px}.hr-inner-nav{padding:12px 12px 0}.wr-kpis,.wr-settlement-kpis{grid-template-columns:1fr 1fr}.wr-week{min-height:118px}.wr-day{min-height:118px;padding:6px}.wr-period{font-size:9px}.wr-work-form{grid-template-columns:1fr}.wr-inner-tabs{margin-bottom:14px}}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -479,7 +530,7 @@ body.frameby-auth-ready{overflow:auto}
         <button type="button" class="finance-primary-btn active" id="cardPrimaryTab" data-module="card" role="tab" aria-selected="true">법인카드</button>
         <button type="button" class="finance-primary-btn" id="salesPrimaryTab" data-module="sales" role="tab" aria-selected="false">매출현황</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
-        <button type="button" class="finance-primary-btn" id="leavePrimaryTab" data-module="leave" role="tab" aria-selected="false">연차관리</button>
+        <button type="button" class="finance-primary-btn" id="hrPrimaryTab" data-module="hr" role="tab" aria-selected="false">인사관리</button>
         <button type="button" class="finance-primary-btn" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false">연구개발</button>
         <button type="button" class="finance-primary-btn" id="vatPrimaryTab" data-module="vat" role="tab" aria-selected="false" hidden>부가세신고자료</button>
       </div>
@@ -547,16 +598,20 @@ body.frameby-auth-ready{overflow:auto}
           <button type="button" class="module-tab" data-page="master">기초관리</button>
         </div>
       </div>
-      <div class="finance-secondary hidden" id="leaveSecondaryMenu">
-        <div class="module-tabs" id="leaveModuleTabs" aria-label="연차관리 세부 메뉴">
-          <button type="button" class="module-tab active" data-leave-page="leave">연차 현황</button>
-          <button type="button" class="module-tab" data-leave-page="settle">정산</button>
-          <button type="button" class="module-tab" data-leave-page="employee">사원정보</button>
+      <div class="finance-secondary hidden" id="hrSecondaryMenu">
+        <div class="module-tabs" id="hrModuleTabs" aria-label="인사관리 세부 메뉴">
+          <button type="button" class="module-tab active" data-hr-page="leave">연차관리</button>
+          <button type="button" class="module-tab" data-hr-page="work">근무기록</button>
         </div>
-        <div class="secondary-tools" id="leaveSecondaryTools" aria-label="연차관리 조회 조건">
-          <div class="secondary-tool-group active">
+        <div class="secondary-tools" id="hrSecondaryTools" aria-label="인사관리 조회 조건">
+          <div class="secondary-tool-group active" id="leaveSecondaryTools">
             <div class="field"><label>연도</label><select id="leaveGlobalYear"></select></div>
             <div class="field"><label>월</label><select id="leaveGlobalMonth"></select></div>
+          </div>
+          <div class="secondary-tool-group" id="workSecondaryTools">
+            <div class="field"><label>연도</label><select id="workGlobalYear"></select></div>
+            <div class="field"><label>월</label><select id="workGlobalMonth"></select></div>
+            <button type="button" class="cash-refresh-btn" id="workGlobalRefreshBtn"><span>↻</span> 새로고침</button>
           </div>
         </div>
       </div>
@@ -576,8 +631,191 @@ body.frameby-auth-ready{overflow:auto}
       <iframe id="cashflowFrame" class="cashflow-frame" title="자금수지"></iframe>
     </section>
 <section class="page leave-host" id="leaveHost">
+      <div class="hr-inner-nav">
+        <div class="module-tabs" id="leaveInnerTabs" aria-label="연차관리 기능">
+          <button type="button" class="module-tab active" data-leave-page="leave">연차 현황</button>
+          <button type="button" class="module-tab" data-leave-page="settle">정산</button>
+          <button type="button" class="module-tab" data-leave-page="employee">사원정보</button>
+        </div>
+      </div>
       <div id="leaveMount"></div>
     </section>
+
+<section class="page work-record-host" id="workRecordHost">
+  <div class="work-record-shell">
+    <div class="wr-inner-tabs" id="workRecordInnerTabs">
+      <button type="button" class="module-tab active" data-wr-page="calendar">근무 달력</button>
+      <button type="button" class="module-tab" data-wr-page="payroll">급여대장</button>
+      <button type="button" class="module-tab" data-wr-page="employees">직원목록</button>
+      <button type="button" class="module-tab" data-wr-page="settlements">퇴직정산</button>
+    </div>
+
+    <div id="wrAlert"></div>
+    <div id="wrLoading" class="wr-loading hidden"><div class="loading-box">근무기록 데이터를 불러오는 중...</div></div>
+
+    <section class="wr-view active" data-wr-view="calendar">
+      <div class="head wr-head">
+        <div>
+          <h1>근무 달력</h1>
+          <p>직원별 계약 근무조건을 기본으로 표시하고, 날짜별 변경기록은 별도로 저장합니다.</p>
+        </div>
+        <div class="head-actions">
+          <button type="button" class="excel-btn" id="wrRefreshBtn">↻ 새로고침</button>
+          <button type="button" class="subscription-primary-btn" id="wrAddRecordBtn">+ 근무기록 추가</button>
+        </div>
+      </div>
+      <div class="grid kpis wr-kpis">
+        <div class="card kpi"><div class="label">등록 직원</div><div class="value" id="wrKpiEmployees">0명</div><div class="sub">저장소 현재 직원 기준</div></div>
+        <div class="card kpi"><div class="label">이번 달 기본 근무일</div><div class="value" id="wrKpiScheduled">0일</div><div class="sub">직원별 근무조건 자동 반영</div></div>
+        <div class="card kpi"><div class="label">개별 변경 기록</div><div class="value" id="wrKpiOverrides">0건</div><div class="sub">날짜별 수정·추가·휴무</div></div>
+        <div class="card kpi"><div class="label">정산 검토 대상</div><div class="value" id="wrKpiSettlements">0명</div><div class="sub">최종근무일 입력 기준</div></div>
+      </div>
+      <section class="card wr-calendar-card">
+        <div class="section-title">
+          <div>
+            <h2 id="wrCalendarTitle">근무 달력</h2>
+            <div class="note">긴 막대 = 근무기간 · 날짜 안 표시 = 개별 변경 근무기록</div>
+          </div>
+          <div class="legend">
+            <span class="pill blue">기본 근무기간</span>
+            <span class="pill orange">개별 변경</span>
+            <span class="pill gray">휴무</span>
+          </div>
+        </div>
+        <div class="wr-weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+        <div id="wrCalendar" class="wr-calendar"></div>
+      </section>
+    </section>
+
+    <section class="wr-view" data-wr-view="payroll">
+      <div class="head wr-head">
+        <div><h1>급여대장</h1><p>기존 월별 급여대장 시트의 값을 그대로 조회합니다.</p></div>
+        <div class="head-actions"><span class="pill blue" id="wrPayrollSource">급여대장</span></div>
+      </div>
+      <div class="grid kpis three">
+        <div class="card kpi"><div class="label">급여 대상자</div><div class="value" id="wrPayCount">0명</div></div>
+        <div class="card kpi"><div class="label">총 지급액</div><div class="value" id="wrPayGross">0원</div></div>
+        <div class="card kpi"><div class="label">실지급액</div><div class="value" id="wrPayNet">0원</div></div>
+      </div>
+      <section class="card">
+        <div class="section-title"><h2>월 급여대장</h2><div class="note">공제 항목은 각각 구분하여 표시합니다.</div></div>
+        <div class="table-wrap"><table class="table wr-payroll-table">
+          <thead><tr>
+            <th>성명</th><th class="num">총근무</th><th class="num">실근무</th><th class="num">기본급</th><th class="num">주휴</th><th class="num">추가</th><th class="num">지급계</th>
+            <th class="num">국민연금</th><th class="num">건강보험</th><th class="num">고용보험</th><th class="num">장기요양</th><th class="num">근로소득세</th><th class="num">지방소득세</th><th class="num">급여공제</th><th class="num">실지급액</th>
+          </tr></thead>
+          <tbody id="wrPayrollBody"></tbody>
+        </table></div>
+      </section>
+    </section>
+
+    <section class="wr-view" data-wr-view="employees">
+      <div class="head wr-head">
+        <div><h1>직원목록</h1><p>계약정보와 직원별 기본 근무조건을 함께 관리합니다.</p></div>
+        <div class="head-actions"><button type="button" class="subscription-primary-btn" id="wrAddEmployeeBtn">+ 직원 추가</button></div>
+      </div>
+      <section class="card">
+        <div class="section-title"><h2>직원정보</h2><div class="note">수정은 해당 행에서 바로 진행합니다.</div></div>
+        <div class="table-wrap"><table class="table wr-employee-table">
+          <thead><tr>
+            <th>성명</th><th>고용형태</th><th>입사일</th><th>계약 시작일</th><th>계약 종료일</th><th>최종근무일</th>
+            <th>근무요일</th><th>출근</th><th>퇴근</th><th>휴게</th><th>주 소정근로시간</th><th>4대보험</th><th class="num">시급</th><th>근무상태</th><th>관리</th>
+          </tr></thead>
+          <tbody id="wrEmployeeBody"></tbody>
+        </table></div>
+        <div class="inline-note">기본 근무조건을 변경하면 변경 시점 이후 일정에 적용되며, 이미 저장된 날짜별 실제 근무기록은 유지됩니다.</div>
+      </section>
+    </section>
+
+    <section class="wr-view" data-wr-view="settlements">
+      <div class="head wr-head">
+        <div><h1>퇴직정산</h1><p>최종근무일이 입력된 직원을 정산 검토 대상으로 관리합니다.</p></div>
+      </div>
+      <div class="grid kpis wr-settlement-kpis">
+        <div class="card kpi"><div class="label">전체 검토</div><div class="value" id="wrSettleAll">0명</div></div>
+        <div class="card kpi"><div class="label">정산예정</div><div class="value" id="wrSettleWait">0명</div></div>
+        <div class="card kpi"><div class="label">정산완료</div><div class="value" id="wrSettleDone">0명</div></div>
+        <div class="card kpi"><div class="label">대상아님</div><div class="value" id="wrSettleNo">0명</div></div>
+      </div>
+      <section class="card">
+        <div class="section-title"><h2>퇴직정산 대상자</h2><div class="note">정산액은 저장소에 입력된 값만 표시합니다.</div></div>
+        <div class="table-wrap"><table class="table wr-settlement-table">
+          <thead><tr><th>성명</th><th>고용형태</th><th>입사일</th><th>최종근무일</th><th>근속기간</th><th>정산상태</th><th class="num">예정액</th><th class="num">확정액</th><th>관리</th></tr></thead>
+          <tbody id="wrSettlementBody"></tbody>
+        </table></div>
+      </section>
+    </section>
+  </div>
+
+  <div class="wr-modal-backdrop" id="wrWorkModal">
+    <div class="wr-modal" role="dialog" aria-modal="true">
+      <div class="wr-modal-head"><div><h3>근무기록</h3><p id="wrWorkModalDate"></p></div><button type="button" class="subscription-close" data-wr-close="wrWorkModal">×</button></div>
+      <div class="wr-modal-body">
+        <div class="wr-worker-list"><label>이 날짜의 근무자</label><div id="wrWorkerCards"></div><button type="button" class="action" id="wrAddWorkerToggle">+ 다른 근무자 선택</button></div>
+        <div class="field wr-add-worker hidden" id="wrAddWorkerBox"><label>근무자</label><select id="wrWorkerSelect"></select></div>
+        <div class="wr-default-box" id="wrDefaultBox">근무자를 선택하면 해당 직원의 기본 근무조건을 표시합니다.</div>
+        <input type="hidden" id="wrSelectedEmployeeId">
+        <div class="subscription-form-grid wr-work-form">
+          <div class="field"><label>출근시간</label><input id="wrWorkStart" type="time"></div>
+          <div class="field"><label>퇴근시간</label><input id="wrWorkEnd" type="time"></div>
+          <div class="field"><label>휴게시간</label><input id="wrWorkBreak" placeholder="예: 1:00"></div>
+          <div class="field"><label>실근무시간</label><input id="wrWorkActual" placeholder="예: 6:00"></div>
+          <div class="field wide"><label>메모</label><textarea id="wrWorkMemo" rows="3"></textarea></div>
+        </div>
+        <div class="wr-scope">
+          <div class="wr-scope-title">적용 범위</div>
+          <label class="wr-radio-card"><input type="radio" name="wrScope" value="one" checked><span><b>이 날짜만 수정</b><small>선택 날짜의 실제 근무기록만 변경합니다.</small></span></label>
+          <label class="wr-radio-card"><input type="radio" name="wrScope" value="future"><span><b>이 날짜 이후 기본 근무시간 변경</b><small>선택 날짜부터 새 기본시간을 적용하고 이전 기간은 그대로 유지합니다.</small></span></label>
+        </div>
+      </div>
+      <div class="subscription-modal-foot"><button type="button" class="row-delete-btn hidden" id="wrDeleteRecordBtn">삭제/근무 제외</button><div style="margin-left:auto;display:flex;gap:8px"><button type="button" class="subscription-ghost-btn" data-wr-close="wrWorkModal">취소</button><button type="button" class="subscription-primary-btn" id="wrSaveRecordBtn">저장</button></div></div>
+    </div>
+  </div>
+
+  <div class="wr-modal-backdrop" id="wrEmployeeModal">
+    <div class="wr-modal" role="dialog" aria-modal="true">
+      <div class="wr-modal-head"><div><h3>직원 추가</h3><p>계약정보와 기본 근무조건을 함께 등록합니다.</p></div><button type="button" class="subscription-close" data-wr-close="wrEmployeeModal">×</button></div>
+      <div class="wr-modal-body">
+        <div class="subscription-form-grid">
+          <div class="field"><label>성명</label><input id="wrEmpName"></div>
+          <div class="field"><label>고용형태</label><select id="wrEmpType"><option>파트타임</option><option>단기직</option><option>계약직</option></select></div>
+          <div class="field"><label>입사일</label><input id="wrEmpHire" type="date"></div>
+          <div class="field"><label>4대보험</label><select id="wrEmpInsurance"><option>가입</option><option>미가입</option></select></div>
+          <div class="field"><label>계약 시작일</label><input id="wrEmpContractStart" type="date"></div>
+          <div class="field"><label>계약 종료일</label><input id="wrEmpContractEnd" type="date"></div>
+          <div class="field"><label>근무요일</label><input id="wrEmpWeekdays" placeholder="예: 월~금 / 화·목"></div>
+          <div class="field"><label>시급</label><input id="wrEmpWage" type="number" min="0"></div>
+          <div class="field"><label>출근시간</label><input id="wrEmpStart" type="time"></div>
+          <div class="field"><label>퇴근시간</label><input id="wrEmpEnd" type="time"></div>
+          <div class="field"><label>휴게시간</label><input id="wrEmpBreak" placeholder="예: 1:00"></div>
+          <div class="field"><label>주 소정근로시간</label><input id="wrEmpWeekly" placeholder="예: 30:00"></div>
+        </div>
+      </div>
+      <div class="subscription-modal-foot"><button type="button" class="subscription-ghost-btn" data-wr-close="wrEmployeeModal">취소</button><button type="button" class="subscription-primary-btn" id="wrSaveEmployeeBtn">등록</button></div>
+    </div>
+  </div>
+
+  <div class="wr-modal-backdrop" id="wrSettlementModal">
+    <div class="wr-modal" role="dialog" aria-modal="true">
+      <div class="wr-modal-head"><div><h3>퇴직정산 관리</h3><p id="wrSettlementModalName"></p></div><button type="button" class="subscription-close" data-wr-close="wrSettlementModal">×</button></div>
+      <div class="wr-modal-body">
+        <input type="hidden" id="wrSettlementId">
+        <div class="subscription-form-grid">
+          <div class="field"><label>정산상태</label><select id="wrSettlementStatus"><option>검토대상</option><option>정산예정</option><option>정산완료</option><option>대상아님</option></select></div>
+          <div class="field"><label>기준 최종근무일</label><input id="wrSettlementLastDate" type="date"></div>
+          <div class="field"><label>산정 시작일</label><input id="wrSettlementStart" type="date"></div>
+          <div class="field"><label>산정 종료일</label><input id="wrSettlementEnd" type="date"></div>
+          <div class="field"><label>정산기준임금</label><input id="wrSettlementBase" type="number"></div>
+          <div class="field"><label>기타정산항목</label><input id="wrSettlementEtc" type="number"></div>
+          <div class="field"><label>퇴직정산 예정액</label><input id="wrSettlementExpected" type="number"></div>
+          <div class="field"><label>확정액</label><input id="wrSettlementConfirmed" type="number"></div>
+        </div>
+      </div>
+      <div class="subscription-modal-foot"><button type="button" class="subscription-ghost-btn" data-wr-close="wrSettlementModal">취소</button><button type="button" class="subscription-primary-btn" id="wrSaveSettlementBtn">저장</button></div>
+    </div>
+  </div>
+</section>
+
 <section class="page research-host" id="researchHost">
       <div class="research-loading" id="researchLoading">연구개발 데이터를 불러오는 중...</div>
       <div id="researchDirectShell" class="research-direct-shell hidden">
@@ -1302,35 +1540,64 @@ const CARD_PAGES=['dashboard','payment','all','subscription','onlinePurchase'];
 const TRIP_PAGES=['trip','vehicle','master'];
 let ACTIVE_MODULE='card';
 let CASH_ACTIVE_PAGE='calendar';
+let HR_ACTIVE_PAGE='leave';
 let LEAVE_ACTIVE_PAGE='leave';
+let WORK_RECORD_ACTIVE_PAGE='calendar';
 let RESEARCH_ACTIVE_PAGE='notes';
 let RESEARCH_ACTIVE_YEAR=2026;
 let RESEARCH_ACTIVE_MONTH=0;
 let CASHFLOW_FRAME_LOADED=false;
-window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,leave:false,research:false};
+window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,hr:false,leave:false,workRecord:false,research:false};
 window.FRAMEBY_ACCESS_READY=false;
-function githubHasModuleAccess(module){return !window.FRAMEBY_ACCESS_READY || !!window.FRAMEBY_MODULE_ACCESS?.[module]}
-function githubFirstAccessibleModule(){return ['cash','card','trip','leave','research'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
-function githubDefaultPageForModule(module){return module==='cash'?'calendar':module==='trip'?'trip':module==='leave'?'leave':module==='research'?'research':'dashboard'}
-function moduleForPage(id){return id==='salesHost'?'sales':CARD_PAGES.includes(id)?'card':TRIP_PAGES.includes(id)?'trip':id==='cashflowHost'?'cash':id==='leaveHost'?'leave':id==='researchHost'?'research':ACTIVE_MODULE}
+function githubHasModuleAccess(module){
+  if(!window.FRAMEBY_ACCESS_READY)return true;
+  if(module==='hr')return !!window.FRAMEBY_MODULE_ACCESS?.hr;
+  if(module==='leave')return !!window.FRAMEBY_MODULE_ACCESS?.leave;
+  if(module==='workRecord')return !!window.FRAMEBY_MODULE_ACCESS?.workRecord;
+  return !!window.FRAMEBY_MODULE_ACCESS?.[module];
+}
+function githubFirstAccessibleModule(){return ['cash','card','trip','hr','research'].find(m=>window.FRAMEBY_MODULE_ACCESS?.[m])||''}
+function githubDefaultPageForModule(module){
+  if(module==='cash')return'calendar';
+  if(module==='trip')return'trip';
+  if(module==='hr')return window.FRAMEBY_MODULE_ACCESS?.leave?'leave':'work';
+  if(module==='research')return'research';
+  return'dashboard';
+}
+function moduleForPage(id){
+  return id==='salesHost'?'sales':
+    CARD_PAGES.includes(id)?'card':
+    TRIP_PAGES.includes(id)?'trip':
+    id==='cashflowHost'?'cash':
+    (id==='leaveHost'||id==='workRecordHost')?'hr':
+    id==='researchHost'?'research':ACTIVE_MODULE;
+}
 function syncModuleHeader(module,id){
+  if(module==='leave'){module='hr';HR_ACTIVE_PAGE='leave';id='leaveHost'}
+  if(module==='workRecord'){module='hr';HR_ACTIVE_PAGE='work';id='workRecordHost'}
   ACTIVE_MODULE=module;
-  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash',isLeave=module==='leave',isResearch=module==='research',isSales=module==='sales';
+  const isCard=module==='card',isTrip=module==='trip',isCash=module==='cash',isHr=module==='hr',isResearch=module==='research',isSales=module==='sales';
   document.getElementById('cardSecondaryMenu')?.classList.toggle('hidden',!isCard);
   document.getElementById('tripSecondaryMenu')?.classList.toggle('hidden',!isTrip);
   document.getElementById('cashSecondaryMenu')?.classList.toggle('hidden',!isCash);
-  document.getElementById('leaveSecondaryMenu')?.classList.toggle('hidden',!isLeave);
+  document.getElementById('hrSecondaryMenu')?.classList.toggle('hidden',!isHr);
   document.getElementById('researchSecondaryMenu')?.classList.toggle('hidden',!isResearch);
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(b=>{
     const active=b.dataset.module===module;
     b.classList.toggle('active',active);
     b.setAttribute('aria-selected',active?'true':'false');
   });
-  document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',!isCash&&b.dataset.page===id));
+  document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.classList.toggle('active',!isCash&&!isHr&&b.dataset.page===id));
   document.querySelectorAll('.module-tab[data-cash-page]').forEach(b=>b.classList.toggle('active',isCash&&b.dataset.cashPage===CASH_ACTIVE_PAGE));
-  document.querySelectorAll('.module-tab[data-leave-page]').forEach(b=>b.classList.toggle('active',isLeave&&b.dataset.leavePage===LEAVE_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-hr-page]').forEach(b=>b.classList.toggle('active',isHr&&b.dataset.hrPage===HR_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-leave-page]').forEach(b=>b.classList.toggle('active',isHr&&HR_ACTIVE_PAGE==='leave'&&b.dataset.leavePage===LEAVE_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-wr-page]').forEach(b=>b.classList.toggle('active',isHr&&HR_ACTIVE_PAGE==='work'&&b.dataset.wrPage===WORK_RECORD_ACTIVE_PAGE));
   document.querySelectorAll('.module-tab[data-research-page]').forEach(b=>b.classList.toggle('active',isResearch&&b.dataset.researchPage===RESEARCH_ACTIVE_PAGE));
   document.querySelectorAll('.secondary-tool-group[data-tools-page]').forEach(g=>g.classList.toggle('active',isCard&&g.dataset.toolsPage===id));
+  document.getElementById('leaveSecondaryTools')?.classList.toggle('active',isHr&&HR_ACTIVE_PAGE==='leave'&&LEAVE_ACTIVE_PAGE==='leave');
+  document.getElementById('leaveSecondaryTools')?.classList.toggle('hidden',!(isHr&&HR_ACTIVE_PAGE==='leave'&&LEAVE_ACTIVE_PAGE==='leave'));
+  document.getElementById('workSecondaryTools')?.classList.toggle('active',isHr&&HR_ACTIVE_PAGE==='work');
+  document.getElementById('workSecondaryTools')?.classList.toggle('hidden',!(isHr&&HR_ACTIVE_PAGE==='work'));
   document.getElementById('researchMonthRow')?.classList.toggle('hidden',!(isResearch&&RESEARCH_ACTIVE_PAGE==='notes'));
   document.getElementById('researchYearBtn')?.classList.toggle('active',Number(RESEARCH_ACTIVE_MONTH)===0);
   document.querySelectorAll('.research-month-btn').forEach(b=>b.classList.toggle('active',Number(b.dataset.month)===Number(RESEARCH_ACTIVE_MONTH)));
@@ -1717,6 +1984,8 @@ function showCashPage(page){
   showModule('cash',CASH_ACTIVE_PAGE);
 }
 function showModule(module,page){
+  if(module==='leave'){module='hr';page='leave'}
+  if(module==='workRecord'){module='hr';page='work'}
   /* 매출현황은 기존 모듈 권한 판정 배열을 변경하지 않고 독립 화면으로 전환합니다. */
   if(module==='sales'){
     syncModuleHeader('sales','salesHost');
@@ -1738,12 +2007,21 @@ function showModule(module,page){
     try{history.replaceState(null,'','#cash')}catch(e){}
     return;
   }
-  if(module==='leave'){
-    LEAVE_ACTIVE_PAGE=page||LEAVE_ACTIVE_PAGE||'leave';
-    syncModuleHeader('leave','leaveHost');
-    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='leaveHost'));
-    ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));
-    try{history.replaceState(null,'','#leave')}catch(e){}
+  if(module==='hr'){
+    let target=page||HR_ACTIVE_PAGE||githubDefaultPageForModule('hr');
+    if(target==='leave'&&!window.FRAMEBY_MODULE_ACCESS?.leave)target='work';
+    if(target==='work'&&!window.FRAMEBY_MODULE_ACCESS?.workRecord)target='leave';
+    HR_ACTIVE_PAGE=target;
+    const hostId=target==='work'?'workRecordHost':'leaveHost';
+    syncModuleHeader('hr',hostId);
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===hostId));
+    if(target==='work'){
+      ensureWorkRecordApp(false).catch(e=>workRecordShowError(e?.message||String(e)));
+      try{history.replaceState(null,'','#work-record')}catch(e){}
+    }else{
+      ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));
+      try{history.replaceState(null,'','#hr')}catch(e){}
+    }
     return;
   }
   if(module==='research'){
@@ -2012,6 +2290,12 @@ const INTEGRATED_CONFIG={
   cashSpreadsheetId:'1RRUCQ8dODOSWL-HFUaczdRoCA-EQxCDXaKF2Ed7VGO4',
   tripSpreadsheetId:'1Sv-68McBK4mKNnIYHYsQCABfl0IoD6Kd7V7puenCwS0',
   leaveSpreadsheetId:'1Dhuq4xiJ6V29Sfkv1II4zFZzf-2wklE_1Br172yi1jA',
+  workRecordSpreadsheetId:'1IroqCP00AeTFl50jvLfwanro7T6xpdPZou5twwC3gsw',
+  workRecordEmployeeSheet:'직원정보_저장소',
+  workRecordConditionSheet:'근무조건_저장소',
+  workRecordLogSheet:'근무기록_저장소',
+  workRecordSettlementSheet:'퇴직정산_저장소',
+  workRecordAuditSheet:'변경이력_저장소',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
   researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
   researchWriteWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
@@ -2212,11 +2496,12 @@ async function githubVerifyIntegratedAccess(){
     .then(value=>({value:!!value,error:''}))
     .catch(error=>({value:false,error:(error&&error.message)||'연구개발 권한 확인 오류'}));
 
-  const [card,cash,trip,leave,researchResult,researchWrite]=await Promise.all([
+  const [card,cash,trip,leave,workRecord,researchResult,researchWrite]=await Promise.all([
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cardSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.cashSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.tripSpreadsheetId),
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.leaveSpreadsheetId),
+    githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.workRecordSpreadsheetId),
     researchPromise,
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.researchWriteSpreadsheetId)
   ]);
@@ -2228,6 +2513,8 @@ async function githubVerifyIntegratedAccess(){
     card,
     trip,
     leave,
+    workRecord,
+    hr:!!(leave||workRecord),
     research:researchResult.value,
     researchWrite:!!researchWrite,
     researchError:RESEARCH_ACCESS_ERROR
@@ -2238,12 +2525,14 @@ function githubApplyModuleAccess(access){
     cash:!!access?.cash,
     card:!!access?.card,
     trip:!!access?.trip,
+    hr:!!access?.hr,
     leave:!!access?.leave,
+    workRecord:!!access?.workRecord,
     research:!!access?.research
   };
   window.FRAMEBY_ACCESS_READY=true;
 
-  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab',leave:'leavePrimaryTab',research:'researchPrimaryTab'};
+  const ids={cash:'cashPrimaryTab',card:'cardPrimaryTab',trip:'tripPrimaryTab',hr:'hrPrimaryTab',research:'researchPrimaryTab'};
   Object.entries(ids).forEach(([module,id])=>{
     const el=document.getElementById(id);
     if(!el) return;
@@ -2257,11 +2546,20 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.cash) document.getElementById('cashSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.card) document.getElementById('cardSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
-  if(!window.FRAMEBY_MODULE_ACCESS.leave) document.getElementById('leaveSecondaryMenu')?.classList.add('hidden');
+  if(!window.FRAMEBY_MODULE_ACCESS.hr) document.getElementById('hrSecondaryMenu')?.classList.add('hidden');
+
+  const leaveBtn=document.querySelector('.module-tab[data-hr-page="leave"]');
+  const workBtn=document.querySelector('.module-tab[data-hr-page="work"]');
+  if(leaveBtn){
+    leaveBtn.hidden=!window.FRAMEBY_MODULE_ACCESS.leave;
+    leaveBtn.setAttribute('aria-hidden',window.FRAMEBY_MODULE_ACCESS.leave?'false':'true');
+  }
+  if(workBtn){
+    workBtn.hidden=!window.FRAMEBY_MODULE_ACCESS.workRecord;
+    workBtn.setAttribute('aria-hidden',window.FRAMEBY_MODULE_ACCESS.workRecord?'false':'true');
+  }
 
   // 연구개발 메뉴 접근 여부는 Google Docs 공유권한 기준을 그대로 사용합니다.
-  // 작성 가능 여부는 Apps Script 내부의 기존 WRITER/ADMIN 권한에서 판정하므로,
-  // 저장소 스프레드시트 공유 여부로 "연구노트 작성" 메뉴 자체를 숨기지 않습니다.
   window.FRAMEBY_RESEARCH_WRITE_ACCESS=!!window.FRAMEBY_MODULE_ACCESS.research;
   const researchWriteBtn=document.querySelector('.module-tab[data-research-page="write"]');
   if(researchWriteBtn){
@@ -2273,7 +2571,9 @@ function githubApplyModuleAccess(access){
 }
 function githubOpenAuthorizedInitialModule(){
   if(location.hash==='#sales'){showModule('sales');return true;}
-  const requested=location.hash==='#research'?'research':location.hash==='#leave'?'leave':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
+  if(location.hash==='#work-record'&&githubHasModuleAccess('workRecord')){showModule('hr','work');return true;}
+  if((location.hash==='#hr'||location.hash==='#leave')&&githubHasModuleAccess('hr')){showModule('hr',window.FRAMEBY_MODULE_ACCESS.leave?'leave':'work');return true;}
+  const requested=location.hash==='#research'?'research':location.hash==='#trip'?'trip':location.hash==='#cash'?'cash':location.hash==='#card'?'card':'';
   const target=(requested && githubHasModuleAccess(requested)) ? requested : githubFirstAccessibleModule();
   if(target){showModule(target,githubDefaultPageForModule(target));return true;}
   showModule('sales');
@@ -3433,7 +3733,10 @@ function printSettlement(){
   const w=window.open('','_blank','width=900,height=1100');
   if(!w){alert('인쇄 창을 열 수 없습니다. 팝업 차단을 확인해 주세요.');return;}
   w.document.open();
-  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>연차수당 정산서</title><style>@page{size:A4 portrait;margin:10mm}body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:#111}.print-title{text-align:center;font-size:18pt;font-weight:800;margin-bottom:8mm}.form-section{margin-top:5mm}.form-section-title{font-weight:800;font-size:10pt;padding:2mm 0;border-bottom:2px solid #222}.form-table{width:100%;border-collapse:collapse;table-layout:fixed}.form-table th,.form-table td{border:1px solid #222;padding:2.2mm 1.5mm;text-align:center;font-size:8.5pt}.form-table th{background:#f1f1f1}.form-table .money{text-align:right}.pay-highlight{margin-top:6mm;border-top:2px solid #222;border-bottom:2px solid #222;padding:4mm 2mm}.amount-row{display:grid;grid-template-columns:32mm 1fr;margin-bottom:2mm}.lab,.val{font-weight:800}.confirm-text{text-align:center;font-size:8.5pt;line-height:1.7;margin:8mm 0 7mm}.sign{text-align:right;font-size:9pt}</style></head><body>${buildPrintHtml(currentSettlement)}</body></html>`);
+  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>연차수당 정산서</title><style>@page{size:A4 portrait;margin:10mm}body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:#111}.print-title{text-align:center;font-size:18pt;font-weight:800;margin-bottom:8mm}.form-section{margin-top:5mm}.form-section-title{font-weight:800;font-size:10pt;padding:2mm 0;border-bottom:2px solid #222}.form-table{width:100%;border-collapse:collapse;table-layout:fixed}.form-table th,.form-table td{border:1px solid #222;padding:2.2mm 1.5mm;text-align:center;font-size:8.5pt}.form-table th{background:#f1f1f1}.form-table .money{text-align:right}.pay-highlight{margin-top:6mm;border-top:2px solid #222;border-bottom:2px solid #222;padding:4mm 2mm}.amount-row{display:grid;grid-template-columns:32mm 1fr;margin-bottom:2mm}.lab,.val{font-weight:800}.confirm-text{text-align:center;font-size:8.5pt;line-height:1.7;margin:8mm 0 7mm}.sign{text-align:right;font-size:9pt}</style></head><body>${buildPrintHtml(currentSettlement)}
+
+
+</body></html>`);
   w.document.close();w.focus();setTimeout(()=>w.print(),150);
 }
 function buildPrintHtml(d){
@@ -3466,7 +3769,9 @@ window.syncLeaveOuterSelectors=function(state){
 };
 window.syncLeaveOuterTab=function(page){
   LEAVE_ACTIVE_PAGE=page||'leave';
+  HR_ACTIVE_PAGE='leave';
   document.querySelectorAll('.module-tab[data-leave-page]').forEach(b=>b.classList.toggle('active',b.dataset.leavePage===LEAVE_ACTIVE_PAGE));
+  document.getElementById('leaveSecondaryTools')?.classList.toggle('active',LEAVE_ACTIVE_PAGE==='leave');
   document.getElementById('leaveSecondaryTools')?.classList.toggle('hidden',LEAVE_ACTIVE_PAGE!=='leave');
 };
 async function ensureLeaveApp(){
@@ -3488,7 +3793,7 @@ async function ensureLeaveApp(){
 function initLeaveShell(){
   document.querySelectorAll('.module-tab[data-leave-page]').forEach(btn=>{
     if(btn.dataset.leaveBound)return;btn.dataset.leaveBound='1';
-    btn.addEventListener('click',()=>{LEAVE_ACTIVE_PAGE=btn.dataset.leavePage||'leave';syncModuleHeader('leave','leaveHost');ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));});
+    btn.addEventListener('click',()=>{LEAVE_ACTIVE_PAGE=btn.dataset.leavePage||'leave';syncModuleHeader('hr','leaveHost');ensureLeaveApp().then(app=>app.showSubPage(LEAVE_ACTIVE_PAGE)).catch(e=>alert(e.message));});
   });
   const y=document.getElementById('leaveGlobalYear'),m=document.getElementById('leaveGlobalMonth');
   const change=()=>ensureLeaveApp().then(app=>app.setYearMonth(Number(y?.value),Number(m?.value))).catch(e=>alert(e.message));
@@ -3509,7 +3814,7 @@ async function githubAfterLogin(){
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
-    const allowedModules=['cash','card','trip','leave','research'].filter(m=>access[m]);
+    const allowedModules=['cash','card','trip','hr','research'].filter(m=>access[m]);
 
     // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
     let cardPayload=null;
@@ -3541,7 +3846,7 @@ async function githubAfterLogin(){
       });
     }
 
-    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',leave:'연차관리',research:'연구개발'};
+    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',hr:'인사관리',research:'연구개발'};
     const badge=document.getElementById('statusBadge');
     if(badge){
       const labels=['매출현황',...allowedModules.map(m=>labelMap[m])];
@@ -3552,7 +3857,7 @@ async function githubAfterLogin(){
     GITHUB_ACCESS_TOKEN=null;
     RESEARCH_SESSION_KEY='';RESEARCH_AUTH_EMAIL='';RESEARCH_ACCESS_ERROR='';
     window.FRAMEBY_ACCESS_READY=false;
-    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,leave:false,research:false};
+    window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,hr:false,leave:false,workRecord:false,research:false};
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
@@ -4148,7 +4453,7 @@ async function salesInitDashboard(force=false){
 }
 
 function initIntegratedNav(){
-  ['cashPrimaryTab','cardPrimaryTab','salesPrimaryTab','tripPrimaryTab','leavePrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
+  ['cashPrimaryTab','cardPrimaryTab','salesPrimaryTab','tripPrimaryTab','hrPrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(btn=>{
     if(btn.dataset.moduleBound)return;
     btn.dataset.moduleBound='1';
@@ -10579,6 +10884,374 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 </script>
+<script id="work-record-module">
+/* =========================================================
+   인사관리 > 근무기록
+   기존 GitHub Google OAuth / Sheets API 구조를 그대로 사용
+   별도 Apps Script URL 불필요
+   ========================================================= */
+const WR_EMP_HEADERS=['직원ID','성명','고용형태','입사일','계약시작일','계약종료일','최종근무일','4대보험','시급','근무상태','생성일시','수정일시','삭제여부','삭제일시'];
+const WR_COND_HEADERS=['조건ID','직원ID','적용시작일','적용종료일','근무요일','출근시간','퇴근시간','휴게시간','주소정근로시간','생성일시','수정일시','삭제여부','삭제일시'];
+const WR_LOG_HEADERS=['기록ID','직원ID','근무일자','기록구분','출근시간','퇴근시간','휴게시간','실근무시간','메모','확정여부','생성일시','수정일시','삭제여부','삭제일시'];
+const WR_SETTLE_HEADERS=['정산ID','직원ID','기준최종근무일','정산상태','산정시작일','산정종료일','정산기준임금','기타정산항목','퇴직정산예정액','확정액','완료일시','생성일시','수정일시','삭제여부','삭제일시'];
+const WR_AUDIT_HEADERS=['이력ID','처리일시','구분','대상ID','작업','변경전','변경후','처리경로','처리자'];
+
+const WR_STATE={
+  loaded:false,loading:false,
+  year:2026,month:9,
+  employees:[],conditions:[],records:[],settlements:[],payroll:[],
+  selectedDate:'',selectedEmployeeId:''
+};
+
+function workRecordEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function workRecordMoney(v){const n=ghNum(v);return n?Math.round(n).toLocaleString('ko-KR')+'원':'0원'}
+function workRecordShowError(msg){const el=document.getElementById('wrAlert');if(el)el.innerHTML=msg?`<div class="wr-error">${workRecordEsc(msg)}</div>`:''}
+function workRecordToast(msg){document.querySelector('.wr-toast')?.remove();const el=document.createElement('div');el.className='wr-toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
+function wrSetLoading(show){WR_STATE.loading=!!show;document.getElementById('wrLoading')?.classList.toggle('hidden',!show)}
+function wrCol(n){return ghCol(n)}
+function wrNow(){return ghNow().replace('T',' ')}
+function wrToday(){return ghDate(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()))}
+function wrId(prefix){return `${prefix}-${wrNow().replace(/\D/g,'').slice(0,14)}-${crypto.randomUUID().replace(/-/g,'').slice(0,8).toUpperCase()}`}
+function wrTime(v){const s=ghText(v);const m=s.match(/(\d{1,2}):(\d{2})/);return m?`${String(m[1]).padStart(2,'0')}:${m[2]}`:''}
+function wrDuration(v){if(typeof v==='number'&&Number.isFinite(v)){const mins=Math.round(v*24*60);return `${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`}const s=ghText(v);const m=s.match(/(\d+):(\d{2})/);return m?`${Number(m[1])}:${m[2]}`:s}
+function wrDate(v){return ghDate(v)||ghText(v)}
+function wrNum(v){return ghNum(v)}
+function wrDateAdd(date,delta){const p=wrDate(date).split('-').map(Number),d=new Date(p[0],p[1]-1,p[2]);d.setDate(d.getDate()+delta);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function wrDaysBetween(a,b){const x=Date.parse(wrDate(a)+'T00:00:00'),y=Date.parse(wrDate(b)+'T00:00:00');return Number.isFinite(x)&&Number.isFinite(y)?Math.max(0,Math.floor((y-x)/86400000)+1):0}
+function wrTenureText(a,b){const days=wrDaysBetween(a,b);if(!days)return'-';const y=Math.floor(days/365),m=Math.floor((days-y*365)/30);return `${y?y+'년 ':''}${m?m+'개월':(!y?days+'일':'')}`.trim()}
+function wrActualTime(start,end,breakTime){const t=s=>{const m=wrTime(s).match(/^(\d+):(\d+)$/);return m?Number(m[1])*60+Number(m[2]):null},a=t(start),b=t(end);if(a==null||b==null)return'';let x=b-a;if(x<0)x+=1440;const bm=(()=>{const m=wrDuration(breakTime).match(/^(\d+):(\d+)$/);return m?Number(m[1])*60+Number(m[2]):0})();x=Math.max(0,x-bm);return `${Math.floor(x/60)}:${String(x%60).padStart(2,'0')}`}
+function wrStripInternal(o){const x={};Object.keys(o||{}).forEach(k=>{if(!k.startsWith('__'))x[k]=o[k]});return x}
+
+async function wrReadRows(sheet,headers){
+  const rows=await ghValuesGet(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A2:${wrCol(headers.length)}`);
+  return rows.map((r,i)=>{
+    r=r||[];if(!r.some(v=>ghText(v)!==''))return null;
+    const o={__rowNo:i+2};headers.forEach((h,j)=>o[h]=r[j]??'');
+    return o;
+  }).filter(Boolean);
+}
+async function wrAppendRow(sheet,headers,obj){
+  await ghValuesAppend(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A:${wrCol(headers.length)}`,[headers.map(h=>obj[h]??'')]);
+}
+async function wrUpdateRow(sheet,headers,rowNo,obj){
+  await ghValuesUpdate(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A${rowNo}:${wrCol(headers.length)}${rowNo}`,[headers.map(h=>obj[h]??'')]);
+}
+async function wrAudit(type,targetId,action,before,after){
+  const row={이력ID:wrId('LOG'),처리일시:wrNow(),구분:type,대상ID:targetId,작업:action,변경전:before?JSON.stringify(wrStripInternal(before)):'',변경후:after?JSON.stringify(wrStripInternal(after)):'',처리경로:'웹',처리자:GITHUB_USER_EMAIL||''};
+  await wrAppendRow(INTEGRATED_CONFIG.workRecordAuditSheet,WR_AUDIT_HEADERS,row);
+}
+function wrActive(rows){return rows.filter(r=>String(r.삭제여부||'N').toUpperCase()!=='Y')}
+function wrNormalizeEmployee(r){return {...r,입사일:wrDate(r.입사일),계약시작일:wrDate(r.계약시작일),계약종료일:wrDate(r.계약종료일),최종근무일:wrDate(r.최종근무일),시급:wrNum(r.시급)}}
+function wrNormalizeCondition(r){return {...r,적용시작일:wrDate(r.적용시작일),적용종료일:wrDate(r.적용종료일),출근시간:wrTime(r.출근시간),퇴근시간:wrTime(r.퇴근시간),휴게시간:wrDuration(r.휴게시간),주소정근로시간:wrDuration(r.주소정근로시간)}}
+function wrNormalizeRecord(r){return {...r,근무일자:wrDate(r.근무일자),출근시간:wrTime(r.출근시간),퇴근시간:wrTime(r.퇴근시간),휴게시간:wrDuration(r.휴게시간),실근무시간:wrDuration(r.실근무시간)}}
+function wrNormalizeSettlement(r){return {...r,기준최종근무일:wrDate(r.기준최종근무일),산정시작일:wrDate(r.산정시작일),산정종료일:wrDate(r.산정종료일),정산기준임금:wrNum(r.정산기준임금),기타정산항목:wrNum(r.기타정산항목),퇴직정산예정액:wrNum(r.퇴직정산예정액),확정액:wrNum(r.확정액)}}
+
+async function wrReadPayroll(year,month){
+  const sheet=`급여대장(${month}월)`;
+  try{
+    const rows=await ghValuesGet(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,'B4:T100');
+    const out=[];
+    for(let i=2;i<rows.length;i++){
+      const r=rows[i]||[],no=ghText(r[0]),name=ghText(r[1]);
+      if(!name)continue;if(no==='합계'||name==='합계')break;
+      out.push({number:no,name,totalWork:r[2]||'',actualWork:r[3]||'',basePay:ghNum(r[4]),weeklyPay:ghNum(r[5]),extraPay:ghNum(r[6]),grossPay:ghNum(r[7]),pension:ghNum(r[8]),health:ghNum(r[9]),employment:ghNum(r[10]),care:ghNum(r[11]),incomeTax:ghNum(r[12]),localTax:ghNum(r[13]),salaryDeduction:ghNum(r[14]),netPay:ghNum(r[15])});
+    }
+    return out;
+  }catch(e){return[]}
+}
+
+async function wrLoadData(force=false){
+  if(WR_STATE.loading)return;
+  if(WR_STATE.loaded&&!force){workRecordRenderAll();return}
+  wrSetLoading(true);workRecordShowError('');
+  try{
+    const [emps,conds,logs,sets,payroll]=await Promise.all([
+      wrReadRows(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS),
+      wrReadRows(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS),
+      wrReadRows(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS),
+      wrReadRows(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS),
+      wrReadPayroll(WR_STATE.year,WR_STATE.month)
+    ]);
+    WR_STATE.employees=wrActive(emps).map(wrNormalizeEmployee);
+    WR_STATE.conditions=wrActive(conds).map(wrNormalizeCondition);
+    WR_STATE.records=wrActive(logs).map(wrNormalizeRecord);
+    WR_STATE.settlements=wrActive(sets).map(wrNormalizeSettlement);
+    WR_STATE.payroll=payroll;
+    WR_STATE.loaded=true;
+    workRecordSyncSelectors();
+    workRecordRenderAll();
+  }catch(e){workRecordShowError(e?.message||String(e));throw e}
+  finally{wrSetLoading(false)}
+}
+async function ensureWorkRecordApp(force=false){if(!window.FRAMEBY_MODULE_ACCESS?.workRecord&&window.FRAMEBY_ACCESS_READY)throw new Error('근무기록 스프레드시트 공유 권한이 없습니다.');await wrLoadData(force);return WR_STATE}
+
+function workRecordSyncSelectors(){
+  const years=new Set([2025,2026,2027,WR_STATE.year]);WR_STATE.employees.forEach(e=>{const y=Number((e.입사일||'').slice(0,4));if(y)years.add(y)});
+  const y=document.getElementById('workGlobalYear'),m=document.getElementById('workGlobalMonth');
+  if(y)y.innerHTML=[...years].sort().map(v=>`<option value="${v}" ${Number(v)===WR_STATE.year?'selected':''}>${v}년</option>`).join('');
+  if(m)m.innerHTML=Array.from({length:12},(_,i)=>i+1).map(v=>`<option value="${v}" ${v===WR_STATE.month?'selected':''}>${v}월</option>`).join('');
+}
+function wrEmployee(id){return WR_STATE.employees.find(e=>String(e.직원ID)===String(id))}
+function wrConditions(id){return WR_STATE.conditions.filter(c=>String(c.직원ID)===String(id)).sort((a,b)=>(a.적용시작일||'').localeCompare(b.적용시작일||''))}
+function wrConditionFor(id,date){return wrConditions(id).filter(c=>c.적용시작일&&c.적용시작일<=date&&(!c.적용종료일||c.적용종료일>=date)).sort((a,b)=>(b.적용시작일||'').localeCompare(a.적용시작일||''))[0]||null}
+function wrLatestCondition(id){return wrConditions(id).sort((a,b)=>(b.적용시작일||'').localeCompare(a.적용시작일||''))[0]||null}
+function wrRecordFor(id,date){return WR_STATE.records.filter(r=>String(r.직원ID)===String(id)&&r.근무일자===date).sort((a,b)=>(b.수정일시||'').localeCompare(a.수정일시||''))[0]||null}
+function wrWeekdayMatches(text,weekday){
+  const raw=ghText(text).replace(/\s/g,'');if(!raw)return false;
+  if(['매일','월~일','월-일'].includes(raw))return true;
+  if(['평일','월~금','월-금'].includes(raw))return weekday>=1&&weekday<=5;
+  const map={일:0,월:1,화:2,수:3,목:4,금:5,토:6},range=raw.match(/^([일월화수목금토])[~-]([일월화수목금토])$/);
+  if(range){const a=map[range[1]],b=map[range[2]];return a<=b?(weekday>=a&&weekday<=b):(weekday>=a||weekday<=b)}
+  return raw.split(/[,·/]/).some(x=>map[x]===weekday);
+}
+function wrResolveDay(date){
+  const d=new Date(date+'T00:00:00'),weekday=d.getDay(),workers=[];
+  WR_STATE.employees.forEach(emp=>{
+    const id=emp.직원ID,start=emp.계약시작일||emp.입사일,end=emp.최종근무일||emp.계약종료일;
+    if(start&&date<start)return;if(end&&date>end)return;
+    const rec=wrRecordFor(id,date);
+    if(rec&&rec.기록구분==='휴무')return;
+    const cond=wrConditionFor(id,date);
+    if(rec){
+      workers.push({employee:emp,condition:cond,record:rec,source:'record',start:rec.출근시간,end:rec.퇴근시간,breakTime:rec.휴게시간,actual:rec.실근무시간||wrActualTime(rec.출근시간,rec.퇴근시간,rec.휴게시간)});
+    }else if(cond&&wrWeekdayMatches(cond.근무요일,weekday)){
+      workers.push({employee:emp,condition:cond,record:null,source:'condition',start:cond.출근시간,end:cond.퇴근시간,breakTime:cond.휴게시간,actual:wrActualTime(cond.출근시간,cond.퇴근시간,cond.휴게시간)});
+    }
+  });
+  return workers;
+}
+function wrMonthDays(){const n=new Date(WR_STATE.year,WR_STATE.month,0).getDate(),out=[];for(let i=1;i<=n;i++)out.push(`${WR_STATE.year}-${String(WR_STATE.month).padStart(2,'0')}-${String(i).padStart(2,'0')}`);return out}
+
+function workRecordRenderAll(){workRecordRenderCalendar();workRecordRenderPayroll();workRecordRenderEmployees();workRecordRenderSettlements();workRecordShowPage(WORK_RECORD_ACTIVE_PAGE,false)}
+function workRecordShowPage(page,load=true){
+  WORK_RECORD_ACTIVE_PAGE=page||'calendar';
+  document.querySelectorAll('[data-wr-view]').forEach(v=>v.classList.toggle('active',v.dataset.wrView===WORK_RECORD_ACTIVE_PAGE));
+  document.querySelectorAll('.module-tab[data-wr-page]').forEach(b=>b.classList.toggle('active',b.dataset.wrPage===WORK_RECORD_ACTIVE_PAGE));
+  if(load&&HR_ACTIVE_PAGE==='work')ensureWorkRecordApp(false).catch(e=>workRecordShowError(e?.message||String(e)));
+}
+
+function workRecordRenderCalendar(){
+  const cal=document.getElementById('wrCalendar');if(!cal)return;
+  const monthStart=new Date(WR_STATE.year,WR_STATE.month-1,1),firstDow=monthStart.getDay(),daysInMonth=new Date(WR_STATE.year,WR_STATE.month,0).getDate();
+  const prevDays=new Date(WR_STATE.year,WR_STATE.month-1,0).getDate(),today=wrToday(),cells=[];
+  for(let i=0;i<42;i++){
+    let date='',day=0,outside=false;
+    if(i<firstDow){day=prevDays-firstDow+i+1;const d=new Date(WR_STATE.year,WR_STATE.month-2,day);date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;outside=true}
+    else if(i>=firstDow+daysInMonth){day=i-(firstDow+daysInMonth)+1;const d=new Date(WR_STATE.year,WR_STATE.month,day);date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;outside=true}
+    else{day=i-firstDow+1;date=`${WR_STATE.year}-${String(WR_STATE.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`}
+    cells.push({date,day,outside});
+  }
+  const monthRecords=WR_STATE.records.filter(r=>r.근무일자.startsWith(`${WR_STATE.year}-${String(WR_STATE.month).padStart(2,'0')}-`));
+  const scheduled=new Set(),monthDays=wrMonthDays();monthDays.forEach(date=>wrResolveDay(date).forEach(w=>{if(w.source==='condition')scheduled.add(`${w.employee.직원ID}|${date}`)}));
+  document.getElementById('wrKpiEmployees').textContent=WR_STATE.employees.length+'명';
+  document.getElementById('wrKpiScheduled').textContent=scheduled.size+'일';
+  document.getElementById('wrKpiOverrides').textContent=monthRecords.length+'건';
+  document.getElementById('wrKpiSettlements').textContent=WR_STATE.settlements.filter(x=>x.정산상태!=='정산완료'&&x.정산상태!=='대상아님').length+'명';
+  document.getElementById('wrCalendarTitle').textContent=`${WR_STATE.year}년 ${WR_STATE.month}월`;
+
+  let html='';
+  for(let w=0;w<6;w++){
+    const week=cells.slice(w*7,w*7+7),weekStart=week[0].date,weekEnd=week[6].date;
+    const periods=[];
+    WR_STATE.employees.slice(0,5).forEach((emp,row)=>{
+      const start=emp.계약시작일||emp.입사일,end=emp.최종근무일||emp.계약종료일||'9999-12-31';
+      if(!start||start>weekEnd||end<weekStart)return;
+      let a=0,b=6;for(let i=0;i<7;i++){if(week[i].date>=start){a=i;break}}for(let i=6;i>=0;i--){if(week[i].date<=end){b=i;break}}
+      const cls=(a>0&&b<6)?'':a>0?'end':b<6?'start':'mid';
+      periods.push(`<div class="wr-period ${cls}" style="grid-column:${a+1}/${b+2};grid-row:${row+1}" title="${workRecordEsc(emp.성명)}">${workRecordEsc(emp.성명)} · ${workRecordEsc(emp.고용형태||'')}</div>`);
+    });
+    html+=`<div class="wr-week">`;
+    week.forEach(c=>{
+      const changes=!c.outside?WR_STATE.records.filter(r=>r.근무일자===c.date):[];
+      const chips=changes.slice(0,2).map(r=>{const emp=wrEmployee(r.직원ID),off=r.기록구분==='휴무';return `<div class="wr-event ${off?'gray':''}"><span>${workRecordEsc(emp?.성명||'')} ${off?'휴무':`${workRecordEsc(r.출근시간)}~${workRecordEsc(r.퇴근시간)}`}</span><b>${off?'휴무':'변경'}</b></div>`}).join('');
+      html+=`<div class="wr-day ${c.outside?'outside':''} ${c.date===today?'today':''}" ${c.outside?'':`data-wr-date="${c.date}"`}><div class="wr-day-number">${c.day}</div>${chips?`<div class="wr-day-events">${chips}${changes.length>2?`<div class="wr-event"><span>외 ${changes.length-2}건</span></div>`:''}</div>`:''}</div>`;
+    });
+    html+=`<div class="wr-period-layer">${periods.join('')}</div></div>`;
+  }
+  cal.innerHTML=html;
+  cal.querySelectorAll('[data-wr-date]').forEach(el=>el.addEventListener('click',()=>workRecordOpenDay(el.dataset.wrDate)));
+}
+
+function workRecordRenderPayroll(){
+  const rows=WR_STATE.payroll||[],gross=rows.reduce((a,r)=>a+wrNum(r.grossPay),0),net=rows.reduce((a,r)=>a+wrNum(r.netPay),0);
+  document.getElementById('wrPayCount').textContent=rows.length+'명';
+  document.getElementById('wrPayGross').textContent=workRecordMoney(gross);
+  document.getElementById('wrPayNet').textContent=workRecordMoney(net);
+  document.getElementById('wrPayrollSource').textContent=`급여대장(${WR_STATE.month}월)`;
+  const body=document.getElementById('wrPayrollBody');if(!body)return;
+  body.innerHTML=rows.map(r=>`<tr><td><b>${workRecordEsc(r.name)}</b></td><td class="num">${workRecordEsc(r.totalWork)}</td><td class="num">${workRecordEsc(r.actualWork)}</td><td class="num">${wrNum(r.basePay).toLocaleString()}</td><td class="num">${wrNum(r.weeklyPay).toLocaleString()}</td><td class="num">${wrNum(r.extraPay).toLocaleString()}</td><td class="num"><b>${wrNum(r.grossPay).toLocaleString()}</b></td><td class="num">${wrNum(r.pension).toLocaleString()}</td><td class="num">${wrNum(r.health).toLocaleString()}</td><td class="num">${wrNum(r.employment).toLocaleString()}</td><td class="num">${wrNum(r.care).toLocaleString()}</td><td class="num">${wrNum(r.incomeTax).toLocaleString()}</td><td class="num">${wrNum(r.localTax).toLocaleString()}</td><td class="num">${wrNum(r.salaryDeduction).toLocaleString()}</td><td class="num"><b>${wrNum(r.netPay).toLocaleString()}</b></td></tr>`).join('')||'<tr><td colspan="15" class="empty">해당 월 급여대장 자료가 없습니다.</td></tr>';
+}
+
+function workRecordEmployeeView(emp){
+  const cond=wrLatestCondition(emp.직원ID)||{};
+  return {emp,cond};
+}
+function workRecordRenderEmployees(){
+  const body=document.getElementById('wrEmployeeBody');if(!body)return;
+  const rows=[...WR_STATE.employees].sort((a,b)=>{const ax=a.근무상태==='퇴사'?1:0,bx=b.근무상태==='퇴사'?1:0;return ax-bx||(a.입사일||'').localeCompare(b.입사일||'')});
+  body.innerHTML=rows.map(emp=>{const c=wrLatestCondition(emp.직원ID)||{},retired=emp.근무상태==='퇴사'||!!emp.최종근무일;return `<tr data-wr-employee="${workRecordEsc(emp.직원ID)}" class="${retired?'employee-row-closed':''}"><td><b>${workRecordEsc(emp.성명)}</b></td><td>${workRecordEsc(emp.고용형태)}</td><td>${workRecordEsc(emp.입사일||'-')}</td><td>${workRecordEsc(emp.계약시작일||'-')}</td><td>${workRecordEsc(emp.계약종료일||'-')}</td><td>${workRecordEsc(emp.최종근무일||'-')}</td><td>${workRecordEsc(c.근무요일||'-')}</td><td>${workRecordEsc(c.출근시간||'-')}</td><td>${workRecordEsc(c.퇴근시간||'-')}</td><td>${workRecordEsc(c.휴게시간||'-')}</td><td>${workRecordEsc(c.주소정근로시간||'-')}</td><td>${workRecordEsc(emp['4대보험']||'-')}</td><td class="num">${wrNum(emp.시급).toLocaleString()}원</td><td><span class="pill ${retired?'gray':'green'}">${retired?'퇴사':'재직'}</span></td><td><div class="wr-row-actions"><button class="action" data-wr-edit-employee="${workRecordEsc(emp.직원ID)}">수정</button><button class="row-delete-btn" data-wr-delete-employee="${workRecordEsc(emp.직원ID)}">삭제</button></div></td></tr>`}).join('')||'<tr><td colspan="15" class="empty">등록된 직원이 없습니다.</td></tr>';
+  body.querySelectorAll('[data-wr-edit-employee]').forEach(b=>b.addEventListener('click',()=>workRecordEditEmployeeRow(b.dataset.wrEditEmployee)));
+  body.querySelectorAll('[data-wr-delete-employee]').forEach(b=>b.addEventListener('click',()=>workRecordDeleteEmployee(b.dataset.wrDeleteEmployee)));
+}
+function workRecordEditEmployeeRow(id){
+  const emp=wrEmployee(id),c=wrLatestCondition(id)||{};if(!emp)return;
+  const tr=document.querySelector(`tr[data-wr-employee="${CSS.escape(id)}"]`);if(!tr)return;tr.classList.add('wr-editing');
+  tr.innerHTML=`
+    <td><input data-f="성명" value="${workRecordEsc(emp.성명)}"></td>
+    <td><select data-f="고용형태"><option ${emp.고용형태==='파트타임'?'selected':''}>파트타임</option><option ${emp.고용형태==='단기직'?'selected':''}>단기직</option><option ${emp.고용형태==='계약직'?'selected':''}>계약직</option></select></td>
+    <td><input data-f="입사일" type="date" value="${workRecordEsc(emp.입사일)}"></td>
+    <td><input data-f="계약시작일" type="date" value="${workRecordEsc(emp.계약시작일)}"></td>
+    <td><input data-f="계약종료일" type="date" value="${workRecordEsc(emp.계약종료일)}"></td>
+    <td><input data-f="최종근무일" type="date" value="${workRecordEsc(emp.최종근무일)}"></td>
+    <td><input data-c="근무요일" value="${workRecordEsc(c.근무요일||'')}"></td>
+    <td><input data-c="출근시간" type="time" value="${workRecordEsc(c.출근시간||'')}"></td>
+    <td><input data-c="퇴근시간" type="time" value="${workRecordEsc(c.퇴근시간||'')}"></td>
+    <td><input data-c="휴게시간" value="${workRecordEsc(c.휴게시간||'')}"></td>
+    <td><input data-c="주소정근로시간" value="${workRecordEsc(c.주소정근로시간||'')}"></td>
+    <td><select data-f="4대보험"><option ${emp['4대보험']==='가입'?'selected':''}>가입</option><option ${emp['4대보험']==='미가입'?'selected':''}>미가입</option></select></td>
+    <td><input data-f="시급" type="number" value="${wrNum(emp.시급)}"></td>
+    <td><select data-f="근무상태"><option ${emp.근무상태!=='퇴사'?'selected':''}>재직</option><option ${emp.근무상태==='퇴사'?'selected':''}>퇴사</option></select></td>
+    <td><div class="wr-row-actions"><button class="action active" data-wr-save-edit="${workRecordEsc(id)}">저장</button><button class="row-delete-btn" data-wr-cancel-edit>취소</button></div></td>`;
+  tr.querySelector('[data-wr-save-edit]').addEventListener('click',()=>workRecordSaveEmployeeRow(id,tr,c));
+  tr.querySelector('[data-wr-cancel-edit]').addEventListener('click',()=>workRecordRenderEmployees());
+}
+async function workRecordSaveEmployeeRow(id,tr,oldCond){
+  const emp={...wrEmployee(id)},cond={...oldCond};
+  tr.querySelectorAll('[data-f]').forEach(el=>emp[el.dataset.f]=el.value);
+  tr.querySelectorAll('[data-c]').forEach(el=>cond[el.dataset.c]=el.value);
+  emp.근무상태=emp.최종근무일?'퇴사':emp.근무상태;
+  const oldEmp=wrEmployee(id),now=wrNow();emp.수정일시=now;emp.삭제여부='N';emp.삭제일시='';emp.생성일시=oldEmp.생성일시||now;
+  wrSetLoading(true);
+  try{
+    await wrUpdateRow(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS,oldEmp.__rowNo,emp);await wrAudit('직원정보',id,'수정',oldEmp,emp);
+    const changed=['근무요일','출근시간','퇴근시간','휴게시간','주소정근로시간'].some(k=>ghText(oldCond?.[k])!==ghText(cond[k]));
+    if(changed){
+      const effective=(emp.계약시작일&&emp.계약시작일>wrToday())?emp.계약시작일:wrToday();
+      await workRecordSaveConditionFromDate(id,effective,cond);
+    }
+    if(emp.최종근무일)await workRecordEnsureSettlement(emp);
+    WR_STATE.loaded=false;await wrLoadData(true);workRecordToast('직원정보가 저장되었습니다.');
+  }catch(e){workRecordShowError(e?.message||String(e))}
+  finally{wrSetLoading(false)}
+}
+async function workRecordDeleteEmployee(id){
+  const emp=wrEmployee(id);if(!emp||!confirm(`${emp.성명} 직원을 삭제 처리할까요?`))return;
+  const after={...emp,삭제여부:'Y',삭제일시:wrNow(),수정일시:wrNow()};wrSetLoading(true);
+  try{await wrUpdateRow(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS,emp.__rowNo,after);await wrAudit('직원정보',id,'삭제',emp,after);WR_STATE.loaded=false;await wrLoadData(true);workRecordToast('삭제 처리되었습니다.')}catch(e){workRecordShowError(e?.message||String(e))}finally{wrSetLoading(false)}
+}
+
+function workRecordRenderSettlements(){
+  const body=document.getElementById('wrSettlementBody');if(!body)return;
+  const map=Object.fromEntries(WR_STATE.employees.map(e=>[e.직원ID,e])),rows=[...WR_STATE.settlements].sort((a,b)=>(b.기준최종근무일||'').localeCompare(a.기준최종근무일||''));
+  document.getElementById('wrSettleAll').textContent=rows.length+'명';document.getElementById('wrSettleWait').textContent=rows.filter(r=>r.정산상태==='정산예정'||r.정산상태==='검토대상').length+'명';document.getElementById('wrSettleDone').textContent=rows.filter(r=>r.정산상태==='정산완료').length+'명';document.getElementById('wrSettleNo').textContent=rows.filter(r=>r.정산상태==='대상아님').length+'명';
+  body.innerHTML=rows.map(r=>{const e=map[r.직원ID]||{},status=r.정산상태||'검토대상',cls=status==='정산완료'?'green':status==='대상아님'?'gray':'orange';return `<tr><td><b>${workRecordEsc(e.성명||'-')}</b></td><td>${workRecordEsc(e.고용형태||'-')}</td><td>${workRecordEsc(e.입사일||'-')}</td><td>${workRecordEsc(r.기준최종근무일||e.최종근무일||'-')}</td><td>${workRecordEsc(wrTenureText(e.입사일,r.기준최종근무일||e.최종근무일))}</td><td><span class="pill ${cls}">${workRecordEsc(status)}</span></td><td class="num">${wrNum(r.퇴직정산예정액).toLocaleString()}원</td><td class="num">${wrNum(r.확정액).toLocaleString()}원</td><td><button class="action" data-wr-settle="${workRecordEsc(r.정산ID)}">보기/수정</button></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">퇴직정산 검토 대상이 없습니다.</td></tr>';
+  body.querySelectorAll('[data-wr-settle]').forEach(b=>b.addEventListener('click',()=>workRecordOpenSettlement(b.dataset.wrSettle)));
+}
+
+function workRecordOpenDay(date){
+  WR_STATE.selectedDate=date;WR_STATE.selectedEmployeeId='';document.getElementById('wrWorkModalDate').textContent=date;
+  const workers=wrResolveDay(date),cards=document.getElementById('wrWorkerCards');
+  cards.innerHTML=workers.length?workers.map(w=>`<button type="button" class="wr-worker-card" data-wr-worker="${workRecordEsc(w.employee.직원ID)}"><div><div class="wr-worker-name">${workRecordEsc(w.employee.성명)}</div><div class="wr-worker-sub">${workRecordEsc(w.start||'-')}~${workRecordEsc(w.end||'-')} ${w.source==='record'?'· 개별 기록':'· 기본 근무조건'}</div></div><span class="pill ${w.source==='record'?'orange':'blue'}">${w.source==='record'?'변경':'기본'}</span></button>`).join(''):'<div class="wr-empty">이 날짜에 자동 표시되는 근무자가 없습니다.</div>';
+  cards.querySelectorAll('[data-wr-worker]').forEach(b=>b.addEventListener('click',()=>workRecordSelectWorker(b.dataset.wrWorker)));
+  const sel=document.getElementById('wrWorkerSelect');sel.innerHTML='<option value="">선택</option>'+WR_STATE.employees.map(e=>`<option value="${workRecordEsc(e.직원ID)}">${workRecordEsc(e.성명)} · ${workRecordEsc(e.고용형태)}</option>`).join('');
+  document.getElementById('wrAddWorkerBox').classList.add('hidden');document.getElementById('wrSelectedEmployeeId').value='';document.getElementById('wrDefaultBox').textContent='근무자를 선택하면 해당 직원의 기본 근무조건을 표시합니다.';
+  ['wrWorkStart','wrWorkEnd','wrWorkBreak','wrWorkActual','wrWorkMemo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('wrDeleteRecordBtn').classList.add('hidden');document.querySelector('input[name="wrScope"][value="one"]').checked=true;
+  workRecordOpenModal('wrWorkModal');if(workers.length===1)workRecordSelectWorker(workers[0].employee.직원ID);
+}
+function workRecordSelectWorker(id){
+  const emp=wrEmployee(id);if(!emp)return;WR_STATE.selectedEmployeeId=id;document.getElementById('wrSelectedEmployeeId').value=id;
+  document.querySelectorAll('.wr-worker-card').forEach(b=>b.classList.toggle('active',b.dataset.wrWorker===id));
+  const date=WR_STATE.selectedDate,cond=wrConditionFor(id,date),rec=wrRecordFor(id,date);
+  document.getElementById('wrDefaultBox').innerHTML=cond?`<b>${workRecordEsc(emp.성명)} 기본 근무조건</b><br>${workRecordEsc(emp.고용형태)} · ${workRecordEsc(cond.근무요일)} · ${workRecordEsc(cond.출근시간)}~${workRecordEsc(cond.퇴근시간)} · 휴게 ${workRecordEsc(cond.휴게시간)} · 주 소정 ${workRecordEsc(cond.주소정근로시간)}`:`<b>${workRecordEsc(emp.성명)}</b><br>이 날짜에 적용되는 기본 근무조건이 없습니다.`;
+  document.getElementById('wrWorkStart').value=rec?.출근시간||cond?.출근시간||'';
+  document.getElementById('wrWorkEnd').value=rec?.퇴근시간||cond?.퇴근시간||'';
+  document.getElementById('wrWorkBreak').value=rec?.휴게시간||cond?.휴게시간||'';
+  document.getElementById('wrWorkActual').value=rec?.실근무시간||wrActualTime(rec?.출근시간||cond?.출근시간,rec?.퇴근시간||cond?.퇴근시간,rec?.휴게시간||cond?.휴게시간);
+  document.getElementById('wrWorkMemo').value=rec?.메모||'';
+  document.getElementById('wrDeleteRecordBtn').classList.remove('hidden');
+  document.getElementById('wrDeleteRecordBtn').textContent=rec?'수정기록 삭제':'이 날짜 근무 제외';
+}
+async function workRecordSaveRecord(){
+  const id=document.getElementById('wrSelectedEmployeeId').value,date=WR_STATE.selectedDate;if(!id){workRecordToast('근무자를 먼저 선택해주세요.');return}
+  const scope=document.querySelector('input[name="wrScope"]:checked')?.value||'one',start=document.getElementById('wrWorkStart').value,end=document.getElementById('wrWorkEnd').value,br=document.getElementById('wrWorkBreak').value,actual=document.getElementById('wrWorkActual').value||wrActualTime(start,end,br),memo=document.getElementById('wrWorkMemo').value;
+  wrSetLoading(true);
+  try{
+    if(scope==='future'){
+      const cond=wrConditionFor(id,date)||wrLatestCondition(id)||{};await workRecordSaveConditionFromDate(id,date,{...cond,출근시간:start,퇴근시간:end,휴게시간:br});workRecordToast('이 날짜 이후 기본 근무시간이 변경되었습니다.');
+    }else{
+      const old=wrRecordFor(id,date),row={기록ID:old?.기록ID||wrId('WORK'),직원ID:id,근무일자:date,기록구분:old?.기록구분==='추가'?'추가':(wrConditionFor(id,date)?'개별수정':'추가'),출근시간:start,퇴근시간:end,휴게시간:br,실근무시간:actual,메모:memo,확정여부:old?.확정여부||'N',생성일시:old?.생성일시||wrNow(),수정일시:wrNow(),삭제여부:'N',삭제일시:''};
+      if(old)await wrUpdateRow(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS,old.__rowNo,row);else await wrAppendRow(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS,row);
+      await wrAudit('근무기록',row.기록ID,old?'수정':'추가',old,row);workRecordToast(`${wrEmployee(id)?.성명||''}의 ${date} 근무기록이 저장되었습니다.`);
+    }
+    workRecordCloseModal('wrWorkModal');WR_STATE.loaded=false;await wrLoadData(true);
+  }catch(e){workRecordShowError(e?.message||String(e))}finally{wrSetLoading(false)}
+}
+async function workRecordSaveConditionFromDate(id,date,newValues){
+  const current=wrConditionFor(id,date),now=wrNow(),emp=wrEmployee(id);
+  if(current&&current.적용시작일===date){
+    const after={...current,근무요일:newValues.근무요일||current.근무요일,출근시간:wrTime(newValues.출근시간),퇴근시간:wrTime(newValues.퇴근시간),휴게시간:wrDuration(newValues.휴게시간),주소정근로시간:wrDuration(newValues.주소정근로시간||current.주소정근로시간),수정일시:now,삭제여부:'N',삭제일시:''};
+    await wrUpdateRow(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS,current.__rowNo,after);await wrAudit('근무조건',current.조건ID,'수정',current,after);return after;
+  }
+  let end=emp?.계약종료일||'';
+  if(current){end=current.적용종료일||end;const before={...current},after={...current,적용종료일:wrDateAdd(date,-1),수정일시:now};await wrUpdateRow(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS,current.__rowNo,after);await wrAudit('근무조건',current.조건ID,'수정',before,after)}
+  const row={조건ID:wrId('COND'),직원ID:id,적용시작일:date,적용종료일:end,근무요일:newValues.근무요일||current?.근무요일||'월~금',출근시간:wrTime(newValues.출근시간),퇴근시간:wrTime(newValues.퇴근시간),휴게시간:wrDuration(newValues.휴게시간),주소정근로시간:wrDuration(newValues.주소정근로시간||current?.주소정근로시간),생성일시:now,수정일시:now,삭제여부:'N',삭제일시:''};
+  await wrAppendRow(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS,row);await wrAudit('근무조건',row.조건ID,'추가',null,row);return row;
+}
+async function workRecordDeleteRecord(){
+  const id=WR_STATE.selectedEmployeeId,date=WR_STATE.selectedDate;if(!id||!date)return;const old=wrRecordFor(id,date);if(!confirm(old?'이 날짜의 수정기록을 삭제하고 기본 근무조건으로 되돌릴까요?':'이 날짜를 근무 제외(휴무) 처리할까요?'))return;
+  wrSetLoading(true);
+  try{
+    if(old){const after={...old,삭제여부:'Y',삭제일시:wrNow(),수정일시:wrNow()};await wrUpdateRow(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS,old.__rowNo,after);await wrAudit('근무기록',old.기록ID,'삭제',old,after)}
+    else{const row={기록ID:wrId('WORK'),직원ID:id,근무일자:date,기록구분:'휴무',출근시간:'',퇴근시간:'',휴게시간:'',실근무시간:'',메모:'해당 날짜 근무 제외',확정여부:'N',생성일시:wrNow(),수정일시:wrNow(),삭제여부:'N',삭제일시:''};await wrAppendRow(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS,row);await wrAudit('근무기록',row.기록ID,'추가',null,row)}
+    workRecordCloseModal('wrWorkModal');WR_STATE.loaded=false;await wrLoadData(true);workRecordToast(old?'수정기록이 삭제되었습니다.':'근무 제외 처리되었습니다.');
+  }catch(e){workRecordShowError(e?.message||String(e))}finally{wrSetLoading(false)}
+}
+
+function workRecordOpenEmployeeModal(){['wrEmpName','wrEmpHire','wrEmpContractStart','wrEmpContractEnd','wrEmpWeekdays','wrEmpWage','wrEmpStart','wrEmpEnd','wrEmpBreak','wrEmpWeekly'].forEach(id=>document.getElementById(id).value='');document.getElementById('wrEmpType').value='파트타임';document.getElementById('wrEmpInsurance').value='가입';workRecordOpenModal('wrEmployeeModal')}
+async function workRecordSaveNewEmployee(){
+  const now=wrNow(),emp={직원ID:wrId('EMP'),성명:ghText(document.getElementById('wrEmpName').value),고용형태:document.getElementById('wrEmpType').value,입사일:document.getElementById('wrEmpHire').value,계약시작일:document.getElementById('wrEmpContractStart').value,계약종료일:document.getElementById('wrEmpContractEnd').value,최종근무일:'','4대보험':document.getElementById('wrEmpInsurance').value,시급:wrNum(document.getElementById('wrEmpWage').value),근무상태:'재직',생성일시:now,수정일시:now,삭제여부:'N',삭제일시:''};
+  if(!emp.성명||!emp.입사일){workRecordToast('성명과 입사일을 입력해주세요.');return}
+  const cond={조건ID:wrId('COND'),직원ID:emp.직원ID,적용시작일:document.getElementById('wrEmpContractStart').value||emp.입사일,적용종료일:document.getElementById('wrEmpContractEnd').value,근무요일:document.getElementById('wrEmpWeekdays').value,출근시간:document.getElementById('wrEmpStart').value,퇴근시간:document.getElementById('wrEmpEnd').value,휴게시간:document.getElementById('wrEmpBreak').value,주소정근로시간:document.getElementById('wrEmpWeekly').value,생성일시:now,수정일시:now,삭제여부:'N',삭제일시:''};
+  wrSetLoading(true);
+  try{await wrAppendRow(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS,emp);await wrAudit('직원정보',emp.직원ID,'추가',null,emp);await wrAppendRow(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS,cond);await wrAudit('근무조건',cond.조건ID,'추가',null,cond);workRecordCloseModal('wrEmployeeModal');WR_STATE.loaded=false;await wrLoadData(true);workRecordToast('직원이 등록되었습니다.')}catch(e){workRecordShowError(e?.message||String(e))}finally{wrSetLoading(false)}
+}
+async function workRecordEnsureSettlement(emp){
+  const existing=WR_STATE.settlements.find(s=>String(s.직원ID)===String(emp.직원ID));
+  if(existing){if(existing.기준최종근무일===emp.최종근무일)return existing;const after={...existing,기준최종근무일:emp.최종근무일,수정일시:wrNow()};await wrUpdateRow(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS,existing.__rowNo,after);await wrAudit('퇴직정산',existing.정산ID,'수정',existing,after);return after}
+  const now=wrNow(),row={정산ID:wrId('SET'),직원ID:emp.직원ID,기준최종근무일:emp.최종근무일,정산상태:'검토대상',산정시작일:'',산정종료일:'',정산기준임금:'',기타정산항목:'',퇴직정산예정액:'',확정액:'',완료일시:'',생성일시:now,수정일시:now,삭제여부:'N',삭제일시:''};await wrAppendRow(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS,row);await wrAudit('퇴직정산',row.정산ID,'추가',null,row);return row;
+}
+
+function workRecordOpenSettlement(id){
+  const s=WR_STATE.settlements.find(x=>x.정산ID===id);if(!s)return;const e=wrEmployee(s.직원ID);
+  document.getElementById('wrSettlementId').value=id;document.getElementById('wrSettlementModalName').textContent=e?`${e.성명} · ${e.고용형태}`:'';
+  document.getElementById('wrSettlementStatus').value=s.정산상태||'검토대상';document.getElementById('wrSettlementLastDate').value=s.기준최종근무일||e?.최종근무일||'';document.getElementById('wrSettlementStart').value=s.산정시작일||'';document.getElementById('wrSettlementEnd').value=s.산정종료일||'';document.getElementById('wrSettlementBase').value=wrNum(s.정산기준임금)||'';document.getElementById('wrSettlementEtc').value=wrNum(s.기타정산항목)||'';document.getElementById('wrSettlementExpected').value=wrNum(s.퇴직정산예정액)||'';document.getElementById('wrSettlementConfirmed').value=wrNum(s.확정액)||'';workRecordOpenModal('wrSettlementModal');
+}
+async function workRecordSaveSettlement(){
+  const id=document.getElementById('wrSettlementId').value,old=WR_STATE.settlements.find(x=>x.정산ID===id);if(!old)return;
+  const status=document.getElementById('wrSettlementStatus').value,after={...old,기준최종근무일:document.getElementById('wrSettlementLastDate').value,정산상태:status,산정시작일:document.getElementById('wrSettlementStart').value,산정종료일:document.getElementById('wrSettlementEnd').value,정산기준임금:wrNum(document.getElementById('wrSettlementBase').value),기타정산항목:wrNum(document.getElementById('wrSettlementEtc').value),퇴직정산예정액:wrNum(document.getElementById('wrSettlementExpected').value),확정액:wrNum(document.getElementById('wrSettlementConfirmed').value),완료일시:status==='정산완료'?(old.완료일시||wrNow()):'',수정일시:wrNow(),삭제여부:'N',삭제일시:''};
+  wrSetLoading(true);try{await wrUpdateRow(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS,old.__rowNo,after);await wrAudit('퇴직정산',id,'수정',old,after);workRecordCloseModal('wrSettlementModal');WR_STATE.loaded=false;await wrLoadData(true);workRecordToast('퇴직정산 정보가 저장되었습니다.')}catch(e){workRecordShowError(e?.message||String(e))}finally{wrSetLoading(false)}
+}
+function workRecordOpenModal(id){document.getElementById(id)?.classList.add('open')}
+function workRecordCloseModal(id){document.getElementById(id)?.classList.remove('open')}
+
+function initWorkRecordShell(){
+  document.querySelectorAll('.module-tab[data-hr-page]').forEach(btn=>{if(btn.dataset.hrBound)return;btn.dataset.hrBound='1';btn.addEventListener('click',()=>{const page=btn.dataset.hrPage;if(page==='leave'&&!window.FRAMEBY_MODULE_ACCESS?.leave)return;if(page==='work'&&!window.FRAMEBY_MODULE_ACCESS?.workRecord)return;HR_ACTIVE_PAGE=page;showModule('hr',page)})});
+  document.querySelectorAll('.module-tab[data-wr-page]').forEach(btn=>{if(btn.dataset.wrBound)return;btn.dataset.wrBound='1';btn.addEventListener('click',()=>workRecordShowPage(btn.dataset.wrPage))});
+  document.getElementById('wrRefreshBtn')?.addEventListener('click',()=>wrLoadData(true));
+  document.getElementById('workGlobalRefreshBtn')?.addEventListener('click',()=>wrLoadData(true));
+  const filterChange=async()=>{WR_STATE.year=Number(document.getElementById('workGlobalYear')?.value)||2026;WR_STATE.month=Number(document.getElementById('workGlobalMonth')?.value)||1;WR_STATE.loaded=false;await wrLoadData(true)};
+  document.getElementById('workGlobalYear')?.addEventListener('change',filterChange);document.getElementById('workGlobalMonth')?.addEventListener('change',filterChange);
+  document.getElementById('wrAddRecordBtn')?.addEventListener('click',()=>workRecordOpenDay(wrToday()));
+  document.getElementById('wrAddEmployeeBtn')?.addEventListener('click',workRecordOpenEmployeeModal);
+  document.getElementById('wrAddWorkerToggle')?.addEventListener('click',()=>document.getElementById('wrAddWorkerBox')?.classList.remove('hidden'));
+  document.getElementById('wrWorkerSelect')?.addEventListener('change',e=>{if(e.target.value)workRecordSelectWorker(e.target.value)});
+  document.getElementById('wrSaveRecordBtn')?.addEventListener('click',workRecordSaveRecord);document.getElementById('wrDeleteRecordBtn')?.addEventListener('click',workRecordDeleteRecord);
+  document.getElementById('wrSaveEmployeeBtn')?.addEventListener('click',workRecordSaveNewEmployee);document.getElementById('wrSaveSettlementBtn')?.addEventListener('click',workRecordSaveSettlement);
+  document.querySelectorAll('[data-wr-close]').forEach(b=>b.addEventListener('click',()=>workRecordCloseModal(b.dataset.wrClose)));
+  document.querySelectorAll('.wr-modal-backdrop').forEach(x=>x.addEventListener('click',e=>{if(e.target===x)workRecordCloseModal(x.id)}));
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initWorkRecordShell,{once:true});else initWorkRecordShell();
+</script>
 </body>
-</html></textarea>
-</body></html>
+</html>
