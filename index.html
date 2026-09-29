@@ -1468,6 +1468,16 @@ async function researchRefreshDirect(force=false){
     try{await researchLoadComments(force)}catch(e){RESEARCH_COMMENTS_CACHE=[];console.warn(e)}
     researchRenderCurrent();if(loading)loading.classList.add('hidden');
   }catch(e){
+    // Docs API가 비활성화/권한 제한이어도 Google Docs 자체 공유권한으로 직접 열람할 수 있게 폴백합니다.
+    const id=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
+    if(id&&frame){
+      shell?.classList.add('hidden');
+      frame.classList.remove('hidden');
+      frame.onload=()=>{if(loading)loading.classList.add('hidden')};
+      frame.src=`https://docs.google.com/document/d/${encodeURIComponent(id)}/preview?rm=minimal&_=${Date.now()}`;
+      if(loading){loading.textContent='Google Docs 직접 열람 화면을 불러오는 중...';loading.classList.remove('hidden')}
+      return;
+    }
     if(loading){loading.textContent=e?.message||'연구개발 자료를 불러오지 못했습니다.';loading.classList.remove('hidden')}
   }
 }
@@ -1943,7 +1953,15 @@ async function githubCheckResearchAccess(){
     );
   }
 
-  if(response.status===403||response.status===404) return false;
+  if(response.status===404) return false;
+
+  if(response.status===403){
+    // Drive API 자체 권한/활성화 문제를 '문서 미공유'로 오판해 메뉴를 숨기지 않습니다.
+    // 실제 문서 열람 가능 여부는 연구개발 화면을 열 때 Google Docs가 다시 확인합니다.
+    RESEARCH_ACCESS_ERROR='Drive API 권한 확인이 제한되어 문서 자체 접근으로 확인합니다.';
+    RESEARCH_COMMENT_CAPABILITY=false;
+    return true;
+  }
 
   if(!response.ok){
     throw Object.assign(
@@ -3675,7 +3693,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-docs-direct-comments-v29';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-docs-direct-comments-v30-menu-restore';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
