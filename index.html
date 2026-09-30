@@ -484,6 +484,7 @@ body.frameby-auth-ready{overflow:auto}
 .wr-day-events{position:absolute;left:7px;right:7px;bottom:7px;display:grid;gap:4px;z-index:4}
 .wr-event{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:4px 6px;border-radius:6px;background:#fff5e7;border:1px solid #f0d5a8;color:#935b12;font-size:9.5px;font-weight:800;min-width:0}
 .wr-event.gray{background:#f1f3f5;border-color:#e1e5ea;color:#707782}.wr-event span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-event.leave-sync{background:#eef7ff;border-color:#cfe2f8;color:#315f8f}.wr-event.leave-sync.full{background:#f5efff;border-color:#ddcff5;color:#6d4ea0}.wr-event.leave-sync.partial{background:#eef8f2;border-color:#cde6d7;color:#3d7754}.wr-leave-legend{background:#f5efff!important;color:#6d4ea0!important}
 .wr-day.saturday:not(.outside){background:#f7f9ff}.wr-day.saturday:not(.outside) .wr-day-number{color:#5572b8}
 .wr-day.sunday:not(.outside),.wr-day.holiday:not(.outside){background:#fff7f7}.wr-day.sunday:not(.outside) .wr-day-number,.wr-day.holiday:not(.outside) .wr-day-number{color:#c94a56}
 .wr-holiday-name{position:absolute;top:8px;right:7px;max-width:calc(100% - 34px);font-size:9px;font-weight:800;color:#c94a56;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
@@ -686,6 +687,7 @@ body.frameby-auth-ready{overflow:auto}
             <span class="pill blue">기본 근무기간</span>
             <span class="pill orange">개별 변경</span>
             <span class="pill gray">휴무</span>
+            <span class="pill wr-leave-legend">연차관리 연동</span>
             <span class="pill wr-holiday-pill">공휴일</span>
           </div>
         </div>
@@ -705,7 +707,7 @@ body.frameby-auth-ready{overflow:auto}
         <div class="card kpi"><div class="label">실지급액</div><div class="value" id="wrPayNet">0원</div></div>
       </div>
       <section class="card">
-        <div class="section-title"><h2>월 급여대장</h2><div class="note">기본급은 직원목록 기준 자동산정 · 주휴/추가/공제액은 웹에서 저장합니다.</div></div>
+        <div class="section-title"><h2>월 급여대장</h2><div class="note">기본급은 직원목록 기준 자동산정 · 수정 버튼을 누른 직원 행에서 수당/공제액을 직접 수정합니다.</div></div>
         <div class="table-wrap"><table class="table wr-payroll-table">
           <thead><tr>
             <th>성명</th><th class="num">총근무</th><th class="num">실근무</th><th class="num">기본급</th><th class="num">주휴</th><th class="num">추가</th><th class="num">지급계</th>
@@ -10911,7 +10913,7 @@ const WR_PAY_HEADERS=['급여ID','연도','월','직원ID','성명','총근무',
 const WR_STATE={
   loaded:false,loading:false,
   year:2026,month:9,
-  employees:[],conditions:[],records:[],settlements:[],payrollSaved:[],payroll:[],
+  employees:[],conditions:[],records:[],settlements:[],payrollSaved:[],payroll:[],leaveEvents:[],
   selectedDate:'',selectedEmployeeId:''
 };
 
@@ -11035,25 +11037,51 @@ const WR_KR_HOLIDAYS={
   '2026-10-09':'한글날','2026-12-25':'기독탄신일'
 };
 function wrHolidayName(date){return WR_KR_HOLIDAYS[date]||''}
+async function wrReadLeaveEvents(){
+  if(!window.FRAMEBY_MODULE_ACCESS?.leave||typeof ghLeaveCalendarEvents!=='function')return[];
+  try{
+    if(typeof ghLeaveClearCache==='function')ghLeaveClearCache();
+    return await ghLeaveCalendarEvents(WR_STATE.year,WR_STATE.month);
+  }catch(e){
+    console.warn('근무달력 연차 연동 조회 실패',e);
+    return[];
+  }
+}
+function wrFilterLeaveEventsForEmployees(events){
+  const employeeNames=new Set((WR_STATE.employees||[]).map(e=>ghText(e.성명).trim()).filter(Boolean));
+  return (events||[]).filter(ev=>employeeNames.has(ghText(ev.employeeName).trim()));
+}
+function wrLeaveEventsOn(date,name=''){
+  const key=ghText(name).trim();
+  return (WR_STATE.leaveEvents||[]).filter(ev=>ev.startDate<=date&&ev.endDate>=date&&(!key||ghText(ev.employeeName).trim()===key));
+}
+function wrLeaveBlocksSchedule(emp,date){
+  return wrLeaveEventsOn(date,emp?.성명||'').some(ev=>ev.type==='연차'||ev.type==='유급');
+}
+function wrLeaveLabel(ev){
+  const detail=ghText(ev.detail);return `${ghText(ev.employeeName)} ${ghText(ev.type)}${detail?`(${detail})`:''}`;
+}
 
 async function wrLoadData(force=false){
   if(WR_STATE.loading)return;
   if(WR_STATE.loaded&&!force){workRecordRenderAll();return}
   wrSetLoading(true);workRecordShowError('');
   try{
-    const [emps,conds,logs,sets,paySaved,legacyPayroll]=await Promise.all([
+    const [emps,conds,logs,sets,paySaved,legacyPayroll,leaveEvents]=await Promise.all([
       wrReadRows(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS),
       wrReadRows(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS),
       wrReadRows(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS),
       wrReadRows(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS),
       wrReadRows(INTEGRATED_CONFIG.workRecordPayrollSheet,WR_PAY_HEADERS),
-      wrReadLegacyPayroll(WR_STATE.year,WR_STATE.month)
+      wrReadLegacyPayroll(WR_STATE.year,WR_STATE.month),
+      wrReadLeaveEvents()
     ]);
     WR_STATE.employees=wrActive(emps).map(wrNormalizeEmployee);
     WR_STATE.conditions=wrActive(conds).map(wrNormalizeCondition);
     WR_STATE.records=wrActive(logs).map(wrNormalizeRecord);
     WR_STATE.settlements=wrActive(sets).map(wrNormalizeSettlement);
     WR_STATE.payrollSaved=wrActive(paySaved);
+    WR_STATE.leaveEvents=wrFilterLeaveEventsForEmployees(leaveEvents);
     WR_STATE.payroll=wrBuildPayrollRows(legacyPayroll);
     WR_STATE.loaded=true;
     workRecordSyncSelectors();
@@ -11061,7 +11089,7 @@ async function wrLoadData(force=false){
   }catch(e){workRecordShowError(e?.message||String(e));throw e}
   finally{wrSetLoading(false)}
 }
-async function ensureWorkRecordApp(force=false){if(!window.FRAMEBY_MODULE_ACCESS?.workRecord&&window.FRAMEBY_ACCESS_READY)throw new Error('근무기록 스프레드시트 공유 권한이 없습니다.');await wrLoadData(force);return WR_STATE}
+async function ensureWorkRecordApp(force=false){if(!window.FRAMEBY_MODULE_ACCESS?.workRecord&&window.FRAMEBY_ACCESS_READY)throw new Error('근무기록 스프레드시트 공유 권한이 없습니다.');const cached=WR_STATE.loaded&&!force;await wrLoadData(force);if(cached){WR_STATE.leaveEvents=wrFilterLeaveEventsForEmployees(await wrReadLeaveEvents());workRecordRenderCalendar()}return WR_STATE}
 
 function workRecordSyncSelectors(){
   const years=new Set([2025,2026,2027,WR_STATE.year]);WR_STATE.employees.forEach(e=>{const y=Number((e.입사일||'').slice(0,4));if(y)years.add(y)});
@@ -11120,7 +11148,7 @@ function workRecordRenderCalendar(){
     cells.push({date,day,outside});
   }
   const monthRecords=WR_STATE.records.filter(r=>r.근무일자.startsWith(`${WR_STATE.year}-${String(WR_STATE.month).padStart(2,'0')}-`));
-  const scheduled=new Set(),monthDays=wrMonthDays();monthDays.forEach(date=>wrResolveDay(date).forEach(w=>{if(w.source==='condition')scheduled.add(`${w.employee.직원ID}|${date}`)}));
+  const scheduled=new Set(),monthDays=wrMonthDays();monthDays.forEach(date=>wrResolveDay(date).forEach(w=>{if(w.source==='condition'&&!wrLeaveBlocksSchedule(w.employee,date))scheduled.add(`${w.employee.직원ID}|${date}`)}));
   document.getElementById('wrKpiEmployees').textContent=WR_STATE.employees.length+'명';
   document.getElementById('wrKpiScheduled').textContent=scheduled.size+'일';
   document.getElementById('wrKpiOverrides').textContent=monthRecords.length+'건';
@@ -11136,6 +11164,7 @@ function workRecordRenderCalendar(){
         if(!start||c.date<start||c.date>end)return false;
         const cond=wrConditionFor(emp.직원ID,c.date);if(!cond)return false;
         const rec=wrRecordFor(emp.직원ID,c.date);if(rec&&rec.기록구분==='휴무')return false;
+        if(wrLeaveBlocksSchedule(emp,c.date))return false;
         return wrWeekdayMatches(cond.근무요일,new Date(c.date+'T00:00:00').getDay());
       });
       if(flags.some(Boolean))scheduledRows.push({emp,flags});
@@ -11153,10 +11182,13 @@ function workRecordRenderCalendar(){
     const weekHeight=Math.max(132,72+scheduledRows.length*25);
     html+=`<div class="wr-week" style="min-height:${weekHeight}px">`;
     week.forEach(c=>{
-      const changes=!c.outside?WR_STATE.records.filter(r=>r.근무일자===c.date):[],dow=new Date(c.date+'T00:00:00').getDay(),holiday=!c.outside?wrHolidayName(c.date):'';
-      const chips=changes.slice(0,2).map(r=>{const emp=wrEmployee(r.직원ID),off=r.기록구분==='휴무';return `<div class="wr-event ${off?'gray':''}"><span>${workRecordEsc(emp?.성명||'')} ${off?'휴무':`${workRecordEsc(r.출근시간)}~${workRecordEsc(r.퇴근시간)}`}</span><b>${off?'휴무':'변경'}</b></div>`}).join('');
+      const changes=!c.outside?WR_STATE.records.filter(r=>r.근무일자===c.date):[],leaveEvents=!c.outside?wrLeaveEventsOn(c.date):[],dow=new Date(c.date+'T00:00:00').getDay(),holiday=!c.outside?wrHolidayName(c.date):'';
+      const eventItems=[];
+      changes.forEach(r=>{const emp=wrEmployee(r.직원ID),off=r.기록구분==='휴무';eventItems.push(`<div class="wr-event ${off?'gray':''}"><span>${workRecordEsc(emp?.성명||'')} ${off?'휴무':`${workRecordEsc(r.출근시간)}~${workRecordEsc(r.퇴근시간)}`}</span><b>${off?'휴무':'변경'}</b></div>`)});
+      leaveEvents.forEach(ev=>{const full=ev.type==='연차'||ev.type==='유급',cls=full?'full':'partial',label=wrLeaveLabel(ev),title=[label,ghText(ev.memo)].filter(Boolean).join(' · ');eventItems.push(`<div class="wr-event leave-sync ${cls}" title="${workRecordEsc(title)}"><span>${workRecordEsc(label)}</span><b>${workRecordEsc(ev.type)}</b></div>`)});
+      const visible=eventItems.slice(0,3).join(''),more=eventItems.length>3?`<div class="wr-event"><span>외 ${eventItems.length-3}건</span></div>`:'';
       const dayCls=[c.outside?'outside':'',c.date===today?'today':'',dow===0?'sunday':'',dow===6?'saturday':'',holiday?'holiday':''].filter(Boolean).join(' ');
-      html+=`<div class="wr-day ${dayCls}" ${c.outside?'':`data-wr-date="${c.date}"`}><div class="wr-day-number">${c.day}</div>${holiday?`<div class="wr-holiday-name" title="${workRecordEsc(holiday)}">${workRecordEsc(holiday)}</div>`:''}${chips?`<div class="wr-day-events">${chips}${changes.length>2?`<div class="wr-event"><span>외 ${changes.length-2}건</span></div>`:''}</div>`:''}</div>`;
+      html+=`<div class="wr-day ${dayCls}" ${c.outside?'':`data-wr-date="${c.date}"`}><div class="wr-day-number">${c.day}</div>${holiday?`<div class="wr-holiday-name" title="${workRecordEsc(holiday)}">${workRecordEsc(holiday)}</div>`:''}${visible?`<div class="wr-day-events">${visible}${more}</div>`:''}</div>`;
     });
     html+=`<div class="wr-period-layer">${periods.join('')}</div></div>`;
   }
@@ -11171,13 +11203,23 @@ function workRecordRenderPayroll(){
   document.getElementById('wrPayNet').textContent=workRecordMoney(net);
   document.getElementById('wrPayrollSource').textContent='직원목록 + 근무기록';
   const body=document.getElementById('wrPayrollBody');if(!body)return;
-  const input=(f,v)=>`<input class="wr-payroll-input" type="number" min="0" data-pay-f="${f}" value="${Math.round(wrNum(v))}">`;
+  const money=v=>wrNum(v).toLocaleString();
   body.innerHTML=rows.map(r=>{
-    if(r.legacyOnly)return `<tr><td><b>${workRecordEsc(r.name)}</b><div class="subscription-sub">이전 급여대장 자료</div></td><td class="num">${workRecordEsc(r.totalWork)}</td><td class="num">${workRecordEsc(r.actualWork)}</td><td class="num">${wrNum(r.basePay).toLocaleString()}</td><td class="num">${wrNum(r.weeklyPay).toLocaleString()}</td><td class="num">${wrNum(r.extraPay).toLocaleString()}</td><td class="num"><b>${wrNum(r.grossPay).toLocaleString()}</b></td><td class="num">${wrNum(r.pension).toLocaleString()}</td><td class="num">${wrNum(r.health).toLocaleString()}</td><td class="num">${wrNum(r.employment).toLocaleString()}</td><td class="num">${wrNum(r.care).toLocaleString()}</td><td class="num">${wrNum(r.incomeTax).toLocaleString()}</td><td class="num">${wrNum(r.localTax).toLocaleString()}</td><td class="num">${wrNum(r.salaryDeduction).toLocaleString()}</td><td class="num"><b>${wrNum(r.netPay).toLocaleString()}</b></td><td><span class="pill gray">이전자료</span></td></tr>`;
-    return `<tr data-pay-employee="${workRecordEsc(r.employeeId)}"><td><b>${workRecordEsc(r.name)}</b><div class="subscription-sub">${r.contract?'계약직 기본급':'시급 × 실근무'}</div></td><td class="num wr-payroll-auto">${workRecordEsc(r.totalWork)}</td><td class="num wr-payroll-auto">${workRecordEsc(r.actualWork)}</td><td class="num wr-payroll-auto">${wrNum(r.basePay).toLocaleString()}</td><td class="num">${input('주휴',r.weeklyPay)}</td><td class="num">${input('추가',r.extraPay)}</td><td class="num wr-payroll-auto" data-pay-gross><b>${wrNum(r.grossPay).toLocaleString()}</b></td><td>${input('국민연금',r.pension)}</td><td>${input('건강보험',r.health)}</td><td>${input('고용보험',r.employment)}</td><td>${input('장기요양',r.care)}</td><td>${input('근로소득세',r.incomeTax)}</td><td>${input('지방소득세',r.localTax)}</td><td>${input('급여공제',r.salaryDeduction)}</td><td class="num wr-payroll-auto" data-pay-net><b>${wrNum(r.netPay).toLocaleString()}</b></td><td><button class="action wr-payroll-save" data-pay-save="${workRecordEsc(r.employeeId)}">저장</button></td></tr>`;
+    if(r.legacyOnly)return `<tr><td><b>${workRecordEsc(r.name)}</b><div class="subscription-sub">이전 급여대장 자료</div></td><td class="num">${workRecordEsc(r.totalWork)}</td><td class="num">${workRecordEsc(r.actualWork)}</td><td class="num">${money(r.basePay)}</td><td class="num">${money(r.weeklyPay)}</td><td class="num">${money(r.extraPay)}</td><td class="num"><b>${money(r.grossPay)}</b></td><td class="num">${money(r.pension)}</td><td class="num">${money(r.health)}</td><td class="num">${money(r.employment)}</td><td class="num">${money(r.care)}</td><td class="num">${money(r.incomeTax)}</td><td class="num">${money(r.localTax)}</td><td class="num">${money(r.salaryDeduction)}</td><td class="num"><b>${money(r.netPay)}</b></td><td><span class="pill gray">이전자료</span></td></tr>`;
+    return `<tr data-pay-employee="${workRecordEsc(r.employeeId)}"><td><b>${workRecordEsc(r.name)}</b><div class="subscription-sub">${r.contract?'계약직 기본급':'시급 × 실근무'}</div></td><td class="num wr-payroll-auto">${workRecordEsc(r.totalWork)}</td><td class="num wr-payroll-auto">${workRecordEsc(r.actualWork)}</td><td class="num wr-payroll-auto">${money(r.basePay)}</td><td class="num">${money(r.weeklyPay)}</td><td class="num">${money(r.extraPay)}</td><td class="num wr-payroll-auto"><b>${money(r.grossPay)}</b></td><td class="num">${money(r.pension)}</td><td class="num">${money(r.health)}</td><td class="num">${money(r.employment)}</td><td class="num">${money(r.care)}</td><td class="num">${money(r.incomeTax)}</td><td class="num">${money(r.localTax)}</td><td class="num">${money(r.salaryDeduction)}</td><td class="num wr-payroll-auto"><b>${money(r.netPay)}</b></td><td><button class="action" data-wr-edit-pay="${workRecordEsc(r.employeeId)}">수정</button></td></tr>`;
   }).join('')||'<tr><td colspan="16" class="empty">직원목록에 해당 월 급여 대상자가 없습니다.</td></tr>';
-  body.querySelectorAll('tr[data-pay-employee]').forEach(tr=>tr.querySelectorAll('[data-pay-f]').forEach(inp=>inp.addEventListener('input',()=>workRecordRefreshPayrollRow(tr))));
-  body.querySelectorAll('[data-pay-save]').forEach(btn=>btn.addEventListener('click',()=>workRecordSavePayrollRow(btn.dataset.paySave,btn.closest('tr'))));
+  body.querySelectorAll('[data-wr-edit-pay]').forEach(btn=>btn.addEventListener('click',()=>workRecordEditPayrollRow(btn.dataset.wrEditPay)));
+}
+function workRecordEditPayrollRow(empId){
+  workRecordRenderPayroll();
+  const row=(WR_STATE.payroll||[]).find(x=>String(x.employeeId)===String(empId)&&!x.legacyOnly);if(!row)return;
+  const tr=document.querySelector(`tr[data-pay-employee="${CSS.escape(String(empId))}"]`);if(!tr)return;
+  tr.classList.add('wr-editing');
+  const input=(f,v)=>`<input class="wr-payroll-input" type="number" min="0" data-pay-f="${f}" value="${Math.round(wrNum(v))}">`;
+  tr.innerHTML=`<td><b>${workRecordEsc(row.name)}</b><div class="subscription-sub">${row.contract?'계약직 기본급':'시급 × 실근무'}</div></td><td class="num wr-payroll-auto">${workRecordEsc(row.totalWork)}</td><td class="num wr-payroll-auto">${workRecordEsc(row.actualWork)}</td><td class="num wr-payroll-auto">${wrNum(row.basePay).toLocaleString()}</td><td class="num">${input('주휴',row.weeklyPay)}</td><td class="num">${input('추가',row.extraPay)}</td><td class="num wr-payroll-auto" data-pay-gross><b>${wrNum(row.grossPay).toLocaleString()}</b></td><td>${input('국민연금',row.pension)}</td><td>${input('건강보험',row.health)}</td><td>${input('고용보험',row.employment)}</td><td>${input('장기요양',row.care)}</td><td>${input('근로소득세',row.incomeTax)}</td><td>${input('지방소득세',row.localTax)}</td><td>${input('급여공제',row.salaryDeduction)}</td><td class="num wr-payroll-auto" data-pay-net><b>${wrNum(row.netPay).toLocaleString()}</b></td><td><div class="wr-row-actions"><button class="action active" data-wr-save-pay="${workRecordEsc(empId)}">저장</button><button class="row-delete-btn" data-wr-cancel-pay>취소</button></div></td>`;
+  tr.querySelectorAll('[data-pay-f]').forEach(inp=>inp.addEventListener('input',()=>workRecordRefreshPayrollRow(tr)));
+  tr.querySelector('[data-wr-save-pay]')?.addEventListener('click',()=>workRecordSavePayrollRow(empId,tr));
+  tr.querySelector('[data-wr-cancel-pay]')?.addEventListener('click',()=>workRecordRenderPayroll());
 }
 function workRecordRefreshPayrollRow(tr){
   const id=tr?.dataset.payEmployee,row=(WR_STATE.payroll||[]).find(x=>String(x.employeeId)===String(id));if(!row)return;
