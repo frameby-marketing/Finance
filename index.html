@@ -4865,6 +4865,24 @@ button,input,select{font:inherit}
 .report-summary .sub{font-size:10px;color:#8d95a4;margin-top:3px}
 .report-summary .negative{color:var(--red)}
 .report-summary .positive{color:var(--green)}
+.report-summary .expense-ratio-cell{padding:0;background:#fbfcfe}
+.report-ratio-stack{display:flex;flex-direction:column;height:100%}
+.report-ratio-metric{padding:10px 12px;border-bottom:1px solid var(--line)}
+.report-ratio-metric:last-child{border-bottom:0}
+.report-ratio-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.report-ratio-head .label{margin:0;min-width:0}
+.report-ratio-head .value{font-size:16px;white-space:nowrap}
+.report-ratio-detail{display:block;position:relative}
+.report-ratio-detail>summary{list-style:none;cursor:pointer;border:1px solid #cbd6ef;background:#fff;color:#405476;border-radius:7px;padding:4px 8px;font-size:10px;font-weight:850;white-space:nowrap}
+.report-ratio-detail>summary::-webkit-details-marker{display:none}
+.report-ratio-detail[open]>summary{background:#eef3ff;border-color:#aebfe8;color:var(--primary)}
+.report-ratio-detail-list{margin-top:8px;padding:8px 9px;border:1px solid #e3e8f0;border-radius:8px;background:#fff}
+.report-ratio-detail-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:5px 0;border-bottom:1px solid #f0f2f6;font-size:10px;line-height:1.4}
+.report-ratio-detail-row:last-child{border-bottom:0}
+.report-ratio-detail-row .name{min-width:0;color:#566174}
+.report-ratio-detail-row .amt{text-align:right;font-weight:850;white-space:nowrap}
+.report-ratio-detail-row .pct{grid-column:1/-1;text-align:right;color:#7d8797;font-size:9px;margin-top:-2px}
+.report-ratio-empty{padding:3px 0;color:#8d95a4;font-size:10px}
 .report-table-wrap{overflow-x:auto}
 .report-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:760px;table-layout:fixed}
 .report-table th,.report-table td{padding:9px 11px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -8092,6 +8110,24 @@ function buildTopLists(d){
     </div>`;
 }
 
+function buildExpenseRatioMetric(label,group,total,operatingIncome,expenses){
+  const items=(expenses||[]).filter(x=>x.group===group);
+  const detail=items.length
+    ? items.map(x=>`<div class="report-ratio-detail-row"><span class="name">${x.item}</span><span class="amt">${x.amount?fmt(x.amount):'-'}</span><span class="pct">영업수입 대비 ${pct(x.amount,operatingIncome)}</span></div>`).join('')
+    : '<div class="report-ratio-empty">상세내역 없음</div>';
+  return `
+    <div class="report-ratio-metric">
+      <div class="report-ratio-head">
+        <div class="label">${label}</div>
+        <div class="value">${pct(total,operatingIncome)}</div>
+        <details class="report-ratio-detail">
+          <summary>보기</summary>
+          <div class="report-ratio-detail-list">${detail}</div>
+        </details>
+      </div>
+    </div>`;
+}
+
 function buildReportMonth(month,d){
   const expenseDetailTotal=d.expenses.reduce((s,x)=>s+x.amount,0);
   const expenseTotal=(typeof d.totalExpense==='number') ? d.totalExpense : expenseDetailTotal;
@@ -8101,6 +8137,8 @@ function buildReportMonth(month,d){
   const totalIncome=(typeof d.totalIncome==='number') ? d.totalIncome : calculatedIncome;
   const operatingCash=(typeof d.cashFlow==='number') ? d.cashFlow : totalIncome-expenseTotal;
   const fixedTotal=d.expenses.filter(x=>x.group==='고정').reduce((s,x)=>s+x.amount,0);
+  const adTotal=d.expenses.filter(x=>x.group==='광고').reduce((s,x)=>s+x.amount,0);
+  const orderTotal=d.expenses.filter(x=>x.group==='발주').reduce((s,x)=>s+x.amount,0);
   const groups=['발주','광고','고정'].filter(g=>d.expenses.some(x=>x.group===g));
 
   let body='';
@@ -8137,7 +8175,13 @@ function buildReportMonth(month,d){
         <div class="cell"><div class="label">총 지출액</div><div class="value">${fmt(expenseTotal)}</div></div>
         <div class="cell"><div class="label">수입액 대비 비율</div><div class="value">${pct(expenseTotal,d.operatingIncome)}</div></div>
         <div class="cell"><div class="label">경상수지</div><div class="value ${operatingCash<0?'negative':'positive'}">${operatingCash<0?'- ':''}${fmt(Math.abs(operatingCash))}</div></div>
-        <div class="cell"><div class="label">고정비 비율</div><div class="value">${pct(fixedTotal,d.operatingIncome)}</div></div>
+        <div class="cell expense-ratio-cell">
+          <div class="report-ratio-stack">
+            ${buildExpenseRatioMetric('영업수입 대비 고정비 비율','고정',fixedTotal,d.operatingIncome,d.expenses)}
+            ${buildExpenseRatioMetric('영업수입 대비 광고비 비율','광고',adTotal,d.operatingIncome,d.expenses)}
+            ${buildExpenseRatioMetric('영업수입 대비 발주비 비율','발주',orderTotal,d.operatingIncome,d.expenses)}
+          </div>
+        </div>
       </div>
 
       ${buildTopLists(d)}
@@ -8226,6 +8270,8 @@ function buildCumulativeReport(label,d){
   const totalIncome=d.operatingIncome+otherTotal+capitalTotal;
   const operatingCash=d.operatingIncome-expenseTotal;
   const fixedTotal=d.expenses.filter(x=>x.group==='고정').reduce((s,x)=>s+x.amount,0);
+  const adTotal=d.expenses.filter(x=>x.group==='광고').reduce((s,x)=>s+x.amount,0);
+  const orderTotal=d.expenses.filter(x=>x.group==='발주').reduce((s,x)=>s+x.amount,0);
   const groups=[...new Set(d.expenses.map(x=>x.group))];
 
   let body='';
@@ -8262,7 +8308,13 @@ function buildCumulativeReport(label,d){
         <div class="cell"><div class="label">총 지출액</div><div class="value">${fmt(expenseTotal)}</div></div>
         <div class="cell"><div class="label">수입액 대비 비율</div><div class="value">${pct(expenseTotal,d.operatingIncome)}</div></div>
         <div class="cell"><div class="label">경상수지</div><div class="value ${operatingCash<0?'negative':'positive'}">${operatingCash<0?'- ':''}${fmt(Math.abs(operatingCash))}</div></div>
-        <div class="cell"><div class="label">고정비 비율</div><div class="value">${pct(fixedTotal,d.operatingIncome)}</div></div>
+        <div class="cell expense-ratio-cell">
+          <div class="report-ratio-stack">
+            ${buildExpenseRatioMetric('영업수입 대비 고정비 비율','고정',fixedTotal,d.operatingIncome,d.expenses)}
+            ${buildExpenseRatioMetric('영업수입 대비 광고비 비율','광고',adTotal,d.operatingIncome,d.expenses)}
+            ${buildExpenseRatioMetric('영업수입 대비 발주비 비율','발주',orderTotal,d.operatingIncome,d.expenses)}
+          </div>
+        </div>
       </div>
 
       ${buildTopLists(d)}
