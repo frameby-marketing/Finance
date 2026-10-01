@@ -659,12 +659,140 @@ button,select,.field label,.table th,.table td,.inline-sheet th,.inline-sheet td
 }
 </style>
 
-<style id="frameby-hub-layout-fix-20261001">
-/* Dashboard_Hub의 왼쪽 공통 사이드바는 그대로 두고 Finance 본문만 남은 화면폭을 사용 */
-html,body{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;overflow-x:hidden!important;}
-.app.integrated-content{max-width:none!important;box-sizing:border-box!important;transform-origin:top left!important;}
-.app.integrated-content>.main{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;}
-.finance-workspace-nav{width:100%!important;max-width:none!important;box-sizing:border-box!important;}
+<style id="frameby-layout-master-20261001">
+/* ===== Finance & Admin 최종 레이아웃 기준 =====
+   - 외부 FRAME BY 사이드바와 Finance 본문을 서로 겹치지 않게 분리
+   - Finance 본문은 남은 viewport 폭을 정확히 사용
+   - 데스크톱 상위메뉴는 왼쪽 고정, 줌은 오른쪽 상단
+   - 작은 화면에서만 메뉴 가로 스크롤
+   - 하위메뉴/조회도구/표의 시작선을 통일
+*/
+html,body{width:100%!important;max-width:100%!important;margin:0!important;overflow-x:hidden!important}
+.app.integrated-content{
+  position:relative!important;display:block!important;box-sizing:border-box!important;
+  min-width:0!important;max-width:none!important;margin-right:0!important;overflow:visible!important;
+}
+.app.integrated-content>.main{
+  box-sizing:border-box!important;width:100%!important;max-width:none!important;min-width:0!important;
+  margin:0!important;padding:0 20px 50px!important;transform-origin:top left!important;
+}
+.finance-workspace-nav{
+  position:relative!important;box-sizing:border-box!important;width:auto!important;max-width:none!important;
+  margin:0 -20px 18px!important;background:#fff!important;overflow:visible!important;
+}
+.finance-primary{
+  box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  width:100%!important;min-width:0!important;min-height:60px!important;margin:0!important;
+  padding:0 164px 0 20px!important;gap:8px!important;overflow:visible!important;white-space:nowrap!important;
+}
+.finance-primary-btn{
+  flex:0 0 122px!important;width:122px!important;height:42px!important;margin:9px 0!important;padding:0 8px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  border:0!important;background:transparent!important;box-shadow:none!important;border-radius:8px!important;
+  color:#2f3948!important;font-size:14px!important;font-weight:850!important;line-height:1!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;writing-mode:horizontal-tb!important;
+}
+.finance-primary-btn:hover{background:transparent!important;color:var(--primary)!important}
+.finance-primary-btn.active{background:transparent!important;color:var(--primary)!important;border:0!important;box-shadow:none!important}
+.finance-primary-btn.active::after{display:none!important;content:none!important}
+#cashPrimaryTab{order:1!important}#cardPrimaryTab{order:2!important}#salesPrimaryTab{order:3!important}
+#tripPrimaryTab{order:4!important}#hrPrimaryTab{order:5!important}#researchPrimaryTab{order:6!important}#vatPrimaryTab{order:7!important}
+#vatPrimaryTab:not([hidden]):not(.frameby-no-access){display:inline-flex!important;visibility:visible!important;opacity:1!important}
+
+.frameby-zoom-control{
+  position:absolute!important;top:13px!important;right:20px!important;left:auto!important;z-index:80!important;
+  display:flex!important;align-items:center!important;gap:4px!important;margin:0!important;padding:0!important;white-space:nowrap!important;
+}
+.frameby-zoom-control button{
+  height:34px!important;min-width:34px!important;padding:0 8px!important;border:1px solid #dfe4ea!important;
+  background:#fff!important;border-radius:8px!important;color:#40506a!important;font-size:12px!important;font-weight:850!important;
+  white-space:nowrap!important;word-break:keep-all!important;cursor:pointer!important;
+}
+.frameby-zoom-control .frameby-zoom-value{min-width:54px!important}
+.frameby-zoom-control button:hover{background:#f7f9fc!important;color:var(--primary)!important}
+
+.finance-secondary{
+  box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  width:100%!important;min-width:0!important;min-height:56px!important;padding:8px 20px!important;gap:12px!important;background:#fff!important;
+}
+.finance-secondary.hidden{display:none!important}
+.module-tabs{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
+  min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important;white-space:nowrap!important;
+}
+.module-tab{
+  flex:0 0 128px!important;width:128px!important;height:38px!important;padding:0 9px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  font-size:14px!important;font-weight:850!important;line-height:1!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;writing-mode:horizontal-tb!important;
+}
+.secondary-tools{margin-left:auto!important;display:flex!important;align-items:flex-end!important;justify-content:flex-end!important;gap:8px!important;min-width:0!important}
+.secondary-tool-group{align-items:flex-end!important;justify-content:flex-end!important;gap:8px!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+.secondary-tool-group .field,.secondary-tools .field{min-width:0!important;flex:0 0 auto!important}
+.secondary-tool-group label,.secondary-tools label{white-space:nowrap!important;word-break:keep-all!important}
+.cash-refresh-btn,.excel-btn,.sales-range-btn,.research-direct-btn,.frameby-menu-refresh{
+  height:36px!important;min-height:36px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  white-space:nowrap!important;word-break:keep-all!important;line-height:1!important;
+}
+
+/* 연구개발 하위메뉴 2줄 모두 왼쪽 시작선 */
+#researchSecondaryMenu:not(.hidden){display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;width:100%!important}
+#researchSecondaryMenu #researchModuleTabs{width:100%!important;justify-content:flex-start!important;overflow-x:auto!important;overflow-y:hidden!important}
+#researchSecondaryMenu #researchMonthRow{
+  width:100%!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:7px!important;margin:0!important;padding:0!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;
+}
+#researchSecondaryMenu #researchMonthBtns{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;flex:0 0 auto!important;white-space:nowrap!important}
+#researchSecondaryMenu .research-year-btn,#researchSecondaryMenu .research-month-btn{
+  flex:0 0 auto!important;min-width:52px!important;height:34px!important;padding:0 8px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:13px!important;
+  white-space:nowrap!important;word-break:keep-all!important;
+}
+#researchGlobalRefreshBtn{flex:0 0 auto!important;margin-left:2px!important}
+
+/* 본문/표/버튼 시작선과 한글 줄바꿈 안정화 */
+.hr-inner-nav,.work-record-shell,.research-direct-shell{padding-left:0!important;padding-right:0!important}
+.finance-primary-btn,.module-tab,.cash-refresh-btn,.excel-btn,.sales-range-btn,.frameby-menu-refresh,
+button,select,.field label,.table th,.table td,.inline-sheet th,.inline-sheet td,.master-table th,.master-table td{
+  word-break:keep-all!important;overflow-wrap:normal!important;writing-mode:horizontal-tb!important;
+}
+.table-wrap,.inline-sheet-wrap,.research-doc-table-wrap{overflow-x:auto!important;overflow-y:visible;-webkit-overflow-scrolling:touch}
+.table th,.table td,.inline-sheet th,.inline-sheet td{white-space:nowrap!important}
+.cashflow-frame,.research-frame{width:100%!important;max-width:100%!important}
+
+/* 중간 폭: 메뉴가 실제로 부족할 때만 가로 스크롤 */
+@media(max-width:1180px){
+  .app.integrated-content>.main{padding-left:16px!important;padding-right:16px!important}
+  .finance-workspace-nav{margin-left:-16px!important;margin-right:-16px!important}
+  .finance-primary{padding-left:16px!important;padding-right:156px!important;gap:6px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin}
+  .finance-primary-btn{flex-basis:108px!important;width:108px!important;font-size:13px!important}
+  .finance-secondary{padding-left:16px!important;padding-right:16px!important;gap:9px!important;flex-wrap:wrap!important}
+  .module-tabs{overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin}
+  .module-tab{flex-basis:112px!important;width:112px!important;font-size:13px!important}
+  .secondary-tools{width:100%!important;flex:1 1 100%!important;margin-left:0!important;justify-content:flex-start!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .secondary-tool-group{justify-content:flex-start!important}
+  .frameby-zoom-control{right:16px!important}
+}
+@media(max-width:720px){
+  .app.integrated-content>.main{padding-left:10px!important;padding-right:10px!important;padding-bottom:36px!important}
+  .finance-workspace-nav{margin-left:-10px!important;margin-right:-10px!important;margin-bottom:12px!important}
+  .finance-primary{min-height:52px!important;padding-left:10px!important;padding-right:132px!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .finance-primary-btn{flex-basis:96px!important;width:96px!important;height:36px!important;margin:8px 0!important;font-size:12px!important}
+  .frameby-zoom-control{top:10px!important;right:10px!important}
+  .frameby-zoom-control button{height:30px!important;min-width:30px!important;padding:0 5px!important;font-size:11px!important}
+  .frameby-zoom-control .frameby-zoom-value{min-width:46px!important}
+  .finance-secondary{padding:7px 10px!important;gap:7px!important;align-items:flex-start!important;flex-wrap:wrap!important}
+  .module-tabs{width:100%!important;flex:1 1 100%!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .module-tab{flex-basis:96px!important;width:96px!important;height:34px!important;font-size:12px!important;padding:0 6px!important}
+  .secondary-tools{width:100%!important;overflow-x:auto!important;padding-bottom:2px!important}
+  .secondary-tool-group{flex:0 0 auto!important;white-space:nowrap!important}
+  .secondary-tool-group select,.secondary-tool-group input{max-width:170px!important}
+  #researchSecondaryMenu .research-year-btn,#researchSecondaryMenu .research-month-btn{height:31px!important;min-width:43px!important;font-size:11px!important;padding:0 5px!important}
+}
+@media(max-width:420px){
+  .finance-primary-btn{flex-basis:90px!important;width:90px!important;font-size:11.5px!important}
+  .module-tab{flex-basis:90px!important;width:90px!important;font-size:11.5px!important}
+}
 </style>
 </head>
 <body class="frameby-auth-locked">
@@ -11822,43 +11950,75 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   const zoomSteps=[80,90,100,110,120];
   let zoomIndex=2;
+
   function detectHubSidebarWidth(){
     const integrated=document.querySelector('.app.integrated-content');
     if(!integrated)return 0;
+    const vw=window.innerWidth||document.documentElement.clientWidth||0;
+    const vh=window.innerHeight||document.documentElement.clientHeight||0;
     let right=0;
-    document.querySelectorAll('body *').forEach(el=>{
+    const inspect=(el)=>{
+      if(!el||el===document.documentElement||el===document.body)return;
       if(el===integrated||integrated.contains(el))return;
-      if(el.tagName==='SCRIPT'||el.tagName==='STYLE'||el.tagName==='LINK')return;
+      if(el.closest?.('#githubAuthGate'))return;
       const cs=getComputedStyle(el);
-      if(cs.display==='none'||cs.visibility==='hidden')return;
-      if(cs.position!=='fixed'&&cs.position!=='sticky')return;
+      if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity||1)===0)return;
       const r=el.getBoundingClientRect();
-      if(r.width<40||r.width>360||r.height<window.innerHeight*.55)return;
-      if(r.left>3||r.top>120||r.right<40)return;
-      right=Math.max(right,Math.min(r.right,360));
+      if(r.width<56||r.width>Math.min(420,vw*.42))return;
+      if(r.height<Math.max(220,vh*.35))return;
+      if(r.left>4||r.right<56||r.top>140)return;
+      right=Math.max(right,Math.min(r.right,420));
+    };
+    /* 실제 화면의 왼쪽 가장자리를 차지하는 요소를 우선 검사 */
+    [Math.min(90,vh*.12),Math.min(240,vh*.28),vh*.5,Math.max(120,vh*.78)].forEach(y=>{
+      try{document.elementsFromPoint(2,Math.max(2,Math.min(vh-2,y))).forEach(el=>{inspect(el);let p=el.parentElement;for(let i=0;i<4&&p;i++,p=p.parentElement)inspect(p)})}catch(e){}
     });
+    /* fixed/sticky가 아닌 공통 사이드바도 잡기 위한 가벼운 fallback */
+    if(right<56){
+      [...document.body.children].forEach(el=>{inspect(el);[...el.children].slice(0,12).forEach(inspect)});
+    }
     return Math.max(0,Math.round(right));
   }
+
+  function applyFinanceViewport(){
+    const integrated=document.querySelector('.app.integrated-content');
+    if(!integrated)return;
+    /* 우리 보정값을 먼저 제거하고 nav.js가 만든 자연스러운 위치를 측정 */
+    integrated.style.removeProperty('margin-left');
+    integrated.style.removeProperty('width');
+    integrated.style.removeProperty('max-width');
+    const naturalLeft=Math.max(0,Math.round(integrated.getBoundingClientRect().left));
+    const sidebar=detectHubSidebarWidth();
+    const desiredLeft=Math.max(naturalLeft,sidebar);
+    const extraLeft=Math.max(0,desiredLeft-naturalLeft);
+    const available=Math.max(320,(window.innerWidth||document.documentElement.clientWidth||0)-desiredLeft);
+    integrated.style.setProperty('margin-left',extraLeft+'px','important');
+    integrated.style.setProperty('width',available+'px','important');
+    integrated.style.setProperty('max-width',available+'px','important');
+    integrated.style.setProperty('min-width','0','important');
+    document.documentElement.style.setProperty('--frameby-hub-left',desiredLeft+'px');
+  }
+
   function applyZoom(){
     const pct=zoomSteps[zoomIndex]||100;
     const scale=pct/100;
-    const integrated=document.querySelector('.app.integrated-content');
-    if(integrated){
-      const sidebar=detectHubSidebarWidth();
-      const available=Math.max(320,window.innerWidth-sidebar);
-      /* Finance 영역에만 zoom을 적용합니다. 좌측 Dashboard_Hub 사이드바는 확대/축소하지 않습니다.
-         margin/width를 역보정하여 실제 보이는 시작점은 sidebar 오른쪽, 끝점은 viewport 오른쪽에 맞춥니다. */
-      integrated.style.setProperty('zoom',String(scale),'important');
-      integrated.style.setProperty('margin-left',(sidebar/scale)+'px','important');
-      integrated.style.setProperty('width',(available/scale)+'px','important');
-      integrated.style.setProperty('min-width','0','important');
-      integrated.style.setProperty('max-width','none','important');
+    applyFinanceViewport();
+    /* 외부 FRAME BY 사이드바/viewport 폭은 고정하고 Finance 본문 내부만 확대·축소 */
+    const main=document.querySelector('.app.integrated-content>.main');
+    if(main){
+      main.style.setProperty('zoom',String(scale),'important');
+      main.style.setProperty('width',(100/scale)+'%','important');
+      main.style.setProperty('max-width','none','important');
+      main.style.setProperty('min-width','0','important');
+      main.style.setProperty('margin','0','important');
     }
-    /* 이전 버전의 body zoom/width 보정이 남지 않도록 원복 */
+    /* 과거 버전에서 body/integrated에 남을 수 있는 zoom은 제거 */
     document.body.style.removeProperty('zoom');
     document.body.style.removeProperty('width');
     document.body.style.removeProperty('min-width');
     document.body.style.removeProperty('max-width');
+    const integrated=document.querySelector('.app.integrated-content');
+    integrated?.style.removeProperty('zoom');
     const v=document.getElementById('framebyZoomValue');if(v)v.textContent=pct+'%';
   }
   function addZoom(){
@@ -11876,13 +12036,16 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function init(){
     addRefreshButtons();
     addZoom();
-    /* 외부 공통 사이드바가 nav.js에서 늦게 생성되거나 접힘/펼침될 수 있어 재측정 */
-    [100,400,1000].forEach(ms=>setTimeout(applyZoom,ms));
-    window.addEventListener('resize',applyZoom);
-    try{
-      let t=0;
-      new MutationObserver(()=>{clearTimeout(t);t=setTimeout(applyZoom,80)}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
-    }catch(e){}
+    /* nav.js가 늦게 붙는 경우와 사이드바 접기/펼치기 후만 재측정 */
+    [80,300,800,1600].forEach(ms=>setTimeout(applyZoom,ms));
+    let rt=0;
+    window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(applyZoom,80)});
+    document.addEventListener('click',e=>{
+      const integrated=document.querySelector('.app.integrated-content');
+      if(integrated&&integrated.contains(e.target))return;
+      const x=e.clientX||0;
+      if(x<=420){setTimeout(applyZoom,80);setTimeout(applyZoom,320)}
+    },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
