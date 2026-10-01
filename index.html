@@ -658,6 +658,15 @@ button,select,.field label,.table th,.table td,.inline-sheet th,.inline-sheet td
   .frameby-zoom-control{top:11px!important;right:8px!important;}
 }
 </style>
+
+<style id="frameby-fullwidth-fix-20261001">
+/* 사이트 전체가 브라우저 가로폭을 끝까지 사용하도록 최상위 폭만 보정 */
+html{width:100%!important;min-width:100%!important;max-width:none!important;}
+body{margin-left:0!important;margin-right:0!important;max-width:none!important;}
+.app.integrated-content{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;}
+.app.integrated-content>.main{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;}
+.finance-workspace-nav{width:100%!important;max-width:none!important;box-sizing:border-box!important;}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -11816,7 +11825,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   let zoomIndex=2;
   function applyZoom(){
     const pct=zoomSteps[zoomIndex]||100;
-    document.body.style.zoom=String(pct/100);
+    const scale=pct/100;
+    document.body.style.zoom=String(scale);
+    /* CSS zoom으로 축소/확대할 때 오른쪽에 빈 여백이 남지 않도록
+       레이아웃 폭을 줌 비율의 역수로 보정합니다. */
+    document.body.style.setProperty('width',(100/scale)+'%','important');
+    document.body.style.setProperty('max-width','none','important');
+    document.body.style.setProperty('min-width','0','important');
     const v=document.getElementById('framebyZoomValue');if(v)v.textContent=pct+'%';
   }
   function addZoom(){
