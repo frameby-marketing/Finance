@@ -659,11 +659,10 @@ button,select,.field label,.table th,.table td,.inline-sheet th,.inline-sheet td
 }
 </style>
 
-<style id="frameby-fullwidth-fix-20261001">
-/* 사이트 전체가 브라우저 가로폭을 끝까지 사용하도록 최상위 폭만 보정 */
-html{width:100%!important;min-width:100%!important;max-width:none!important;}
-body{margin-left:0!important;margin-right:0!important;max-width:none!important;}
-.app.integrated-content{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;}
+<style id="frameby-hub-layout-fix-20261001">
+/* Dashboard_Hub의 왼쪽 공통 사이드바는 그대로 두고 Finance 본문만 남은 화면폭을 사용 */
+html,body{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;overflow-x:hidden!important;}
+.app.integrated-content{max-width:none!important;box-sizing:border-box!important;transform-origin:top left!important;}
 .app.integrated-content>.main{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;}
 .finance-workspace-nav{width:100%!important;max-width:none!important;box-sizing:border-box!important;}
 </style>
@@ -11823,15 +11822,43 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   const zoomSteps=[80,90,100,110,120];
   let zoomIndex=2;
+  function detectHubSidebarWidth(){
+    const integrated=document.querySelector('.app.integrated-content');
+    if(!integrated)return 0;
+    let right=0;
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el===integrated||integrated.contains(el))return;
+      if(el.tagName==='SCRIPT'||el.tagName==='STYLE'||el.tagName==='LINK')return;
+      const cs=getComputedStyle(el);
+      if(cs.display==='none'||cs.visibility==='hidden')return;
+      if(cs.position!=='fixed'&&cs.position!=='sticky')return;
+      const r=el.getBoundingClientRect();
+      if(r.width<40||r.width>360||r.height<window.innerHeight*.55)return;
+      if(r.left>3||r.top>120||r.right<40)return;
+      right=Math.max(right,Math.min(r.right,360));
+    });
+    return Math.max(0,Math.round(right));
+  }
   function applyZoom(){
     const pct=zoomSteps[zoomIndex]||100;
     const scale=pct/100;
-    document.body.style.zoom=String(scale);
-    /* CSS zoom으로 축소/확대할 때 오른쪽에 빈 여백이 남지 않도록
-       레이아웃 폭을 줌 비율의 역수로 보정합니다. */
-    document.body.style.setProperty('width',(100/scale)+'%','important');
-    document.body.style.setProperty('max-width','none','important');
-    document.body.style.setProperty('min-width','0','important');
+    const integrated=document.querySelector('.app.integrated-content');
+    if(integrated){
+      const sidebar=detectHubSidebarWidth();
+      const available=Math.max(320,window.innerWidth-sidebar);
+      /* Finance 영역에만 zoom을 적용합니다. 좌측 Dashboard_Hub 사이드바는 확대/축소하지 않습니다.
+         margin/width를 역보정하여 실제 보이는 시작점은 sidebar 오른쪽, 끝점은 viewport 오른쪽에 맞춥니다. */
+      integrated.style.setProperty('zoom',String(scale),'important');
+      integrated.style.setProperty('margin-left',(sidebar/scale)+'px','important');
+      integrated.style.setProperty('width',(available/scale)+'px','important');
+      integrated.style.setProperty('min-width','0','important');
+      integrated.style.setProperty('max-width','none','important');
+    }
+    /* 이전 버전의 body zoom/width 보정이 남지 않도록 원복 */
+    document.body.style.removeProperty('zoom');
+    document.body.style.removeProperty('width');
+    document.body.style.removeProperty('min-width');
+    document.body.style.removeProperty('max-width');
     const v=document.getElementById('framebyZoomValue');if(v)v.textContent=pct+'%';
   }
   function addZoom(){
@@ -11846,7 +11873,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     document.getElementById('framebyZoomValue')?.addEventListener('click',()=>{zoomIndex=2;applyZoom()});
     applyZoom();
   }
-  function init(){addRefreshButtons();addZoom()}
+  function init(){
+    addRefreshButtons();
+    addZoom();
+    /* 외부 공통 사이드바가 nav.js에서 늦게 생성되거나 접힘/펼침될 수 있어 재측정 */
+    [100,400,1000].forEach(ms=>setTimeout(applyZoom,ms));
+    window.addEventListener('resize',applyZoom);
+    try{
+      let t=0;
+      new MutationObserver(()=>{clearTimeout(t);t=setTimeout(applyZoom,80)}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+    }catch(e){}
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
