@@ -886,6 +886,62 @@ button, select, input, label, th, td,
   .frameby-site-zoom .frameby-zoom-value{min-width:52px;font-size:11px}
 }
 </style>
+
+<style id="frameby-primary-nav-size-blue-text-v1">
+/* 2026-10-01: 상위메뉴 확대 + 활성 상태는 배경 없이 파란 글씨만 표시 */
+.finance-primary{
+  align-items:center !important;
+  gap:26px !important;
+}
+.finance-primary-btn{
+  box-sizing:border-box !important;
+  height:52px !important;
+  min-height:52px !important;
+  padding:0 18px !important;
+  margin:6px 0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  color:#2f3948 !important;
+  font-size:clamp(17px,1.18vw,20px) !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+  white-space:nowrap !important;
+  word-break:keep-all !important;
+  overflow-wrap:normal !important;
+}
+.finance-primary-btn:hover{
+  background:transparent !important;
+  border-color:transparent !important;
+  color:var(--primary) !important;
+}
+.finance-primary-btn.active{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  color:var(--primary) !important;
+}
+.finance-primary-btn.active::after{display:none !important;content:none !important}
+
+@media(max-width:1280px){
+  .finance-primary{gap:18px !important}
+  .finance-primary-btn{font-size:18px !important;padding:0 15px !important}
+}
+@media(max-width:900px){
+  .finance-primary{gap:10px !important}
+  .finance-primary-btn{height:48px !important;min-height:48px !important;font-size:16px !important;padding:0 12px !important}
+}
+@media(max-width:720px){
+  .finance-primary{gap:6px !important}
+  .finance-primary-btn{height:44px !important;min-height:44px !important;font-size:15px !important;padding:0 10px !important;margin:5px 0 !important}
+}
+@media(max-width:430px){
+  .finance-primary-btn{font-size:14px !important;padding:0 9px !important}
+}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -7466,6 +7522,41 @@ button,select,input,label,th,td,
   .cash-secondary-tools{
     margin-left:0 !important;
     justify-content:flex-start !important;
+  }
+}
+</style>
+
+<style id="frameby-research-subnav-left-only-v1">
+/* 연구개발 하위메뉴만 왼쪽 시작선으로 고정 — 기능/규격 변경 없음 */
+#researchSecondaryMenu{
+  align-items:flex-start !important;
+  justify-content:flex-start !important;
+}
+#researchSecondaryMenu #researchModuleTabs{
+  align-self:flex-start !important;
+  justify-content:flex-start !important;
+  margin-left:0 !important;
+  margin-right:auto !important;
+  flex:0 0 auto !important;
+  width:auto !important;
+  max-width:100% !important;
+}
+#researchSecondaryMenu #researchMonthRow{
+  align-self:flex-start !important;
+  justify-content:flex-start !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+#researchSecondaryMenu #researchMonthBtns{
+  justify-content:flex-start !important;
+  margin-left:0 !important;
+}
+@media(max-width:720px){
+  #researchSecondaryMenu #researchModuleTabs,
+  #researchSecondaryMenu #researchMonthRow{
+    align-self:flex-start !important;
+    justify-content:flex-start !important;
+    margin-left:0 !important;
   }
 }
 </style>
