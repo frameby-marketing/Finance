@@ -620,6 +620,44 @@ button,select,.field label,.table th,.table td,.inline-sheet th,.inline-sheet td
   :root{--fb-sub-slot:96px;--fb-sub-font:11px;--fb-primary-slot:96px;--fb-primary-font:12px}
 }
 </style>
+
+<style id="frameby-topnav-hard-fix-20261001">
+/* 상위메뉴 실제 왼쪽 고정 / 줌은 메뉴 flex 밖 우측 상단 */
+.finance-workspace-nav{position:relative!important;width:100%!important;}
+.finance-primary{
+  width:100%!important;
+  margin:0!important;
+  padding-left:30px!important;
+  padding-right:190px!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+}
+.finance-primary-btn{margin-left:0!important;margin-right:0!important;}
+.frameby-zoom-control{
+  position:absolute!important;
+  top:15px!important;
+  right:30px!important;
+  left:auto!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  z-index:50!important;
+}
+@media(max-width:1180px){
+  .finance-primary{padding-left:20px!important;padding-right:176px!important;}
+  .frameby-zoom-control{right:20px!important;}
+}
+@media(max-width:720px){
+  .finance-primary{padding-left:12px!important;padding-right:146px!important;}
+  .frameby-zoom-control{top:12px!important;right:12px!important;}
+}
+@media(max-width:420px){
+  .finance-primary{padding-left:8px!important;padding-right:136px!important;}
+  .frameby-zoom-control{top:11px!important;right:8px!important;}
+}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -11782,10 +11820,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const v=document.getElementById('framebyZoomValue');if(v)v.textContent=pct+'%';
   }
   function addZoom(){
-    const primary=document.querySelector('.finance-primary');if(!primary||document.getElementById('framebyZoomControl'))return;
+    const nav=document.querySelector('.finance-workspace-nav');
+    const primary=document.querySelector('.finance-primary');
+    if(!nav||!primary||document.getElementById('framebyZoomControl'))return;
     const wrap=document.createElement('div');wrap.id='framebyZoomControl';wrap.className='frameby-zoom-control';wrap.setAttribute('aria-label','전체 화면 확대 축소');
     wrap.innerHTML='<button type="button" id="framebyZoomOut" aria-label="축소">−</button><button type="button" id="framebyZoomValue" class="frameby-zoom-value" aria-label="100%로 초기화">100%</button><button type="button" id="framebyZoomIn" aria-label="확대">+</button>';
-    primary.appendChild(wrap);
+    nav.appendChild(wrap);
     document.getElementById('framebyZoomOut')?.addEventListener('click',()=>{zoomIndex=Math.max(0,zoomIndex-1);applyZoom()});
     document.getElementById('framebyZoomIn')?.addEventListener('click',()=>{zoomIndex=Math.min(zoomSteps.length-1,zoomIndex+1);applyZoom()});
     document.getElementById('framebyZoomValue')?.addEventListener('click',()=>{zoomIndex=2;applyZoom()});
