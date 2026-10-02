@@ -3409,16 +3409,20 @@ async function ghLeaveSettlementDetail(employeeNo){
   return ghLeaveNormalizeSettlementDetail({employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,accruedLeave:annual.annualLeave??null,usedLeave:annual.used??null,remainingLeave:annual.remain??null,unusedLeave:unused,monthlyAvgPay:emp.avgPay||summary.monthlyAvgPay||null,hourlyPay:summary.hourlyPay||(emp.avgPay?emp.avgPay/209:null),dayPay,leavePay:dayPay&&unused!==null?Math.trunc(dayPay*unused):null,payDate:emp.finalWorkDate||'',salary:null,totalPay:null,insurance:null,netBeforeExtra:null,managementFee:null,incomeTax:null,finalPay:null,finalPayKorean:'',status:status?status.status:'정산예정',calculationNote:'연차수당처리일수는 웹에서 자동 계산하며 원본 월별사용대장 셀은 변경하지 않습니다.'},employeeNo);
 }
 async function ghLeaveSettlementList(){
-  const employees=(await ghLeaveGetEmployeeInfo()).filter(e=>!!e.finalWorkDate),statusMap=await ghLeaveStatusMap(),today=ghLeaveToday();const rows=[];
-  for(const emp of employees){const detail=await ghLeaveSettlementDetail(emp.employeeNo),status=ghLeaveResolveSettlementStatus(emp,statusMap[emp.employeeNo]);rows.push({employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,unusedLeave:detail.baseAvailableDays??null,settlementProcessedDays:detail.settlementProcessedDays??null,leavePay:detail.leavePay??null,status,isPast:emp.finalWorkDate<=today})}
-  return{current:rows.filter(x=>!x.isPast).sort((a,b)=>(a.joinDate||'').localeCompare(b.joinDate||'')),history:rows.filter(x=>x.isPast).sort((a,b)=>(a.finalWorkDate||'').localeCompare(b.finalWorkDate||'')),today};
+  return ghLeaveCached('settlementList',async()=>{
+    const employees=(await ghLeaveGetEmployeeInfo()).filter(e=>!!e.finalWorkDate),statusMap=await ghLeaveStatusMap(),today=ghLeaveToday();const rows=[];
+    for(const emp of employees){const detail=await ghLeaveSettlementDetail(emp.employeeNo),status=ghLeaveResolveSettlementStatus(emp,statusMap[emp.employeeNo]);rows.push({employeeNo:emp.employeeNo,name:emp.name,dept:emp.dept,position:emp.position,joinDate:emp.joinDate,finalWorkDate:emp.finalWorkDate,unusedLeave:detail.baseAvailableDays??null,settlementProcessedDays:detail.settlementProcessedDays??null,leavePay:detail.leavePay??null,status,isPast:emp.finalWorkDate<=today})}
+    return{current:rows.filter(x=>!x.isPast).sort((a,b)=>(a.joinDate||'').localeCompare(b.joinDate||'')),history:rows.filter(x=>x.isPast).sort((a,b)=>(a.finalWorkDate||'').localeCompare(b.finalWorkDate||'')),today};
+  });
 }
 async function ghLeaveUpsertStatus(employeeNo,name,status,confirmedAt,finalWorkDate,snapshotJson,memo){
   const map=await ghLeaveStatusMap(),row=map[employeeNo]?.row,values=[[employeeNo,name,status||'정산예정',confirmedAt||'',finalWorkDate||'',snapshotJson||'',memo||'']];if(row)await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.statusSheet,`A${row}:G${row}`,values);else await ghValuesAppend(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.statusSheet,'A:G',values);ghLeaveClearCache();
 }
-async function ghLeaveGetAppData(year,month){
+async function ghLeaveGetAppData(year,month,includeSettlement=false){
   await ghLeaveRequireStores();const years=await ghLeaveAvailableYears();const now=new Date();year=Number(year)||(years.includes(now.getFullYear())?now.getFullYear():Math.max(...years));month=Number(month)||(year===now.getFullYear()?now.getMonth()+1:1);if(!years.includes(year))year=Math.max(...years);if(month<1||month>12)month=1;
-  const [employees,directory,calendarEvents,deductionMap,settlementList]=await Promise.all([ghLeaveBuildYearSummary(year),ghLeaveEmployeeDirectory(),ghLeaveCalendarEvents(year,month),ghLeaveDeductionMap(),ghLeaveSettlementList()]);return{year,month,years,employees,employeeDirectory:directory,calendarEvents,deductionMap,settlementList};
+  const [employees,directory,calendarEvents,deductionMap]=await Promise.all([ghLeaveBuildYearSummary(year),ghLeaveEmployeeDirectory(),ghLeaveCalendarEvents(year,month),ghLeaveDeductionMap()]);
+  const settlementList=includeSettlement?await ghLeaveSettlementList():null;
+  return{year,month,years,employees,employeeDirectory:directory,calendarEvents,deductionMap,settlementList};
 }
 async function ghLeaveSaveRecord(payload){
   ghLeaveClearCache();await ghLeaveRequireStores();if(!payload)throw new Error('저장할 일정 정보가 없습니다.');const employeeNo=ghText(payload.employeeNo),startDate=ghText(payload.startDate),endDate=ghText(payload.endDate),type=ghText(payload.type),detail=ghText(payload.detail),memo=String(payload.memo||''),oldEventId=ghText(payload.eventId);if(!employeeNo||!startDate||!endDate||!type)throw new Error('사원, 시작일, 종료일, 구분을 모두 입력해 주세요.');if(endDate<startDate)throw new Error('종료일은 시작일보다 빠를 수 없습니다.');const start=ghLeaveParseYmd(startDate),end=ghLeaveParseYmd(endDate),year=start.getFullYear();if(end.getFullYear()!==year)throw new Error('연차 기간은 같은 연도 안에서 등록해 주세요.');const employee=(await ghLeaveGetEmployeeInfo()).find(x=>x.employeeNo===employeeNo);if(!employee)throw new Error('사원정보에서 해당 사원을 찾을 수 없습니다.');const token=ghLeaveToken(type,detail),deductionMap=await ghLeaveDeductionMap(),deductionPerDay=deductionMap[token]!==undefined?Number(deductionMap[token]):0,totalDeduction=ghLeaveRound2(deductionPerDay*ghLeaveDateCountInclusive(startDate,endDate));const records=await ghLeaveRecords();let old=null,eventId=oldEventId||`E${year}_${crypto.randomUUID()}`;if(oldEventId){old=records.find(r=>r.eventId===oldEventId&&r.status==='ACTIVE');if(!old)throw new Error('수정할 기존 연차기록을 저장소에서 찾을 수 없습니다.')}const conflict=records.find(r=>r.status==='ACTIVE'&&r.employeeNo===employeeNo&&r.eventId!==eventId&&!(endDate<r.startDate||startDate>r.endDate));if(conflict)throw new Error(`${conflict.startDate} ~ ${conflict.endDate}에 이미 '${conflict.token}' 일정이 등록되어 있습니다.`);const now=ghLeaveNowText(),actor=GITHUB_USER_EMAIL||'',record={eventId,employeeNo,employeeName:employee.name,startDate,endDate,type,detail,token,deductionPerDay,totalDeduction,memo,status:'ACTIVE',createdAt:old?old.createdAt:now,updatedAt:now,deletedAt:'',createdBy:old?old.createdBy:actor,updatedBy:actor};const vals=[[record.eventId,record.employeeNo,record.employeeName,record.startDate,record.endDate,record.type,record.detail,record.token,record.deductionPerDay,record.totalDeduction,record.memo,record.status,record.createdAt,record.updatedAt,record.deletedAt,record.createdBy,record.updatedBy]];if(old)await ghValuesUpdate(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.leaveStoreSheet,`A${old.row}:Q${old.row}`,vals);else await ghValuesAppend(LEAVE_CONFIG.spreadsheetId,LEAVE_CONFIG.leaveStoreSheet,'A:Q',vals);ghLeaveClearCache();return ghLeaveGetAppData(year,start.getMonth()+1);
@@ -3513,33 +3517,30 @@ function n(v){const x=Number(v||0);return Number.isFinite(x)?x:0}
 function fmtDay(v){return n(v)===0?'-':n(v).toFixed(2)}
 function fmtMoney(v){return (v===null||v===undefined||v==='')?'-':Number(v).toLocaleString('ko-KR')+'원'}
 
+function normalizeLeaveState(next,keepSettlement=true){
+  const previous=keepSettlement&&state?.settlementListLoaded?state.settlementList:null;
+  next=next||{};
+  next.years=Array.isArray(next.years)?next.years:[];
+  next.employees=Array.isArray(next.employees)?next.employees:[];
+  next.employeeDirectory=Array.isArray(next.employeeDirectory)
+    ?next.employeeDirectory
+    :next.employees.map(e=>({employeeNo:e.employeeNo,name:e.name,joinDate:e.joinDate||'',finalWorkDate:e.finalWorkDate||'',isFinalDateSet:!!e.finalWorkDate,isRetired:!!e.isRetired,isClosed:!!e.isClosed}));
+  next.calendarEvents=Array.isArray(next.calendarEvents)?next.calendarEvents:[];
+  next.settlementListLoaded=!!next.settlementList||!!previous;
+  next.settlementList=next.settlementList||previous||{current:[],history:[],today:''};
+  return next;
+}
 async function loadApp(year,month){
   setLoading(true);
   try{
-    state = await server('getAppData',year,month);
-
-    // Code.gs / Index.html 배포 버전이 순간적으로 어긋나도 화면이 죽지 않도록 기본값 보정
-    state.years = Array.isArray(state.years) ? state.years : [];
-    state.employees = Array.isArray(state.employees) ? state.employees : [];
-    state.employeeDirectory = Array.isArray(state.employeeDirectory)
-      ? state.employeeDirectory
-      : state.employees.map(e => ({
-          employeeNo:e.employeeNo,
-          name:e.name,
-          joinDate:e.joinDate||'',
-          finalWorkDate:e.finalWorkDate||'',
-          isFinalDateSet:!!e.finalWorkDate,
-          isRetired:!!e.isRetired,
-          isClosed:!!e.isClosed
-        }));
-    state.calendarEvents = Array.isArray(state.calendarEvents) ? state.calendarEvents : [];
-    state.settlementList = state.settlementList || {current:[],history:[]};
-
+    state=normalizeLeaveState(await server('getAppData',year,month,false),true);
     buildColorMap();
     renderSelectors();
-    renderLeavePage();
-    renderEmployeeDirectory();
-    renderSettlementList(state.settlementList);
+    if(LEAVE_ACTIVE_PAGE==='employee')renderEmployeeDirectory();
+    else if(LEAVE_ACTIVE_PAGE==='settle'){
+      if(state.settlementListLoaded)renderSettlementList(state.settlementList);
+      else refreshSettlementList();
+    }else renderLeavePage();
   }catch(e){alert(e.message)}
   finally{setLoading(false)}
 }
@@ -3789,7 +3790,7 @@ async function saveLeave(){
   if(leaveType.value==='조기퇴근')detail=earlyType.value;
   const payload={eventId:editingEvent?.eventId||'',employeeNo:employeeSelect.value,startDate:startDate.value,endDate:endDate.value,type:leaveType.value,detail,memo:memo.value};
   setLoading(true);
-  try{state=await server('saveLeave',payload);buildColorMap();renderSelectors();renderLeavePage();LeaveApp.closeLeaveModal()}
+  try{state=normalizeLeaveState(await server('saveLeave',payload),false);buildColorMap();renderSelectors();renderLeavePage();LeaveApp.closeLeaveModal()}
   catch(e){alert(e.message)}
   finally{setLoading(false)}
 }
@@ -3800,7 +3801,7 @@ async function deleteLeave(){
   try{
     await server('deleteLeave',editingEvent.eventId);
     closeLeaveModal();
-    state=await server('getAppData',y,m);
+    state=normalizeLeaveState(await server('getAppData',y,m,false),false);
     buildColorMap();renderSelectors();renderLeavePage();
   }catch(e){alert(e.message)}
   finally{setLoading(false)}
@@ -3830,9 +3831,8 @@ function showPage(page){
   if(isSettle){
     currentSettlement=null;
     resetSettlementDetail();
-    renderSettlementList(
-      state.settlementList || {current:[],history:[],today:''}
-    );
+    if(state.settlementListLoaded)renderSettlementList(state.settlementList || {current:[],history:[],today:''});
+    else refreshSettlementList();
   }
 
   window.scrollTo({top:0,behavior:'auto'});
@@ -3919,12 +3919,11 @@ async function saveEmployee(){
   setLoading(true);
   try{
     state.employeeDirectory=await server('saveEmployee',payload);
-    state=await server('getAppData',state.year,state.month);
+    state=normalizeLeaveState(await server('getAppData',state.year,state.month,false),false);
     buildColorMap();
     renderSelectors();
     renderLeavePage();
     renderEmployeeDirectory();
-    renderSettlementList(state.settlementList);
     closeEmployeeModal();
   }catch(e){alert(e.message)}
   finally{setLoading(false)}
@@ -3935,6 +3934,7 @@ async function refreshSettlementList(){
   try{
     const list=await server('getSettlementList');
     state.settlementList=list || {current:[],history:[],today:''};
+    state.settlementListLoaded=true;
     renderSettlementList(state.settlementList);
   }catch(e){
     alert(e.message);
@@ -3967,7 +3967,7 @@ function settlementRow(r){
 }
 async function updateFinalDate(no,value){
   setLoading(true);
-  try{state.settlementList=await server('setFinalWorkDate',no,value);renderSettlementList(state.settlementList);resetSettlementDetail()}
+  try{state.settlementList=await server('setFinalWorkDate',no,value);state.settlementListLoaded=true;renderSettlementList(state.settlementList);resetSettlementDetail()}
   catch(e){alert(e.message)}
   finally{setLoading(false)}
 }
@@ -4043,7 +4043,9 @@ async function confirmSettlement(no){
     const res=await server('confirmSettlement',no);
     currentSettlement=res.detail;
 
-    state=await server('getAppData',state.year,state.month);
+    state=normalizeLeaveState(await server('getAppData',state.year,state.month,false),false);
+    state.settlementList=res.list||{current:[],history:[],today:''};
+    state.settlementListLoaded=true;
     buildColorMap();
     renderSelectors();
     renderLeavePage();
@@ -4406,6 +4408,10 @@ let SALES_SELECTED=[];
 let SALES_INITIALIZED=false;
 let SALES_DATA_LOADED=false;
 let SALES_DATA_LOADING=null;
+const SALES_MONTH_ITEMS_CACHE=new Map();
+const SALES_MONTH_SUMMARY_CACHE=new Map();
+let SALES_ALL_SUMMARIES_CACHE=null;
+function salesResetDerivedCache(){SALES_MONTH_ITEMS_CACHE.clear();SALES_MONTH_SUMMARY_CACHE.clear();SALES_ALL_SUMMARIES_CACHE=null}
 let SALES_RANGE_START=null;
 let SALES_RANGE_END=null;
 let SALES_RANGE_VIEW=null;
@@ -4551,16 +4557,23 @@ function salesMonthItem(base,monthNo){
   };
 }
 function salesMonthSummary(monthNo){
+  monthNo=Number(monthNo)||1;
+  if(SALES_MONTH_SUMMARY_CACHE.has(monthNo))return SALES_MONTH_SUMMARY_CACHE.get(monthNo);
   const other=salesRow(4),total=salesRow(6),s=salesMonthStart(monthNo);
-  return {
+  const summary={
     month:monthNo,
     productQty:salesNum(total[s]),productSales:salesNum(total[s+1]),
     otherSales:salesNum(other[s]),
     ownSales:salesNum(total[s+3]),naverSales:salesNum(total[s+5]),
     mmallSales:salesNum(total[s+7]),coupangSales:salesNum(total[s+9])
   };
+  SALES_MONTH_SUMMARY_CACHE.set(monthNo,summary);
+  return summary;
 }
-function salesAllMonthSummaries(){return Array.from({length:12},(_,i)=>salesMonthSummary(i+1))}
+function salesAllMonthSummaries(){
+  if(!SALES_ALL_SUMMARIES_CACHE)SALES_ALL_SUMMARIES_CACHE=Array.from({length:12},(_,i)=>salesMonthSummary(i+1));
+  return SALES_ALL_SUMMARIES_CACHE;
+}
 function salesAggregate(items){
   const map=new Map();
   items.forEach(it=>{
@@ -4595,6 +4608,7 @@ async function salesFetchData(force=false){
     salesSetState('loading','매출 데이터를 불러오는 중...');
     SALES_RAW_VALUES=await salesRequestBridgeData();
     if(!SALES_RAW_VALUES.length)throw new Error('제품매출(2026) 시트에서 데이터를 찾지 못했습니다.');
+    salesResetDerivedCache();
     salesBuildMasterItems();
     const latestSummary=salesAllMonthSummaries().filter(x=>
       salesNum(x.productQty)||salesNum(x.productSales)||salesNum(x.otherSales)||
@@ -4612,7 +4626,11 @@ async function salesFetchData(force=false){
   }).finally(()=>{SALES_DATA_LOADING=null});
   return SALES_DATA_LOADING;
 }
-function salesCurrentItems(){const m=salesMonthNo();return SALES_MASTER_ITEMS.map(x=>salesMonthItem(x,m))}
+function salesCurrentItems(){
+  const m=salesMonthNo();
+  if(!SALES_MONTH_ITEMS_CACHE.has(m))SALES_MONTH_ITEMS_CACHE.set(m,SALES_MASTER_ITEMS.map(x=>salesMonthItem(x,m)));
+  return SALES_MONTH_ITEMS_CACHE.get(m);
+}
 function salesMatchesSelected(it){
   if(!SALES_SELECTED.length)return true;
   const hay=salesNorm([it.major,it.name,it.itemNo,it.option,it.color,it.code].join(' '));
@@ -4780,6 +4798,7 @@ async function salesInitDashboard(force=false){
     document.getElementById('salesTop5Modal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')});
     document.addEventListener('click',e=>{if(!e.target.closest('.sales-search-card'))document.getElementById('salesSuggestions')?.classList.remove('open')});
   }
+  if(SALES_DATA_LOADED&&!force)return;
   try{await salesFetchData(force);salesRenderAll()}catch(e){}
 }
 
@@ -11450,13 +11469,30 @@ function wrTenureText(a,b){const days=wrDaysBetween(a,b);if(!days)return'-';cons
 function wrActualTime(start,end,breakTime){const t=s=>{const m=wrTime(s).match(/^(\d+):(\d+)$/);return m?Number(m[1])*60+Number(m[2]):null},a=t(start),b=t(end);if(a==null||b==null)return'';let x=b-a;if(x<0)x+=1440;const bm=(()=>{const m=wrDuration(breakTime).match(/^(\d+):(\d+)$/);return m?Number(m[1])*60+Number(m[2]):0})();x=Math.max(0,x-bm);return `${Math.floor(x/60)}:${String(x%60).padStart(2,'0')}`}
 function wrStripInternal(o){const x={};Object.keys(o||{}).forEach(k=>{if(!k.startsWith('__'))x[k]=o[k]});return x}
 
-async function wrReadRows(sheet,headers){
-  const rows=await ghValuesGet(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A2:${wrCol(headers.length)}`);
-  return rows.map((r,i)=>{
+function wrRowsFromValues(rows,headers){
+  return (rows||[]).map((r,i)=>{
     r=r||[];if(!r.some(v=>ghText(v)!==''))return null;
     const o={__rowNo:i+2};headers.forEach((h,j)=>o[h]=r[j]??'');
     return o;
   }).filter(Boolean);
+}
+async function wrReadRows(sheet,headers){
+  const rows=await ghValuesGet(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A2:${wrCol(headers.length)}`);
+  return wrRowsFromValues(rows,headers);
+}
+async function wrReadCoreRowsBatch(){
+  const specs=[
+    [INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS],
+    [INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS],
+    [INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS],
+    [INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS],
+    [INTEGRATED_CONFIG.workRecordPayrollSheet,WR_PAY_HEADERS]
+  ];
+  const params=specs.map(([sheet,headers])=>`ranges=${encodeURIComponent(`${ghQ(sheet)}!A2:${wrCol(headers.length)}`)}`).join('&');
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.workRecordSpreadsheetId)}/values:batchGet?${params}&valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;
+  const data=await githubFetchJson(url);
+  const ranges=Array.isArray(data?.valueRanges)?data.valueRanges:[];
+  return specs.map(([,headers],i)=>wrRowsFromValues(ranges[i]?.values||[],headers));
 }
 async function wrAppendRow(sheet,headers,obj){
   await ghValuesAppend(INTEGRATED_CONFIG.workRecordSpreadsheetId,sheet,`A:${wrCol(headers.length)}`,[headers.map(h=>obj[h]??'')]);
@@ -11551,10 +11587,10 @@ const WR_KR_HOLIDAYS={
   '2026-10-09':'한글날','2026-12-25':'기독탄신일'
 };
 function wrHolidayName(date){return WR_KR_HOLIDAYS[date]||''}
-async function wrReadLeaveEvents(){
+async function wrReadLeaveEvents(force=false){
   if(!window.FRAMEBY_MODULE_ACCESS?.leave||typeof ghLeaveCalendarEvents!=='function')return[];
   try{
-    if(typeof ghLeaveClearCache==='function')ghLeaveClearCache();
+    if(force&&typeof ghLeaveClearCache==='function')ghLeaveClearCache();
     return await ghLeaveCalendarEvents(WR_STATE.year,WR_STATE.month);
   }catch(e){
     console.warn('근무달력 연차 연동 조회 실패',e);
@@ -11581,15 +11617,12 @@ async function wrLoadData(force=false){
   if(WR_STATE.loaded&&!force){workRecordRenderAll();return}
   wrSetLoading(true);workRecordShowError('');
   try{
-    const [emps,conds,logs,sets,paySaved,legacyPayroll,leaveEvents]=await Promise.all([
-      wrReadRows(INTEGRATED_CONFIG.workRecordEmployeeSheet,WR_EMP_HEADERS),
-      wrReadRows(INTEGRATED_CONFIG.workRecordConditionSheet,WR_COND_HEADERS),
-      wrReadRows(INTEGRATED_CONFIG.workRecordLogSheet,WR_LOG_HEADERS),
-      wrReadRows(INTEGRATED_CONFIG.workRecordSettlementSheet,WR_SETTLE_HEADERS),
-      wrReadRows(INTEGRATED_CONFIG.workRecordPayrollSheet,WR_PAY_HEADERS),
+    const [coreRows,legacyPayroll,leaveEvents]=await Promise.all([
+      wrReadCoreRowsBatch(),
       wrReadLegacyPayroll(WR_STATE.year,WR_STATE.month),
-      wrReadLeaveEvents()
+      wrReadLeaveEvents(force)
     ]);
+    const [emps,conds,logs,sets,paySaved]=coreRows;
     WR_STATE.employees=wrActive(emps).map(wrNormalizeEmployee);
     WR_STATE.conditions=wrActive(conds).map(wrNormalizeCondition);
     WR_STATE.records=wrActive(logs).map(wrNormalizeRecord);
@@ -11651,7 +11684,13 @@ function wrResolveDay(date){
 }
 function wrMonthDays(){const n=new Date(WR_STATE.year,WR_STATE.month,0).getDate(),out=[];for(let i=1;i<=n;i++)out.push(`${WR_STATE.year}-${String(WR_STATE.month).padStart(2,'0')}-${String(i).padStart(2,'0')}`);return out}
 
-function workRecordRenderAll(){workRecordRenderCalendar();workRecordRenderPayroll();workRecordRenderEmployees();workRecordRenderSettlements();workRecordShowPage(WORK_RECORD_ACTIVE_PAGE,false)}
+function workRecordRenderAll(){
+  if(WORK_RECORD_ACTIVE_PAGE==='payroll')workRecordRenderPayroll();
+  else if(WORK_RECORD_ACTIVE_PAGE==='employees')workRecordRenderEmployees();
+  else if(WORK_RECORD_ACTIVE_PAGE==='settlements')workRecordRenderSettlements();
+  else workRecordRenderCalendar();
+  workRecordShowPage(WORK_RECORD_ACTIVE_PAGE,false);
+}
 function workRecordShowPage(page,load=true){
   WORK_RECORD_ACTIVE_PAGE=page||'calendar';
   document.querySelectorAll('[data-wr-view]').forEach(v=>v.classList.toggle('active',v.dataset.wrView===WORK_RECORD_ACTIVE_PAGE));
