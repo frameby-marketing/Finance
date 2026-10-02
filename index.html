@@ -12267,13 +12267,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     return {date:dateKey,transactions,balances};
   }
-
-  /* 기존 RPC 객체에 조회 함수 1개만 추가한다. 기존 호출/저장 기능은 변경하지 않는다. */
-  if(typeof CASH_GITHUB_RPC!=='undefined'){
-    CASH_GITHUB_RPC.getDailyAccountDetail=cgGetDailyAccountDetail;
-  }
-
-  function ensureDetailModal(){
+function ensureDetailModal(){
     let modal=document.getElementById('cfDailyDetailModal');
     if(modal) return modal;
 
@@ -12404,25 +12398,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.body.style.overflow='hidden';
 
     const seq=++detailRequestSeq;
-    if(typeof google==='undefined'||!google.script?.run){
-      renderDetailError(new Error('Google Sheets 연결을 확인해 주세요.'));
-      return;
-    }
-    google.script.run
-      .withSuccessHandler(result=>{if(seq===detailRequestSeq) renderDetailResult(result);})
-      .withFailureHandler(err=>{if(seq===detailRequestSeq) renderDetailError(err);})
-      .getDailyAccountDetail(dateKey);
+    Promise.resolve()
+      .then(()=>cgGetDailyAccountDetail(dateKey))
+      .then(result=>{if(seq===detailRequestSeq) renderDetailResult(result);})
+      .catch(err=>{if(seq===detailRequestSeq) renderDetailError(err);});
   }
 
-  /* 기존 renderCalendar를 수정하지 않고 이벤트 위임만 추가한다. */
+  /* 기존 renderCalendar는 수정하지 않고, 날짜 클릭만 capture 단계에서 확실히 감지한다. */
   document.addEventListener('click',e=>{
-    const dayCell=e.target?.closest?.('#calendar .day:not(.muted)');
-    if(!dayCell) return;
+    const path=typeof e.composedPath==='function'?e.composedPath():[];
+    const dayCell=path.find(el=>el?.classList?.contains?.('day') && !el.classList.contains('muted'))
+      || e.target?.closest?.('#calendar .day:not(.muted)');
+    if(!dayCell || !dayCell.closest?.('#calendar')) return;
+
     const day=Number(dayCell.querySelector('.date .num')?.textContent||0);
     if(!day||typeof selectedYear==='undefined'||typeof calendarMonth==='undefined') return;
+
     const dateKey=String(selectedYear)+'-'+String(calendarMonth).padStart(2,'0')+'-'+String(day).padStart(2,'0');
     openDetailModal(dateKey);
-  });
+  },true);
 
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&document.getElementById('cfDailyDetailModal')?.classList.contains('open')) closeDetailModal();
