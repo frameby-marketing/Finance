@@ -11427,6 +11427,625 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 </script>
+<style id="cf-input-ux-patch-20261002">
+/* 2026-10-02 입력 UX 개선: 최신 자금수지 코드의 현재 레이아웃을 유지한 채 입력부만 보완 */
+#forecastMiniCard{display:none!important}
+
+/* 예측기준 카드 제거 후 큰 화면의 기존 2열 배치는 그대로 유지 */
+@media (min-width:1280px) and (max-width:1699px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(720px,1fr) var(--cf-side-width,420px)!important;
+    gap:16px!important;
+    align-items:start!important;
+  }
+  #calendarPage .side{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    gap:14px!important;
+  }
+}
+@media (min-width:1700px){
+  #calendarPage .content-grid{
+    grid-template-columns:minmax(760px,1fr) var(--cf-side-width,680px)!important;
+    gap:16px!important;
+    align-items:start!important;
+  }
+  #calendarPage .side{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-areas:
+      "income loan"
+      "cost loan"!important;
+    gap:14px!important;
+    align-items:start!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  #incomeMiniCard{grid-area:income!important}
+  #costMiniCard{grid-area:cost!important}
+  #shortLoanCard{grid-area:loan!important;align-self:start!important;position:sticky!important;top:78px!important}
+}
+@media (max-width:1279px){
+  #calendarPage .content-grid{grid-template-columns:1fr!important}
+  #calendarPage .side{display:flex!important;flex-direction:column!important;width:100%!important;margin-top:14px!important;gap:14px!important}
+  #shortLoanCard{position:static!important}
+}
+#calendarPage .side .metric-card{width:100%!important;min-width:0!important}
+
+/* 긴 거래처/내용에 따라 우측 영역이 넓어지면 표 열도 같이 늘어남 */
+#incomeMiniCard .sheet-edit-head,
+#incomeMiniCard .sheet-edit-row,
+#incomeMiniCard .sheet-edit-total,
+#costMiniCard .sheet-edit-head:not(.actual-cost-head),
+#costMiniCard #mfgExpectedRows .sheet-edit-row,
+#costMiniCard #adExpectedRows .sheet-edit-row,
+#costMiniCard .sheet-edit-total:not(.actual-cost-total){
+  grid-template-columns:90px minmax(80px,1fr) 108px!important;
+}
+#costMiniCard .actual-cost-head,
+#costMiniCard #mfgRows .sheet-edit-row,
+#costMiniCard #adRows .sheet-edit-row,
+#costMiniCard .actual-cost-total{
+  grid-template-columns:minmax(120px,1fr) 108px!important;
+}
+#shortLoanCard .loan-edit-head,
+#shortLoanCard #loanRows .sheet-edit-row{
+  grid-template-columns:90px minmax(84px,1fr) minmax(84px,1fr)!important;
+}
+#calendarPage .side .sheet-edit-row input{
+  min-width:0!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+}
+
+/* 행 선택 버튼 */
+.sheet-edit-row.cf-selectable-row{position:relative!important;padding-left:27px!important}
+.cf-row-select{
+  position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;padding:0;border:1px solid #bcc7d8;border-radius:4px;
+  background:#fff;color:transparent;cursor:pointer;z-index:5;
+}
+.cf-row-select:hover{border-color:#7fa2e8;background:#f4f8ff}
+.sheet-edit-row.cf-row-selected{background:#f1f6ff!important;box-shadow:inset 3px 0 0 #2f6fed}
+.sheet-edit-row.cf-row-selected .cf-row-select{background:#2f6fed;border-color:#2f6fed;color:#fff}
+.sheet-edit-row.cf-row-selected .cf-row-select::after{content:'✓';display:block;font-size:11px;line-height:14px;text-align:center;font-weight:900}
+.cf-delete-selected{
+  height:28px;border:1px solid #e2b8bd;background:#fff;color:#b42332;border-radius:7px;
+  padding:0 8px;font-size:10px;font-weight:850;cursor:pointer;white-space:nowrap;
+}
+.cf-delete-selected:hover:not(:disabled){background:#fff3f4;border-color:#dc8f98}
+.cf-delete-selected:disabled{opacity:.38;cursor:default}
+.metric-title .cf-title-actions,.section-actions.cf-title-actions{display:flex;align-items:center;gap:5px}
+
+/* 예상지출 선택 UI */
+#expectedExpenseSubview .expected-day-wrap{position:relative!important;padding-left:24px!important}
+#expectedExpenseSubview .cf-expected-select{
+  position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;padding:0;border:1px solid #bcc7d8;border-radius:4px;background:#fff;cursor:pointer;
+}
+#expectedExpenseSubview tr.cf-expected-selected td{background:#f1f6ff!important}
+#expectedExpenseSubview tr.cf-expected-selected .cf-expected-select{background:#2f6fed;border-color:#2f6fed}
+#expectedExpenseSubview tr.cf-expected-selected .cf-expected-select::after{content:'✓';display:block;color:#fff;font-size:10px;line-height:13px;text-align:center;font-weight:900}
+#expectedDeleteSelectedBtn{height:34px;padding:0 11px}
+
+/* 예상지출 입력칸 가독성 확대 */
+#expectedExpenseSubview .expected-month-card{width:470px!important;min-width:470px!important;flex-basis:470px!important}
+#expectedExpenseSubview .expected-month-table{table-layout:fixed!important}
+#expectedExpenseSubview .expected-month-table col:nth-child(1){width:70px!important}
+#expectedExpenseSubview .expected-month-table col:nth-child(2){width:130px!important}
+#expectedExpenseSubview .expected-month-table col:nth-child(3){width:165px!important}
+#expectedExpenseSubview .expected-month-table col:nth-child(4){width:105px!important}
+
+/* 저장 중 입력이 끼어들어 저장 직후 이전 금액으로 보이는 현상 방지 */
+#expectedExpenseBody.cf-saving input{pointer-events:none;background:#fafbfd!important}
+</style>
+<script id="cf-input-ux-patch-script-20261002">
+(function(){
+  'use strict';
+
+  const GROUP_TOTAL={
+    incomeRows:'incomeEditTotal',
+    mfgRows:'mfgTotal',
+    mfgExpectedRows:'mfgExpectedTotal',
+    adRows:'adTotal',
+    adExpectedRows:'adExpectedTotal',
+    loanRows:'loanMonthTotal'
+  };
+  const ADD_TO_GROUP={
+    addIncomeRow:'incomeRows',
+    addMfgRow:'mfgRows',
+    addMfgExpectedRow:'mfgExpectedRows',
+    addAdRow:'adRows',
+    addAdExpectedRow:'adExpectedRows',
+    addLoanRow:'loanRows'
+  };
+
+  function visibleInputs(row){
+    return [...(row?.querySelectorAll('input')||[])].filter(inp=>{
+      const cs=getComputedStyle(inp);
+      return cs.display!=='none' && cs.visibility!=='hidden';
+    });
+  }
+
+  function setInputValue(inp,value){
+    if(!inp) return;
+    inp.value=String(value??'');
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+    if(inp.classList.contains('amount-cell')){
+      inp.value=formatAmountValue(inp.value);
+    }
+  }
+
+  function makeSidebarRow(rowsId){
+    const row=document.createElement('div');
+    if(rowsId==='loanRows'){
+      row.className='sheet-edit-row loan-edit-row cf-dirty cf-draft-row';
+      row.innerHTML=`
+        <input type="text" class="date-cell" value="" placeholder="">
+        <input type="text" class="amount-cell loan-change-cell" inputmode="numeric" value="" placeholder="">
+        <span class="loan-balance-display"></span>`;
+      bindLoanRow(row);
+    }else{
+      row.className='sheet-edit-row cf-dirty cf-draft-row';
+      row.innerHTML=`
+        <input type="text" class="date-cell" value="" placeholder="">
+        <input type="text" value="" placeholder="">
+        <input type="text" class="amount-cell" inputmode="numeric" value="" placeholder="">`;
+      bindEditableRow(row,rowsId,GROUP_TOTAL[rowsId]);
+      bindSmartDateCells(row);
+      bindAmountCells(row);
+    }
+    return row;
+  }
+
+  function addSidebarDraft(rowsId,focus=true){
+    const holder=document.getElementById(rowsId);
+    if(!holder) return null;
+    const row=makeSidebarRow(rowsId);
+    holder.appendChild(row);
+    cfBindSidebarPersistence(holder,rowsId,GROUP_TOTAL[rowsId]);
+    decorateSidebarRows(holder,rowsId);
+    if(rowsId==='loanRows') recalcLoanGroup();
+    else recalcEditableGroup(rowsId,GROUP_TOTAL[rowsId]);
+    fitSidebarWidth();
+    if(focus){
+      const inputs=visibleInputs(row);
+      (inputs[0]||row.querySelector('input'))?.focus({preventScroll:true});
+    }
+    return row;
+  }
+
+  function updateDeleteButton(rowsId){
+    const btn=document.querySelector(`.cf-delete-selected[data-rows-id="${rowsId}"]`);
+    if(!btn) return;
+    const root=document.getElementById(rowsId);
+    btn.disabled=!root?.querySelector('.cf-row-selected');
+  }
+
+  function decorateSidebarRows(root,rowsId){
+    if(!root) return;
+    root.querySelectorAll('.sheet-edit-row').forEach(row=>{
+      row.classList.add('cf-selectable-row');
+      if(row.querySelector('.cf-row-select')) return;
+      const sel=document.createElement('button');
+      sel.type='button';
+      sel.className='cf-row-select';
+      sel.title='삭제할 행 선택';
+      sel.setAttribute('aria-pressed','false');
+      sel.addEventListener('click',e=>{
+        e.preventDefault();e.stopPropagation();
+        const on=row.classList.toggle('cf-row-selected');
+        sel.setAttribute('aria-pressed',on?'true':'false');
+        updateDeleteButton(rowsId);
+      });
+      row.appendChild(sel);
+    });
+    updateDeleteButton(rowsId);
+  }
+
+  function ensureDeleteButtons(){
+    Object.entries(ADD_TO_GROUP).forEach(([addId,rowsId])=>{
+      const add=document.getElementById(addId);
+      if(!add || document.querySelector(`.cf-delete-selected[data-rows-id="${rowsId}"]`)) return;
+      const del=document.createElement('button');
+      del.type='button';
+      del.className='cf-delete-selected';
+      del.dataset.rowsId=rowsId;
+      del.textContent='선택삭제';
+      del.disabled=true;
+      del.title='선택한 행 삭제';
+      del.addEventListener('click',()=>deleteSelectedSidebar(rowsId));
+
+      const parent=add.parentElement;
+      if(parent?.classList?.contains('metric-title')){
+        let actions=parent.querySelector('.cf-title-actions');
+        if(!actions){
+          actions=document.createElement('div');
+          actions.className='cf-title-actions';
+          parent.insertBefore(actions,add);
+          actions.appendChild(add);
+        }
+        actions.insertBefore(del,add);
+      }else if(parent){
+        parent.classList.add('cf-title-actions');
+        parent.insertBefore(del,add);
+      }
+    });
+  }
+
+  function deleteSelectedSidebar(rowsId){
+    const root=document.getElementById(rowsId);
+    if(!root) return;
+    const rows=[...root.querySelectorAll('.cf-row-selected')];
+    if(!rows.length) return;
+    const totalId=GROUP_TOTAL[rowsId];
+
+    const removeLocal=row=>{
+      const id=row.dataset.recordId||'';
+      if(id) cfRemoveLocalStore(id);
+      row.remove();
+    };
+
+    let pending=rows.length;
+    cfSetMiniStatus('삭제 중…','saving');
+    const done=()=>{
+      pending--;
+      if(pending>0) return;
+      if(rowsId==='loanRows') recalcLoanGroup();
+      else recalcEditableGroup(rowsId,totalId);
+      updateDeleteButton(rowsId);
+      fitSidebarWidth();
+      cfSetMiniStatus('삭제됨','saved');
+    };
+
+    rows.forEach(row=>{
+      clearTimeout(row.__cfSaveTimer);
+      row.__cfDeleting=true;
+      const id=row.dataset.recordId||'';
+      if(!id || typeof google==='undefined' || !google.script?.run){
+        removeLocal(row);done();return;
+      }
+      google.script.run
+        .withSuccessHandler(()=>{removeLocal(row);done();})
+        .withFailureHandler(err=>{row.__cfDeleting=false;cfShowError(err);done();})
+        .softDeleteWebRecord(id);
+    });
+  }
+
+  /* Backspace/Delete는 셀 내용만 지우고, 행 삭제는 선택삭제로만 처리 */
+  window.cfSidebarRowIsBlank=function(){return false;};
+
+  /* 행별 순차 저장: 같은 행의 저장 요청이 겹치지 않도록 마지막 수정값까지 순서대로 반영 */
+  window.cfBindSidebarPersistence=function(root,rowsId,totalId){
+    const type=cfStoreTypeForRows(rowsId);
+    if(!type || !root) return;
+
+    const buildRecord=row=>{
+      const ins=row.querySelectorAll('input');
+      const recordId=row.dataset.recordId||'';
+      if(rowsId==='loanRows'){
+        const date=cfNormalizeMiniPasteDate(ins[0]?.value||'');
+        if(ins[0]) ins[0].value=date;
+        const amountRaw=String(ins[1]?.value||'').trim();
+        if(!date || amountRaw==='') return null;
+        return {id:recordId,type:'단기차입금',year:selectedYear,month:Number(date.slice(5,7))||0,date,vendor:'',description:'',amount:Number(amountRaw.replace(/,/g,''))||0};
+      }
+      const actualNoDate=(rowsId==='mfgRows'||rowsId==='adRows');
+      const date=actualNoDate?'':cfNormalizeMiniPasteDate(ins[0]?.value||'');
+      if(ins[0]&&!actualNoDate) ins[0].value=date;
+      const desc=ins[1]?.value?.trim()||'';
+      const amountRaw=String(ins[2]?.value||'').trim();
+      const complete=actualNoDate?(!!desc&&amountRaw!==''):(!!date&&!!desc&&amountRaw!=='');
+      if(!complete) return null;
+      return {id:recordId,type,year:selectedYear,month:date&&/^\d{4}-\d{2}-\d{2}$/.test(date)?Number(date.slice(5,7)):calendarMonth,date,vendor:'',description:desc,amount:Number(amountRaw.replace(/,/g,''))||0};
+    };
+
+    const saveLatest=row=>{
+      if(!row || row.__cfDeleting || !row.isConnected) return;
+      if(row.__cfSaving){row.__cfPendingSave=true;return;}
+      const record=buildRecord(row);
+      if(!record) return;
+      if(typeof google==='undefined'||!google.script?.run) return;
+
+      row.__cfSaving=true;
+      row.__cfPendingSave=false;
+      const version=row.__cfEditVersion||0;
+      const snapshot=cfSidebarRowSnapshot(row);
+      cfSetMiniStatus('저장 중…','saving');
+
+      google.script.run
+        .withSuccessHandler(saved=>{
+          row.__cfSaving=false;
+          if(!row.isConnected) return;
+          row.dataset.recordId=saved.id;
+          cfUpsertLocalStore(saved);
+          const unchanged=(row.__cfEditVersion||0)===version && cfSidebarRowSnapshot(row)===snapshot;
+          if(unchanged){
+            cfClearSidebarRowDirty(row);
+            row.classList.remove('cf-draft-row');
+          }else{
+            row.__cfPendingSave=true;
+          }
+          if(rowsId==='loanRows') recalcLoanGroup();
+          else recalcEditableGroup(rowsId,totalId);
+          decorateSidebarRows(root,rowsId);
+          fitSidebarWidth();
+          if(row.__cfPendingSave){
+            row.__cfPendingSave=false;
+            setTimeout(()=>saveLatest(row),0);
+          }else{
+            cfSetMiniStatus('저장됨','saved');
+          }
+        })
+        .withFailureHandler(err=>{
+          row.__cfSaving=false;
+          row.__cfPendingSave=false;
+          cfMarkSidebarRowDirty(row);
+          cfShowError(err);
+          cfSetMiniStatus('저장 실패','error');
+        })
+        .saveWebRecord(record);
+    };
+
+    root.querySelectorAll('.sheet-edit-row').forEach(row=>{
+      if(row.dataset.cfUxPersistBound==='1') return;
+      row.dataset.cfUxPersistBound='1';
+      row.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('input',()=>{
+          row.__cfEditVersion=(row.__cfEditVersion||0)+1;
+          cfMarkSidebarRowDirty(row);
+          clearTimeout(row.__cfSaveTimer);
+          row.__cfSaveTimer=setTimeout(()=>saveLatest(row),350);
+          fitSidebarWidth();
+        });
+        inp.addEventListener('blur',()=>{
+          if(row.__cfDeleting||!row.isConnected) return;
+          clearTimeout(row.__cfSaveTimer);
+          row.__cfSaveTimer=setTimeout(()=>saveLatest(row),60);
+        });
+      });
+    });
+    decorateSidebarRows(root,rowsId);
+  };
+
+  function parseMatrix(text){
+    return String(text??'').replace(/\r/g,'').split('\n')
+      .filter((line,i,arr)=>!(i===arr.length-1&&line===''))
+      .map(line=>line.split('\t'));
+  }
+
+  function pasteSidebar(e,input,root){
+    const rowsId=root.id,totalId=GROUP_TOTAL[rowsId];
+    const matrix=parseMatrix(e.clipboardData?.getData('text/plain')||'');
+    if(!matrix.length) return;
+    e.preventDefault();e.stopImmediatePropagation();
+
+    let rows=[...root.querySelectorAll('.sheet-edit-row')];
+    let startRow=input.closest('.sheet-edit-row');
+    if(!startRow){startRow=addSidebarDraft(rowsId,false);rows=[...root.querySelectorAll('.sheet-edit-row')];}
+    let startIndex=rows.indexOf(startRow);if(startIndex<0) startIndex=0;
+    const startVisible=visibleInputs(startRow);
+    let startCol=startVisible.indexOf(input);if(startCol<0) startCol=0;
+
+    matrix.forEach((cols,rIdx)=>{
+      rows=[...root.querySelectorAll('.sheet-edit-row')];
+      let row=rows[startIndex+rIdx];
+      if(!row) row=addSidebarDraft(rowsId,false);
+      const targets=visibleInputs(row);
+      cols.forEach((value,cIdx)=>{
+        const target=targets[startCol+cIdx];
+        if(target) setInputValue(target,value);
+      });
+      cfMarkSidebarRowDirty(row);
+    });
+    if(rowsId==='loanRows') recalcLoanGroup();else recalcEditableGroup(rowsId,totalId);
+    fitSidebarWidth();
+  }
+
+  function expectedInputIndex(input){
+    if(input.classList.contains('expected-vendor')) return 0;
+    if(input.classList.contains('expected-desc')) return 1;
+    if(input.classList.contains('expected-amount')) return 2;
+    return 0;
+  }
+  function expectedInputs(tr){return [tr.querySelector('.expected-vendor'),tr.querySelector('.expected-desc'),tr.querySelector('.expected-amount')];}
+
+  function pasteExpected(e,input){
+    const tr=input.closest('tr[data-day]');
+    if(!tr) return;
+    const month=Number(tr.dataset.month||0),day=Number(tr.dataset.day||0);
+    if(!month||!day) return;
+    let matrix=parseMatrix(e.clipboardData?.getData('text/plain')||'');
+    if(!matrix.length) return;
+    e.preventDefault();e.stopImmediatePropagation();
+
+    const tbody=document.getElementById(`expectedMonthBody-${month}`);
+    const sameDay=[...(tbody?.querySelectorAll(`tr[data-day="${day}"]`)||[])];
+    let occurrence=sameDay.indexOf(tr);if(occurrence<0) occurrence=0;
+    const startCol=expectedInputIndex(input);
+
+    matrix.forEach((cols,rIdx)=>{
+      let targetTr=rIdx===0?tr:cfFindExpectedRow(day,month,occurrence+rIdx,true);
+      if(!targetTr) return;
+      cfBindExpectedPersistence();
+      decorateExpectedRows();
+      const targets=expectedInputs(targetTr);
+      cols.forEach((value,cIdx)=>{
+        const target=targets[startCol+cIdx];
+        if(target) setInputValue(target,value);
+      });
+      cfMarkExpectedPasteTarget(targetTr);
+    });
+    recalcExpectedMonthTotals();
+    cfMarkExpectedDirty();
+  }
+
+  /* 기존 행 단위 붙여넣기보다 먼저 잡아서, 클릭한 셀을 시작점으로 엑셀처럼 붙여넣음 */
+  window.addEventListener('paste',e=>{
+    const input=e.target?.closest?.('input');
+    if(!input) return;
+    const root=input.closest('#incomeRows,#mfgRows,#mfgExpectedRows,#adRows,#adExpectedRows,#loanRows');
+    if(root){pasteSidebar(e,input,root);return;}
+    if(input.closest('#expectedExpenseBody')) pasteExpected(e,input);
+  },true);
+
+  function customExpectedAdd(btn){
+    const baseRow=btn.closest('tr[data-day]');
+    if(!baseRow) return;
+    const day=Number(baseRow.dataset.day||0),month=Number(baseRow.dataset.month||0);
+    if(!day||!month) return;
+    const extra=buildExpectedExpenseRow(day,month,true);
+    extra.classList.add('cf-draft-row');
+    let insertAfter=baseRow;
+    while(insertAfter.nextElementSibling&&insertAfter.nextElementSibling.dataset.day===String(day)) insertAfter=insertAfter.nextElementSibling;
+    insertAfter.insertAdjacentElement('afterend',extra);
+    bindAmountCells(extra);cfBindExpectedPersistence();cfMarkExpectedDirty();decorateExpectedRows();
+    cfMarkExpectedPasteTarget(extra);
+    extra.querySelector('.expected-vendor')?.focus({preventScroll:true});
+  }
+
+  /* + 버튼은 빈 행도 임시행으로 유지. 기존 + 핸들러보다 먼저 실행 */
+  document.addEventListener('click',e=>{
+    const id=e.target?.id;
+    if(id==='expectedSaveBtn'){
+      e.preventDefault();e.stopImmediatePropagation();
+      window.cfSaveExpectedSnapshot();
+      return;
+    }
+    if(ADD_TO_GROUP[id]){
+      e.preventDefault();e.stopImmediatePropagation();
+      addSidebarDraft(ADD_TO_GROUP[id],true);
+      return;
+    }
+    const exp=e.target?.closest?.('.expected-add-row');
+    if(exp){
+      e.preventDefault();e.stopImmediatePropagation();
+      customExpectedAdd(exp);
+    }
+  },true);
+
+  function decorateExpectedRows(){
+    const body=document.getElementById('expectedExpenseBody');
+    if(!body) return;
+    body.querySelectorAll('tr[data-day]').forEach(tr=>{
+      const wrap=tr.querySelector('.expected-day-wrap');
+      if(!wrap||wrap.querySelector('.cf-expected-select')) return;
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='cf-expected-select';btn.title='삭제할 행 선택';
+      btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();tr.classList.toggle('cf-expected-selected');updateExpectedDeleteButton();});
+      wrap.appendChild(btn);
+    });
+    updateExpectedDeleteButton();
+  }
+
+  function updateExpectedDeleteButton(){
+    const btn=document.getElementById('expectedDeleteSelectedBtn');
+    if(btn) btn.disabled=!document.querySelector('#expectedExpenseBody .cf-expected-selected');
+  }
+
+  function ensureExpectedDeleteButton(){
+    if(document.getElementById('expectedDeleteSelectedBtn')) return;
+    const save=document.getElementById('expectedSaveBtn');
+    if(!save) return;
+    const btn=document.createElement('button');
+    btn.type='button';btn.id='expectedDeleteSelectedBtn';btn.className='cf-delete-selected';btn.textContent='선택삭제';btn.disabled=true;
+    btn.addEventListener('click',()=>{
+      const rows=[...document.querySelectorAll('#expectedExpenseBody tr.cf-expected-selected')];
+      if(!rows.length) return;
+      rows.forEach(tr=>{
+        if(tr.classList.contains('expected-extra')){
+          tr.remove();
+        }else{
+          expectedInputs(tr).forEach(inp=>{if(inp) inp.value='';});
+          tr.classList.remove('cf-expected-selected');
+        }
+      });
+      recalcExpectedMonthTotals();cfMarkExpectedDirty();decorateExpectedRows();updateExpectedDeleteButton();
+    });
+    save.parentElement?.insertBefore(btn,save);
+  }
+
+  /* 예상지출 저장 중 값 수정이 끼어들어 이전값으로 되돌아가는 현상 방지 */
+  window.cfSaveExpectedSnapshot=function(){
+    if(typeof google==='undefined'||!google.script?.run){alert('배포된 웹앱에서 저장할 수 있습니다.');return;}
+    const btn=document.getElementById('expectedSaveBtn');
+    const del=document.getElementById('expectedDeleteSelectedBtn');
+    const body=document.getElementById('expectedExpenseBody');
+    const snapshot=cfCollectExpectedSnapshot();
+    if(!snapshot.months.length) return;
+    if(btn) btn.disabled=true;if(del) del.disabled=true;if(body) body.classList.add('cf-saving');
+    body?.querySelectorAll('input').forEach(inp=>inp.readOnly=true);
+    cfSetExpectedSaveStatus('저장 중','saving');
+    google.script.run
+      .withSuccessHandler(result=>{
+        window.__CF_STORE__=result?.store||[];
+        createExpectedExpenseTable(true);
+        cfLoadExpectedFromStore();
+        cfMarkExpectedSaved();
+        if(btn) btn.disabled=false;
+        document.getElementById('expectedExpenseBody')?.classList.remove('cf-saving');
+        document.getElementById('expectedExpenseBody')?.querySelectorAll('input').forEach(inp=>inp.readOnly=false);
+        ensureExpectedDeleteButton();decorateExpectedRows();
+      })
+      .withFailureHandler(err=>{
+        if(btn) btn.disabled=false;
+        if(body){body.classList.remove('cf-saving');body.querySelectorAll('input').forEach(inp=>inp.readOnly=false);}
+        cfSetExpectedSaveStatus('저장 실패','dirty');cfShowError(err);ensureExpectedDeleteButton();decorateExpectedRows();
+      })
+      .saveExpectedExpenseSnapshot(snapshot);
+  };
+
+  function fitSidebarWidth(){
+    const page=document.getElementById('calendarPage');
+    if(!page) return;
+    if(window.innerWidth<1280){page.style.removeProperty('--cf-side-width');return;}
+
+    const candidates=[...document.querySelectorAll(
+      '#incomeRows input:not(.date-cell),#mfgRows input:not(.date-cell),#mfgExpectedRows input:not(.date-cell),'+
+      '#adRows input:not(.date-cell),#adExpectedRows input:not(.date-cell)'
+    )].filter(inp=>!inp.classList.contains('amount-cell'));
+
+    let longest=0;
+    candidates.forEach(inp=>{
+      const len=[...String(inp.value||'')].length;
+      longest=Math.max(longest,len);
+      inp.title=inp.value||'';
+    });
+
+    const wide=window.innerWidth>=1700;
+    const base=wide?680:420;
+    const desired=wide
+      ? Math.max(base,Math.min(980,680+Math.max(0,longest-12)*9))
+      : Math.max(base,Math.min(720,420+Math.max(0,longest-12)*8));
+
+    const pageWidth=page.getBoundingClientRect().width||window.innerWidth;
+    const minCalendar=wide?760:720;
+    const maxSide=Math.max(base,Math.floor(pageWidth-minCalendar-16));
+    page.style.setProperty('--cf-side-width',`${Math.min(desired,maxSide)}px`);
+  }
+
+  function refreshDecorations(){
+    ensureDeleteButtons();
+    Object.keys(GROUP_TOTAL).forEach(id=>decorateSidebarRows(document.getElementById(id),id));
+    ensureExpectedDeleteButton();decorateExpectedRows();fitSidebarWidth();
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('forecastMiniCard')?.remove();
+    refreshDecorations();
+    const targets=[...Object.keys(GROUP_TOTAL).map(id=>document.getElementById(id)),document.getElementById('expectedExpenseBody')].filter(Boolean);
+    const observer=new MutationObserver(()=>requestAnimationFrame(refreshDecorations));
+    targets.forEach(t=>observer.observe(t,{childList:true,subtree:true}));
+    window.addEventListener('resize',fitSidebarWidth);
+    document.addEventListener('input',e=>{
+      if(e.target?.closest?.('#calendarPage .side')) fitSidebarWidth();
+    },true);
+  });
+})();
+</script>
+
 </body>
 </html></textarea>
 <script id="work-record-module">
