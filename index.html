@@ -12046,6 +12046,390 @@ document.addEventListener('DOMContentLoaded', ()=>{
 })();
 </script>
 
+
+<style id="cf-daily-detail-popup-style-20261002">
+/* 자금수지 달력 날짜 클릭 > 상세내역 팝업 전용. 기존 달력/계산/저장 로직에는 영향 없음. */
+.cf-detail-backdrop{
+  position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;
+  padding:24px;background:rgba(17,27,46,.46);
+}
+.cf-detail-backdrop.open{display:flex}
+.cf-detail-modal{
+  width:min(1120px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
+  background:#fff;border:1px solid #dce3ed;border-radius:17px;
+  box-shadow:0 28px 90px rgba(17,27,46,.28);
+}
+.cf-detail-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+  padding:19px 22px 16px;border-bottom:1px solid #e1e6ee;
+}
+.cf-detail-title h2{margin:0;font-size:19px;letter-spacing:-.45px;color:#1d2738}
+.cf-detail-title p{margin:5px 0 0;font-size:11px;color:#747f91}
+.cf-detail-close{
+  width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;cursor:pointer;
+  border:1px solid #e1e6ee;border-radius:9px;background:#fff;color:#687386;font-size:21px;
+}
+.cf-detail-close:hover{background:#f6f8fb}
+.cf-detail-body{padding:18px 22px 22px;overflow:auto}
+.cf-detail-section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:9px;
+}
+.cf-detail-section-head h3{margin:0;font-size:14px;color:#1d2738}
+.cf-detail-section-head span{font-size:10.5px;color:#747f91}
+.cf-detail-table-wrap{border:1px solid #e1e6ee;border-radius:10px;overflow:auto;background:#fff}
+.cf-detail-table{width:100%;min-width:880px;border-collapse:collapse}
+.cf-detail-table th{
+  position:sticky;top:0;background:#f7f9fc;color:#58657a;font-size:10.5px;
+  padding:10px;border-bottom:1px solid #e1e6ee;white-space:nowrap;
+}
+.cf-detail-table td{
+  padding:10px;border-bottom:1px solid #edf0f4;font-size:11.5px;vertical-align:middle;color:#25324a;
+}
+.cf-detail-table tbody tr:hover td{background:#fbfcff}
+.cf-detail-table th:nth-child(1),.cf-detail-table td:nth-child(1),
+.cf-detail-table th:nth-child(2),.cf-detail-table td:nth-child(2){text-align:center}
+.cf-detail-table th:nth-child(3),.cf-detail-table td:nth-child(3),
+.cf-detail-table th:nth-child(4),.cf-detail-table td:nth-child(4){text-align:left}
+.cf-detail-table .num{text-align:right!important;font-variant-numeric:tabular-nums}
+.cf-detail-type{
+  display:inline-flex;align-items:center;justify-content:center;min-width:43px;padding:4px 7px;
+  border-radius:999px;font-size:10px;font-weight:900;
+}
+.cf-detail-type.in{background:#eef4ff;color:#2f6fed}
+.cf-detail-type.out{background:#fff1f1;color:#d54a4a}
+.cf-detail-table tfoot td{
+  padding:13px 14px;border-top:2px solid #dfe6ef;border-bottom:0;background:#f8fafc;font-weight:900;
+}
+.cf-detail-table .cf-detail-total-label{text-align:right!important;color:#4f5f74}
+.cf-detail-table .cf-detail-in-total{color:#235dc7}
+.cf-detail-table .cf-detail-out-total{color:#c23b48}
+.cf-detail-balance-section{margin-top:20px;padding-top:18px;border-top:1px solid #e1e6ee}
+.cf-detail-balance-table{
+  width:100%;border-collapse:collapse;border:1px solid #e1e6ee;border-radius:10px;overflow:hidden;
+}
+.cf-detail-balance-table th{
+  background:#f7f9fc;color:#58657a;font-size:10.5px;padding:9px 10px;
+  text-align:right;border-bottom:1px solid #e1e6ee;
+}
+.cf-detail-balance-table th:first-child,.cf-detail-balance-table td:first-child{text-align:left}
+.cf-detail-balance-table td{
+  padding:9px 10px;font-size:11.5px;text-align:right;border-bottom:1px solid #edf0f4;
+  font-variant-numeric:tabular-nums;color:#25324a;
+}
+.cf-detail-balance-table tr:last-child td{border-bottom:0}
+.cf-detail-balance-table .total td{font-weight:900;background:#f5f8ff}
+.cf-detail-empty,.cf-detail-loading{
+  padding:42px 20px;text-align:center;color:#8791a2;font-size:12px;
+}
+.cf-detail-loading::before{
+  content:"";display:inline-block;width:13px;height:13px;margin-right:8px;vertical-align:-2px;
+  border:2px solid #dbe4f4;border-top-color:#2f6fed;border-radius:50%;
+  animation:cf-detail-spin .8s linear infinite;
+}
+.cf-detail-error{padding:18px;border:1px solid #f0c5c5;background:#fff6f6;color:#a63232;border-radius:10px;font-size:12px}
+@keyframes cf-detail-spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){
+  .cf-detail-backdrop{padding:8px}
+  .cf-detail-modal{width:100%;max-height:94vh}
+  .cf-detail-head{padding:15px}
+  .cf-detail-body{padding:14px}
+}
+</style>
+<script id="cf-daily-detail-popup-script-20261002">
+(function(){
+  'use strict';
+
+  const DETAIL_SHEET='상세내역';
+  const DETAIL_RANGE='A1:BC1000';
+  let detailRequestSeq=0;
+
+  function cfDetailEscape(v){
+    return String(v==null?'':v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function cfDetailFmt(v){
+    const n=Number(v||0);
+    return Number.isFinite(n)?n.toLocaleString('ko-KR'):'0';
+  }
+  function cfDetailNum(v){
+    if(typeof v==='number') return Number.isFinite(v)?v:0;
+    const s=String(v==null?'':v).replace(/,/g,'').replace(/[^\d.-]/g,'');
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+  function cfDetailParseDateTime(v){
+    if(typeof v==='number' && Number.isFinite(v)){
+      const whole=Math.floor(v);
+      const frac=v-whole;
+      const ms=Date.UTC(1899,11,30)+whole*86400000+Math.round(frac*86400000);
+      const d=new Date(ms);
+      if(!Number.isNaN(d.getTime())){
+        return {
+          key:d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'),
+          stamp:ms
+        };
+      }
+    }
+    const s=String(v==null?'':v).trim();
+    const m=s.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+    if(!m) return null;
+    const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);
+    const h=Number(m[4]||0),mi=Number(m[5]||0),se=Number(m[6]||0);
+    if(!y||mo<1||mo>12||d<1||d>31) return null;
+    return {
+      key:y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'),
+      stamp:Date.UTC(y,mo-1,d,h,mi,se)
+    };
+  }
+
+  /* 상세내역 시트는 계좌별 6열 + 구분 빈열 구조.
+     2행의 '거래일시'를 기준으로 계좌 블록을 자동 감지하므로 계좌명이 바뀌어도 그대로 읽는다. */
+  async function cgGetDailyAccountDetail(dateKey){
+    await cgUser();
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey||''))) throw new Error('조회 날짜가 올바르지 않습니다.');
+
+    /* 캐시하지 않고 클릭할 때마다 원본 시트를 다시 읽어 적요 수정사항을 즉시 반영한다. */
+    const rows=await cgValuesGet(DETAIL_SHEET,DETAIL_RANGE,'FORMATTED_VALUE');
+    const accountRow=rows[0]||[];
+    const headerRow=rows[1]||[];
+    const blocks=[];
+
+    for(let c=0;c<headerRow.length;c++){
+      if(String(headerRow[c]||'').trim()==='거래일시'){
+        blocks.push({start:c,account:String(accountRow[c]||'').trim()||('계좌 '+(blocks.length+1))});
+      }
+    }
+
+    const transactions=[];
+    const balances=[];
+    const targetEnd=Date.parse(dateKey+'T23:59:59Z');
+
+    blocks.forEach(block=>{
+      let dayIn=0,dayOut=0;
+      let latestBalance=null,latestBalanceStamp=-Infinity;
+
+      for(let r=2;r<rows.length;r++){
+        const row=rows[r]||[];
+        const dt=cfDetailParseDateTime(row[block.start]);
+        if(!dt) continue;
+
+        const outAmount=cfDetailNum(row[block.start+3]);
+        const inAmount=cfDetailNum(row[block.start+4]);
+        const rawBalance=row[block.start+5];
+        const hasBalance=String(rawBalance==null?'':rawBalance).trim()!=='';
+        const balance=cfDetailNum(rawBalance);
+
+        if(dt.stamp<=targetEnd && hasBalance && dt.stamp>latestBalanceStamp){
+          latestBalanceStamp=dt.stamp;
+          latestBalance=balance;
+        }
+
+        if(dt.key!==dateKey || (!inAmount && !outAmount)) continue;
+
+        dayIn+=inAmount;
+        dayOut+=outAmount;
+
+        if(inAmount>0){
+          transactions.push({
+            type:'입금',account:block.account,
+            party:String(row[block.start+2]||'').trim(),
+            memo:String(row[block.start+1]||'').trim(),
+            inAmount,outAmount:0,stamp:dt.stamp
+          });
+        }
+        if(outAmount>0){
+          transactions.push({
+            type:'출금',account:block.account,
+            party:String(row[block.start+2]||'').trim(),
+            memo:String(row[block.start+1]||'').trim(),
+            inAmount:0,outAmount,stamp:dt.stamp
+          });
+        }
+      }
+
+      if(latestBalance!==null){
+        balances.push({
+          account:block.account,
+          prevBalance:latestBalance-dayIn+dayOut,
+          dayIn,dayOut,
+          balance:latestBalance
+        });
+      }
+    });
+
+    /* 항상 입금이 상단, 출금이 하단. 같은 구분 안에서는 최신 거래 순. */
+    transactions.sort((a,b)=>{
+      const groupA=a.type==='입금'?0:1;
+      const groupB=b.type==='입금'?0:1;
+      return groupA-groupB || b.stamp-a.stamp;
+    });
+
+    return {date:dateKey,transactions,balances};
+  }
+
+  /* 기존 RPC 객체에 조회 함수 1개만 추가한다. 기존 호출/저장 기능은 변경하지 않는다. */
+  if(typeof CASH_GITHUB_RPC!=='undefined'){
+    CASH_GITHUB_RPC.getDailyAccountDetail=cgGetDailyAccountDetail;
+  }
+
+  function ensureDetailModal(){
+    let modal=document.getElementById('cfDailyDetailModal');
+    if(modal) return modal;
+
+    modal=document.createElement('div');
+    modal.id='cfDailyDetailModal';
+    modal.className='cf-detail-backdrop';
+    modal.setAttribute('aria-hidden','true');
+    modal.innerHTML=`
+      <div class="cf-detail-modal" role="dialog" aria-modal="true" aria-labelledby="cfDailyDetailTitle">
+        <div class="cf-detail-head">
+          <div class="cf-detail-title">
+            <h2 id="cfDailyDetailTitle">입출금 상세내역</h2>
+            <p>해당 날짜에 실제 입금·출금이 발생한 거래만 표시합니다.</p>
+          </div>
+          <button type="button" class="cf-detail-close" id="cfDailyDetailClose" aria-label="닫기">×</button>
+        </div>
+        <div class="cf-detail-body" id="cfDailyDetailBody"></div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    document.getElementById('cfDailyDetailClose')?.addEventListener('click',closeDetailModal);
+    modal.addEventListener('click',e=>{if(e.target===modal) closeDetailModal();});
+    return modal;
+  }
+
+  function closeDetailModal(){
+    const modal=document.getElementById('cfDailyDetailModal');
+    if(!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+  }
+
+  function renderDetailResult(result){
+    const body=document.getElementById('cfDailyDetailBody');
+    if(!body) return;
+
+    const tx=Array.isArray(result?.transactions)?result.transactions:[];
+    const balances=Array.isArray(result?.balances)?result.balances:[];
+    const totalIn=tx.reduce((s,r)=>s+Number(r.inAmount||0),0);
+    const totalOut=tx.reduce((s,r)=>s+Number(r.outAmount||0),0);
+
+    let txHtml='';
+    if(!tx.length){
+      txHtml='<div class="cf-detail-empty">해당 날짜의 입출금 상세내역이 없습니다.</div>';
+    }else{
+      const rows=tx.map(r=>`
+        <tr>
+          <td><span class="cf-detail-type ${r.type==='입금'?'in':'out'}">${cfDetailEscape(r.type)}</span></td>
+          <td>${cfDetailEscape(r.account)}</td>
+          <td>${cfDetailEscape(r.party||'-')}</td>
+          <td>${cfDetailEscape(r.memo||'-')}</td>
+          <td class="num">${r.inAmount?cfDetailFmt(r.inAmount):'-'}</td>
+          <td class="num">${r.outAmount?cfDetailFmt(r.outAmount):'-'}</td>
+        </tr>`).join('');
+
+      txHtml=`
+        <table class="cf-detail-table">
+          <thead><tr>
+            <th>구분</th><th>계좌</th><th>거래처/입금자</th><th>적요명</th>
+            <th class="num">입금액</th><th class="num">출금액</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr>
+            <td colspan="4" class="cf-detail-total-label">합계</td>
+            <td class="num cf-detail-in-total">${cfDetailFmt(totalIn)}원</td>
+            <td class="num cf-detail-out-total">${cfDetailFmt(totalOut)}원</td>
+          </tr></tfoot>
+        </table>`;
+    }
+
+    let balanceHtml='<div class="cf-detail-empty">확인할 계좌 잔액이 없습니다.</div>';
+    if(balances.length){
+      const balanceRows=balances.map(r=>`
+        <tr>
+          <td>${cfDetailEscape(r.account)}</td>
+          <td>${cfDetailFmt(r.prevBalance)}</td>
+          <td>${cfDetailFmt(r.dayIn)}</td>
+          <td>${cfDetailFmt(r.dayOut)}</td>
+          <td><b>${cfDetailFmt(r.balance)}</b></td>
+        </tr>`).join('');
+      const sum=balances.reduce((a,r)=>({
+        prev:a.prev+Number(r.prevBalance||0),
+        in:a.in+Number(r.dayIn||0),
+        out:a.out+Number(r.dayOut||0),
+        balance:a.balance+Number(r.balance||0)
+      }),{prev:0,in:0,out:0,balance:0});
+
+      balanceHtml=`
+        <table class="cf-detail-balance-table">
+          <thead><tr><th>계좌</th><th>전일잔액</th><th>당일 입금</th><th>당일 출금</th><th>현재 잔액</th></tr></thead>
+          <tbody>
+            ${balanceRows}
+            <tr class="total"><td>합계</td><td>${cfDetailFmt(sum.prev)}</td><td>${cfDetailFmt(sum.in)}</td><td>${cfDetailFmt(sum.out)}</td><td>${cfDetailFmt(sum.balance)}</td></tr>
+          </tbody>
+        </table>`;
+    }
+
+    body.innerHTML=`
+      <div class="cf-detail-section-head">
+        <h3>입출금 상세내역</h3>
+        <span>자금수지 스프레드시트 · 상세내역 시트 기준</span>
+      </div>
+      <div class="cf-detail-table-wrap">${txHtml}</div>
+      <section class="cf-detail-balance-section">
+        <div class="cf-detail-section-head">
+          <h3>계좌별 잔액 확인</h3>
+          <span>선택일 거래 반영 후</span>
+        </div>
+        ${balanceHtml}
+      </section>`;
+  }
+
+  function renderDetailError(err){
+    const body=document.getElementById('cfDailyDetailBody');
+    if(body) body.innerHTML='<div class="cf-detail-error">'+cfDetailEscape(err?.message||String(err)||'상세내역을 불러오지 못했습니다.')+'</div>';
+  }
+
+  function openDetailModal(dateKey){
+    const modal=ensureDetailModal();
+    const title=document.getElementById('cfDailyDetailTitle');
+    const body=document.getElementById('cfDailyDetailBody');
+    const [y,m,d]=String(dateKey).split('-').map(Number);
+    if(title) title.textContent=`${y}년 ${m}월 ${d}일 입출금 상세내역`;
+    if(body) body.innerHTML='<div class="cf-detail-loading">상세내역을 불러오는 중입니다.</div>';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+
+    const seq=++detailRequestSeq;
+    if(typeof google==='undefined'||!google.script?.run){
+      renderDetailError(new Error('Google Sheets 연결을 확인해 주세요.'));
+      return;
+    }
+    google.script.run
+      .withSuccessHandler(result=>{if(seq===detailRequestSeq) renderDetailResult(result);})
+      .withFailureHandler(err=>{if(seq===detailRequestSeq) renderDetailError(err);})
+      .getDailyAccountDetail(dateKey);
+  }
+
+  /* 기존 renderCalendar를 수정하지 않고 이벤트 위임만 추가한다. */
+  document.addEventListener('click',e=>{
+    const dayCell=e.target?.closest?.('#calendar .day:not(.muted)');
+    if(!dayCell) return;
+    const day=Number(dayCell.querySelector('.date .num')?.textContent||0);
+    if(!day||typeof selectedYear==='undefined'||typeof calendarMonth==='undefined') return;
+    const dateKey=String(selectedYear)+'-'+String(calendarMonth).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    openDetailModal(dateKey);
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&document.getElementById('cfDailyDetailModal')?.classList.contains('open')) closeDetailModal();
+  });
+})();
+</script>
+
 </body>
 </html></textarea>
 <script id="work-record-module">
