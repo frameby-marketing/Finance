@@ -12230,19 +12230,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
         dayIn+=inAmount;
         dayOut+=outAmount;
 
+        const memo=String(row[block.start+1]||'').trim();
+        const party=String(row[block.start+2]||'').trim();
+
+        /* '프레임바이' 거래는 입출금/잔액 계산에는 포함하되 상세내역 목록에서는 숨긴다. */
+        const hideFromDetail=memo.includes('프레임바이') || party.includes('프레임바이');
+        if(hideFromDetail) continue;
+
         if(inAmount>0){
           transactions.push({
             type:'입금',account:block.account,
-            party:String(row[block.start+2]||'').trim(),
-            memo:String(row[block.start+1]||'').trim(),
+            party,
+            memo,
             inAmount,outAmount:0,stamp:dt.stamp
           });
         }
         if(outAmount>0){
           transactions.push({
             type:'출금',account:block.account,
-            party:String(row[block.start+2]||'').trim(),
-            memo:String(row[block.start+1]||'').trim(),
+            party,
+            memo,
             inAmount:0,outAmount,stamp:dt.stamp
           });
         }
