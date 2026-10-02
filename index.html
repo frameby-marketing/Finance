@@ -12280,7 +12280,40 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return groupA-groupB || b.stamp-a.stamp;
     });
 
-    return {date:dateKey,transactions,balances};
+    /*
+      자금일보(당일/전일) 기준 고정 계좌 잔액.
+      상세내역 시트 거래 유무와 무관하게 아래 계좌는 지정 잔액을 사용한다.
+      변동 계좌인 우리(218905), 우리(218882)는 상세내역의 선택일 기준 마지막 거래후 잔액을 사용한다.
+    */
+    const fixedBalances={
+      '우리(585028)':156,
+      '우리(496043)':594,
+      '기업(01027)':20,
+      '기업(04016)':7687,
+      '신한(215101)':2000,
+      '우리(630998)':0
+    };
+    const accountOrder=[
+      '우리(218905)','우리(218882)',
+      '우리(585028)','우리(496043)',
+      '기업(01027)','기업(04016)',
+      '신한(215101)','우리(630998)'
+    ];
+    const balanceByAccount=new Map(balances.map(r=>[r.account,r]));
+    Object.entries(fixedBalances).forEach(([account,balance])=>{
+      balanceByAccount.set(account,{
+        account,
+        prevBalance:balance,
+        dayIn:0,
+        dayOut:0,
+        balance
+      });
+    });
+    const finalBalances=accountOrder
+      .map(account=>balanceByAccount.get(account))
+      .filter(Boolean);
+
+    return {date:dateKey,transactions,balances:finalBalances};
   }
 function ensureDetailModal(){
     let modal=document.getElementById('cfDailyDetailModal');
