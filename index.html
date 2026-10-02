@@ -12144,9 +12144,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let detailRequestSeq=0;
 
   function cfDetailEscape(v){
-    return String(v==null?'':v)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const el=document.createElement('div');
+    el.textContent=String(v==null?'':v);
+    return el.innerHTML;
   }
   function cfDetailFmt(v){
     const n=Number(v||0);
