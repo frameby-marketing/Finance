@@ -12104,6 +12104,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .cf-detail-table .cf-detail-in-total{color:#235dc7}
 .cf-detail-table .cf-detail-out-total{color:#c23b48}
 .cf-detail-balance-section{margin-top:20px;padding-top:18px;border-top:1px solid #e1e6ee}
+.cf-detail-total-balance{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  margin:0 0 10px;padding:14px 16px;border:1px solid #cfdcf4;border-radius:11px;
+  background:#f6f9ff;
+}
+.cf-detail-total-balance .label{font-size:11px;font-weight:850;color:#58657a}
+.cf-detail-total-balance .amount{font-size:22px;font-weight:950;color:#1f4fbf;font-variant-numeric:tabular-nums}
+.cf-detail-total-balance .note{margin-top:3px;font-size:10px;color:#8a94a5}
 .cf-detail-balance-table{
   width:100%;border-collapse:collapse;border:1px solid #e1e6ee;border-radius:10px;overflow:hidden;
 }
@@ -12364,11 +12372,18 @@ function ensureDetailModal(){
       }),{prev:0,in:0,out:0,balance:0});
 
       balanceHtml=`
+        <div class="cf-detail-total-balance">
+          <div>
+            <div class="label">전체 잔액</div>
+            <div class="note">선택일 기준 전체 계좌 잔액 합계 · 달력 현잔액 대조용</div>
+          </div>
+          <div class="amount">${cfDetailFmt(sum.balance)}원</div>
+        </div>
         <table class="cf-detail-balance-table">
           <thead><tr><th>계좌</th><th>전일잔액</th><th>당일 입금</th><th>당일 출금</th><th>현재 잔액</th></tr></thead>
           <tbody>
             ${balanceRows}
-            <tr class="total"><td>합계</td><td>${cfDetailFmt(sum.prev)}</td><td>${cfDetailFmt(sum.in)}</td><td>${cfDetailFmt(sum.out)}</td><td>${cfDetailFmt(sum.balance)}</td></tr>
+            <tr class="total"><td>전체</td><td>${cfDetailFmt(sum.prev)}</td><td>${cfDetailFmt(sum.in)}</td><td>${cfDetailFmt(sum.out)}</td><td>${cfDetailFmt(sum.balance)}</td></tr>
           </tbody>
         </table>`;
     }
@@ -12381,8 +12396,8 @@ function ensureDetailModal(){
       <div class="cf-detail-table-wrap">${txHtml}</div>
       <section class="cf-detail-balance-section">
         <div class="cf-detail-section-head">
-          <h3>계좌별 잔액 확인</h3>
-          <span>선택일 거래 반영 후</span>
+          <h3>전체 잔액 확인</h3>
+          <span>선택일 기준 · 전체 계좌 합산</span>
         </div>
         ${balanceHtml}
       </section>`;
