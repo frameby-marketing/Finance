@@ -11519,6 +11519,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .cf-delete-selected:disabled{opacity:.38;cursor:default}
 .metric-title .cf-title-actions,.section-actions.cf-title-actions{display:flex;align-items:center;gap:5px}
 
+/* 미니리스트 선택 체크박스 공간만큼 머리글/합계행도 동일하게 정렬 */
+#incomeMiniCard .sheet-edit-head,
+#incomeMiniCard .sheet-edit-total,
+#costMiniCard .sheet-edit-head,
+#costMiniCard .sheet-edit-total,
+#shortLoanCard .loan-edit-head{
+  padding-left:27px !important;
+  box-sizing:border-box !important;
+}
+
 /* 예상지출 선택 UI */
 #expectedExpenseSubview .expected-day-wrap{position:relative!important;padding-left:24px!important}
 #expectedExpenseSubview .cf-expected-select{
