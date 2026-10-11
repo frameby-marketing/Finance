@@ -817,6 +817,73 @@ body.frameby-auth-locked .github-auth-btn{
   color:#fff!important;
 }
 </style>
+<style id="online-purchase-responsive-fix">
+/* 온라인 구입내역 조회 시에만 활성화되는 반응형 레이아웃 */
+@media (max-width: 1650px) {
+  #cardSecondaryMenu:has(.secondary-tool-group[data-tools-page="onlinePurchase"].active) {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #cardSecondaryMenu:has(.secondary-tool-group[data-tools-page="onlinePurchase"].active) #cardModuleTabs {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  #cardSecondaryMenu:has(.secondary-tool-group[data-tools-page="onlinePurchase"].active) #cardSecondaryTools {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+}
+@media (max-width: 850px) {
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active .field {
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active .field:last-child {
+    flex: 2 1 220px;
+  }
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active select,
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  #onlinePurchase .online-purchase-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #onlinePurchase .kpi .value {
+    font-size: clamp(18px, 3.3vw, 27px);
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 480px) {
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active .field {
+    flex: 1 1 calc(50% - 9px);
+  }
+  #cardSecondaryMenu .secondary-tool-group[data-tools-page="onlinePurchase"].active .field:last-child {
+    flex: 1 1 100%;
+  }
+  #onlinePurchase .online-purchase-kpis {gap: 9px;}
+  #onlinePurchase .online-purchase-kpis .card {padding: 12px;}
+  #onlinePurchase .kpi .value {font-size: clamp(15px, 4.3vw, 22px);}
+}
+/* 표는 컨테이너 안에서만 가로 스크롤해 주변 화면을 밀어내지 않도록 함 */
+#onlinePurchase, #onlinePurchase .card, #onlinePurchase .table-wrap {min-width: 0;max-width: 100%;}
+#onlinePurchase .table-wrap {overflow-x: auto;}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
