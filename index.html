@@ -1005,8 +1005,6 @@ body.frameby-auth-locked .github-auth-btn{
           <div class="research-toolbar-actions" id="researchToolbarActions">
             <button type="button" class="research-toolbar-btn research-toolbar-refresh" id="researchGlobalRefreshBtn"><span aria-hidden="true">⟳</span> 새로고침</button>
             <button type="button" class="research-toolbar-btn research-toolbar-bell" id="researchToolbarBell" aria-label="연구개발 알림" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="researchToolbarBadge" class="research-toolbar-badge" hidden>0</span></button>
-            <button type="button" class="research-toolbar-btn research-toolbar-print" id="researchToolbarPrint" disabled>인쇄</button>
-            <button type="button" class="research-toolbar-btn research-toolbar-admin" id="researchToolbarAdmin" hidden disabled>관리자</button>
           </div>
         </div>
       </div>
@@ -13354,7 +13352,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #researchSecondaryMenu #researchToolbarActions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex:0 0 auto!important;white-space:nowrap!important;margin-left:auto!important}
 #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;height:35px!important;min-width:auto!important;padding:7px 11px!important;border:1px solid #cdd8e8!important;border-radius:8px!important;background:#fff!important;color:#263b57!important;cursor:pointer!important;line-height:1!important;font-size:12px!important;font-weight:800!important;position:relative!important;white-space:nowrap!important}
 #researchSecondaryMenu #researchToolbarActions .research-toolbar-refresh{border-color:#a0baf7!important;color:#0758e4!important}
-#researchSecondaryMenu #researchToolbarActions .research-toolbar-print{background:#2463eb!important;color:#fff!important;border-color:#2463eb!important}
 #researchSecondaryMenu #researchToolbarActions button:disabled{opacity:.43!important;cursor:not-allowed!important}
 #researchSecondaryMenu #researchToolbarActions [hidden]{display:none!important}
 #researchSecondaryMenu .research-toolbar-bell svg{width:18px;height:18px;display:block}
@@ -13411,8 +13408,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function paint(){
     const badge=byId('researchToolbarBadge');
     if(badge){const n=Number(toolbarState.unreadCount)||0;badge.hidden=n<1;badge.textContent=n>99?'99+':String(n)}
-    const print=byId('researchToolbarPrint');if(print)print.disabled=!toolbarState.detail&&!toolbarState.selectedCount;
-    const admin=byId('researchToolbarAdmin');if(admin){admin.hidden=!toolbarState.canAdmin;admin.disabled=!toolbarState.detail}
     const list=byId('researchToolbarAlertList');if(!list)return;
     const glyphs={REVIEW_REQUEST:'▤',REVIEW_COMPLETED:'✓',REVIEW_COMMENT:'▧'};
     list.innerHTML=toolbarState.items.length?toolbarState.items.map(n=>`<button type="button" class="rt-entry ${n.read?'read':'unread'}" data-type="${escText(n.type)}" data-alert-id="${escText(n.id)}"><span class="rt-dot"></span><span class="rt-icon">${glyphs[n.type]||'▤'}</span><span class="rt-info"><b>${escText(n.title)}</b><span>${escText(n.message)}</span><small>${escText(n.createdAt)}</small></span><span>›</span></button>`).join(''):'<div class="rt-empty">새로운 알림이 없습니다.</div>';
@@ -13423,8 +13418,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     pop.innerHTML='<div class="rt-head"><strong>연구개발 알림</strong><button type="button" id="researchToolbarReadAll">모두 읽음 처리</button></div><div class="rt-list" id="researchToolbarAlertList"><div class="rt-empty">알림을 불러오는 중...</div></div>';
     document.body.appendChild(pop);
     byId('researchGlobalRefreshBtn')?.addEventListener('click',()=>{if(typeof ensureResearchView==='function')ensureResearchView(true);});
-    byId('researchToolbarPrint')?.addEventListener('click',()=>send('print'));
-    byId('researchToolbarAdmin')?.addEventListener('click',()=>send('admin'));
     byId('researchToolbarBell')?.addEventListener('click',()=>setPopover(!popoverOpen));
     byId('researchToolbarReadAll')?.addEventListener('click',()=>send('read-all'));
     byId('researchMonthRow')?.addEventListener('click',e=>{
