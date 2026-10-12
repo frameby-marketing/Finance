@@ -884,6 +884,54 @@ body.frameby-auth-locked .github-auth-btn{
 #onlinePurchase, #onlinePurchase .card, #onlinePurchase .table-wrap {min-width: 0;max-width: 100%;}
 #onlinePurchase .table-wrap {overflow-x: auto;}
 </style>
+<style id="fb-research-responsive-shell-20261012">
+/* 연구개발 전용 소형 화면 보정. PC (1101px 이상)는 기존 레이아웃 그대로. */
+@media screen and (max-width:1100px){
+  body:has(#researchHost.active) .finance-workspace-nav{
+    padding-top:43px!important; overflow:visible!important;
+  }
+  body:has(#researchHost.active) .frameby-zoom-control{
+    position:absolute!important;top:5px!important;right:12px!important;left:auto!important;
+    z-index:95!important;margin:0!important;padding:0!important;gap:4px!important;
+  }
+  body:has(#researchHost.active) .frameby-zoom-control button{
+    min-width:32px!important;height:30px!important;padding:0 7px!important;
+  }
+  body:has(#researchHost.active) .finance-primary{
+    min-width:0!important;padding:0 12px!important;min-height:48px!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+    flex-wrap:nowrap!important;white-space:nowrap!important;scrollbar-width:thin;
+    -webkit-overflow-scrolling:touch;
+  }
+  body:has(#researchHost.active) .finance-primary-btn{flex:0 0 auto!important;min-width:94px!important;width:auto!important;height:37px!important;margin:5px 0!important;padding:0 12px!important}
+  #researchSecondaryMenu:not(.hidden){min-width:0!important;padding:9px 12px!important;gap:7px!important}
+  #researchSecondaryMenu #researchModuleTabs{width:100%!important;min-width:0!important;flex:0 0 auto!important;overflow-x:auto!important;overflow-y:hidden!important;flex-wrap:nowrap!important;scrollbar-width:thin}
+  #researchSecondaryMenu #researchModuleTabs .module-tab{width:auto!important;min-width:95px!important;flex:0 0 auto!important;padding:0 11px!important;height:37px!important;font-size:13px!important}
+  #researchSecondaryMenu #researchMonthRow{display:flex!important;width:100%!important;min-width:0!important;align-items:center!important;flex-wrap:nowrap!important;gap:7px!important;overflow:visible!important}
+  #researchSecondaryMenu #researchMonthBtns{display:flex!important;min-width:0!important;flex:1 1 auto!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  #researchSecondaryMenu #researchYearBtn{flex:0 0 auto!important;min-width:57px!important}
+  #researchSecondaryMenu #researchToolbarActions{display:flex!important;flex:0 0 auto!important;gap:5px!important;margin-left:auto!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{height:34px!important;padding:6px 9px!important}
+  #researchHost .research-frame{display:block;width:100%!important;max-width:100%!important;height:calc(100dvh - 218px)!important;min-height:480px!important;border:0}
+  #researchHost .research-frame.hidden{display:none!important}
+  #researchHost .research-direct-shell{min-width:0!important;padding:12px!important}
+  #researchToolbarAlertPopover{max-width:calc(100vw - 20px)!important}
+}
+@media screen and (max-width:740px){
+  body:has(#researchHost.active) .finance-workspace-nav{padding-top:40px!important}
+  body:has(#researchHost.active) .finance-primary{gap:5px!important;min-height:44px!important}
+  body:has(#researchHost.active) .finance-primary-btn{font-size:12px!important;min-width:80px!important;height:34px!important;padding:0 9px!important}
+  #researchSecondaryMenu:not(.hidden){padding:8px 10px!important;gap:6px!important}
+  #researchSecondaryMenu #researchModuleTabs .module-tab{min-width:85px!important;font-size:12px!important;height:34px!important}
+  #researchSecondaryMenu #researchMonthRow{gap:4px!important}
+  #researchSecondaryMenu #researchMonthBtns .research-month-btn{min-width:40px!important;width:40px!important;height:32px!important;padding:0 3px!important;font-size:12px!important}
+  #researchSecondaryMenu #researchYearBtn{min-width:50px!important;width:50px!important;height:32px!important;padding:0 3px!important;font-size:12px!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-refresh{font-size:0!important;gap:0!important;width:35px!important;padding:6px!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-refresh span{font-size:19px!important;line-height:1!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-bell{width:35px!important;padding:6px!important}
+  #researchHost .research-frame{height:calc(100dvh - 202px)!important;min-height:430px!important}
+}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
