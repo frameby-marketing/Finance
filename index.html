@@ -13422,7 +13422,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const pop=document.createElement('div');pop.id='researchToolbarAlertPopover';pop.hidden=true;
     pop.innerHTML='<div class="rt-head"><strong>연구개발 알림</strong><button type="button" id="researchToolbarReadAll">모두 읽음 처리</button></div><div class="rt-list" id="researchToolbarAlertList"><div class="rt-empty">알림을 불러오는 중...</div></div>';
     document.body.appendChild(pop);
-    byId('researchGlobalRefreshBtn')?.addEventListener('click',()=>send('refresh'));
+    byId('researchGlobalRefreshBtn')?.addEventListener('click',()=>{if(typeof ensureResearchView==='function')ensureResearchView(true);});
     byId('researchToolbarPrint')?.addEventListener('click',()=>send('print'));
     byId('researchToolbarAdmin')?.addEventListener('click',()=>send('admin'));
     byId('researchToolbarBell')?.addEventListener('click',()=>setPopover(!popoverOpen));
