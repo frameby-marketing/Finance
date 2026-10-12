@@ -884,6 +884,54 @@ body.frameby-auth-locked .github-auth-btn{
 #onlinePurchase, #onlinePurchase .card, #onlinePurchase .table-wrap {min-width: 0;max-width: 100%;}
 #onlinePurchase .table-wrap {overflow-x: auto;}
 </style>
+<style id="fb-research-responsive-shell-20261012">
+/* 연구개발 전용 소형 화면 보정. PC (1101px 이상)는 기존 레이아웃 그대로. */
+@media screen and (max-width:1100px){
+  body:has(#researchHost.active) .finance-workspace-nav{
+    padding-top:43px!important; overflow:visible!important;
+  }
+  body:has(#researchHost.active) .frameby-zoom-control{
+    position:absolute!important;top:5px!important;right:12px!important;left:auto!important;
+    z-index:95!important;margin:0!important;padding:0!important;gap:4px!important;
+  }
+  body:has(#researchHost.active) .frameby-zoom-control button{
+    min-width:32px!important;height:30px!important;padding:0 7px!important;
+  }
+  body:has(#researchHost.active) .finance-primary{
+    min-width:0!important;padding:0 12px!important;min-height:48px!important;
+    overflow:visible!important;
+    flex-wrap:wrap!important;white-space:normal!important;scrollbar-width:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  body:has(#researchHost.active) .finance-primary-btn{flex:0 0 auto!important;min-width:0!important;width:auto!important;height:37px!important;margin:5px 0!important;padding:0 12px!important}
+  #researchSecondaryMenu:not(.hidden){min-width:0!important;padding:9px 12px!important;gap:7px!important}
+  #researchSecondaryMenu #researchModuleTabs{width:100%!important;min-width:0!important;flex:0 0 auto!important;overflow-x:auto!important;overflow-y:hidden!important;flex-wrap:nowrap!important;scrollbar-width:thin}
+  #researchSecondaryMenu #researchModuleTabs .module-tab{width:auto!important;min-width:95px!important;flex:0 0 auto!important;padding:0 11px!important;height:37px!important;font-size:13px!important}
+  #researchSecondaryMenu #researchMonthRow{display:flex!important;width:100%!important;min-width:0!important;align-items:center!important;flex-wrap:nowrap!important;gap:7px!important;overflow:visible!important}
+  #researchSecondaryMenu #researchMonthBtns{display:flex!important;min-width:0!important;flex:1 1 auto!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  #researchSecondaryMenu #researchYearBtn{flex:0 0 auto!important;min-width:57px!important}
+  #researchSecondaryMenu #researchToolbarActions{display:flex!important;flex:0 0 auto!important;gap:5px!important;margin-left:auto!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{height:34px!important;padding:6px 9px!important}
+  #researchHost .research-frame{display:block;width:100%!important;max-width:100%!important;height:calc(100dvh - 218px)!important;min-height:480px!important;border:0}
+  #researchHost .research-frame.hidden{display:none!important}
+  #researchHost .research-direct-shell{min-width:0!important;padding:12px!important}
+  #researchToolbarAlertPopover{max-width:calc(100vw - 20px)!important}
+}
+@media screen and (max-width:740px){
+  body:has(#researchHost.active) .finance-workspace-nav{padding-top:40px!important}
+  body:has(#researchHost.active) .finance-primary{gap:5px!important;min-height:44px!important}
+  body:has(#researchHost.active) .finance-primary-btn{font-size:12px!important;min-width:0!important;height:34px!important;padding:0 9px!important}
+  #researchSecondaryMenu:not(.hidden){padding:8px 10px!important;gap:6px!important}
+  #researchSecondaryMenu #researchModuleTabs .module-tab{min-width:85px!important;font-size:12px!important;height:34px!important}
+  #researchSecondaryMenu #researchMonthRow{gap:4px!important}
+  #researchSecondaryMenu #researchMonthBtns .research-month-btn{min-width:40px!important;width:40px!important;height:32px!important;padding:0 3px!important;font-size:12px!important}
+  #researchSecondaryMenu #researchYearBtn{min-width:50px!important;width:50px!important;height:32px!important;padding:0 3px!important;font-size:12px!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-refresh{font-size:0!important;gap:0!important;width:35px!important;padding:6px!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-refresh span{font-size:19px!important;line-height:1!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-bell{width:35px!important;padding:6px!important}
+  #researchHost .research-frame{height:calc(100dvh - 202px)!important;min-height:430px!important}
+}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -2813,80 +2861,33 @@ async function githubGetResearchSharedEmails(){
   });
 }
 async function githubCheckResearchAccess(){
+  // iframe 응답과 무관하게 로그인한 Google 계정의 원본 Docs 열람권한을 확인합니다.
   const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
-  if(!email) return false;
-
-  const base=INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
-
-  // 1순위: 기존 연구개발 Apps Script의 브리지 인증 사용.
-  // Google OAuth 토큰을 URL에 노출하지 않고 postMessage로 전달합니다.
-  if(base&&GITHUB_ACCESS_TOKEN){
-    try{
-      const bridgeAllowed=await new Promise((resolve,reject)=>{
-        const frame=document.createElement('iframe');
-        frame.className='research-access-probe';
-        frame.setAttribute('aria-hidden','true');
-        let tokenSent=false;
-
-        const cleanup=()=>{
-          window.removeEventListener('message',onMessage);
-          clearTimeout(timer);
-          try{frame.remove()}catch(e){}
-        };
-
-        const onMessage=event=>{
-          if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin)) return;
-          const msg=event.data||{};
-
-          if(msg.type==='frameby-research-bridge-ready'){
-            if(tokenSent) return;
-            tokenSent=true;
-            try{
-              frame.contentWindow.postMessage(
-                {type:'frameby-research-auth',accessToken:GITHUB_ACCESS_TOKEN},
-                event.origin
-              );
-            }catch(e){
-              cleanup();
-              reject(e);
-            }
-            return;
-          }
-
-          if(msg.type==='frameby-research-auth-result'){
-            cleanup();
-            if(msg.allowed) resolve(true);
-            else reject(new Error(msg.message||'research-bridge-denied'));
-          }
-        };
-
-        const timer=setTimeout(()=>{
-          cleanup();
-          reject(new Error('research-bridge-timeout'));
-        },9000);
-
-        window.addEventListener('message',onMessage);
-        frame.src=base+(base.includes('?')?'&':'?')+'mode=bridge&_='+Date.now();
-        document.body.appendChild(frame);
-      });
-
-      if(bridgeAllowed) return true;
-    }catch(e){
-      // 브리지 응답 실패 시 아래의 공유목록 확인으로 한 번 더 판정합니다.
-    }
-  }
-
-  // 2순위: Google Docs 실제 공유 이메일 목록 확인.
+  const token=GITHUB_ACCESS_TOKEN;
+  const documentId=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
+  if(!email||!token||!documentId)return false;
   try{
-    const sharedEmails=await githubGetResearchSharedEmails();
-    if(Array.isArray(sharedEmails)) return sharedEmails.includes(email);
-  }catch(e){
-    // 공유권한 목록을 가져오지 못한 경우 아래에서 접근을 차단합니다.
+    const url='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(documentId)+'?fields=id,mimeType,trashed';
+    const response=await fetch(url,{
+      method:'GET',
+      headers:{Authorization:'Bearer '+token},
+      cache:'no-store'
+    });
+    if(!response.ok){
+      RESEARCH_ACCESS_ERROR='원본 Google Docs 접근 확인 실패 (HTTP '+response.status+')';
+      return false;
+    }
+    const file=await response.json();
+    if(!file||file.id!==documentId||file.trashed===true){
+      RESEARCH_ACCESS_ERROR='Google Docs 원본 파일 확인 실패';
+      return false;
+    }
+    RESEARCH_ACCESS_ERROR='';
+    return true;
+  }catch(error){
+    RESEARCH_ACCESS_ERROR='Google Docs 접근 확인 통신 오류: '+(error?.message||'');
+    return false;
   }
-
-  // Google Docs 공유권한 확인이 실패하면 연구개발 메뉴를 표시하지 않습니다.
-  // 권한 확인을 다시 시도하려면 사이트를 새로고침해야 합니다.
-  return false;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
