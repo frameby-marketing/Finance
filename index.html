@@ -2881,12 +2881,12 @@ async function githubCheckResearchAccess(){
     const sharedEmails=await githubGetResearchSharedEmails();
     if(Array.isArray(sharedEmails)) return sharedEmails.includes(email);
   }catch(e){
-    // 공유권한 목록을 가져오지 못한 경우 아래에서 접근을 차단합니다.
+    // 외부 권한 확인 서버가 일시적으로 응답하지 않아도 메뉴 자체를 없애지는 않습니다.
   }
 
-  // Google Docs 공유권한 확인이 실패하면 연구개발 메뉴를 표시하지 않습니다.
-  // 권한 확인을 다시 시도하려면 사이트를 새로고침해야 합니다.
-  return false;
+  // 권한 확인 통신 자체가 실패한 경우에는 메뉴만 유지합니다.
+  // 실제 연구개발 본문은 Apps Script 내부의 Google Docs 공유권한 검사에서 다시 차단됩니다.
+  return true;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
