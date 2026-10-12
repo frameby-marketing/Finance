@@ -13483,5 +13483,84 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- Research access diagnostic: opt-in only with ?researchDebug=1; does not change access control. -->
+<style id="research-access-diagnostic-style">
+  #framebyResearchDiagnostic{display:none;position:relative;z-index:50;margin:12px 30px 16px;padding:16px;border:1px solid #d7e1f0;border-radius:12px;background:#fff;color:#27344a;font:13px/1.6 Pretendard,'Noto Sans KR',sans-serif;box-shadow:0 4px 20px rgba(25,43,72,.08)}
+  #framebyResearchDiagnostic[data-visible="true"]{display:block}
+  #framebyResearchDiagnostic h3{font-size:15px;margin:0 0 8px;font-weight:850}
+  #framebyResearchDiagnostic .rd-msg{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fb;border-radius:9px;padding:10px 12px;font-size:12px}
+  #framebyResearchDiagnostic .rd-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  #framebyResearchDiagnostic button,#framebyResearchDiagnostic a{border:1px solid #cbd5e1;background:#fff;color:#2558c7;border-radius:8px;padding:8px 11px;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer}
+  #framebyResearchDiagnostic button:disabled{opacity:.5;cursor:wait}
+  @media(max-width:720px){#framebyResearchDiagnostic{margin:10px 12px 15px;padding:12px}}
+</style>
+<script id="research-access-diagnostic-script">
+(function(){
+  // This diagnostic does not grant access. Unshared accounts remain blocked.
+  if(new URLSearchParams(window.location.search).get('researchDebug')!=='1')return;
+  function getEmail(){try{return GITHUB_USER_EMAIL}catch(e){return ''}}
+  function getError(){try{return RESEARCH_ACCESS_ERROR}catch(e){return ''}}
+  function getToken(){try{return GITHUB_ACCESS_TOKEN}catch(e){return null}}
+  function getClient(){try{return GITHUB_TOKEN_CLIENT}catch(e){return null}}
+  function getDocId(){try{return INTEGRATED_CONFIG.researchDocumentId}catch(e){return ''}}
+  function update(){
+    const pane=document.getElementById('framebyResearchDiagnostic');
+    if(!pane)return;
+    const email=String(getEmail()||'').trim();
+    const access=window.FRAMEBY_MODULE_ACCESS||{};
+    const ready=!!window.FRAMEBY_ACCESS_READY;
+    const error=String(getError()||'');
+    const row=pane.querySelector('.rd-msg');
+    const status=ready?(access.research?'허용(메뉴 표시)':'차단(메뉴 숨김)'):'확인 중 또는 로그인 대기';
+    row.textContent='현재 사이트 로그인 계정: '+(email||'(미확인)')+'\n연구개발 권한 판정: '+status+'\n판정 상세: '+(error||'(오류 정보 없음 — 정상 공유자라면 다시 확인을 눌러 재검사)');
+    pane.dataset.visible='true';
+  }
+  async function retry(){
+    const pane=document.getElementById('framebyResearchDiagnostic');
+    const btn=pane?.querySelector('#researchRetryAuth');
+    if(btn)btn.disabled=true;
+    try{
+      if(!getToken())throw new Error('로그인 토큰이 없습니다. Google 계정으로 다시 로그인하세요.');
+      const allowed=await githubCheckResearchAccess();
+      if(allowed){
+        // Preserve the other module permissions exactly as they were.
+        const current=window.FRAMEBY_MODULE_ACCESS||{};
+        githubApplyModuleAccess({...current,research:true});
+      }else{
+        const current=window.FRAMEBY_MODULE_ACCESS||{};
+        githubApplyModuleAccess({...current,research:false});
+      }
+    }catch(e){
+      const msg=e&&e.message?e.message:String(e);
+      const row=pane?.querySelector('.rd-msg');
+      if(row)row.textContent+='\n재검사 오류: '+msg;
+    }finally{if(btn)btn.disabled=false;update()}
+  }
+  function start(){
+    const nav=document.querySelector('.finance-workspace-nav');
+    if(!nav)return;
+    if(document.getElementById('framebyResearchDiagnostic'))return;
+    const pane=document.createElement('section');
+    pane.id='framebyResearchDiagnostic';
+    pane.setAttribute('aria-label','연구개발 권한 진단');
+    pane.innerHTML='<h3>연구개발 권한 진단 (임시 점검 화면)</h3><div class="rd-msg"></div><div class="rd-actions"><button type="button" id="researchRetryAuth">권한 다시 확인</button><button type="button" id="researchReconsent">Google 권한 재승인</button><a id="researchOpenDoc" target="_blank" rel="noopener noreferrer">원본 Google Docs 열기</a></div>';
+    nav.insertAdjacentElement('afterend',pane);
+    pane.querySelector('#researchRetryAuth').addEventListener('click',retry);
+    pane.querySelector('#researchReconsent').addEventListener('click',()=>{
+      try{
+        if(!getClient())throw new Error('Google 로그인 모듈이 준비되지 않았습니다.');
+        GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:'consent'});
+      }catch(e){const row=pane.querySelector('.rd-msg');row.textContent+='\n재승인 오류: '+String(e.message||e)}
+    });
+    const docId=String(getDocId()||'');
+    pane.querySelector('#researchOpenDoc').href='https://docs.google.com/document/d/'+encodeURIComponent(docId)+'/edit';
+    const b=document.body;
+    new MutationObserver(update).observe(b,{attributes:true,attributeFilter:['class']});
+    update();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
 </body>
 </html>
