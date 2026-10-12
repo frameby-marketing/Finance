@@ -2861,37 +2861,62 @@ async function githubGetResearchSharedEmails(){
   });
 }
 async function githubCheckResearchAccess(){
-  // iframe 응답과 무관하게 로그인한 Google 계정의 원본 Docs 열람권한을 확인합니다.
+  // 원본 Google Docs에 로그인 계정이 실제로 접근 가능한지 확인합니다.
+  // Docs API / Drive API 중 한 경로가 실패해도 다른 경로로 확인하고,
+  // 마지막으로 Apps Script의 실제 Google Docs 공유자 목록을 확인합니다.
+  // 확인되지 않은 계정은 허용하지 않습니다(공유 해제 시 접근 차단).
+  RESEARCH_ACCESS_ERROR='';
   const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
   const token=GITHUB_ACCESS_TOKEN;
   const documentId=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
-  if(!email||!token||!documentId)return false;
-  try{
-    const url='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(documentId)+'?fields=id,mimeType,trashed';
-    const response=await fetch(url,{
-      method:'GET',
-      headers:{Authorization:'Bearer '+token},
-      cache:'no-store'
-    });
-    if(!response.ok){
-      RESEARCH_ACCESS_ERROR='원본 Google Docs 접근 확인 실패 (HTTP '+response.status+')';
-      return false;
-    }
-    const file=await response.json();
-    if(!file||file.id!==documentId||file.trashed===true){
-      RESEARCH_ACCESS_ERROR='Google Docs 원본 파일 확인 실패';
-      return false;
-    }
-    RESEARCH_ACCESS_ERROR='';
-    return true;
-  }catch(error){
-    RESEARCH_ACCESS_ERROR='Google Docs 접근 확인 통신 오류: '+(error?.message||'');
+  if(!email||!token||!documentId){
+    RESEARCH_ACCESS_ERROR='Google 로그인 계정, 토큰 또는 연구개발 문서 ID가 없습니다.';
     return false;
   }
+  const failures=[];
+  const headers={Authorization:'Bearer '+token};
+  async function canReadFile(url,expectedField){
+    try{
+      const response=await fetch(url,{method:'GET',headers,cache:'no-store'});
+      if(!response.ok){
+        let detail='';
+        try{const body=await response.json();detail=String(body?.error?.status||body?.error?.message||'').slice(0,180)}catch(e){}
+        failures.push(expectedField+' HTTP '+response.status+(detail?' ('+detail+')':''));
+        return false;
+      }
+      const data=await response.json();
+      if(data?.[expectedField]===documentId && data?.trashed!==true) return true;
+      failures.push(expectedField+' 원본 문서 ID 불일치');
+      return false;
+    }catch(error){
+      failures.push(expectedField+' 통신 오류: '+String(error?.message||error));
+      return false;
+    }
+  }
+  const id=encodeURIComponent(documentId);
+  // 1차: Google Docs API (원본 문서를 읽을 권한이 있는지 직접 확인).
+  if(await canReadFile('https://docs.googleapis.com/v1/documents/'+id+'?fields=documentId','documentId')) return true;
+  // 2차: Google Drive API. Docs API가 비활성/제한된 경우를 보완.
+  if(await canReadFile('https://www.googleapis.com/drive/v3/files/'+id+'?fields=id,trashed&supportsAllDrives=true','id')) return true;
+  // 3차: Apps Script Code.gs가 원본 Google Docs로부터 조회한 소유자/편집자/뷰어 목록.
+  // 목록을 정상 수신한 경우 그 결과를 우선하며, 과거에 공유했다가 해제한 계정도 제외됩니다.
+  try{
+    const sharedEmails=await githubGetResearchSharedEmails();
+    if(Array.isArray(sharedEmails)){
+      if(sharedEmails.includes(email))return true;
+      RESEARCH_ACCESS_ERROR='원본 Google Docs 공유자 목록에 현재 계정이 없습니다.';
+      return false;
+    }
+  }catch(error){
+    failures.push('Google Docs 공유자 목록 조회 실패: '+String(error?.message||error));
+  }
+  RESEARCH_ACCESS_ERROR='연구개발 권한 확인 실패: '+failures.join(' / ');
+  console.warn('[연구개발 권한]',RESEARCH_ACCESS_ERROR);
+  return false;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
-    .then(value=>({value:!!value,error:''}))
+    .then(value=>({value:!!value,error:RESEARCH_ACCESS_ERROR}))
     .catch(error=>({value:false,error:(error&&error.message)||'연구개발 권한 확인 오류'}));
 
   const [card,cash,trip,leave,workRecord,researchResult,researchWrite]=await Promise.all([
