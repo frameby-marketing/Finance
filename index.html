@@ -2861,58 +2861,71 @@ async function githubGetResearchSharedEmails(){
   });
 }
 async function githubCheckResearchAccess(){
-  // 원본 Google Docs에 로그인 계정이 실제로 접근 가능한지 확인합니다.
-  // Docs API / Drive API 중 한 경로가 실패해도 다른 경로로 확인하고,
-  // 마지막으로 Apps Script의 실제 Google Docs 공유자 목록을 확인합니다.
-  // 확인되지 않은 계정은 허용하지 않습니다(공유 해제 시 접근 차단).
+  // Google Docs 공유 권한을 기준으로 합니다.
+  // 확인되지 않은 통신 오류를 "공유 권한 없음"으로 오판하지 않습니다.
+  // 원본 연구개발 페이지의 서버측 공유 권한 검사도 그대로 적용됩니다.
   RESEARCH_ACCESS_ERROR='';
   const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
-  const token=GITHUB_ACCESS_TOKEN;
+  if(!email) return false;
   const documentId=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
-  if(!email||!token||!documentId){
-    RESEARCH_ACCESS_ERROR='Google 로그인 계정, 토큰 또는 연구개발 문서 ID가 없습니다.';
-    return false;
-  }
+  const token=GITHUB_ACCESS_TOKEN;
   const failures=[];
-  const headers={Authorization:'Bearer '+token};
-  async function canReadFile(url,expectedField){
-    try{
-      const response=await fetch(url,{method:'GET',headers,cache:'no-store'});
-      if(!response.ok){
-        let detail='';
-        try{const body=await response.json();detail=String(body?.error?.status||body?.error?.message||'').slice(0,180)}catch(e){}
-        failures.push(expectedField+' HTTP '+response.status+(detail?' ('+detail+')':''));
-        return false;
+  const results=[];
+  if(documentId&&token){
+    const id=encodeURIComponent(documentId);
+    const urls=[
+      ['Docs','documentId','https://docs.googleapis.com/v1/documents/'+id+'?fields=documentId'],
+      ['Drive','id','https://www.googleapis.com/drive/v3/files/'+id+'?fields=id,trashed&supportsAllDrives=true']
+    ];
+    for(const [label,field,url] of urls){
+      try{
+        const response=await fetch(url,{
+          method:'GET',headers:{Authorization:'Bearer '+token},cache:'no-store'
+        });
+        if(response.ok){
+          const result=await response.json();
+          if(result&&result[field]===documentId&&result.trashed!==true) return true;
+          failures.push(label+' 파일 ID 불일치');
+          results.push('unknown');
+        }else{
+          results.push(response.status===404?'not_found':'unknown');
+          let detail='';
+          try{const body=await response.json();detail=String(body?.error?.message||'').slice(0,140)}catch(e){}
+          failures.push(label+' HTTP '+response.status+(detail?' ('+detail+')':''));
+        }
+      }catch(e){
+        results.push('unknown');
+        failures.push(label+' 통신 오류: '+String(e?.message||e));
       }
-      const data=await response.json();
-      if(data?.[expectedField]===documentId && data?.trashed!==true) return true;
-      failures.push(expectedField+' 원본 문서 ID 불일치');
-      return false;
-    }catch(error){
-      failures.push(expectedField+' 통신 오류: '+String(error?.message||error));
-      return false;
     }
+  }else{
+    failures.push('Docs ID 또는 Google 접근 토큰을 확인하지 못함');
   }
-  const id=encodeURIComponent(documentId);
-  // 1차: Google Docs API (원본 문서를 읽을 권한이 있는지 직접 확인).
-  if(await canReadFile('https://docs.googleapis.com/v1/documents/'+id+'?fields=documentId','documentId')) return true;
-  // 2차: Google Drive API. Docs API가 비활성/제한된 경우를 보완.
-  if(await canReadFile('https://www.googleapis.com/drive/v3/files/'+id+'?fields=id,trashed&supportsAllDrives=true','id')) return true;
-  // 3차: Apps Script Code.gs가 원본 Google Docs로부터 조회한 소유자/편집자/뷰어 목록.
-  // 목록을 정상 수신한 경우 그 결과를 우선하며, 과거에 공유했다가 해제한 계정도 제외됩니다.
+
+  // 원래부터 사용한 Apps Script의 Google Docs 공유자 명단 검사도 유지합니다.
+  // 명단이 실제 반환되면 추가/해제 이력을 추정하지 않고 현 시점 결과만 적용합니다.
   try{
     const sharedEmails=await githubGetResearchSharedEmails();
     if(Array.isArray(sharedEmails)){
-      if(sharedEmails.includes(email))return true;
-      RESEARCH_ACCESS_ERROR='원본 Google Docs 공유자 목록에 현재 계정이 없습니다.';
-      return false;
+      const allowed=sharedEmails.includes(email);
+      if(!allowed) RESEARCH_ACCESS_ERROR='Google Docs 공유자 목록에 현재 계정이 없습니다.';
+      return allowed;
     }
-  }catch(error){
-    failures.push('Google Docs 공유자 목록 조회 실패: '+String(error?.message||error));
+  }catch(e){
+    failures.push('공유자 명단 통신 실패: '+String(e?.message||e));
   }
-  RESEARCH_ACCESS_ERROR='연구개발 권한 확인 실패: '+failures.join(' / ');
-  console.warn('[연구개발 권한]',RESEARCH_ACCESS_ERROR);
-  return false;
+
+  // 두 API가 모두 명확하게 문서를 찾지 못하는 경우만 접근 불가로 판정.
+  if(results.length===2&&results.every(status=>status==='not_found')){
+    RESEARCH_ACCESS_ERROR='Google Docs 원본 문서에 대한 접근 권한이 없습니다.';
+    return false;
+  }
+
+  // API 차단/토큰 범위 부족/iframe 차단은 공유 해제의 증거가 아닙니다.
+  // 처음 제공된 정상 버전과 같이 메뉴는 유지하되 본문은 서버에서 재검증합니다.
+  RESEARCH_ACCESS_ERROR='Google Docs 권한 확인 통신 불안정 (메뉴는 유지, 본문에서 재확인): '+failures.join(' / ');
+  console.warn('[연구개발 권한 확인]',RESEARCH_ACCESS_ERROR);
+  return true;
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -13483,84 +13496,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
-
-<!-- Research access diagnostic: opt-in only with ?researchDebug=1; does not change access control. -->
-<style id="research-access-diagnostic-style">
-  #framebyResearchDiagnostic{display:none;position:relative;z-index:50;margin:12px 30px 16px;padding:16px;border:1px solid #d7e1f0;border-radius:12px;background:#fff;color:#27344a;font:13px/1.6 Pretendard,'Noto Sans KR',sans-serif;box-shadow:0 4px 20px rgba(25,43,72,.08)}
-  #framebyResearchDiagnostic[data-visible="true"]{display:block}
-  #framebyResearchDiagnostic h3{font-size:15px;margin:0 0 8px;font-weight:850}
-  #framebyResearchDiagnostic .rd-msg{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fb;border-radius:9px;padding:10px 12px;font-size:12px}
-  #framebyResearchDiagnostic .rd-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  #framebyResearchDiagnostic button,#framebyResearchDiagnostic a{border:1px solid #cbd5e1;background:#fff;color:#2558c7;border-radius:8px;padding:8px 11px;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer}
-  #framebyResearchDiagnostic button:disabled{opacity:.5;cursor:wait}
-  @media(max-width:720px){#framebyResearchDiagnostic{margin:10px 12px 15px;padding:12px}}
-</style>
-<script id="research-access-diagnostic-script">
-(function(){
-  // This diagnostic does not grant access. Unshared accounts remain blocked.
-  if(new URLSearchParams(window.location.search).get('researchDebug')!=='1')return;
-  function getEmail(){try{return GITHUB_USER_EMAIL}catch(e){return ''}}
-  function getError(){try{return RESEARCH_ACCESS_ERROR}catch(e){return ''}}
-  function getToken(){try{return GITHUB_ACCESS_TOKEN}catch(e){return null}}
-  function getClient(){try{return GITHUB_TOKEN_CLIENT}catch(e){return null}}
-  function getDocId(){try{return INTEGRATED_CONFIG.researchDocumentId}catch(e){return ''}}
-  function update(){
-    const pane=document.getElementById('framebyResearchDiagnostic');
-    if(!pane)return;
-    const email=String(getEmail()||'').trim();
-    const access=window.FRAMEBY_MODULE_ACCESS||{};
-    const ready=!!window.FRAMEBY_ACCESS_READY;
-    const error=String(getError()||'');
-    const row=pane.querySelector('.rd-msg');
-    const status=ready?(access.research?'허용(메뉴 표시)':'차단(메뉴 숨김)'):'확인 중 또는 로그인 대기';
-    row.textContent='현재 사이트 로그인 계정: '+(email||'(미확인)')+'\n연구개발 권한 판정: '+status+'\n판정 상세: '+(error||'(오류 정보 없음 — 정상 공유자라면 다시 확인을 눌러 재검사)');
-    pane.dataset.visible='true';
-  }
-  async function retry(){
-    const pane=document.getElementById('framebyResearchDiagnostic');
-    const btn=pane?.querySelector('#researchRetryAuth');
-    if(btn)btn.disabled=true;
-    try{
-      if(!getToken())throw new Error('로그인 토큰이 없습니다. Google 계정으로 다시 로그인하세요.');
-      const allowed=await githubCheckResearchAccess();
-      if(allowed){
-        // Preserve the other module permissions exactly as they were.
-        const current=window.FRAMEBY_MODULE_ACCESS||{};
-        githubApplyModuleAccess({...current,research:true});
-      }else{
-        const current=window.FRAMEBY_MODULE_ACCESS||{};
-        githubApplyModuleAccess({...current,research:false});
-      }
-    }catch(e){
-      const msg=e&&e.message?e.message:String(e);
-      const row=pane?.querySelector('.rd-msg');
-      if(row)row.textContent+='\n재검사 오류: '+msg;
-    }finally{if(btn)btn.disabled=false;update()}
-  }
-  function start(){
-    const nav=document.querySelector('.finance-workspace-nav');
-    if(!nav)return;
-    if(document.getElementById('framebyResearchDiagnostic'))return;
-    const pane=document.createElement('section');
-    pane.id='framebyResearchDiagnostic';
-    pane.setAttribute('aria-label','연구개발 권한 진단');
-    pane.innerHTML='<h3>연구개발 권한 진단 (임시 점검 화면)</h3><div class="rd-msg"></div><div class="rd-actions"><button type="button" id="researchRetryAuth">권한 다시 확인</button><button type="button" id="researchReconsent">Google 권한 재승인</button><a id="researchOpenDoc" target="_blank" rel="noopener noreferrer">원본 Google Docs 열기</a></div>';
-    nav.insertAdjacentElement('afterend',pane);
-    pane.querySelector('#researchRetryAuth').addEventListener('click',retry);
-    pane.querySelector('#researchReconsent').addEventListener('click',()=>{
-      try{
-        if(!getClient())throw new Error('Google 로그인 모듈이 준비되지 않았습니다.');
-        GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:'consent'});
-      }catch(e){const row=pane.querySelector('.rd-msg');row.textContent+='\n재승인 오류: '+String(e.message||e)}
-    });
-    const docId=String(getDocId()||'');
-    pane.querySelector('#researchOpenDoc').href='https://docs.google.com/document/d/'+encodeURIComponent(docId)+'/edit';
-    const b=document.body;
-    new MutationObserver(update).observe(b,{attributes:true,attributeFilter:['class']});
-    update();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-</script>
 </body>
 </html>
