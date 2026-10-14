@@ -12316,7 +12316,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   'use strict';
 
   const DETAIL_SHEET='상세내역';
-  const DETAIL_RANGE='A1:BC1000';
+  // 신규 거래가 1000행 이후에 입력되어도 잘리지 않도록 사용 중인 전체 행을 조회한다.
+  const DETAIL_RANGE='A:BC';
+  // 2026-10-02 당시 자금일보 기준 잔액은 시작값이고, 이후의 신규 거래는 반영한다.
+  const FIXED_BALANCE_BASE_DATE='2026-10-02';
   let detailRequestSeq=0;
 
   function cfDetailEscape(v){
@@ -12379,6 +12382,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     const transactions=[];
     const balances=[];
+    // 날짜별 입출금과 기준일 이후 누적 거래를 분리해 잔액을 계산한다.
+    const dailyAmounts=new Map();
+    const afterBaseAmounts=new Map();
     const targetEnd=Date.parse(dateKey+'T23:59:59Z');
 
     blocks.forEach(block=>{
@@ -12395,6 +12401,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const rawBalance=row[block.start+5];
         const hasBalance=String(rawBalance==null?'':rawBalance).trim()!=='';
         const balance=cfDetailNum(rawBalance);
+
+        // 고정 기준일 이후의 거래는 거래후 잔액 셀 입력 여부와 무관하게 반영한다.
+        if(dt.stamp<=targetEnd && dt.key>FIXED_BALANCE_BASE_DATE && (inAmount||outAmount)){
+          const amt=afterBaseAmounts.get(block.account)||{in:0,out:0};
+          amt.in+=inAmount;
+          amt.out+=outAmount;
+          afterBaseAmounts.set(block.account,amt);
+        }
 
         if(dt.stamp<=targetEnd && hasBalance && dt.stamp>latestBalanceStamp){
           latestBalanceStamp=dt.stamp;
@@ -12431,6 +12445,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         }
       }
 
+      dailyAmounts.set(block.account,{in:dayIn,out:dayOut});
       if(latestBalance!==null){
         balances.push({
           account:block.account,
@@ -12449,9 +12464,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
 
     /*
-      자금일보(당일/전일) 기준 고정 계좌 잔액.
-      상세내역 시트 거래 유무와 무관하게 아래 계좌는 지정 잔액을 사용한다.
-      변동 계좌인 우리(218905), 우리(218882)는 상세내역의 선택일 기준 마지막 거래후 잔액을 사용한다.
+      자금일보(당일/전일)에서 설정한 기준 잔액(2026-10-02).
+      기준일까지는 기존 잔액을 유지하고, 그 다음 날부터 상세내역 시트에 추가된
+      계좌별 입출금을 누적한다. 새 거래가 있더라도 기준 잔액으로 덮어쓰지 않는다.
+      우리(218905), 우리(218882)는 기존과 같이 최근 거래후 잔액을 사용한다.
     */
     const fixedBalances={
       '우리(585028)':156,
@@ -12468,12 +12484,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
       '신한(215101)','우리(630998)'
     ];
     const balanceByAccount=new Map(balances.map(r=>[r.account,r]));
-    Object.entries(fixedBalances).forEach(([account,balance])=>{
+    Object.entries(fixedBalances).forEach(([account,baseBalance])=>{
+      const after=afterBaseAmounts.get(account)||{in:0,out:0};
+      const today=dateKey>FIXED_BALANCE_BASE_DATE
+        ?(dailyAmounts.get(account)||{in:0,out:0})
+        :{in:0,out:0};
+      const balance=baseBalance+after.in-after.out;
       balanceByAccount.set(account,{
         account,
-        prevBalance:balance,
-        dayIn:0,
-        dayOut:0,
+        prevBalance:balance-today.in+today.out,
+        dayIn:today.in,
+        dayOut:today.out,
         balance
       });
     });
