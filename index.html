@@ -13479,29 +13479,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 
 
-<style id="frameby-research-responsive-20261014">
-/* 연구개발 화면 반응형 추가분. 다른 업무 메뉴, 권한 판정, 연동 및 인쇄는 변경하지 않음. */
-@media screen and (min-width:761px) and (max-width:1150px){
-  #researchSecondaryMenu{min-width:0}
-  #researchSecondaryMenu #researchModuleTabs{max-width:100%;min-width:0;overflow-x:auto}
+<style id="frameby-research-mockup-responsive-20261014">
+/* 2026-10-12 승인 시안 대응: 연구개발 하위 메뉴와 iframe의 화면 배치만 변경.
+   GitHub 로그인/권한/연동/기존 버튼/기타 메뉴의 스타일·로직은 그대로 유지. */
+@media screen and (min-width:701px) and (max-width:1199px){
+  #researchSecondaryMenu{min-width:0!important;padding:9px 16px!important}
+  #researchSecondaryMenu #researchModuleTabs{max-width:100%;min-width:0;overflow-x:auto;gap:4px}
   #researchSecondaryMenu #researchMonthRow{width:100%;min-width:0}
-  #researchHost .research-frame{display:block;width:100%;min-width:0;min-height:620px}
+  #researchHost{min-width:0!important}
+  #researchHost .research-frame{width:100%;min-width:0;height:calc(100dvh - 168px);min-height:610px}
 }
-@media screen and (max-width:760px){
-  #researchSecondaryMenu{gap:8px!important;padding:9px 10px 10px!important;min-width:0}
-  #researchSecondaryMenu #researchModuleTabs{display:flex!important;align-items:stretch;gap:4px!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:0 0 auto!important;overflow-x:auto!important;scrollbar-width:thin}
-  #researchSecondaryMenu #researchModuleTabs>.module-tab{flex:1 0 auto;min-width:0;padding:9px 8px!important;font-size:12px!important;text-align:center;white-space:nowrap}
-  #researchSecondaryMenu #researchMonthRow{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;width:100%;min-width:0;gap:5px!important}
-  #researchSecondaryMenu #researchYearBtn{min-width:0!important;max-width:74px;padding:7px 6px!important;margin:0!important;font-size:12px!important}
-  #researchSecondaryMenu #researchMonthBtns{display:flex!important;flex-wrap:nowrap!important;width:100%;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin}
-  #researchSecondaryMenu #researchMonthBtns>.research-month-btn{flex:0 0 auto;font-size:12px;padding:7px 8px}
-  #researchSecondaryMenu #researchToolbarActions{gap:4px!important;margin-left:0!important;flex:0 0 auto!important}
-  #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{width:34px!important;min-width:34px!important;height:34px!important;padding:6px!important}
+@media screen and (max-width:700px){
+  #researchSecondaryMenu{padding:9px 10px 10px!important;gap:9px!important;min-width:0!important;align-items:stretch!important}
+  #researchSecondaryMenu #researchModuleTabs{display:flex!important;align-items:stretch;gap:4px!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;scrollbar-width:thin}
+  #researchSecondaryMenu #researchModuleTabs>.module-tab{flex:1 1 0;min-width:max-content;padding:9px 9px!important;font-size:12px!important;text-align:center;white-space:nowrap}
+  #researchSecondaryMenu #researchMonthRow:not(.hidden){display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;gap:5px!important;align-items:center!important;min-width:0!important;flex-wrap:nowrap!important;width:100%}
+  #researchSecondaryMenu #researchYearBtn{margin:0!important;flex:0 0 auto!important;padding:7px 6px!important;font-size:12px!important}
+  #researchSecondaryMenu #researchMonthBtns{display:flex!important;flex-wrap:nowrap!important;flex:1 1 auto!important;min-width:0!important;max-width:100%;width:100%;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin}
+  #researchSecondaryMenu #researchMonthBtns>.research-month-btn{white-space:nowrap;flex:0 0 auto;font-size:12px;padding:7px 8px}
+  #researchSecondaryMenu #researchToolbarActions{display:flex!important;align-items:center;gap:4px!important;flex:0 0 auto!important;margin:0!important}
+  #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{min-width:34px!important;width:34px!important;height:34px!important;padding:6px!important;justify-content:center!important}
   #researchSecondaryMenu #researchGlobalRefreshBtn{font-size:0!important;gap:0!important}
-  #researchSecondaryMenu #researchGlobalRefreshBtn span{font-size:20px!important;line-height:1!important}
-  #researchSecondaryMenu #researchToolbarBell svg{width:18px;height:18px}
-  #researchHost{min-width:0!important;overflow:hidden}
-  #researchHost .research-frame{display:block;width:100%;min-width:0;height:calc(100dvh - 195px);min-height:520px}
+  #researchSecondaryMenu #researchGlobalRefreshBtn span{font-size:19px!important;line-height:1!important}
+  #researchHost{min-width:0!important;overflow:hidden!important}
+  #researchHost .research-frame{width:100%;min-width:0;height:calc(100dvh - 190px);min-height:510px}
 }
 </style>
 </body>
