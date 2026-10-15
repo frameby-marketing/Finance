@@ -12668,6 +12668,101 @@ function ensureDetailModal(){
 })();
 </script>
 
+<style id="frameby-cashflow-responsive-only-20261015">
+/* 화면 너비 대응 전용: 데이터·계산·조회·저장·팝업 JS와 인쇄 스타일 변경 없음.
+   1400px 이상은 기존 PC 화면 그대로 유지. iframe viewport 너비로 적용. */
+@media screen and (max-width:1399px){
+  #calendarPage .content-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;min-width:0!important}
+  #calendarPage .calendar-card{min-width:0!important;width:100%!important;overflow:hidden!important}
+  #calendarSubview .calendar{width:100%!important;min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  #calendarPage .side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-areas:none!important;align-items:start!important;gap:14px!important;min-width:0!important;margin-top:0!important}
+  #calendarPage .side>.card{grid-area:auto!important;min-width:0!important;width:auto!important;position:static!important;top:auto!important;align-self:stretch!important}
+  #calendarPage .side .sheet-edit-row,#calendarPage .side .sheet-edit-head,#calendarPage .side .sheet-edit-total{grid-template-columns:78px minmax(0,1fr) 105px}
+  #calendarPage .side .loan-edit-row,#calendarPage .side .loan-edit-head{min-width:0}
+  .report-main{grid-template-columns:minmax(0,1fr)!important}
+  .report-right{border-left:0!important;border-top:1px solid var(--line)}
+  .report-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .report-top-lists{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .report-sheet,.report-left,.report-table-wrap,.tablecard,.table-scroll{min-width:0!important;max-width:100%}
+  .report-table-wrap,.table-scroll,.expected-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+}
+@media screen and (min-width:768px) and (max-width:1199px){
+  #calendarSubview .calendar{grid-auto-rows:minmax(149px,auto)!important}
+  #calendarSubview .day{display:flex!important;flex-direction:column!important;min-height:149px!important;height:auto!important;overflow:hidden!important;padding:5px!important}
+  #calendarSubview .day .date{min-height:22px!important;height:22px!important;flex:0 0 22px!important;margin:0!important}
+  #calendarSubview .day .detail{display:none!important}
+  #calendarSubview .day .cash-section{flex:0 0 auto!important;height:auto!important;min-height:0!important;overflow:hidden!important;margin:0!important}
+  #calendarSubview .day .sumrow{display:flex!important;flex:0 0 auto!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;height:auto!important;min-height:0!important;margin:0!important}
+  #calendarSubview .day .sumrow .label{display:none!important}
+  #calendarSubview .day .sumrow .money{font-size:clamp(9px,1.1vw,11px)!important;text-align:left!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;width:100%!important}
+  #calendarSubview .day .dayfoot{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:repeat(4,auto)!important;flex:0 0 auto!important;height:auto!important;min-height:0!important;margin-top:3px!important;gap:0!important;padding:3px 0 0!important}
+  #calendarSubview .day .dayfoot>*{display:block!important;height:auto!important;min-height:0!important;font-size:9px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  #calendarSubview .day .dayfoot>b{font-weight:800!important;font-size:10px!important}
+  #calendarPage .side .metric-card{min-width:0!important}
+  .report-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:767px){
+  .page{padding:12px 9px 28px!important;max-width:100%!important}
+  .topbar{height:auto!important;min-height:58px!important;display:flex!important;flex-wrap:wrap!important;gap:6px!important;padding:8px 10px!important}
+  .topbar .brand{display:none!important}
+  .topbar .mainnav{height:auto!important;display:flex!important;flex:1 1 auto!important;min-width:0!important;gap:2px!important}
+  .topbar .navbtn{padding:9px 10px!important;font-size:13px!important;white-space:nowrap!important}
+  .topbar .spacer{display:none!important}
+  .topbar .year-select-wrap{margin-left:auto!important;margin-right:0!important}
+  .topbar .refresh-btn{margin:0!important}
+  #calendarPage .toolbar{gap:9px!important;align-items:center!important}
+  #calendarPage .toolbar .titlewrap{width:100%!important;flex:1 0 100%!important;margin:0!important}
+  #calendarPage .toolbar .titlewrap h1{font-size:21px!important}
+  #calendarPage .toolbar .segment{order:1!important;width:100%!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;min-width:0!important}
+  #calendarPage .toolbar .segment button{min-width:0!important;padding:10px 4px!important;font-size:13px!important;white-space:nowrap!important}
+  #calendarPage .toolbar .monthCtl{order:2!important;margin-left:auto!important;margin-right:auto!important}
+  #calendarPage .content-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+  #calendarPage .side{display:flex!important;flex-direction:column!important;gap:12px!important;margin-top:0!important}
+  #calendarPage .side>.card{width:100%!important;max-width:100%!important;min-width:0!important}
+  #calendarPage .side .metric-card{padding:13px!important}
+  /* 작은 월 달력에서도 7개 요일과 날짜 클릭은 유지. 상세 금액은 기존 날짜 팝업 사용. */
+  #calendarSubview .calendar-card{container-type:normal!important;overflow:hidden!important}
+  #calendarSubview .calendar-head{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  #calendarSubview .calendar-head div{padding:8px 0!important;font-size:11px!important}
+  #calendarSubview .calendar{width:100%!important;min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:minmax(71px,auto)!important;align-content:start!important;}
+  #calendarSubview .day{display:block!important;height:auto!important;min-height:71px!important;min-width:0!important;padding:5px 2px!important;overflow:hidden!important;position:relative!important}
+  #calendarSubview .day .date{display:flex!important;justify-content:center!important;align-items:center!important;margin:0!important;min-height:25px!important;height:25px!important;flex-basis:auto!important}
+  #calendarSubview .day .date .num{font-size:12px!important;white-space:nowrap!important}
+  #calendarSubview .day.today .num{width:24px!important;height:24px!important}
+  #calendarSubview .day .detail,#calendarSubview .day .dayfoot{display:none!important}
+  #calendarSubview .day .cash-section{display:inline-flex!important;vertical-align:top!important;min-width:0!important;max-width:48%!important;min-height:15px!important;margin:1px 0 0!important;justify-content:center!important;}
+  #calendarSubview .day .cash-section .sumrow{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important;margin:0!important;height:12px!important;min-height:0!important;flex-basis:auto!important}
+  #calendarSubview .day .cash-section .sumrow .label{display:none!important}
+  #calendarSubview .day .cash-section .sumrow .money{font-size:0!important;width:8px!important;height:8px!important;border-radius:100%!important;display:block!important;flex:none!important;background:currentColor!important;}
+  #calendarSubview .day .cash-section .sumrow.income .money{color:var(--blue)!important}
+  #calendarSubview .day .cash-section .sumrow.expense .money{color:var(--red)!important}
+  #calendarSubview .day.muted .cash-section{display:none!important}
+  #calendarSubview .day .cash-section{display:none!important}
+  #calendarSubview .day:not(.muted)::after{content:'›';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:16px;color:#a1adbc;line-height:1}
+  #calendarSubview .calendar-card:after{content:'날짜를 누르면 입금·출금·경상수지·현잔액과 상세내역을 확인할 수 있습니다.';display:block;padding:10px 12px;font-size:12px;line-height:1.5;color:#66758b;background:#fbfcfe;border-top:1px solid var(--line)}
+  #monthlyPage .toolbar .titlewrap,#reportPage .toolbar .titlewrap{min-width:0!important;width:100%!important}
+  .filterbar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:11px!important}
+  .filterbar .field{min-width:0!important}
+  .filterbar .field input,.filterbar .field select{max-width:100%!important;width:100%!important}
+  .filterbar .apply{align-self:end}
+  .cash-table .sticky2,.cash-table .sticky3,.cash-table .sticky4{position:static!important;box-shadow:none!important}
+  .cash-table .sticky1{left:0!important;min-width:85px!important;max-width:85px!important}
+  .report-controls{max-width:100%;flex-wrap:wrap}
+  .report-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .report-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .report-summary .cell{min-width:0!important;padding:12px!important}
+  .report-summary .value{font-size:16px!important;overflow-wrap:anywhere!important}
+  .report-top-lists{grid-template-columns:minmax(0,1fr)!important}
+  .report-sheet-head{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important}
+  .report-sheet-head .period{margin-left:0!important}
+  .report-right{padding:12px!important}
+  .report-table-wrap,.table-scroll,.expected-wrap{overscroll-behavior-x:contain!important}
+  #forecastStatusSubview,#expectedSubview,.forecast-status-frame{min-width:0!important;max-width:100%!important}
+  .cf-detail-modal{width:100%!important;max-width:calc(100vw - 12px)!important}
+  .cf-detail-table-wrap,.cf-detail-balance-section{overflow-x:auto!important;max-width:100%!important}
+  .cf-detail-total-balance{flex-wrap:wrap!important}
+}
+</style>
 </body>
 </html></textarea>
 <script id="work-record-module">
