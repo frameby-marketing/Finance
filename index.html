@@ -12847,6 +12847,290 @@ html body .app>.topbar{display:none!important}
   .report-sheet,.report-main,.report-left,.report-right,.tablecard{min-width:0!important;max-width:100%!important}
 }
 </style>
+
+<style id="frameby-cash-eight-screen-responsive-20261015">
+/* Confirmed 8-screen UX: presentation only; unchanged data, calculations and save handlers. */
+.cf-mobile-daymarks{display:none!important}
+@media screen and (min-width:768px) and (max-width:1199px){
+ #calendarPage .content-grid{grid-template-columns:minmax(0,1fr)!important}
+ #calendarPage .side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start!important}
+ #calendarPage .side>.card{min-width:0!important;width:100%!important}
+ #calendarSubview .calendar{min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
+ #calendarSubview .day{min-width:0!important;overflow:hidden!important;min-height:148px!important;padding:8px 5px!important}
+ #calendarSubview .day .detail{display:none!important}
+ #calendarSubview .day .sumrow{min-width:0!important}
+ #calendarSubview .day .sumrow .money{font-size:11px!important;white-space:nowrap!important}
+ #calendarSubview .day .sumrow .label{font-size:10px!important}
+ #calendarSubview .day .dayfoot{font-size:10px!important;grid-template-rows:18px 18px!important;height:43px!important;min-height:43px!important;flex-basis:43px!important}
+ #calendarSubview .day .dayfoot b{font-size:10px!important}
+}
+@media screen and (max-width:767px){
+ /* Calendar and document navigation still come from the original application. */
+ html,body,.app{max-width:100%!important;overflow-x:hidden!important}
+ #calendarPage .toolbar{display:flex!important;flex-wrap:wrap!important;align-items:center!important}
+ #calendarPage .toolbar .titlewrap{order:0!important}
+ #calendarPage .toolbar .titlewrap p{font-size:12px!important;line-height:1.5!important}
+ #calendarPage .toolbar .segment{order:1!important;border-radius:11px!important;background:#fff!important;min-height:44px!important}
+ #calendarPage .toolbar .monthCtl{order:2!important;min-height:42px!important;margin-top:4px!important}
+ #calendarPage .content-grid{grid-template-columns:minmax(0,1fr)!important}
+ #calendarSubview .calendar-card{border-radius:12px!important;overflow:hidden!important}
+ #calendarSubview .calendar{grid-auto-rows:54px!important;min-width:0!important}
+ #calendarSubview .day{height:54px!important;max-height:54px!important;min-height:54px!important;padding:3px 1px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;align-items:center!important}
+ #calendarSubview .day .date{height:27px!important;min-height:27px!important;flex:0 0 27px!important}
+ #calendarSubview .day .cash-section,#calendarSubview .day .dayfoot,#calendarSubview .day .detail{display:none!important}
+ #calendarSubview .day .cf-mobile-daymarks{display:flex!important;align-items:center;justify-content:center;gap:4px!important;margin:2px 0 0!important;min-height:5px;height:5px}
+ .cf-mobile-daymarks i{display:inline-block;width:4px;height:4px;border-radius:50%;background:#bdc9d7}
+ .cf-mobile-daymarks i.in{background:#3274df}.cf-mobile-daymarks i.out{background:#e3787d}
+ #calendarSubview .day.cf-mobile-selected{background:#eff5ff!important;outline:1px solid #c9d9fb;outline-offset:-1px}
+ #calendarSubview .day.cf-mobile-selected:not(.today) .num{background:#2763df!important;color:white!important;border-radius:50%;width:24px;height:24px;display:grid!important;place-items:center}
+ #calendarSubview .calendar-card:after{font-size:10px!important;padding:7px 9px!important}
+ .cf-mobile-daily-summary{display:block!important;min-width:0!important;border:1px solid #dce5f1;border-radius:13px;background:#fff;padding:13px!important;margin:0 0 14px;box-shadow:0 2px 10px #243c6008}
+ .cf-mobile-sum-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+ .cf-mobile-sum-head strong{font-size:15px;font-weight:850;color:#1d2d4a}
+ .cf-mobile-sum-head small{font-size:10px;color:#7f8ba0}
+ .cf-mobile-statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .cf-mobile-stat{min-width:0;padding:11px 9px;border:1px solid #e6ecf3;border-radius:9px;background:#fbfcfe}
+ .cf-mobile-stat label{display:block;font-size:11px;color:#63738e;font-weight:800}
+ .cf-mobile-stat strong{display:block;overflow-wrap:anywhere;font-size:clamp(12px,3.6vw,16px);font-weight:900;margin-top:4px;color:#20314d;font-variant-numeric:tabular-nums}
+ .cf-mobile-stat.in strong{color:#2165d5}.cf-mobile-stat.out strong{color:#c84851}
+ .cf-mobile-stat.balance{background:#f1f6ff;border-color:#dce9ff}.cf-mobile-stat.balance strong{color:#1b51be}
+ .cf-mobile-detail-btn{width:100%;display:block;border:1px solid #2662d9;border-radius:8px;background:#2c62db;color:white;font-size:12px;font-weight:850;padding:10px;margin-top:11px}
+ #calendarPage .side{display:flex!important;flex-direction:column!important;gap:10px!important;margin-top:0!important}
+ #calendarPage .side .metric-card{padding:0!important;overflow:hidden!important;border-radius:12px!important}
+ #calendarPage .side .metric-card.cf-mobile-collapsed>:not(.cf-mobile-mini-toggle){display:none!important}
+ .cf-mobile-mini-toggle{display:flex!important;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:13px 14px;border:0;text-align:left;background:#fff;color:#283b56;font-weight:850;font-size:13px;cursor:pointer}
+ .cf-mobile-mini-toggle small{font-size:11px;color:#7f8da1}
+ #calendarPage .side .metric-card:not(.cf-mobile-collapsed)>.cf-mobile-mini-toggle{background:#eff5ff;color:#1b5cdb;border-bottom:1px solid #e5eaf2}
+ #calendarPage .side .metric-card:not(.cf-mobile-collapsed)>:not(.cf-mobile-mini-toggle){margin-left:12px!important;margin-right:12px!important}
+ #calendarPage .side .sheet-edit-head{font-size:10px!important}
+ #calendarPage .side .sheet-edit-row{grid-template-columns:70px minmax(0,1fr) 90px!important}
+ #calendarPage .side .sheet-edit-row input{font-size:11px!important;padding:0 4px!important;min-width:0!important}
+ /* Month switcher shows only one existing month card; all underlying inputs remain live. */
+ .cf-mobile-expected-monthbar{display:flex!important;align-items:center;gap:8px;padding:11px 12px 2px}
+ .cf-mobile-expected-monthbar label{color:#52657e;font-weight:850;font-size:12px}
+ .cf-mobile-expected-monthbar select{min-width:95px;font-size:13px;font-weight:850;padding:8px;border:1px solid #d8e1ee;border-radius:8px;background:white}
+ .cf-mobile-expected-monthbar button{margin-left:auto;border:1px solid #cbdcf6;color:#195bc5;background:#f3f7ff;border-radius:8px;padding:8px 10px;font-weight:850;font-size:11px}
+ #expectedExpenseSubview .expected-wrap{overflow-x:hidden!important}
+ #expectedExpenseSubview .expected-month-grid{width:100%!important;min-width:0!important;display:block!important;overflow-x:hidden!important}
+ #expectedExpenseSubview .expected-month-card{display:none!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important}
+ #expectedExpenseSubview .expected-month-card.cf-mobile-active-month{display:block!important}
+ #expectedExpenseSubview .expected-month-table{width:100%!important;table-layout:fixed!important}
+ #expectedExpenseSubview .expected-month-table colgroup{display:none!important}
+ #expectedExpenseSubview .expected-month-table thead th{padding:7px 3px!important;font-size:10px!important}
+ #expectedExpenseSubview .expected-month-table td{padding:4px 2px!important;min-width:0!important}
+ #expectedExpenseSubview .expected-month-table td input{min-width:0!important;width:100%!important;padding:5px 3px!important;font-size:11px!important}
+ #expectedExpenseSubview .expected-month-table td:first-child{width:55px!important}
+ #expectedExpenseSubview .expected-month-table td:last-child{width:auto!important}
+ #expectedExpenseSubview .expected-month-table thead{display:none!important}
+ #expectedExpenseSubview .expected-month-table,#expectedExpenseSubview .expected-month-table tbody{display:block!important;width:100%!important}
+ #expectedExpenseSubview .expected-month-table tbody tr:not(.cf-mobile-empty-day){display:grid!important;grid-template-columns:52px minmax(0,1fr) minmax(0,0.9fr)!important;grid-template-rows:auto auto!important;gap:6px!important;margin:8px!important;padding:9px!important;border:1px solid #e6ecf3!important;border-radius:10px!important;background:#fff!important}
+ #expectedExpenseSubview .expected-month-table tbody tr td{display:block!important;border:0!important;padding:0!important;min-width:0!important;width:auto!important}
+ #expectedExpenseSubview .expected-month-table tbody tr td:nth-child(1){grid-column:1;grid-row:1/3;align-self:center;font-weight:800;color:#425a7a}
+ #expectedExpenseSubview .expected-month-table tbody tr td:nth-child(2){grid-column:2;grid-row:1}
+ #expectedExpenseSubview .expected-month-table tbody tr td:nth-child(3){grid-column:2/4;grid-row:2}
+ #expectedExpenseSubview .expected-month-table tbody tr td:nth-child(4){grid-column:3;grid-row:1}
+ #expectedExpenseSubview .expected-month-table tbody tr td input{border:1px solid #e2e7f0!important;border-radius:6px!important;background:#fff!important;min-height:32px!important;font-size:12px!important;padding:5px 7px!important}
+ #expectedExpenseSubview .expected-headline{flex-wrap:wrap!important;align-items:center!important;gap:10px!important}
+ #expectedExpenseSubview .expected-headline-copy{flex:1 1 170px!important;min-width:0!important}
+ #expectedExpenseSubview .expected-headline-copy h2{font-size:18px!important;white-space:normal!important;word-break:keep-all!important}
+ #expectedExpenseSubview .expected-headline-copy .expected-year-label{font-size:10px!important;line-height:1.35!important}
+ #expectedExpenseSubview .expected-save-actions{flex:0 0 auto!important;margin-left:auto!important}
+ #expectedExpenseSubview .expected-month-table tr.cf-mobile-empty-day{display:none!important}
+ #expectedExpenseSubview .expected-month-card.cf-mobile-show-all tr.cf-mobile-empty-day{display:table-row!important}
+ .cf-mobile-expected-hint{display:block!important;padding:8px 12px 12px;font-size:11px;line-height:1.5;color:#7c889b}
+ /* In statuses/reports no data column may disappear; the mobile grouping is a view of the same table. */
+ .cf-mobile-status-view{display:block!important;margin-top:13px}
+ #monthlyPage.cf-mobile-status-ready .tablecard{display:none!important}
+ .cf-mobile-status-group{margin-bottom:10px;border:1px solid #e4eaf3;border-radius:12px;overflow:hidden;background:#fff}
+ .cf-mobile-status-group summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 13px;background:#f5f8fd;color:#33425c;font-weight:850;font-size:13px;cursor:pointer}
+ .cf-mobile-status-group summary::-webkit-details-marker{display:none}
+ .cf-mobile-status-group summary small{font-size:12px;color:#3464c1;text-align:right}
+ .cf-mobile-status-row{display:flex;justify-content:space-between;gap:12px;padding:9px 13px;border-top:1px solid #edf1f5;font-size:11.5px;color:#546377}
+ .cf-mobile-status-row b{font-weight:850;color:#223956;white-space:nowrap}
+ .cf-mobile-status-actions{display:flex!important;justify-content:flex-end;gap:8px;margin:6px 0 10px}
+ .cf-mobile-status-actions button{border:1px solid #d8e2ee;background:white;border-radius:8px;padding:8px 11px;color:#245bd3;font-weight:850;font-size:12px}
+ #monthlyPage.cf-mobile-raw-open .tablecard{display:block!important;overflow:hidden}
+ #monthlyPage.cf-mobile-raw-open .cf-mobile-status-view{display:none!important}
+ #reportPage .report-top-lists{display:block!important}
+ #reportPage .report-grid,#reportPage .report-main,#reportPage .report-body{grid-template-columns:minmax(0,1fr)!important}
+ #reportPage .report-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #reportPage .report-right{border-left:0!important}
+ .cf-mobile-expense-backdrop{display:none!important;position:fixed;inset:0;align-items:flex-end;justify-content:center;background:#0e213b73;padding:0;z-index:12000}
+ .cf-mobile-expense-backdrop.open{display:flex!important}
+ .cf-mobile-expense-sheet{width:100%;max-height:90dvh;overflow:auto;background:white;border-radius:17px 17px 0 0;padding:18px 15px max(20px,env(safe-area-inset-bottom));box-shadow:0 -12px 32px #0e213b24}
+ .cf-mobile-expense-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e7ef;padding-bottom:11px;margin-bottom:12px}
+ .cf-mobile-expense-title strong{font-size:16px}
+ .cf-mobile-expense-title button{border:1px solid #dbe3ef;border-radius:8px;background:#fff;padding:5px 10px;font-size:19px}
+ .cf-mobile-expense-field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+ .cf-mobile-expense-field label{font-size:11px;font-weight:850;color:#68778f}
+ .cf-mobile-expense-field input,.cf-mobile-expense-field select{width:100%;min-height:40px;border:1px solid #e0e5ed;border-radius:9px;padding:9px 11px;background:white;color:#233752}
+ .cf-mobile-expense-buttons{display:flex;gap:8px;margin-top:15px}
+ .cf-mobile-expense-buttons button{flex:1;border:1px solid #dfe6f0;border-radius:8px;background:#f7f9fb;padding:11px;font-size:12px;font-weight:850}
+ .cf-mobile-expense-buttons button:last-child{background:#2861dc;color:white;border-color:#2861dc}
+}
+/* Desktop and tablet retain original tables and workflows. */
+@media print{.cf-mobile-daily-summary,.cf-mobile-mini-toggle,.cf-mobile-expected-monthbar,.cf-mobile-status-view,.cf-mobile-status-actions,.cf-mobile-expense-backdrop{display:none!important}}
+</style>
+
+
+<script id="frameby-cash-eight-screen-ux-only-20261015">
+(()=>{
+ 'use strict';
+ const byId=id=>document.getElementById(id);
+ const mobile=()=>window.matchMedia('(max-width:767px)').matches;
+ const fmtKorean=(v)=>String(v||'').trim()||'0';
+ const idle=(fn)=>{ if(typeof requestAnimationFrame==='function') requestAnimationFrame(fn); else fn(); };
+ const sumHtml=`<div class="cf-mobile-sum-head"><strong id="cfMobileChosenDate">선택일 자금수지</strong><small>달력 날짜 선택</small></div><div class="cf-mobile-statgrid"><div class="cf-mobile-stat in"><label>입금</label><strong id="cfMobIncome">0</strong></div><div class="cf-mobile-stat out"><label>지출</label><strong id="cfMobExpense">0</strong></div><div class="cf-mobile-stat"><label>경상수지</label><strong id="cfMobNet">0</strong></div><div class="cf-mobile-stat balance"><label>현잔액</label><strong id="cfMobBalance">0</strong></div></div><button class="cf-mobile-detail-btn" id="cfMobDetailBtn" type="button">입출금 상세내역 · 전체 계좌 잔액 보기 ›</button>`;
+ let lastChosenDay=null;
+ function validDays(){return [...(byId('calendar')?.querySelectorAll('.day:not(.muted)')||[])];}
+ function decorateCalendar(){
+  const cal=byId('calendar');if(!cal)return;
+  let days=validDays();
+  days.forEach(day=>{
+   if(day.querySelector('.cf-mobile-daymarks'))return;
+   const inc=(day.querySelector('.sumrow.income .money')?.textContent||'').replace(/[^\d-]/g,'');
+   const out=(day.querySelector('.sumrow.expense .money')?.textContent||'').replace(/[^\d-]/g,'');
+   const marks=document.createElement('span');marks.className='cf-mobile-daymarks';
+   if(Number(inc))marks.innerHTML+='<i class="in"></i>';
+   if(Number(out))marks.innerHTML+='<i class="out"></i>';
+   day.appendChild(marks);
+  });
+  const today=cal.querySelector('.day.today:not(.muted)');
+  const hit=days.find(d=>Number(d.querySelector('.date .num')?.textContent)===lastChosenDay);
+  selectDay(hit||today||days[0]||null);
+ }
+ function selectDay(day){
+  if(!day)return;
+  const dateNumber=Number(day.querySelector('.date .num')?.textContent||0);
+  if(!dateNumber)return;
+  lastChosenDay=dateNumber;
+  validDays().forEach(d=>d.classList.toggle('cf-mobile-selected',d===day));
+  const label=byId('monthLabel')?.textContent||'';
+  const parsed=label.match(/(\d{4})년\s*(\d{1,2})월/);
+  const d=new Date(parsed?Number(parsed[1]):new Date().getFullYear(),parsed?Number(parsed[2])-1:0,dateNumber);
+  const week='일월화수목금토'[d.getDay()];
+  if(byId('cfMobileChosenDate'))byId('cfMobileChosenDate').textContent=`${label} ${dateNumber}일 (${week})`;
+  const mapping=[['cfMobIncome','.sumrow.income .money'],['cfMobExpense','.sumrow.expense .money'],['cfMobNet','.dayfoot b:nth-of-type(1)'],['cfMobBalance','.dayfoot b:nth-of-type(2)']];
+  mapping.forEach(([id,sel])=>{const el=byId(id); if(el)el.textContent=fmtKorean(day.querySelector(sel)?.textContent);});
+ }
+ function initCalendar(){
+  const card=document.querySelector('#calendarSubview .calendar-card');if(!card)return;
+  let sum=byId('cfMobileDailySummary');
+  if(!sum){sum=document.createElement('div');sum.id='cfMobileDailySummary';sum.className='cf-mobile-daily-summary';sum.style.display='none';sum.innerHTML=sumHtml;card.insertAdjacentElement('afterend',sum);sum.querySelector('#cfMobDetailBtn').addEventListener('click',()=>{const day=validDays().find(d=>Number(d.querySelector('.date .num')?.textContent)===lastChosenDay);day?.click();});}
+  const cal=byId('calendar');
+  if(cal && !cal.dataset.cfMobileWatch){
+   cal.dataset.cfMobileWatch='1';let scheduled=false;
+   new MutationObserver(mutations=>{if(mutations.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&n.classList?.contains('day')))){if(!scheduled){scheduled=true;idle(()=>{scheduled=false;decorateCalendar()})}}}).observe(cal,{childList:true});
+   cal.addEventListener('click',e=>{const day=e.target.closest('.day:not(.muted)');if(day)selectDay(day)},true);
+  }
+  decorateCalendar();
+ }
+ const miniNames={incomeMiniCard:'월매출 입금내역',costMiniCard:'제조 / 광고 비용',shortLoanCard:'단기차입금'};
+ function initMiniCards(){
+  Object.entries(miniNames).forEach(([id,label])=>{
+   const card=byId(id);if(!card||card.querySelector('.cf-mobile-mini-toggle'))return;
+   const btn=document.createElement('button');btn.type='button';btn.className='cf-mobile-mini-toggle';btn.style.display='none';btn.setAttribute('aria-expanded','false');btn.innerHTML=`<span>${label}</span><small>펼치기 ▾</small>`;
+   card.insertBefore(btn,card.firstChild);card.classList.add('cf-mobile-collapsed');
+   btn.addEventListener('click',()=>{const next=card.classList.toggle('cf-mobile-collapsed');btn.setAttribute('aria-expanded',String(!next));btn.querySelector('small').textContent=next?'펼치기 ▾':'접기 ▴'});
+  });
+ }
+ const expected={month:null};
+ function activeExpectedCards(){return [...(byId('expectedExpenseBody')?.querySelectorAll('.expected-month-card')||[])];}
+ function selectExpectedMonth(val){
+  const cards=activeExpectedCards();if(!cards.length)return;
+  expected.month=String(cards.find(x=>x.dataset.month===String(val))?.dataset.month||cards[0].dataset.month);
+  cards.forEach(card=>card.classList.toggle('cf-mobile-active-month',card.dataset.month===expected.month));
+  const sel=byId('cfMobileExpectedSelect');if(sel)sel.value=expected.month;
+  decorateExpectedRows();
+ }
+ function decorateExpectedRows(){
+  activeExpectedCards().forEach(card=>{
+   card.querySelectorAll('tbody tr').forEach(row=>{
+    const ins=[...row.querySelectorAll('input')];
+    row.classList.toggle('cf-mobile-empty-day',!!ins.length && ins.every(i=>!i.value.trim()));
+   });
+  });
+ }
+ function refreshExpectedMonths(){
+  const bar=byId('cfMobileExpectedMonthbar'),cards=activeExpectedCards();if(!bar||!cards.length)return;
+  const select=byId('cfMobileExpectedSelect');const old=select.value;
+  select.replaceChildren(...cards.map(card=>{const opt=document.createElement('option');opt.value=card.dataset.month;opt.textContent=card.dataset.month+'월';return opt;}));
+  selectExpectedMonth(cards.some(c=>c.dataset.month===old)?old:expected.month);
+ }
+ function openExpenseForm(){
+  const modal=byId('cfMobileExpenseModal');if(!modal)return;
+  const select=byId('cfExpenseMonth');select.replaceChildren(...activeExpectedCards().map(card=>{const opt=document.createElement('option');opt.value=card.dataset.month;opt.textContent=card.dataset.month+'월';return opt;}));
+  select.value=expected.month||select.options[0]?.value||'';
+  byId('cfExpenseDay').value='1';byId('cfExpenseVendor').value='';byId('cfExpenseDesc').value='';byId('cfExpenseAmount').value='';modal.classList.add('open');
+ }
+ function commitExpenseForm(){
+  const month=byId('cfExpenseMonth').value,day=byId('cfExpenseDay').value.trim(),vendor=byId('cfExpenseVendor').value.trim(),desc=byId('cfExpenseDesc').value.trim(),amount=byId('cfExpenseAmount').value.trim();
+  if(!month||!day||Number(day)<1||Number(day)>31||!vendor||!desc||!amount){byId('cfMobileExpenseMsg').textContent='일자·거래처·적요명·금액을 모두 입력해 주세요.';return;}
+  const card=activeExpectedCards().find(c=>c.dataset.month===month);let row=card?.querySelector(`tbody tr[data-day="${Number(day)}"]`);if(!row){byId('cfMobileExpenseMsg').textContent='선택 월에 해당 날짜가 없습니다.';return;}
+  let fields=['.expected-vendor','.expected-desc','.expected-amount'].map(sel=>row.querySelector(sel));
+  if(fields.some(i=>i?.value.trim())){
+   const add=row.querySelector('.expected-add-row');if(add){add.click();}
+   const same=[...card.querySelectorAll(`tbody tr[data-day="${Number(day)}"]`)];row=same.find(r=>[...r.querySelectorAll('.expected-vendor,.expected-desc,.expected-amount')].every(i=>!i.value.trim()))||same[same.length-1];
+   fields=['.expected-vendor','.expected-desc','.expected-amount'].map(sel=>row.querySelector(sel));
+  }
+  [vendor,desc,amount].forEach((v,i)=>{if(!fields[i])return;fields[i].value=v;fields[i].dispatchEvent(new Event('input',{bubbles:true}));fields[i].dispatchEvent(new Event('change',{bubbles:true}));});
+  selectExpectedMonth(month);decorateExpectedRows();
+  byId('cfMobileExpenseModal').classList.remove('open');
+  const msg=byId('expectedSaveStatus');if(msg)msg.textContent='입력 중 · 저장 버튼을 눌러 반영';
+ }
+ function initExpected(){
+  const section=byId('expectedExpenseSubview');if(!section)return;
+  if(!byId('cfMobileExpectedMonthbar')){
+   const bar=document.createElement('div');bar.id='cfMobileExpectedMonthbar';bar.className='cf-mobile-expected-monthbar';bar.style.display='none';bar.innerHTML='<label for="cfMobileExpectedSelect">월별 보기</label><select id="cfMobileExpectedSelect"></select><button type="button" id="cfMobileExpectedAdd">+ 지출 추가</button>';
+   const wrap=section.querySelector('.expected-wrap');wrap?.parentElement?.insertBefore(bar,wrap);
+   byId('cfMobileExpectedSelect').addEventListener('change',e=>selectExpectedMonth(e.target.value));
+   byId('cfMobileExpectedAdd').addEventListener('click',openExpenseForm);
+   const hint=document.createElement('p');hint.className='cf-mobile-expected-hint';hint.style.display='none';hint.textContent='선택한 월의 입력된 지급내역만 먼저 보여줍니다. 변경 후 상단 저장 버튼을 눌러야 반영됩니다.';
+   wrap?.insertAdjacentElement('afterend',hint);
+  }
+  if(!byId('cfMobileExpenseModal')){
+   const modal=document.createElement('div');modal.id='cfMobileExpenseModal';modal.className='cf-mobile-expense-backdrop';modal.innerHTML='<div class="cf-mobile-expense-sheet" role="dialog" aria-modal="true" aria-label="예상지출 추가"><div class="cf-mobile-expense-title"><strong>예상지출 행 추가</strong><button type="button" id="cfExpenseClose" aria-label="닫기">×</button></div><div class="cf-mobile-expense-field"><label>월</label><select id="cfExpenseMonth"></select></div><div class="cf-mobile-expense-field"><label>일자</label><input type="number" id="cfExpenseDay" min="1" max="31" inputmode="numeric"></div><div class="cf-mobile-expense-field"><label>거래처</label><input type="text" id="cfExpenseVendor"></div><div class="cf-mobile-expense-field"><label>적요명</label><input type="text" id="cfExpenseDesc"></div><div class="cf-mobile-expense-field"><label>금액</label><input type="text" id="cfExpenseAmount" inputmode="numeric"></div><div id="cfMobileExpenseMsg" style="color:#b24040;font-size:11px;min-height:16px"></div><div class="cf-mobile-expense-buttons"><button type="button" id="cfExpenseCancel">취소</button><button type="button" id="cfExpenseConfirm">입력 완료</button></div></div>';
+   document.body.appendChild(modal);
+   function close(){modal.classList.remove('open');byId('cfMobileExpenseMsg').textContent='';}
+   byId('cfExpenseClose').addEventListener('click',close);byId('cfExpenseCancel').addEventListener('click',close);
+   modal.addEventListener('click',e=>{if(e.target===modal)close()});
+   byId('cfExpenseConfirm').addEventListener('click',commitExpenseForm);
+  }
+  const root=byId('expectedExpenseBody');if(root && !root.dataset.cfMobileWatch){root.dataset.cfMobileWatch='1';let scheduled=false;new MutationObserver(ms=>{if(ms.some(m=>m.type==='characterData'||m.type==='childList')){if(!scheduled){scheduled=true;idle(()=>{scheduled=false;refreshExpectedMonths()})}}}).observe(root,{childList:true,subtree:true,characterData:true});root.addEventListener('input',()=>{if(mobile())decorateExpectedRows()},true)}
+  refreshExpectedMonths();
+ }
+ function collectStatusTable(){
+  const table=byId('cashTable'),host=byId('cfMobileStatusGroups');if(!table||!host)return;
+  const rows=[...table.querySelectorAll('tbody tr')];if(!rows.length)return;
+  const frag=document.createDocumentFragment();let group=null;let count=0;
+  const addGroup=(title,val)=>{const card=document.createElement('details');card.className='cf-mobile-status-group';card.open=count<2;const summary=document.createElement('summary');const a=document.createElement('span'),b=document.createElement('small');a.textContent=title;b.textContent=val;summary.append(a,b);card.appendChild(summary);frag.appendChild(card);count++;return card;};
+  rows.forEach((row,i)=>{
+   const cells=[...row.querySelectorAll('td')];if(!cells.length)return;
+   const txt=cells.map(c=>c.textContent.replace(/\s+/g,' ').trim());
+   if(row.classList.contains('group-title')){group=addGroup(txt[1]||txt[0]||'분류',txt[2]||'');return;}
+   if(!group || row.classList.contains('section-total')||row.classList.contains('balance-row')||row.classList.contains('result-row')){group=addGroup(txt.slice(0,3).filter(Boolean).join(' · ')||'항목',txt[3]||txt[txt.length-1]||'');if(row.classList.contains('balance-row'))group.open=true;return;}
+   const item=document.createElement('div');item.className='cf-mobile-status-row';const name=document.createElement('span'),val=document.createElement('b');name.textContent=txt[2]||txt[1]||txt[0]||'-';val.textContent=txt[3]||txt[txt.length-1]||'—';item.append(name,val);group.appendChild(item);
+  });
+  host.replaceChildren(frag);byId('monthlyPage')?.classList.add('cf-mobile-status-ready');
+ }
+ function initStatus(){
+  const monthly=byId('monthlyPage');if(!monthly)return;
+  if(!byId('cfMobileStatusGroups')){const wrap=document.createElement('div');wrap.id='cfMobileStatusGroups';wrap.className='cf-mobile-status-view';wrap.style.display='none';monthly.querySelector('.tablecard')?.insertAdjacentElement('afterend',wrap);const btn=document.createElement('div');btn.className='cf-mobile-status-actions';btn.style.display='none';btn.innerHTML='<button type="button" id="cfMobileStatusToggle">원본 표로 보기</button>';wrap.insertAdjacentElement('beforebegin',btn);byId('cfMobileStatusToggle').addEventListener('click',()=>{const opened=monthly.classList.toggle('cf-mobile-raw-open');byId('cfMobileStatusToggle').textContent=opened?'항목별 카드 보기':'원본 표로 보기'});}
+  const table=byId('cashTable');if(table&&!table.dataset.cfMobileWatch){table.dataset.cfMobileWatch='1';let scheduled=false;new MutationObserver(ms=>{if(ms.some(m=>[...m.addedNodes].some(n=>n.nodeType===1 && ['TBODY','THEAD','TR'].includes(n.tagName)))){if(!scheduled){scheduled=true;idle(()=>{scheduled=false;collectStatusTable()})}}}).observe(table,{childList:true});}
+  collectStatusTable();
+ }
+ // Maintain the original forecast renderer and live postMessage bridge. Styling only.
+ const forecastCSS=`<style id="cf-mobile-forecast-presenter">@media(max-width:767px){html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}.top-main,.top-sub{display:none!important}.page{width:100%!important;min-width:0!important;max-width:100%!important;padding:12px 10px 40px!important}.toolbar{flex-wrap:wrap!important}.titlewrap{min-width:0!important}.titlewrap h1{font-size:19px!important}.jumpbar{max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;flex-wrap:nowrap!important;white-space:nowrap!important;scrollbar-width:thin!important}.jumpbar button{flex:0 0 auto!important}.risk-layout,.forecast-report-pair,.report-grid,.risk-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important}.risk-summary-side,.risk-alert-panel,.forecast-compare-slot,.cash-report-slot{min-width:0!important;max-width:100%!important}.risk-table-wrap,.cash-report-table-wrap,.table-wrap,.selected-month-wrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}.month-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.risk-table,.cash-report-table,.selected-month-table{min-width:590px!important}.detail-groups{grid-template-columns:1fr!important}.risk-card,.forecast-compare-card,.cash-report-card{width:100%!important;max-width:100%!important}.risk-note{font-size:11px!important}}@media(min-width:768px) and (max-width:1050px){.top-main,.top-sub{display:none!important}.risk-layout,.forecast-report-pair{grid-template-columns:1fr!important}.page{width:100%!important;min-width:0!important;max-width:100%!important;padding:16px!important}}</style>`;
+ function adaptForecastFrame(){
+  const fr=byId('forecastStatusFrame');if(!fr)return;
+  try{const doc=fr.contentDocument;if(doc?.head&&!doc.getElementById('cf-mobile-forecast-presenter'))doc.head.insertAdjacentHTML('beforeend',forecastCSS)}catch(e){/* cross-origin fallback: retain original */}
+ }
+ function initForecast(){const fr=byId('forecastStatusFrame');if(!fr||fr.dataset.cfMobileWatch)return;fr.dataset.cfMobileWatch='1';fr.addEventListener('load',adaptForecastFrame);adaptForecastFrame()}
+ function init(){initCalendar();initMiniCards();initExpected();initStatus();initForecast();}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
 </body>
 </html></textarea>
 <script id="work-record-module">
