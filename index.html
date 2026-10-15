@@ -884,6 +884,73 @@ body.frameby-auth-locked .github-auth-btn{
 #onlinePurchase, #onlinePurchase .card, #onlinePurchase .table-wrap {min-width: 0;max-width: 100%;}
 #onlinePurchase .table-wrap {overflow-x: auto;}
 </style>
+
+<style id="frameby-cash-shell-mobile-fix-20261015">
+/* 바깥 GitHub 화면의 배치만 보정. 원본 기능·로그인·데이터·다른 메뉴는 유지. */
+@media screen and (max-width:1100px){
+  html,body{max-width:100%!important;overscroll-behavior-x:none}
+  .app.integrated-content{box-sizing:border-box!important;min-width:0!important;overflow-x:clip!important}
+  .app.integrated-content>.main{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
+  .finance-workspace-nav{box-sizing:border-box!important;max-width:calc(100% + 32px)!important}
+  .finance-primary{min-width:0!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch}
+  .finance-primary::-webkit-scrollbar{display:none}
+  .finance-secondary{min-width:0!important;max-width:100%!important}
+  .finance-secondary .module-tabs{min-width:0!important;overscroll-behavior-x:contain!important}
+  #cashSecondaryMenu{min-width:0!important;}
+  #cashSecondaryMenu .cash-secondary-tools{display:flex!important;flex-wrap:nowrap!important;min-width:0!important;max-width:100%!important;justify-content:flex-end!important}
+  #cashflowHost{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+  #cashflowFrame{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;overscroll-behavior-x:contain}
+  /* 자금수지에 들어와 있는 동안 부모는 고정하고 iframe 하나에서만 세로 스크롤 */
+  html:has(body[data-active-module="cash"]),body[data-active-module="cash"]{height:100%!important;overflow-y:hidden!important;overflow-x:hidden!important}
+  body[data-active-module="cash"] .app.integrated-content{height:100dvh!important;min-height:0!important;overflow:hidden!important}
+  body[data-active-module="cash"] .app.integrated-content>.main{height:100dvh!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding-bottom:0!important}
+  body[data-active-module="cash"] .finance-workspace-nav{flex:0 0 auto!important}
+  body[data-active-module="cash"] #cashflowHost.active{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow:hidden!important}
+  body[data-active-module="cash"] #cashflowFrame{height:100%!important;min-height:0!important;max-height:100%!important;border:0}
+  /* 인증 상태에서는 게이트를 표시해야 하므로 프레임 잠금 규칙만 적용되지 않게 처리 */
+  body.frameby-auth-locked .app.integrated-content{visibility:hidden!important}
+  #githubAuthGate{left:var(--frameby-hub-left,0px)!important;right:0!important;width:auto!important;box-sizing:border-box!important;padding:16px!important;overflow:auto!important;z-index:2147483000!important}
+  #githubAuthGate .github-auth-card{box-sizing:border-box!important;width:100%!important;max-width:410px!important;min-width:0!important;margin:0 auto!important;padding:clamp(18px,5vw,30px)!important;overflow-wrap:anywhere!important}
+  #githubAuthGate .github-auth-card *{max-width:100%!important;min-width:0!important;overflow-wrap:anywhere!important}
+}
+@media screen and (max-width:767px){
+  /* 전체 메뉴는 그 행 안에서만 옆으로 넘기고 화면 자체는 이동하지 않음 */
+  .app.integrated-content>.main{padding-left:8px!important;padding-right:8px!important}
+  .finance-workspace-nav{margin-left:-8px!important;margin-right:-8px!important;width:auto!important;max-width:none!important;margin-bottom:6px!important;overflow:visible!important}
+  .finance-primary{padding:0 49px 0 7px!important;min-height:44px!important;gap:3px!important;overflow-x:auto!important;overflow-y:hidden!important}
+
+  /* 아이폰에서도 상위 메뉴가 잘리지 않도록 기존 메뉴 버튼을 그대로 드롭다운으로 표시. */
+  #framebyMobileModuleToggle{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;margin:4px 0!important;width:calc(100% - 49px)!important;min-width:0!important;min-height:38px!important;padding:0 12px!important;background:#fff!important;border:1px solid #dce4ef!important;border-radius:8px!important;color:#1d3152!important;font-size:13px!important;font-weight:850!important;text-align:left!important;cursor:pointer!important}
+  .finance-primary:not(.is-open){display:none!important}
+  .finance-primary.is-open{box-sizing:border-box!important;position:absolute!important;left:8px!important;right:8px!important;top:47px!important;z-index:130!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:3px!important;width:auto!important;max-height:min(70dvh,420px)!important;padding:8px!important;overflow-y:auto!important;overflow-x:hidden!important;border:1px solid #dce4ef!important;border-radius:11px!important;background:#fff!important;box-shadow:0 18px 30px rgba(16,36,62,.17)!important}
+  .finance-primary.is-open .finance-primary-btn{box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:40px!important;justify-content:flex-start!important;text-align:left!important;padding:7px 12px!important;margin:0!important}
+  .finance-primary.is-open .finance-primary-btn.frameby-no-access,.finance-primary.is-open .finance-primary-btn[hidden]{display:none!important}
+  .finance-primary-btn{flex:0 0 auto!important;width:auto!important;min-width:82px!important;height:38px!important;padding:0 9px!important;margin:3px 0!important;font-size:12px!important}
+  .frameby-zoom-control{position:absolute!important;top:6px!important;right:7px!important;z-index:120!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;width:auto!important;max-width:none!important;overflow:visible!important}
+  .frameby-zoom-control #framebyMobileZoomToggle{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:32px!important;min-width:32px!important;height:32px!important;padding:0!important;font-size:17px!important;border-radius:8px!important}
+  .frameby-zoom-control .frameby-zoom-actions{display:none!important;position:absolute!important;top:37px!important;right:0!important;align-items:center!important;gap:4px!important;padding:7px!important;border-radius:10px!important;border:1px solid #dce4ef!important;background:#fff!important;box-shadow:0 12px 28px rgba(20,34,58,.17)!important;white-space:nowrap!important;z-index:121!important}
+  .frameby-zoom-control.is-open .frameby-zoom-actions{display:flex!important}
+  .frameby-zoom-control .frameby-zoom-actions button{height:33px!important;min-width:34px!important;padding:0 8px!important;font-size:12px!important}
+  .frameby-zoom-control .frameby-zoom-actions .frameby-zoom-value{min-width:52px!important}
+  /* 사용 중인 자금수지 메뉴는 한 줄 3등분, 연도/새로고침은 다음 줄 오른쪽 */
+  #cashSecondaryMenu{padding:6px 8px!important;gap:6px!important;flex-wrap:wrap!important}
+  #cashSecondaryMenu #cashModuleTabs{display:grid!important;width:100%!important;flex:1 1 100%!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;overflow:visible!important}
+  #cashSecondaryMenu #cashModuleTabs .module-tab{box-sizing:border-box!important;min-width:0!important;width:100%!important;flex:1 1 auto!important;height:33px!important;font-size:12px!important;padding:0 4px!important}
+  #cashSecondaryMenu .cash-secondary-tools{width:100%!important;margin:0!important;padding:0!important;justify-content:flex-end!important;gap:7px!important}
+  #cashSecondaryMenu .cash-year-control{min-width:0!important}
+  #cashSecondaryMenu #cashGlobalYear{max-width:105px!important;height:32px!important;padding:0 6px!important;font-size:12px!important}
+  #cashSecondaryMenu #cashOuterRefreshBtn{height:32px!important;min-height:32px!important;padding:0 9px!important;font-size:11px!important}
+  #cashflowHost{padding:0!important;}
+  /* 사이드바가 남아있는 모바일에서도 인증 카드가 본문 영역 안에서 완전히 보이도록 */
+  #githubAuthGate{align-items:center!important;justify-content:center!important;padding:10px!important}
+}
+@media screen and (min-width:768px){
+  #framebyMobileModuleToggle{display:none!important}
+  #framebyMobileZoomToggle{display:none!important}
+  .frameby-zoom-actions{display:flex!important;align-items:center!important;gap:4px!important}
+}
+@media print{.frameby-zoom-control .frameby-zoom-actions{display:none!important}}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -12670,8 +12737,8 @@ function ensureDetailModal(){
 
 <style id="frameby-cashflow-responsive-only-20261015">
 /* 화면 너비 대응 전용: 데이터·계산·조회·저장·팝업 JS와 인쇄 스타일 변경 없음.
-   1400px 이상은 기존 PC 화면 그대로 유지. iframe viewport 너비로 적용. */
-@media screen and (max-width:1399px){
+   1200px 이상인 자금수지 내부 화면은 기존 PC 배치를 유지. iframe viewport 너비로 적용. */
+@media screen and (max-width:1199px){
   #calendarPage .content-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;min-width:0!important}
   #calendarPage .calendar-card{min-width:0!important;width:100%!important;overflow:hidden!important}
   #calendarSubview .calendar{width:100%!important;min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
@@ -12687,17 +12754,14 @@ function ensureDetailModal(){
   .report-table-wrap,.table-scroll,.expected-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
 }
 @media screen and (min-width:768px) and (max-width:1199px){
-  #calendarSubview .calendar{grid-auto-rows:minmax(149px,auto)!important}
-  #calendarSubview .day{display:flex!important;flex-direction:column!important;min-height:149px!important;height:auto!important;overflow:hidden!important;padding:5px!important}
-  #calendarSubview .day .date{min-height:22px!important;height:22px!important;flex:0 0 22px!important;margin:0!important}
+  #calendarSubview .calendar{grid-auto-rows:minmax(140px,auto)!important}
+  #calendarSubview .day{min-height:140px!important;height:auto!important;overflow:hidden!important}
   #calendarSubview .day .detail{display:none!important}
-  #calendarSubview .day .cash-section{flex:0 0 auto!important;height:auto!important;min-height:0!important;overflow:hidden!important;margin:0!important}
-  #calendarSubview .day .sumrow{display:flex!important;flex:0 0 auto!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;height:auto!important;min-height:0!important;margin:0!important}
-  #calendarSubview .day .sumrow .label{display:none!important}
-  #calendarSubview .day .sumrow .money{font-size:clamp(9px,1.1vw,11px)!important;text-align:left!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;width:100%!important}
-  #calendarSubview .day .dayfoot{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:repeat(4,auto)!important;flex:0 0 auto!important;height:auto!important;min-height:0!important;margin-top:3px!important;gap:0!important;padding:3px 0 0!important}
-  #calendarSubview .day .dayfoot>*{display:block!important;height:auto!important;min-height:0!important;font-size:9px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  #calendarSubview .day .dayfoot>b{font-weight:800!important;font-size:10px!important}
+  #calendarSubview .day .sumrow{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:1px!important;height:auto!important;min-height:0!important}
+  #calendarSubview .day .sumrow .label{font-size:10px!important}
+  #calendarSubview .day .sumrow .money{font-size:clamp(9px,1.1vw,12px)!important;text-align:left!important;overflow:hidden;text-overflow:ellipsis}
+  #calendarSubview .day .dayfoot{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto!important;height:auto!important;min-height:0!important;gap:0!important;font-size:10px!important}
+  #calendarSubview .day .dayfoot>*{height:auto!important;min-height:0!important;justify-content:flex-start!important;white-space:normal!important;overflow-wrap:anywhere!important}
   #calendarPage .side .metric-card{min-width:0!important}
   .report-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -12737,8 +12801,6 @@ function ensureDetailModal(){
   #calendarSubview .day .cash-section .sumrow.income .money{color:var(--blue)!important}
   #calendarSubview .day .cash-section .sumrow.expense .money{color:var(--red)!important}
   #calendarSubview .day.muted .cash-section{display:none!important}
-  #calendarSubview .day .cash-section{display:none!important}
-  #calendarSubview .day:not(.muted)::after{content:'›';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:16px;color:#a1adbc;line-height:1}
   #calendarSubview .calendar-card:after{content:'날짜를 누르면 입금·출금·경상수지·현잔액과 상세내역을 확인할 수 있습니다.';display:block;padding:10px 12px;font-size:12px;line-height:1.5;color:#66758b;background:#fbfcfe;border-top:1px solid var(--line)}
   #monthlyPage .toolbar .titlewrap,#reportPage .toolbar .titlewrap{min-width:0!important;width:100%!important}
   .filterbar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:11px!important}
@@ -12761,6 +12823,28 @@ function ensureDetailModal(){
   .cf-detail-modal{width:100%!important;max-width:calc(100vw - 12px)!important}
   .cf-detail-table-wrap,.cf-detail-balance-section{overflow-x:auto!important;max-width:100%!important}
   .cf-detail-total-balance{flex-wrap:wrap!important}
+}
+</style>
+
+<style id="frameby-cash-iframe-mobile-fix-20261015">
+/* srcdoc에만 적용: 통합 메뉴 이중표시 방지 + 프레임 안쪽 좌우 이동 차단 */
+html,body{max-width:100%!important;overflow-x:hidden!important;overscroll-behavior-x:none}
+html body .app>.topbar{display:none!important}
+@media screen and (max-width:1100px){
+  .app,.page{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
+  #calendarPage,#monthlyPage,#reportPage{overflow-x:clip!important}
+  #calendarPage .content-grid,#calendarPage .calendar-card,#calendarPage .side,#calendarSubview,.calendar-subview{min-width:0!important;max-width:100%!important}
+  /* 표·예상지출만 해당 카드 내부에서 가로 스크롤 */
+  .table-scroll,.report-table-wrap,.expected-wrap,#expectedExpenseSubview .expected-wrap{max-width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch}
+  .forecast-status-frame{display:block!important;min-width:0!important;max-width:100%!important;width:100%!important}
+  .cf-detail-backdrop{box-sizing:border-box!important;max-width:100vw!important;overflow-x:hidden!important}
+}
+@media screen and (max-width:767px){
+  #calendarPage,#monthlyPage,#reportPage{padding-left:8px!important;padding-right:8px!important}
+  .calendar-wrap,#calendarSubview .calendar-card{max-width:100%!important;min-width:0!important;overflow:hidden!important}
+  #calendarSubview .calendar{width:100%!important;min-width:0!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  #calendarSubview .day{min-width:0!important;overflow:hidden!important}
+  .report-sheet,.report-main,.report-left,.report-right,.tablecard{min-width:0!important;max-width:100%!important}
 }
 </style>
 </body>
@@ -13399,7 +13483,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const sidebar=detectHubSidebarWidth();
     const desiredLeft=Math.max(naturalLeft,sidebar);
     const extraLeft=Math.max(0,desiredLeft-naturalLeft);
-    const available=Math.max(320,(window.innerWidth||document.documentElement.clientWidth||0)-desiredLeft);
+    /* 모바일에서는 사이드바를 뺀 실제 남은 너비만 사용. 320px 강제는 화면 밖 가로 넘침을 만듭니다. */
+    const available=Math.max(0,(window.innerWidth||document.documentElement.clientWidth||0)-desiredLeft);
     integrated.style.setProperty('margin-left',extraLeft+'px','important');
     integrated.style.setProperty('width',available+'px','important');
     integrated.style.setProperty('max-width',available+'px','important');
@@ -13600,5 +13685,68 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   #researchHost .research-frame{width:100%;min-width:0;height:calc(100dvh - 190px);min-height:510px}
 }
 </style>
+
+<script id="frameby-cash-mobile-zoom-ui-20261015">
+(function(){
+  'use strict';
+  function installMobileNavigation(){
+    const host=document.querySelector('.finance-workspace-nav'),primary=host?.querySelector('.finance-primary');
+    if(!host||!primary||document.getElementById('framebyMobileModuleToggle'))return false;
+    const toggle=document.createElement('button');
+    toggle.id='framebyMobileModuleToggle';toggle.type='button';
+    toggle.setAttribute('aria-label','전체 업무 메뉴 펼치기');toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-controls','framebyMobilePrimaryMenu');
+    primary.id='framebyMobilePrimaryMenu';
+    host.insertBefore(toggle,primary);
+    const close=()=>{primary.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')};
+    const current=()=>primary.querySelector('.finance-primary-btn.active:not(.frameby-no-access)')||primary.querySelector('.finance-primary-btn[aria-selected="true"]:not(.frameby-no-access)');
+    const refresh=()=>{toggle.textContent='☰  '+(current()?.textContent?.trim()||'업무 메뉴')+'  ▾'};
+    toggle.addEventListener('click',e=>{e.stopPropagation();const on=!primary.classList.contains('is-open');primary.classList.toggle('is-open',on);toggle.setAttribute('aria-expanded',String(on))});
+    primary.addEventListener('click',e=>{if(e.target.closest('.finance-primary-btn'))close()});
+    document.addEventListener('click',e=>{if(!host.contains(e.target))close()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    window.addEventListener('resize',()=>{if(window.innerWidth>767)close()});
+    new MutationObserver(refresh).observe(primary,{attributes:true,subtree:true,attributeFilter:['class','aria-selected','hidden']});
+    refresh();
+    return true;
+  }
+  function trackCashModule(){
+    const cash=document.getElementById('cashflowHost');
+    if(!cash||cash.dataset.cashViewportObserved)return false;
+    cash.dataset.cashViewportObserved='1';
+    const sync=()=>{document.body.dataset.activeModule=cash.classList.contains('active')?'cash':'other'};
+    new MutationObserver(sync).observe(cash,{attributes:true,attributeFilter:['class']});
+    sync();
+    return true;
+  }
+  function install(){
+    installMobileNavigation();trackCashModule();
+    const wrap=document.getElementById('framebyZoomControl');
+    if(!wrap||wrap.dataset.mobileZoomInstalled)return false;
+    const original=['framebyZoomOut','framebyZoomValue','framebyZoomIn'].map(id=>document.getElementById(id));
+    if(original.some(x=>!x))return false;
+    wrap.dataset.mobileZoomInstalled='1';
+    const toggle=document.createElement('button');
+    toggle.type='button';toggle.id='framebyMobileZoomToggle';toggle.textContent='⚙';
+    toggle.setAttribute('aria-label','화면 크기 조절');toggle.setAttribute('aria-controls','framebyMobileZoomActions');
+    toggle.setAttribute('aria-expanded','false');
+    const actions=document.createElement('div');actions.id='framebyMobileZoomActions';actions.className='frameby-zoom-actions';
+    original.forEach(btn=>actions.appendChild(btn)); // 노드와 기존 이벤트 핸들러는 그대로
+    wrap.appendChild(toggle);wrap.appendChild(actions);
+    const close=()=>{wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')};
+    toggle.addEventListener('click',e=>{e.stopPropagation();const open=!wrap.classList.contains('is-open');wrap.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open))});
+    actions.addEventListener('click',()=>{if(window.matchMedia('(max-width:767px)').matches)close()});
+    document.addEventListener('click',e=>{if(!wrap.contains(e.target))close()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    window.addEventListener('resize',()=>{if(window.innerWidth>767)close()});
+    return true;
+  }
+  if(!install()){
+    const mo=new MutationObserver(()=>{installMobileNavigation();trackCashModule();if(install())mo.disconnect()});
+    mo.observe(document.documentElement,{childList:true,subtree:true});
+    document.addEventListener('DOMContentLoaded',()=>{installMobileNavigation();trackCashModule();if(install())mo.disconnect()},{once:true});
+  }
+})();
+</script>
 </body>
 </html>
