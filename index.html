@@ -13295,6 +13295,299 @@ html body .app>.topbar{display:none!important}
   }
 }
 </style>
+
+<style id="fb-touch-cash-ux-20261019">
+/* GitHub 자금수지 srcdoc 화면 전용. 업무 데이터 / 원본 표 / 저장로직과 분리. */
+@media screen and (max-width:1199px) and (pointer:coarse){
+ html,body,.app{width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:clip!important}
+ .page{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+ #calendarPage .content-grid,#calendarPage .side{min-width:0!important;max-width:100%!important}
+ #calendarPage .content-grid{grid-template-columns:minmax(0,1fr)!important}
+ #calendarPage .side{grid-template-columns:minmax(0,1fr)!important;display:grid!important}
+ #calendarPage .side>.card{min-width:0!important;width:100%!important;position:static!important}
+ #calendarPage .toolbar .titlewrap p,#monthlyPage .toolbar .titlewrap p,#reportPage .toolbar .titlewrap p{font-size:12px;line-height:1.5}
+ #monthlyPage .table-scroll,#reportPage .report-table-wrap{max-width:100%;min-width:0}
+ #calendarPage .calendar-head,#calendarPage .calendar{grid-template-columns:repeat(7,minmax(0,1fr))!important;min-width:0!important}
+ #calendarPage .day{min-width:0!important}
+ #calendarPage .cf-mobile-today{display:block!important;position:sticky;top:0;z-index:22;background:#fff;border:1px solid #dbe5f3;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 6px 24px rgba(24,47,92,.09)}
+ #calendarPage .cf-mobile-today-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+ #calendarPage .cf-mobile-today-head strong{font-size:16px;color:#1d2b45}
+ #calendarPage .cf-mobile-today-head small{font-size:11px;color:#677b99}
+ #calendarPage .cf-mobile-today-balance{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:8px 10px;background:#edf3ff;border-radius:9px}
+ #calendarPage .cf-mobile-today-balance span{color:#4c6386;font-size:12px;font-weight:800}
+ #calendarPage .cf-mobile-today-balance b{font-size:clamp(18px,4.5vw,26px);color:#245bd0;overflow-wrap:anywhere;text-align:right}
+ #calendarPage .cf-mobile-today-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}
+ #calendarPage .cf-mobile-today-metric{padding:8px 6px;border:1px solid #e3eaf4;border-radius:9px;min-width:0}
+ #calendarPage .cf-mobile-today-metric span{display:block;color:#718096;font-size:10.5px;font-weight:750}
+ #calendarPage .cf-mobile-today-metric b{display:block;margin-top:4px;color:#1c304c;font-size:clamp(11px,2.9vw,16px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+ #calendarPage .cf-mobile-today-metric.in b{color:#2165d5}
+ #calendarPage .cf-mobile-today-metric.out b{color:#c84851}
+ #calendarPage .cf-mobile-today-msg{font-size:10px;color:#8592a5;margin-top:7px}
+ #calendarPage .cf-mobile-daily-summary{display:none!important}
+ #calendarSubview .day{cursor:pointer}
+ #calendarSubview .day.cf-mobile-selected:not(.today) .num{background:transparent!important;color:inherit!important}
+ #calendarSubview .day.cf-mobile-selected{outline:0!important;background:inherit!important}
+ #calendarSubview .day.today{background:#eff5ff!important}
+ #expectedExpenseSubview .expected-month-grid,#expectedExpenseSubview .expected-wrap{max-width:100%!important;min-width:0!important}
+ #expectedExpenseSubview .expected-month-card{max-width:100%!important}
+ #expectedExpenseSubview:not(.fb-show-old-expenses) .expected-month-card tr.fb-expense-past-row{display:none!important}
+ #expectedExpenseSubview #fbExpectedPastToggle{min-height:35px;padding:7px 9px;border:1px solid #d2dff0;background:#fff;color:#395c8d;border-radius:8px;font-size:11px;font-weight:850}
+
+ #monthlyPage .cf-mobile-column-picker{display:flex;align-items:center;justify-content:space-between;gap:9px;margin:12px 0 8px;padding:10px 11px;border:1px solid #e0e8f3;border-radius:11px;background:white}
+ #monthlyPage .cf-mobile-column-picker label{font-size:12px;color:#536783;font-weight:800}
+ #monthlyPage .cf-mobile-column-picker select{max-width:65%;min-width:0;font-size:12px;padding:9px;border:1px solid #dce5f2;border-radius:8px}
+ #monthlyPage .cf-mobile-status-row{align-items:flex-start!important;font-size:12px!important}
+ #monthlyPage .cf-mobile-status-row span{min-width:0;overflow-wrap:anywhere}
+ #monthlyPage .cf-mobile-status-row b{flex:0 0 auto;font-size:12px;text-align:right}
+ #monthlyPage.fb-mobile-monthly-ready .tablecard{display:none!important}
+ #monthlyPage.fb-mobile-monthly-ready.fb-mobile-raw-open .tablecard{display:block!important}
+ #monthlyPage.fb-mobile-monthly-ready.fb-mobile-raw-open .cf-mobile-status-view{display:none!important}
+ #reportPage .fb-report-mobile-cards{display:block!important;margin:13px 0 20px}
+ #reportPage .fb-report-group{margin:9px 0;border:1px solid #e1e8f2;border-radius:11px;overflow:hidden;background:#fff}
+ #reportPage .fb-report-group>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:#f0f5fe;font-size:13px;font-weight:850;color:#29466f;cursor:pointer;list-style:none}
+ #reportPage .fb-report-group>summary::-webkit-details-marker{display:none}
+ #reportPage .fb-report-item{padding:11px 12px;border-top:1px solid #edf1f5}
+ #reportPage .fb-report-item-line{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+ #reportPage .fb-report-item-line span{min-width:0;font-size:12px;overflow-wrap:anywhere}
+ #reportPage .fb-report-item-line b{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+ #reportPage .fb-report-item-note{font-size:10px;color:#6c7b91;text-align:right;margin-top:4px}
+ #reportPage .fb-report-raw-toggle{width:100%;margin:11px 0 5px;min-height:40px;border:1px solid #cedcf2;border-radius:9px;background:#fff;color:#245cca;font-size:12px;font-weight:850}
+ #reportPage.fb-mobile-report-ready .report-table-wrap{display:none!important}
+ #reportPage.fb-mobile-report-ready.fb-mobile-report-raw .report-table-wrap{display:block!important;overflow-x:auto!important}
+ #reportPage.fb-mobile-report-ready.fb-mobile-report-raw .fb-report-mobile-cards{display:none!important}
+ #reportPage .report-summary .cell .value{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+ .cf-detail-backdrop{z-index:12000!important}
+}
+@media screen and (max-width:767px) and (pointer:coarse){
+ #calendarPage .toolbar .titlewrap{display:none!important}
+ #calendarPage .toolbar{gap:6px!important;margin-bottom:9px!important}
+ #calendarPage .toolbar .segment{order:0!important}
+ #calendarPage .toolbar .monthCtl{order:1!important}
+ #calendarPage .content-grid{gap:10px!important}
+ #calendarPage .cf-mobile-today{padding:12px!important}
+ #calendarSubview .calendar{grid-auto-rows:minmax(56px,auto)!important}
+ #calendarSubview .day{min-height:56px!important;height:56px!important}
+ #expectedExpenseSubview .expected-month-card{border-radius:12px!important}
+ #expectedExpenseSubview .expected-headline-copy .expected-year-label{line-height:1.4}
+ #monthlyPage .filterbar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #monthlyPage .filterbar .field{min-width:0!important}
+ #monthlyPage .filterbar .field input,#monthlyPage .filterbar .field select{width:100%!important;min-width:0!important}
+ #reportPage .report-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #reportPage .report-month-block{min-width:0!important}
+}
+@media screen and (min-width:768px) and (max-width:1199px) and (pointer:coarse){
+ #calendarPage .content-grid{gap:14px!important}
+ #calendarPage .side{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #expectedExpenseSubview .expected-wrap{overflow-x:hidden!important}
+ #expectedExpenseSubview .expected-month-grid{display:block!important;min-width:0!important;width:100%!important}
+ #expectedExpenseSubview .expected-month-card{display:none!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important}
+ #expectedExpenseSubview .expected-month-card.cf-mobile-active-month{display:block!important}
+ #expectedExpenseSubview .cf-mobile-expected-monthbar{display:flex!important;align-items:center;gap:12px;padding:10px}
+ #expectedExpenseSubview .cf-mobile-expected-monthbar select{min-width:120px}
+ #reportPage .report-summary{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media print{#calendarPage .cf-mobile-today,#monthlyPage .cf-mobile-column-picker,#reportPage .fb-report-mobile-cards,#reportPage .fb-report-raw-toggle{display:none!important}}
+</style>
+
+
+<script id="fb-touch-cash-ux-js-20261019">
+/* 원본 조회/저장/계산 함수는 호출하거나 바꾸지 않는다. 렌더링된 내용을 읽어 모바일 화면에 별도 표시한다. */
+(()=>{
+ 'use strict';
+ const touch=()=>matchMedia('(max-width:1199px) and (pointer:coarse)').matches;
+ const el=id=>document.getElementById(id);
+ const money=v=>{const n=Number(v);return Number.isFinite(n)?n.toLocaleString('ko-KR')+'원':'—';};
+ const text=v=>String(v??'').replace(/\s+/g,' ').trim();
+ const mk=(tag,cls,content)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(content!=null)e.textContent=content;return e};
+ // 오늘 현황: 선택일이 아니라 Seoul 현재일의 원본 실제 일일자금수지 데이터를 사용한다.
+ function todayKey(){
+  const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const q=Object.fromEntries(p.filter(x=>['year','month','day'].includes(x.type)).map(x=>[x.type,x.value]));
+  return q.year+'-'+q.month+'-'+q.day;
+ }
+ function initToday(){
+  const root=el('calendarSubview');if(!root||el('fbMobileToday'))return;
+  const card=mk('section','cf-mobile-today');card.id='fbMobileToday';card.style.display='none';
+  card.innerHTML='<div class="cf-mobile-today-head"><strong>오늘 자금현황</strong><small id="fbTodayDate">—</small></div><div class="cf-mobile-today-balance"><span>현재 잔액</span><b id="fbTodayBalance">—</b></div><div class="cf-mobile-today-metrics"><div class="cf-mobile-today-metric in"><span>입금</span><b id="fbTodayIncome">—</b></div><div class="cf-mobile-today-metric out"><span>지출</span><b id="fbTodayExpense">—</b></div><div class="cf-mobile-today-metric"><span>경상수지</span><b id="fbTodayCash">—</b></div></div><div class="cf-mobile-today-msg" id="fbTodayMsg">실제 일별자금수지 기준</div>';
+  root.insertBefore(card,root.firstChild);
+  const update=()=>{
+   if(!touch())return;
+   const today=todayKey(),live=window.__CF_LIVE__||{},day=live.daily?.[today];
+   const y=Number(today.slice(0,4)),m=Number(today.slice(5,7)),d=Number(today.slice(8,10));
+   el('fbTodayDate').textContent=`${y}년 ${m}월 ${d}일`;
+   const vals=['Income','Expense','Cash','Balance'];
+   const keys=['income','expense','cash','balance'];
+   for(let i=0;i<keys.length;i++){
+    const target=el('fbToday'+vals[i]);const raw=day?.[keys[i]];
+    target.textContent=(raw==null||raw==='')?'—':money(raw);
+   }
+   el('fbTodayMsg').textContent=day?'실제 일별자금수지 기준 · 날짜를 누르면 상세내역을 볼 수 있습니다.':'오늘 데이터가 조회되지 않았습니다. 새로고침 후 확인해 주세요.';
+  };
+  update();
+  const cal=el('calendar');if(cal){new MutationObserver(()=>{if(touch())update()}).observe(cal,{childList:true});}
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
+  window.addEventListener('message',e=>{if(e.data?.type==='frameby-cash-refresh'||e.data?.type==='frameby-cash-year')setTimeout(update,300)});
+  setInterval(()=>{if(touch()&&!document.hidden)update()},60000);
+ }
+ // 모바일 원본 표: 세로 탐색하면서 보고 싶은 월/일자 열만 선택한다.
+ function initMonthly(){
+  const table=el('cashTable'),page=el('monthlyPage');if(!table||!page||el('fbMobileColumnBar'))return;
+  const bar=mk('div','cf-mobile-column-picker');bar.id='fbMobileColumnBar';bar.style.display='none';
+  const label=mk('label','', '표시 금액 기준');label.htmlFor='fbMobileColumn';const select=document.createElement('select');select.id='fbMobileColumn';bar.append(label,select);
+  const host=el('cfMobileStatusGroups');(host||page.querySelector('.tablecard'))?.insertAdjacentElement('beforebegin',bar);
+  let signature='';
+  function paint(){
+   if(!touch())return;
+   const hdr=[...table.querySelectorAll('thead th')].map(th=>text(th.textContent));
+   const rows=[...table.querySelectorAll('tbody tr')];if(!hdr.length||!rows.length)return;
+   const key=hdr.join('|');
+   if(key!==signature){
+    const prev=select.options[select.selectedIndex]?.textContent||'';select.replaceChildren();
+    hdr.slice(3).forEach((h,j)=>{const op=document.createElement('option');op.value=String(j+3);op.textContent=h||`금액 ${j+1}`;select.appendChild(op)});
+    const matched=[...select.options].find(o=>o.textContent===prev);
+    select.value=matched?.value||'3';signature=key;
+   }
+   if(!el('cfMobileStatusGroups'))return;
+   const view=el('cfMobileStatusGroups'),opened=new Set([...view.querySelectorAll('details[open]')].map(x=>x.dataset.fbGroup));
+   view.replaceChildren();let current=null,idx=0;
+   const col=Number(select.value)||3;
+   const createGroup=(name,amount,forceOpen=false)=>{
+    const det=mk('details','cf-mobile-status-group');det.dataset.fbGroup=String(idx++);det.open=forceOpen||opened.has(det.dataset.fbGroup)||(!opened.size&&idx<3);
+    const summary=mk('summary');summary.append(mk('span','',name),mk('small','',amount));det.append(summary);view.append(det);return det;
+   };
+   for(const tr of rows){
+    if(tr.style.display==='none')continue;
+    const cells=[...tr.querySelectorAll('td')];if(!cells.length)continue;
+    const vals=cells.map(c=>text(c.textContent));const raw=vals[col]??'—';
+    if(tr.classList.contains('group-title')){current=createGroup(vals[1]||vals[0]||'구분',raw);continue}
+    if(!current||tr.classList.contains('balance-row')||tr.classList.contains('result-row')||tr.classList.contains('section-total')){
+     const name=[vals[0],vals[1],vals[2]].filter(Boolean).join(' · ')||'합계';current=createGroup(name,raw,tr.classList.contains('balance-row'));continue;
+    }
+    const item=mk('div','cf-mobile-status-row');
+    const name=vals[2]||vals[1]||vals[0]||'세부항목';item.append(mk('span','',name),mk('b','',raw));current.append(item);
+   }
+   page.classList.add('fb-mobile-monthly-ready');
+  }
+  let task=0;const schedule=()=>{if(task)return;task=requestAnimationFrame(()=>{task=0;paint()})};
+  new MutationObserver(schedule).observe(table,{childList:true,subtree:false});
+  select.addEventListener('change',schedule);
+  el('applyFilter')?.addEventListener('click',()=>setTimeout(schedule,100));
+  el('backMonthly')?.addEventListener('click',()=>setTimeout(schedule,100));
+  document.addEventListener('click',e=>{if(e.target.closest('.group-toggle,.month-link'))setTimeout(schedule,100)});
+  setTimeout(paint,100);
+ }
+ // 보고서는 원본 표를 그대로 유지하고 읽기용 접이식 목록만 추가한다.
+ function initReport(){
+  const container=el('reportContainer'),page=el('reportPage');if(!container||!page)return;
+  function paint(){
+   if(!touch())return;
+   const blocks=[...container.querySelectorAll('.report-month-block')];
+   for(const block of blocks){
+    const original=block.querySelector('.report-table-wrap');if(!original)continue;
+    block.querySelector('.fb-report-mobile-cards')?.remove();block.querySelector('.fb-report-raw-toggle')?.remove();
+    const wrap=mk('div','fb-report-mobile-cards');wrap.style.display='none';let current=null,counter=0;
+    const mkGroup=(title,amount)=>{
+     const d=mk('details','fb-report-group');d.open=counter++<2;
+     const h=mk('summary');h.append(mk('span','',title),mk('b','',amount));d.append(h);wrap.append(d);return d;
+    };
+    for(const tr of original.querySelectorAll('tbody tr')){
+     const td=[...tr.querySelectorAll('td')].map(x=>text(x.textContent));if(!td.length)continue;
+     if(tr.classList.contains('report-group-row')){current=mkGroup(td[0]||'분류',td[2]||'—');continue}
+     if(!current)current=mkGroup(td[0]||'기타',td[2]||'—');
+     const item=mk('div','fb-report-item');const line=mk('div','fb-report-item-line');
+     line.append(mk('span','',td[1]||td[0]||'항목'),mk('b','',td[2]||'—'));item.append(line);
+     const note=[td[3]?'수입액 대비 '+td[3]:'',td[4]?'지출액 대비 '+td[4]:''].filter(Boolean).join(' · ');
+     if(note)item.append(mk('div','fb-report-item-note',note));current.append(item);
+    }
+    original.insertAdjacentElement('beforebegin',wrap);
+    const btn=mk('button','fb-report-raw-toggle','원본 표 보기');btn.type='button';
+    btn.addEventListener('click',()=>{const on=page.classList.toggle('fb-mobile-report-raw');btn.textContent=on?'항목별 목록 보기':'원본 표 보기'});
+    wrap.insertAdjacentElement('afterend',btn);
+   }
+   page.classList.add('fb-mobile-report-ready');
+  }
+  let pending=0;new MutationObserver(()=>{if(pending)return;pending=requestAnimationFrame(()=>{pending=0;paint()})}).observe(container,{childList:true,subtree:false});
+  setTimeout(paint,100);
+ }
+ // 별도 예측 iframe은 동일한 데이터를 사용하면서 보고서 순서·표 가독성만 변경한다.
+ const forecastStyle=`<style id="fb-touch-forecast-ux-20261019">
+ @media screen and (max-width:1199px) and (pointer:coarse){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:clip!important}
+  main.page{width:100%!important;min-width:0!important;max-width:100%!important;display:flex!important;flex-direction:column!important;padding:12px!important;gap:12px!important}
+  main.page>.toolbar{order:0!important;min-width:0!important;margin:0!important}
+  main.page>.toolbar .titlewrap{display:none!important}
+  #forecastReportPair{order:1!important;display:flex!important;flex-direction:column!important;max-width:100%!important;min-width:0!important;gap:12px!important}
+  #forecastReportPair>.forecast-compare-slot,#forecastReportPair>.cash-report-slot{width:100%!important;max-width:100%!important;min-width:0!important;flex:1 1 auto!important}
+  #forecastCompareCard{width:100%!important;max-width:100%!important;min-width:0!important;padding:14px!important}
+  .forecast-compare-wrap{width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important}
+  .forecast-compare-table.vertical{width:100%!important;max-width:100%!important;table-layout:fixed!important;min-width:0!important}
+  .forecast-compare-table.vertical tr{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;width:100%!important}
+  .forecast-compare-table.vertical tr th,.forecast-compare-table.vertical tr td{width:auto!important;min-width:0!important;max-width:100%!important;padding:12px 8px!important;overflow-wrap:anywhere!important;white-space:normal!important}
+  .forecast-compare-table.vertical tr th{font-size:11px!important;text-align:left!important}
+  .forecast-compare-table.vertical tr td{font-size:clamp(13px,3.2vw,17px)!important;text-align:right!important;font-variant-numeric:tabular-nums!important}
+  #jumpbar{order:2!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+  .risk-card{order:3!important;width:100%!important;min-width:0!important}
+  .risk-layout{grid-template-columns:minmax(0,1fr)!important;min-width:0!important;gap:10px!important}
+  .risk-summary-side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important}
+  .risk-summary-item{min-width:0!important;padding:10px!important}
+  .risk-summary-item .v{font-size:clamp(13px,3.3vw,17px)!important;overflow-wrap:anywhere!important}
+  .risk-alert-panel{max-width:100%!important;min-width:0!important}
+  .risk-table-wrap{max-width:100%!important;overflow-x:auto!important}
+  .selected-view{order:4!important;min-width:0!important;max-width:100%!important}
+  .selected-view .table-wrap,.cash-report-table-wrap{max-width:100%!important;overflow-x:auto!important}
+  main.page>section:not(#forecastReportPair):not(.risk-card):not(.selected-view){order:5!important;max-width:100%!important;min-width:0!important}
+ }
+ @media screen and (max-width:767px) and (pointer:coarse){
+  main.page{padding:10px 8px 20px!important}
+  .risk-summary-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .forecast-compare-table.vertical tr th{font-size:10px!important}
+  .forecast-compare-table.vertical tr td{font-size:13px!important}
+  .risk-alert-panel .risk-alert-table{min-width:0!important;width:100%!important}
+  .risk-alert-table th,.risk-alert-table td{font-size:9px!important;padding:7px 4px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ }
+ </style>`;
+ function initForecast(){
+  const frame=el('forecastStatusFrame');if(!frame)return;
+  const fix=()=>{
+   try{const d=frame.contentDocument;if(!d?.head)return;
+    if(!d.getElementById('fb-touch-forecast-ux-20261019'))d.head.insertAdjacentHTML('beforeend',forecastStyle);
+    if(touch()){
+     const measure=()=>{const h=Math.max(d.documentElement?.scrollHeight||0,d.body?.scrollHeight||0);if(h>0)frame.style.height=(h+10)+'px'};
+     measure();if(!frame.dataset.fbTouchForecastObserver){frame.dataset.fbTouchForecastObserver='1';new ResizeObserver(measure).observe(d.body)}
+    }
+   }catch(e){}
+  };
+  frame.addEventListener('load',fix);setTimeout(fix,200);
+ }
+ function initExpectedRemain(){
+  const root=el('expectedExpenseSubview');if(!root||el('fbExpectedPastToggle'))return;
+  const bar=el('cfMobileExpectedMonthbar');if(!bar)return;
+  const btn=mk('button','','지난 내역 보기');btn.id='fbExpectedPastToggle';btn.type='button';
+  bar.append(btn);
+  btn.addEventListener('click',()=>{const on=root.classList.toggle('fb-show-old-expenses');btn.textContent=on?'지난 내역 숨기기':'지난 내역 보기'});
+  function paint(){
+   if(!touch())return;
+   const today=todayKey(),currYear=Number(today.slice(0,4)),currMonth=Number(today.slice(5,7)),currDay=Number(today.slice(8,10));
+   const year=Number(el('globalYear')?.value)||currYear;
+   for(const card of root.querySelectorAll('.expected-month-card')){
+    const month=Number(card.dataset.month||0);
+    for(const tr of card.querySelectorAll('tbody tr[data-day]')){
+     const day=Number(tr.dataset.day||0);
+     const past=year<currYear||(year===currYear&&(month<currMonth||(month===currMonth&&day<currDay)));
+     tr.classList.toggle('fb-expense-past-row',past);
+    }
+   }
+  }
+  const body=el('expectedExpenseBody');if(body){let queued=0;new MutationObserver(()=>{if(queued)return;queued=requestAnimationFrame(()=>{queued=0;paint()})}).observe(body,{childList:true,subtree:true});}
+  el('cfMobileExpectedSelect')?.addEventListener('change',paint);
+  window.addEventListener('message',e=>{if(e.data?.type==='frameby-cash-year')setTimeout(paint,100)});
+  paint();
+ }
+ function init(){initToday();initMonthly();initReport();initForecast();initExpectedRemain();}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
 </body>
 </html></textarea>
 <script id="work-record-module">
@@ -14196,5 +14489,87 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
 })();
 </script>
+
+<style id="fb-github-touch-layout-20261019">
+/* 태블릿·휴대폰 전용: 업무 공통표시만 조정. 연구개발 선택 화면에 적용하지 않는다. */
+@media screen and (max-width:1199px) and (pointer:coarse){
+ .app.integrated-content>.main{min-width:0!important;width:100%!important;max-width:100%!important}
+ .app.integrated-content .page:not(#researchHost),.app.integrated-content .page:not(#researchHost) .card{box-sizing:border-box;min-width:0;max-width:100%}
+ .app.integrated-content .page:not(#researchHost) .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ .app.integrated-content .page:not(#researchHost) input:not([type="checkbox"]):not([type="radio"]),
+ .app.integrated-content .page:not(#researchHost) select,
+ .app.integrated-content .page:not(#researchHost) textarea{max-width:100%;min-width:0;box-sizing:border-box}
+ #cashflowFrame{min-width:0!important;width:100%!important}
+ #salesHost .sales-head,#trip .head,#vehicle .head,.subscription-head{flex-wrap:wrap!important;gap:10px!important}
+ #salesHost .sales-filter-bar,#salesHost .sales-head-actions{max-width:100%;min-width:0;flex-wrap:wrap!important}
+ #salesHost .sales-two,#trip .edit-layout,#vehicle .edit-layout,.subscription-insight-grid{grid-template-columns:minmax(0,1fr)!important}
+ .subscription-modal,.sales-range-modal,.sales-modal{max-width:calc(100vw - 16px)!important}
+ .subscription-modal-body,.sales-modal-body{overflow-x:hidden!important}
+ .subscription-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .finance-primary{min-width:0}
+}
+@media screen and (max-width:767px) and (pointer:coarse){
+ .app.integrated-content>.main{padding:0 9px 36px!important}
+ body[data-active-module="cash"] #framebyZoomControl,
+ body[data-active-module="cash"] #framebyMobileZoomToggle{display:none!important}
+ body[data-active-module="cash"] .finance-workspace-nav{margin:0 -9px 0!important}
+ body[data-active-module="cash"] .finance-primary{padding:0 9px!important}
+ body[data-active-module="cash"] .finance-secondary{padding:4px 9px 9px!important}
+ body[data-active-module="cash"] .finance-workspace-nav .cash-secondary-tools{gap:6px!important}
+ body[data-active-module="cash"] .finance-workspace-nav .cash-secondary-tools select,
+ body[data-active-module="cash"] .finance-workspace-nav .cash-refresh-btn{min-height:34px;font-size:12px}
+ body[data-active-module="cash"] #cashflowHost{padding:0!important}
+ #salesHost .sales-kpis,#card .kpis,#trip .kpis,#vehicle .kpis,.subscription-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #salesHost .sales-kpis .value,.kpi .value{font-size:clamp(15px,4vw,22px)!important;overflow-wrap:anywhere!important}
+ #salesHost .sales-top5-grid{grid-template-columns:minmax(0,1fr)!important}
+ #salesHost .sales-filter-bar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #salesHost .sales-filter-bar .field,#salesHost .sales-filter-bar select{min-width:0!important;width:100%!important}
+ #trip .vehicle-form-grid,#vehicle .vehicle-form-grid,.form-grid{grid-template-columns:minmax(0,1fr)!important}
+ #trip .head-actions,#vehicle .head-actions{flex-wrap:wrap}
+ #trip .inline-sheet-wrap,#vehicle .inline-sheet-wrap{overflow:auto;max-width:100%}
+ .subscription-form-grid,.subscription-insight-grid{grid-template-columns:minmax(0,1fr)!important}
+ .subscription-alert-row{grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important}
+ .subscription-alert-amount{white-space:nowrap}
+ .filter-menu{max-width:calc(100vw - 16px)!important}
+}
+@media screen and (min-width:768px) and (max-width:1199px) and (pointer:coarse){
+ .app.integrated-content>.main{padding:0 16px 40px!important}
+ body[data-active-module="cash"] .finance-workspace-nav{margin:0 -16px 6px!important}
+ .subscription-insight-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+</style>
+
+
+<script id="fb-github-touch-viewport-20261019">
+(()=>{
+ 'use strict';
+ const touch=()=>matchMedia('(max-width:1199px) and (pointer:coarse)').matches;
+ const frame=document.getElementById('cashflowFrame');if(!frame)return;
+ let ro=null,lastDocument=null;
+ function sync(){
+  if(!touch()){
+   frame.style.removeProperty('height');return;
+  }
+  const cash=document.getElementById('cashflowHost');if(!cash?.classList.contains('active'))return;
+  try{
+   const d=frame.contentDocument;if(!d)return;
+   if(d!==lastDocument){
+    ro?.disconnect();lastDocument=d;
+    if(d.body&&typeof ResizeObserver==='function'){
+     ro=new ResizeObserver(()=>requestAnimationFrame(sync));ro.observe(d.body);
+    }
+   }
+   const h=Math.max(d.documentElement?.scrollHeight||0,d.body?.scrollHeight||0);
+   if(h>0){const target=Math.max(680,Math.ceil(h)+12);if(Math.abs(frame.getBoundingClientRect().height-target)>4)frame.style.height=target+'px';}
+  }catch(e){}
+ }
+ frame.addEventListener('load',()=>setTimeout(sync,150));
+ const holder=document.getElementById('cashflowHost');if(holder)new MutationObserver(sync).observe(holder,{attributes:true,attributeFilter:['class']});
+ window.addEventListener('resize',sync);
+ window.addEventListener('message',e=>{if(e.source===frame.contentWindow && e.data?.type==='fb-touch-layout-height')sync()});
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,300),{once:true});else setTimeout(sync,300);
+})();
+</script>
+
 </body>
 </html>
