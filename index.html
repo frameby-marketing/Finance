@@ -14684,6 +14684,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #researchHost .rt-connection-controls{display:flex;gap:9px;flex-wrap:wrap}
 #researchHost .rt-review-box .rt-status-label{display:inline-flex;color:#2b519c;font-weight:800;font-size:12px;margin-top:9px}
 #researchHost .rt-review-box.admin .rt-status-label{color:#936630}
+
+#researchHost .rt-text-fallback-note{font-weight:700;font-size:12px;color:#9a6422;background:#fffbf2;border:1px solid #f1e0bd;border-radius:8px;padding:9px 12px}
+#researchHost .rt-image-missing{color:#67788d;font-size:12px;line-height:1.8;border:1px dashed #d7e1ee;background:#fff;border-radius:10px;padding:17px 13px;margin-bottom:13px}
+#researchHost .rt-doc-link{display:block;text-align:center;text-decoration:none;white-space:normal;line-height:1.6}
 </style>
 <script id="frameby-research-timeline-live-script-20261022">
 /* 원본의 Google Docs API, 권한 확인, GAS 연구노트 작성/관리 기능은 그대로 호출합니다. */
@@ -14693,6 +14697,59 @@ const rootId='researchDirectMount';
 let items=[],activeId='',readStarted=false,month=0,selected=new Set(),loadingSeq=0,rollTimer=0;
 let gallery=[],imgAt=0,scale=1,offsetX=0,offsetY=0,dragPos=null;
 let rtStatuses={author:new Map(),admin:new Map()};
+
+// Google Docs API가 Google Cloud 프로젝트에서 꺼져 있어도 기존에 사용 중인 Drive API의
+// text/plain export를 통해 실제 문서 원문(텍스트)으로 타임라인을 구성합니다.
+// 이 경로에는 이미지/표 원래 서식이 포함되지 않으므로 이미지를 임의로 만들지 않습니다.
+let rtUsingDriveFallback=false;
+function rtPlainTabHtml(lines){
+  const normalize=String(lines||'').replace(/\r\n?/g,'\n');
+  const rows=normalize.split('\n');
+  const result=[];let blanks=0;
+  for(const raw of rows){
+    let line=raw.replace(/\uFEFF/g,'');
+    if(!line.trim()){if(++blanks>1)continue;result.push('');continue}
+    blanks=0;result.push(line);
+  }
+  return result.map(line=>{
+    const t=line.trim();
+    const header=/^(목적|사용\s*도구(?:\s*및\s*(?:환경|재료))?|방법|수행내용|결과|고찰|연구개발계획서\s*요약|\d+\.\s*연구(?:목적|내용|결과)|■\s*.+)$/.test(t);
+    return {paragraph:{paragraphStyle:{namedStyleType:header?'HEADING_2':'NORMAL_TEXT'},elements:[{textRun:{content:line+'\n'}}]}};
+  });
+}
+function rtParseDriveText(raw){
+ const lines=String(raw||'').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n').split('\n');
+ const parts=[];let title='연구개발계획서',buf=[],k=0;
+ function add(){if(!buf.some(x=>x.trim()) && parts.length)return;parts.push({id:'drive-text-'+(k++),title,depth:0,index:k,documentTab:{body:{content:rtPlainTabHtml(buf.join('\n'))}},rtPlainText:true});buf=[]}
+ for(let i=0;i<lines.length;i++){
+  const value=lines[i].trim();
+  const week=value.match(/^(\d{1,2})월\s*(\d+)주차\s*연구노트$/);
+  if(week){add();title=`${Number(week[1])}월 ${Number(week[2])}주차 연구노트`;continue}
+  const phase=value.match(/^([1-5])단계$/);
+  if(phase && lines.slice(i+1,i+7).some(x=>x.trim()==='개발보고서')){
+   add();title=`${phase[1]}단계 보고서`;
+   const next=lines.slice(i+1,i+7).findIndex(x=>x.trim()==='개발보고서');
+   i+=1+next;
+   continue;
+  }
+  buf.push(lines[i]);
+ }
+ add();return parts.filter(x=>x.documentTab.body.content.some(y=>y.paragraph?.elements?.[0]?.textRun?.content?.trim()));
+}
+async function rtLoadFromDriveExport(){
+ const id=INTEGRATED_CONFIG.researchDocumentId;
+ const url=`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}/export?mimeType=text%2Fplain`;
+ const res=await fetch(url,{headers:{Authorization:`Bearer ${GITHUB_ACCESS_TOKEN}`}});
+ if(!res.ok){let m=`Drive 문서 내보내기 실패 (HTTP ${res.status})`;try{const data=await res.json();m=data?.error?.message||m}catch(_){}throw new Error(m)}
+ const txt=await res.text();
+ if(!txt || !/(?:연구개발계획서|\d+월\s*\d+주차\s*연구노트)/.test(txt))throw new Error('Google Drive에서 연구개발 원문 내용을 찾지 못했습니다.');
+ const parsed=rtParseDriveText(txt);
+ if(parsed.length<2)throw new Error('문서에 주차별 연구노트가 존재하지만 타임라인으로 분류하지 못했습니다.');
+ RESEARCH_DOC_FLAT=parsed;
+ rtUsingDriveFallback=true;
+ return parsed;
+}
+
 const rtOrigErrorLogger=(err)=>{try{console.error('[연구개발 타임라인] Google Docs 자료 조회 오류',err)}catch(e){}};
 // 코멘트와 검토 상태는 기존 연구개발 저장소의 읽기 전용 조회로 표시합니다.
 async function rtReadNoteStatus(){
@@ -14727,10 +14784,11 @@ function dateFromText(s){s=String(s||'');let m=s.match(/(20\d\d)[.\-\/년]\s*(\d
 function flatText(docTab,max=40){const body=docTab?.body?.content||[];return body.slice(0,max).map(e=>{if(e.paragraph)return(e.paragraph.elements||[]).map(x=>x.textRun?.content||'').join('');if(e.table)return(e.table.tableRows||[]).slice(0,4).map(row=>(row.tableCells||[]).map(c=>(c.content||[]).map(x=>(x.paragraph?.elements||[]).map(y=>y.textRun?.content||'').join('')).join(' ')).join(' ')).join(' ');return ''}).join('\n')}
 function identify(tab){const title=String(tab.title||'');const info=researchNoteInfo(tab);if(info)return {type:'note',month:info.month,week:info.week};if(/연구개발계획서|연구개발 계획서|연구계획서/.test(title))return {type:'plan',month:0};if(/\d+\s*단계.*보고서|최종.*보고서|중간.*보고서/.test(title)){const step=Number(title.match(/(\d+)\s*단계/)?.[1]||0);let data=flatText(tab.documentTab,22);const dateMatch=data.match(/(?:작성일|보고일|제출일|보고서\s*일자|작성\s*일자)[^\n]{0,35}/);const d=dateFromText(dateMatch?.[0])||dateFromText(title);const stages={1:2,2:5,3:7,4:9,5:12};return{type:'report',month:d?Number(d.slice(5,7)):(stages[step]||12),reportDate:d,step,approx:!d}}
 return {type:'document',month:0}}
-function buildRecords(){const src=(typeof RESEARCH_DOC_FLAT!=='undefined'?RESEARCH_DOC_FLAT:[]);const all=src.map(tab=>({...tab,...identify(tab)}));
+function buildRecords(){const src=(typeof RESEARCH_DOC_FLAT!=='undefined'?RESEARCH_DOC_FLAT:[]);const all=src.map(tab=>{const info=identify(tab);if(rtUsingDriveFallback&&info.type==='report'&&!info.reportDate){info.month=13;info.dateUnverified=true}return {...tab,...info}});
 const seq=x=>x.type==='plan'?0:x.type==='document'?1:x.type==='note'?3:2;
 return all.sort((a,b)=>(a.month-b.month)||((a.reportDate||'').localeCompare(b.reportDate||''))||(a.type==='note'&&b.type==='note'?a.week-b.week:seq(a)-seq(b))||a.index-b.index);
 }
+function rtActualTitle(r){if(r.type!=='note')return r.title;const lines=flatText(r.documentTab,27).split('\n').map(t=>t.trim()).filter(Boolean);const ix=lines.findIndex(x=>x==='실험제목');return ix>=0&&lines[ix+1]&&lines[ix+1]!=='목적'?lines[ix+1]:r.title}
 function recordTop(r){if(r.type==='note')return `${r.month}월 ${r.week}주차`;
 if(r.type==='plan')return '연구개발계획서';if(r.type==='report')return `${r.step||''}단계 보고서`;return '연구문서'}
 function recordDate(r){if(r.type==='note'){const text=flatText(r.documentTab,12);const m=text.match(/(?:연구\s*기간|기간)\s*[:：]?\s*(20\d\d[^\n]{0,50})/);return m?m[1].trim().slice(0,54):''}
@@ -14738,12 +14796,13 @@ if(r.type==='report')return r.reportDate?fmtDate(r.reportDate):'보고 일자 �
 function noteNumber(r){if(r.type!=='note')return '';const m=flatText(r.documentTab,13).match(/FB-20\d\d-\d{2}-\d{2}/);return m?m[0]:''}
 function view(){return $('rt-app')}
 function getScroll(){return $('rt-list-scroll')}
-function controls(){return `<div class="rt-page-title"><div><div class="rt-kicker">RESEARCH &amp; DEVELOPMENT · 2026</div><h1>연구개발 타임라인</h1><p>연구개발계획서부터 주차별 연구노트와 단계 보고서까지 시간순으로 살펴봅니다.</p></div></div><div class="rt-jump"><button type="button" class="rt-year" data-rt-year>2026년 ↑</button><div class="rt-months" id="rt-month-buttons">${Array.from({length:12},(_,i)=>`<button type="button" class="rt-month" data-rt-month="${i+1}">${i+1}월</button>`).join('')}</div></div><div class="rt-workarea" id="rt-area"><section class="rt-timeline"><div class="rt-timeline-head"><div><b>2026년 연구기록</b><small>연구개발계획서 · 연구노트 · 단계 보고서</small></div><div class="rt-actions"><button type="button" class="rt-btn" data-rt-select>전체선택</button><button type="button" class="rt-btn" data-rt-print-selected>선택 인쇄</button></div></div><div id="rt-list-scroll" class="rt-scroll"><div id="rt-list"></div></div><div class="rt-timeline-footer"><span>주차 카드 전체를 눌러 오른쪽 본문 보기</span><span id="rt-selected">0개 선택</span></div></section><section id="rt-detail" class="rt-detail" hidden></section></div>`}
+function controls(){return `<div class="rt-page-title"><div><div class="rt-kicker">RESEARCH &amp; DEVELOPMENT · 2026</div><h1>연구개발 타임라인</h1><p>연구개발계획서부터 주차별 연구노트와 단계 보고서까지 시간순으로 살펴봅니다.</p>${rtUsingDriveFallback?'<p class="rt-text-fallback-note">Google Docs API가 비활성화되어 원문 텍스트로 표시하고 있습니다. 표 서식·사진은 원본 문서에서 확인하세요.</p>':''}</div></div><div class="rt-jump"><button type="button" class="rt-year" data-rt-year>2026년 ↑</button><div class="rt-months" id="rt-month-buttons">${Array.from({length:12},(_,i)=>`<button type="button" class="rt-month" data-rt-month="${i+1}">${i+1}월</button>`).join('')}</div></div><div class="rt-workarea" id="rt-area"><section class="rt-timeline"><div class="rt-timeline-head"><div><b>2026년 연구기록</b><small>연구개발계획서 · 연구노트 · 단계 보고서</small></div><div class="rt-actions"><button type="button" class="rt-btn" data-rt-select>전체선택</button><button type="button" class="rt-btn" data-rt-print-selected>선택 인쇄</button></div></div><div id="rt-list-scroll" class="rt-scroll"><div id="rt-list"></div></div><div class="rt-timeline-footer"><span>주차 카드 전체를 눌러 오른쪽 본문 보기</span><span id="rt-selected">0개 선택</span></div></section><section id="rt-detail" class="rt-detail" hidden></section></div>`}
 function roleHtml(r){if(r.type!=='note')return '';return `<div class="rt-rec-review">${rtStatusCard(r,'author')}${rtStatusCard(r,'admin')}</div>`}
-function recordHtml(r){return `<div class="rt-record ${r.type} ${activeId===r.id?'on':''}" role="button" tabindex="0" data-rt-record="${escAttr(r.id)}"><div class="rt-rec-top"><span>${safe(recordTop(r))}</span><time>${safe(recordDate(r))}</time></div><div class="rt-rec-title">${safe(r.title)}</div>${noteNumber(r)?`<span class="rt-rec-number">${safe(noteNumber(r))}</span>`:''}${roleHtml(r)}${r.type==='note'?`<label style="display:inline-flex;gap:5px;align-items:center;margin-top:8px;font-size:11px;color:#6a7c98" ><input type="checkbox" data-rt-check="${escAttr(r.id)}" ${selected.has(r.id)?'checked':''} aria-label="${safe(r.title)} 인쇄 선택"> 인쇄 선택</label>`:''}</div>`}
+function recordHtml(r){return `<div class="rt-record ${r.type} ${activeId===r.id?'on':''}" role="button" tabindex="0" data-rt-record="${escAttr(r.id)}"><div class="rt-rec-top"><span>${safe(recordTop(r))}</span><time>${safe(recordDate(r))}</time></div><div class="rt-rec-title">${safe(rtActualTitle(r))}</div>${noteNumber(r)?`<span class="rt-rec-number">${safe(noteNumber(r))}</span>`:''}${roleHtml(r)}${r.type==='note'?`<label style="display:inline-flex;gap:5px;align-items:center;margin-top:8px;font-size:11px;color:#6a7c98" ><input type="checkbox" data-rt-check="${escAttr(r.id)}" ${selected.has(r.id)?'checked':''} aria-label="${safe(r.title)} 인쇄 선택"> 인쇄 선택</label>`:''}</div>`}
 function renderList(){const list=$('rt-list');if(!list)return;const plan=items.filter(x=>x.month===0);
 let markup=plan.length?`<div class="rt-year-entry" id="rt-year-start">${plan.map(recordHtml).join('')}</div>`:`<div class="rt-year-entry" id="rt-year-start"><div class="rt-empty">연구개발계획서 탭을 찾지 못했습니다.</div></div>`;
 for(let m=1;m<=12;m++){const arr=items.filter(x=>x.month===m);markup+=`<section class="rt-month-section" id="rt-month-${m}"><h3 class="rt-month-head">${m}월 <span>${arr.length?arr.length+'개 기록':''}</span></h3>${arr.map(recordHtml).join('')||'<p style="color:#a0aabc;font-size:12px;margin:9px 0 20px">등록된 기록 없음</p>'}</section>`}
+const undated=items.filter(x=>x.month===13);if(undated.length)markup+=`<section class="rt-month-section" id="rt-undated"><h3 class="rt-month-head">일자 미확인 보고서 <span>${undated.length}개</span></h3>${undated.map(recordHtml).join('')}</section>`;
 list.innerHTML=markup;$('rt-selected').textContent=`${selected.size}개 선택`;document.querySelectorAll('#rt-month-buttons [data-rt-month]').forEach(btn=>btn.classList.toggle('on',Number(btn.dataset.rtMonth)===month));
 }
 function extraction(r){const text=researchStructuralHtml(r.documentTab?.body?.content||[],r.documentTab||{});
@@ -14751,8 +14810,8 @@ const node=document.createElement('div');node.innerHTML=text;const imgs=Array.fr
 node.querySelectorAll('img').forEach(img=>{const p=img.parentElement;img.remove();if(p&&p!==node&&!p.textContent.trim()&&!p.children.length)p.remove()});return {html:node.innerHTML,imgs}}
 function detailHtml(r){const ex=extraction(r);const notes=items.filter(x=>x.type==='note');const i=notes.findIndex(x=>x.id===r.id);const prev=i>0?notes[i-1]:null;const next=i>=0&&i<notes.length-1?notes[i+1]:null;
 const pair=r.type==='note'?`<div class="rt-review-pair">${['author','admin'].map(role=>{const status=rtStatusFor(r,role);return `<div class="rt-review-box ${role==='admin'?'admin':''}"><b>${role==='admin'?'관리자':'작성자'} 상태 및 코멘트</b><span class="rt-status-label">${safe(status?.state||'상태 정보 없음')}</span><p>${safe(status?.comment||'등록된 코멘트 없음')}</p></div>`}).join('')}</div>`:'';
-const gal=ex.imgs.length?`<aside class="rt-gallery"><div class="rt-gallery-head">연구 이미지 <small>${ex.imgs.length}개</small></div>${ex.imgs.map((x,j)=>`<button type="button" class="rt-thumb" data-rt-img="${j}"><img src="${escAttr(x.src)}" alt="연구 이미지 ${j+1}"><span>이미지 ${j+1} / ${ex.imgs.length} · 크게 보기 ↗</span></button>`).join('')}</aside>`:'';
-return `<header class="rt-detail-header"><div><button type="button" class="rt-btn" data-rt-close>← 카드 목록</button>${r.type==='note'?`<button type="button" class="rt-btn" data-rt-prev ${prev?'':'disabled'}>← 이전 주차</button><button type="button" class="rt-btn" data-rt-next ${next?'':'disabled'}>다음 주차 →</button>`:''}</div><div><button type="button" class="rt-btn" data-rt-print>인쇄</button>${r.type==='note'?`<button type="button" class="rt-btn" data-rt-role="author">작성자</button><button type="button" class="rt-btn primary" data-rt-role="admin">관리자</button>`:''}</div></header><div class="rt-detail-headline"><div class="meta">${safe(recordTop(r))} · 2026년</div><h2>${safe(r.title)}</h2><p>${safe(recordDate(r))}${noteNumber(r)?` · ${safe(noteNumber(r))}`:''}</p></div>${pair}<div class="rt-readable ${gal?'':'no-gallery'}"><div class="rt-text-content"><article class="research-doc-paper">${ex.html||'<p>이 탭에 표시할 본문이 없습니다.</p>'}</article></div>${gal}</div>${r.type==='note'?`<div class="rt-nextprev"><button type="button" class="rt-btn" data-rt-prev ${prev?'':'disabled'}>← 이전 주차 ${prev?safe(recordTop(prev)):''}</button><button type="button" class="rt-btn" data-rt-next ${next?'':'disabled'}>다음 주차 ${next?safe(recordTop(next)):''} →</button></div>`:''}`
+const gal=ex.imgs.length?`<aside class="rt-gallery"><div class="rt-gallery-head">연구 이미지 <small>${ex.imgs.length}개</small></div>${ex.imgs.map((x,j)=>`<button type="button" class="rt-thumb" data-rt-img="${j}"><img src="${escAttr(x.src)}" alt="연구 이미지 ${j+1}"><span>이미지 ${j+1} / ${ex.imgs.length} · 크게 보기 ↗</span></button>`).join('')}</aside>`:(rtUsingDriveFallback?`<aside class="rt-gallery"><div class="rt-gallery-head">연구 이미지</div><div class="rt-image-missing">현재 Google Docs API가 비활성화되어 원본 이미지가 표시되지 않습니다.<br><br>도면·사진은 아래 원본 문서에서 확인할 수 있습니다.</div><a class="rt-btn rt-doc-link" href="https://docs.google.com/document/d/${encodeURIComponent(INTEGRATED_CONFIG.researchDocumentId)}/edit" target="_blank" rel="noopener noreferrer">원본 문서에서 이미지 보기 ↗</a></aside>`:'');
+return `<header class="rt-detail-header"><div><button type="button" class="rt-btn" data-rt-close>← 카드 목록</button>${r.type==='note'?`<button type="button" class="rt-btn" data-rt-prev ${prev?'':'disabled'}>← 이전 주차</button><button type="button" class="rt-btn" data-rt-next ${next?'':'disabled'}>다음 주차 →</button>`:''}</div><div><button type="button" class="rt-btn" data-rt-print>인쇄</button>${r.type==='note'?`<button type="button" class="rt-btn" data-rt-role="author">작성자</button><button type="button" class="rt-btn primary" data-rt-role="admin">관리자</button>`:''}</div></header><div class="rt-detail-headline"><div class="meta">${safe(recordTop(r))} · 2026년</div><h2>${safe(rtActualTitle(r))}</h2><p>${safe(recordDate(r))}${noteNumber(r)?` · ${safe(noteNumber(r))}`:''}</p></div>${pair}<div class="rt-readable ${gal?'':'no-gallery'}"><div class="rt-text-content"><article class="research-doc-paper">${ex.html||'<p>이 탭에 표시할 본문이 없습니다.</p>'}</article></div>${gal}</div>${r.type==='note'?`<div class="rt-nextprev"><button type="button" class="rt-btn" data-rt-prev ${prev?'':'disabled'}>← 이전 주차 ${prev?safe(recordTop(prev)):''}</button><button type="button" class="rt-btn" data-rt-next ${next?'':'disabled'}>다음 주차 ${next?safe(recordTop(next)):''} →</button></div>`:''}`
 }
 function renderDetail(){const r=items.find(x=>x.id===activeId);const el=$('rt-detail'),area=$('rt-area');if(!el||!area)return;if(!r){area.classList.remove('has-detail');el.hidden=true;el.innerHTML='';return}el.hidden=false;area.classList.add('has-detail');el.innerHTML=detailHtml(r);el.scrollTop=0}
 function open(rid,focus=true){const r=items.find(x=>x.id===rid);if(!r)return;activeId=rid;renderList();renderDetail();if(focus){const n=Array.from(document.querySelectorAll('[data-rt-record]')).find(x=>x.dataset.rtRecord===rid);n?.scrollIntoView({behavior:'smooth',block:'nearest'});if(window.innerWidth<1050)setTimeout(()=>$('rt-detail')?.scrollIntoView({behavior:'smooth',block:'start'}),90)} }
@@ -14783,7 +14842,10 @@ async function ensure(force){const shell=$('researchDirectShell'),frame=$('resea
 if(RESEARCH_ACTIVE_PAGE==='write'){closeRole();hideViewer();shell.classList.add('hidden');frame.style.display='';return ensureResearchFrame(!!force)}
 RESEARCH_ACTIVE_PAGE='notes';syncModuleHeader('research','researchHost');frame.classList.add('hidden');frame.style.display='none';shell.classList.remove('hidden');month=Number(RESEARCH_ACTIVE_MONTH)||0;
 if(items.length&&!force){display();return}const seq=++loadingSeq;if(loading){loading.textContent='연구개발 타임라인을 불러오는 중...';loading.classList.remove('hidden')}
-try{if(force){RESEARCH_DOC_CACHE=null;RESEARCH_DOC_FLAT=[];RESEARCH_COMMENTS_CACHE=[];RESEARCH_COMMENT_CAPABILITY=null}await researchLoadDocument(!!force);await Promise.allSettled([researchLoadCapabilities(!!force),researchLoadComments(!!force),rtReadNoteStatus()]);if(seq!==loadingSeq)return;display();loading?.classList.add('hidden')}
+try{if(force){RESEARCH_DOC_CACHE=null;RESEARCH_DOC_FLAT=[];RESEARCH_COMMENTS_CACHE=[];RESEARCH_COMMENT_CAPABILITY=null;rtUsingDriveFallback=false}
+try{await researchLoadDocument(!!force);rtUsingDriveFallback=false}
+catch(docError){if(docError?.status!==403 && docError?.status!==404)throw docError;console.info('Google Docs API 사용 불가. Google Drive 텍스트 내보내기로 표시합니다.',docError?.message);await rtLoadFromDriveExport()}
+await Promise.allSettled([researchLoadCapabilities(!!force),rtUsingDriveFallback?Promise.resolve():researchLoadComments(!!force),rtReadNoteStatus()]);if(seq!==loadingSeq)return;display();loading?.classList.add('hidden')}
 catch(error){if(seq!==loadingSeq)return;rtFailView(error)}}
 function initial(){const docs=document.querySelector('.module-tab[data-research-page="documents"]');const notes=document.querySelector('.module-tab[data-research-page="notes"]');if(docs)docs.hidden=true;if(notes)notes.textContent='연구 타임라인';installOverlays();
 const row=$('researchMonthRow');if(row&&!row.dataset.rtCapture){row.dataset.rtCapture='1';row.addEventListener('click',e=>{const year=e.target.closest('#researchYearBtn'),b=e.target.closest('.research-month-btn');if(!year&&!b)return;if(RESEARCH_ACTIVE_PAGE==='write')return;e.preventDefault();e.stopImmediatePropagation();RESEARCH_ACTIVE_MONTH=b?Number(b.dataset.month)||0:0;month=RESEARCH_ACTIVE_MONTH;syncModuleHeader('research','researchHost');if(items.length){jump(month)}else ensure(false)},true)}
