@@ -12850,6 +12850,9 @@ html body .app>.topbar{display:none!important}
 
 <style id="frameby-cash-eight-screen-responsive-20261015">
 /* Confirmed 8-screen UX: presentation only; unchanged data, calculations and save handlers. */
+/* Mobile expense-entry dialog is appended to body on every cash page.
+   Hide it by default at desktop/tablet widths; the existing mobile .open rule still opens it. */
+.cf-mobile-expense-backdrop{display:none!important}
 .cf-mobile-daymarks{display:none!important}
 @media screen and (min-width:768px) and (max-width:1199px){
  #calendarPage .content-grid{grid-template-columns:minmax(0,1fr)!important}
