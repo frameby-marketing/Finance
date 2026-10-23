@@ -14764,5 +14764,29 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- Research-only V9 viewport fix: no changes to PC and other Finance modules. -->
+<style id="frameby-research-parent-responsive-v9">
+@media screen and (min-width:701px) and (max-width:1199px){
+ #researchHost,#researchHost #researchFrame{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box}
+ #researchHost .research-frame{height:calc(100dvh - 175px)!important;min-height:610px!important;display:block}
+ #researchSecondaryMenu{min-width:0!important}
+ #researchSecondaryMenu #researchMonthBtns{min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin}
+}
+@media screen and (max-width:700px){
+ #researchHost{padding:0!important;margin:0!important;min-width:0!important;width:100%!important;max-width:100%!important;overflow:hidden!important;box-sizing:border-box}
+ #researchHost #researchFrame{width:100%!important;max-width:100%!important;min-width:0!important;display:block!important;border:0!important}
+ #researchHost #researchFrame.hidden{display:none!important}
+ #researchHost .research-frame{height:calc(100dvh - 203px)!important;min-height:540px!important}
+ #researchSecondaryMenu{min-width:0!important;padding:8px 8px!important;gap:7px!important}
+ #researchSecondaryMenu #researchModuleTabs{min-width:0!important;width:100%!important;overflow-x:auto!important}
+ #researchSecondaryMenu #researchMonthRow:not(.hidden){display:flex!important;flex-wrap:nowrap!important;align-items:center!important;min-width:0!important;width:100%!important;gap:5px!important}
+ #researchSecondaryMenu #researchMonthBtns{display:flex!important;min-width:0!important;width:1px!important;flex:1 1 auto!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;scrollbar-width:thin}
+ #researchSecondaryMenu #researchMonthBtns .research-month-btn{flex:0 0 auto!important;white-space:nowrap!important;min-width:34px}
+ #researchSecondaryMenu #researchToolbarActions{flex:0 0 auto!important;gap:3px!important;min-width:0!important}
+ #researchSecondaryMenu #researchToolbarActions .research-toolbar-btn{min-width:31px!important;width:31px!important;max-width:31px!important;height:34px!important;overflow:hidden!important}
+}
+</style>
+
 </body>
 </html>
