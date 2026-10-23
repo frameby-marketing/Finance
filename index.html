@@ -2378,8 +2378,10 @@ function ensureResearchFrame(forceReload){
   const viewKey=`${page}|${year}|${month}`;
   const navPayload={type:'frameby-research-shell-nav',page,year,month};
   const deliverNav=()=>{
-    try{frame.contentWindow?.postMessage(navPayload,'*')}
-    catch(err){console.warn('연구개발 월 이동:',err)}
+    try{
+      if(typeof window.framebyResearchDispatchNav==='function')window.framebyResearchDispatchNav(navPayload);
+      else frame.contentWindow?.postMessage(navPayload,'*');
+    }catch(err){console.warn('연구개발 월 이동:',err)}
   };
   if(!forceReload && frame.dataset.loaded==='1'){
     // V6: same month is NOT equivalent to current iframe position. Re-send every user
@@ -2411,10 +2413,15 @@ function ensureResearchFrame(forceReload){
       const requested=frame.__researchPendingNav;
       frame.__researchPendingNav=null;
       frame.dataset.currentView=`${requested.page}|${requested.year}|${requested.month}`;
-      try{frame.contentWindow?.postMessage(requested,'*')}catch(err){console.warn(err)}
+      try{
+        if(typeof window.framebyResearchDispatchNav==='function')window.framebyResearchDispatchNav(requested);
+        else frame.contentWindow?.postMessage(requested,'*');
+      }catch(err){console.warn(err)}
     }else if(!frame.dataset.currentView){
       frame.dataset.currentView=viewKey;
     }
+    // The nested research app announces readiness separately; this event alone
+    // does not mean it has accepted the navigation command.
     if(loading)loading.classList.add('hidden');
   };
   frame.dataset.loaded='0';
@@ -14623,7 +14630,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){
  window.addEventListener('message',function(event){
   const frame=document.getElementById('researchFrame');
-  if(!frame||event.source!==frame.contentWindow)return;
+  if(!frame||!(event.source===frame.contentWindow||window.framebyResearchIsFrameMessageSource?.(event)))return;
   const msg=event.data||{};
   if(msg.type!=='frameby-research-scroll-month')return;
   const m=Math.max(0,Math.min(12,Number(msg.month)||0));if(!m)return;
@@ -14650,7 +14657,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  },true);
  window.addEventListener('message',function(event){
    const frame=document.getElementById('researchFrame');
-   if(!frame||event.source!==frame.contentWindow)return;
+   if(!frame||!(event.source===frame.contentWindow||window.framebyResearchIsFrameMessageSource?.(event)))return;
    const data=event.data||{};
    if(data.type==='frameby-research-scroll-month'){
      const month=Number(data.month)||0;
@@ -14661,6 +14668,98 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
      }
      if(pending&&month===pending.month)pending=null;
    }
+ },true);
+})();
+</script>
+
+
+<!-- V8: deliver month navigation to the real Apps Script content frame, acknowledge it, then fall back safely. -->
+<script id="frameby-research-month-bridge-v8">
+(function(){
+ 'use strict';
+ let nextRequestId=0,latest=null,ackTimer=0,contentWindow=null,verifiedReady=false,frameWindow=null;
+ const targetFrame=()=>document.getElementById('researchFrame');
+ const recognizedOrigin=(origin)=>{try{const h=new URL(origin).hostname;return h==='script.google.com'||h==='script.googleusercontent.com'||h.endsWith('.googleusercontent.com')}catch(e){return false}};
+ function belongsToFrame(win,source){
+   if(!win||!source)return false;
+   const queue=[win],seen=new Set();
+   for(let i=0;i<queue.length&&i<24;i++){
+     const w=queue[i];if(!w||seen.has(w))continue;seen.add(w);
+     if(w===source)return true;
+     try{const n=Math.min(w.length||0,12);for(let k=0;k<n;k++){try{queue.push(w[k])}catch(e){}}}catch(e){}
+   }
+   return false;
+ }
+ function sendToFrameTree(win,data){
+   if(!win)return;
+   const queue=[win],seen=new Set();
+   for(let i=0;i<queue.length&&i<24;i++){
+     const w=queue[i];if(!w||seen.has(w))continue;seen.add(w);
+     try{w.postMessage(data,'*')}catch(e){}
+     try{const n=Math.min(w.length||0,12);for(let k=0;k<n;k++){try{queue.push(w[k])}catch(e){}}}catch(e){}
+   }
+ }
+ function send(data){
+   const f=targetFrame();if(!f||!f.contentWindow)return;
+   // A change of document invalidates the prior content window.
+   if(frameWindow!==f.contentWindow){frameWindow=f.contentWindow;contentWindow=null;verifiedReady=false}
+   // Send to the known GAS content directly. Use tree traversal only before its first ready event.
+   if(contentWindow){try{contentWindow.postMessage(data,'*');return}catch(e){contentWindow=null;verifiedReady=false}}
+   sendToFrameTree(f.contentWindow,data);
+ }
+ function fallback(request){
+   if(!latest||latest.id!==request.id||latest.acked)return;
+   const f=targetFrame();if(!f)return;
+   // The Google wrapper did not pass a single message through. A fresh URL
+   // carrying the month is the reliable fallback, with no Docs API required.
+   // Do this only once per click and never loop on iframe load.
+   latest.fallback=true;
+   f.__researchPendingNav=null;
+   f.dataset.loaded='0';
+   contentWindow=null;verifiedReady=false;
+   const base=f.dataset.src||((typeof INTEGRATED_CONFIG!=='undefined'&&INTEGRATED_CONFIG.researchWriteWebAppUrl)||'');
+   if(!base)return;
+   const qs=new URLSearchParams({shell:'1',page:request.page||'notes',year:String(request.year||2026),month:String(request.month||0),_nav:String(Date.now())});
+   const loading=document.getElementById('researchLoading');
+   if(loading){loading.textContent='선택한 월의 연구노트를 연결하는 중...';loading.classList.remove('hidden')}
+   f.src=base+(base.includes('?')?'&':'?')+qs.toString();
+ }
+ function dispatch(payload){
+   if(!payload||payload.type!=='frameby-research-shell-nav')return;
+   const request={...payload,requestId:++nextRequestId};
+   latest={id:request.requestId,page:request.page,year:request.year,month:request.month,acked:false,fallback:false};
+   clearTimeout(ackTimer);
+   send(request);
+   // Allow time for an authenticated GAS boot; no repeated page reloads.
+   ackTimer=setTimeout(()=>{
+     if(!latest||latest.id!==request.requestId||latest.acked)return;
+     send(request);
+     ackTimer=setTimeout(()=>{
+       if(latest&&latest.id===request.requestId&&!latest.acked)fallback(latest);
+     },2000);
+   },900);
+ }
+ window.framebyResearchDispatchNav=dispatch;
+ window.framebyResearchIsFrameMessageSource=function(event){
+   const f=targetFrame();return !!(f?.contentWindow&&recognizedOrigin(event?.origin||'')&&belongsToFrame(f.contentWindow,event.source));
+ };
+ window.addEventListener('message',event=>{
+   const f=targetFrame();if(!f||!f.contentWindow||!recognizedOrigin(event.origin))return;
+   const msg=event.data||{};
+   if(!['frameby-research-shell-ready','frameby-research-shell-ack','frameby-research-scroll-month'].includes(msg.type))return;
+   if(!belongsToFrame(f.contentWindow,event.source))return;
+   contentWindow=event.source;verifiedReady=true;
+   if(msg.type==='frameby-research-shell-ready'){
+     // The inner Google-hosted HTML—not just the outer iframe—has now booted.
+     const active=latest;
+     if(active&&!active.fallback){send({type:'frameby-research-shell-nav',page:active.page,year:active.year,month:active.month,requestId:active.id})}
+     return;
+   }
+   if(msg.type==='frameby-research-shell-ack'){
+     if(latest&&Number(msg.requestId)===latest.id){latest.acked=true;clearTimeout(ackTimer)}
+     return;
+   }
+   // Scroll-progress messages are handled by the existing V5/V6 listeners.
  },true);
 })();
 </script>
