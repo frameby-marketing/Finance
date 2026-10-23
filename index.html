@@ -2376,9 +2376,23 @@ function ensureResearchFrame(forceReload){
   params.set('month',String(month));
 
   const viewKey=`${page}|${year}|${month}`;
-  if(!forceReload && frame.dataset.currentView===viewKey && frame.dataset.loaded==='1'){
-    if(loading)loading.classList.add('hidden');
-    return;
+  const previousView=frame.dataset.currentView||'';
+  if(frame.dataset.loaded==='1'){
+    if(!forceReload && previousView===viewKey){
+      if(loading)loading.classList.add('hidden');
+      return;
+    }
+    // Changing a month or switching notes/write is an in-page navigation, not a new GAS request.
+    // Keep the already-loaded iframe, its auth state and cached note HTML.
+    if(previousView!==viewKey){
+      frame.dataset.currentView=viewKey;
+      try{
+        frame.contentWindow.postMessage({type:'frameby-research-shell-nav',page,year,month},'*');
+      }catch(err){console.warn('연구개발 월 이동:',err)}
+      if(loading)loading.classList.add('hidden');
+      return;
+    }
+    // A real refresh on the SAME view may reload the iframe intentionally.
   }
 
   if(loading){
@@ -2533,7 +2547,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_YEAR=2026;
       RESEARCH_ACTIVE_MONTH=0;
       syncModuleHeader('research','researchHost');
-      ensureResearchView(true);
+      ensureResearchView(false);
     });
   }
 
@@ -2546,7 +2560,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_PAGE=nextPage;
       if(RESEARCH_ACTIVE_PAGE!=='notes') RESEARCH_ACTIVE_MONTH=0;
       syncModuleHeader('research','researchHost');
-      ensureResearchView(true);
+      ensureResearchView(false);
     });
   });
 
@@ -2558,7 +2572,7 @@ function initResearchShell(){
       RESEARCH_ACTIVE_YEAR=2026;
       RESEARCH_ACTIVE_MONTH=Number(btn.dataset.month)||0;
       syncModuleHeader('research','researchHost');
-      ensureResearchView(true);
+      ensureResearchView(false);
     });
   });
 }
