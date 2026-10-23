@@ -2376,23 +2376,26 @@ function ensureResearchFrame(forceReload){
   params.set('month',String(month));
 
   const viewKey=`${page}|${year}|${month}`;
-  const previousView=frame.dataset.currentView||'';
-  if(frame.dataset.loaded==='1'){
-    if(!forceReload && previousView===viewKey){
-      if(loading)loading.classList.add('hidden');
-      return;
-    }
-    // Changing a month or switching notes/write is an in-page navigation, not a new GAS request.
-    // Keep the already-loaded iframe, its auth state and cached note HTML.
-    if(previousView!==viewKey){
-      frame.dataset.currentView=viewKey;
-      try{
-        frame.contentWindow.postMessage({type:'frameby-research-shell-nav',page,year,month},'*');
-      }catch(err){console.warn('연구개발 월 이동:',err)}
-      if(loading)loading.classList.add('hidden');
-      return;
-    }
-    // A real refresh on the SAME view may reload the iframe intentionally.
+  const navPayload={type:'frameby-research-shell-nav',page,year,month};
+  const deliverNav=()=>{
+    try{frame.contentWindow?.postMessage(navPayload,'*')}
+    catch(err){console.warn('연구개발 월 이동:',err)}
+  };
+  if(!forceReload && frame.dataset.loaded==='1'){
+    // V6: same month is NOT equivalent to current iframe position. Re-send every user
+    // navigation, even if currentView matches; the inner scroll and the parent tab
+    // can become temporarily different after an asynchronous status update.
+    frame.dataset.currentView=viewKey;
+    deliverNav();
+    if(loading)loading.classList.add('hidden');
+    return;
+  }
+  if(!forceReload && frame.dataset.loaded==='0' && frame.getAttribute('src')){
+    // Never replace a still-bootstrapping GAS iframe just because a month was
+    // clicked. Defer the latest navigation until the existing iframe has loaded.
+    frame.dataset.currentView=viewKey;
+    frame.__researchPendingNav=navPayload;
+    return;
   }
 
   if(loading){
@@ -2402,7 +2405,16 @@ function ensureResearchFrame(forceReload){
 
   frame.onload=()=>{
     frame.dataset.loaded='1';
-    frame.dataset.currentView=viewKey;
+    // Keep the most recently requested month instead of restoring the month
+    // that happened to be selected when this slow iframe request first started.
+    if(frame.__researchPendingNav){
+      const requested=frame.__researchPendingNav;
+      frame.__researchPendingNav=null;
+      frame.dataset.currentView=`${requested.page}|${requested.year}|${requested.month}`;
+      try{frame.contentWindow?.postMessage(requested,'*')}catch(err){console.warn(err)}
+    }else if(!frame.dataset.currentView){
+      frame.dataset.currentView=viewKey;
+    }
     if(loading)loading.classList.add('hidden');
   };
   frame.dataset.loaded='0';
@@ -14620,6 +14632,36 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   frame.dataset.currentView=`notes|${year}|${m}`;
   syncModuleHeader('research','researchHost');
  });
+})();
+</script>
+
+<!-- V6: month-jump click has priority over stale progress/scroll reports from iframe. -->
+<script id="frameby-research-month-click-consistency-v6">
+(function(){
+ 'use strict';
+ let pending=null;
+ const maxWait=5500;
+ document.addEventListener('click',function(event){
+   const button=event.target.closest?.('#researchYearBtn, #researchMonthBtns .research-month-btn');
+   if(!button)return;
+   const month=button.id==='researchYearBtn'?0:Number(button.dataset.month);
+   if(!Number.isFinite(month)||month<0||month>12)return;
+   pending={month,expires:Date.now()+maxWait};
+ },true);
+ window.addEventListener('message',function(event){
+   const frame=document.getElementById('researchFrame');
+   if(!frame||event.source!==frame.contentWindow)return;
+   const data=event.data||{};
+   if(data.type==='frameby-research-scroll-month'){
+     const month=Number(data.month)||0;
+     if(pending&&Date.now()<pending.expires&&month!==pending.month){
+       // Ignore the month that an earlier in-flight animation reported.
+       event.stopImmediatePropagation();
+       return;
+     }
+     if(pending&&month===pending.month)pending=null;
+   }
+ },true);
 })();
 </script>
 
