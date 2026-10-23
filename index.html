@@ -14405,11 +14405,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       detail:!!msg.detail,selectedCount:Math.max(0,Number(msg.selectedCount)||0),canAdmin:!!msg.canAdmin,
       unreadCount:Math.max(0,Number(msg.unreadCount)||0),items:Array.isArray(msg.items)?msg.items:[]
     };
-    // Opening an alert may move to a different month; keep the parent selector in sync without reloading the iframe.
-    if(typeof RESEARCH_ACTIVE_MONTH!=='undefined'&&msg.detail){
-      RESEARCH_ACTIVE_MONTH=Number(msg.month)||0;
-      if(typeof syncModuleHeader==='function')syncModuleHeader('research','researchHost');
-    }
+    // The displayed detail may be from a different month. Keep month buttons tied to the
+    // independently scrolling timeline, not the last note's asynchronously fetched detail.
     paint();
   });
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
@@ -14606,6 +14603,23 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(tab)tab.textContent='연구 타임라인';
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
+})();
+</script>
+
+
+<script id="frameby-research-v5-scroll-status">
+(function(){
+ window.addEventListener('message',function(event){
+  const frame=document.getElementById('researchFrame');
+  if(!frame||event.source!==frame.contentWindow)return;
+  const msg=event.data||{};
+  if(msg.type!=='frameby-research-scroll-month')return;
+  const m=Math.max(0,Math.min(12,Number(msg.month)||0));if(!m)return;
+  RESEARCH_ACTIVE_PAGE='notes';RESEARCH_ACTIVE_MONTH=m;
+  const year=Number(msg.year)||2026;
+  frame.dataset.currentView=`notes|${year}|${m}`;
+  syncModuleHeader('research','researchHost');
+ });
 })();
 </script>
 
