@@ -450,6 +450,14 @@ body.frameby-auth-ready{overflow:auto}
 .vat-detail-grid .table-wrap{max-width:100%}
 @media(max-width:1279px){.vat-detail-grid{grid-template-columns:1fr}}
 .vat-filter-box{background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:10px}.vat-filter-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line)}.vat-filter-row:last-child{border-bottom:0}.vat-filter-label{width:64px;flex:0 0 64px;font-size:11px;color:var(--muted);font-weight:850}.vat-chips{display:flex;gap:6px;flex-wrap:wrap}.vat-chip{border:1px solid var(--line);background:#fff;color:#59657a;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer}.vat-chip:hover{background:#f6f8fc;color:var(--primary)}.vat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+/* 부가세신고자료 > 불공제 상세 표: 각 열 클릭 정렬 (이 표에만 적용) */
+#vatBlockedTable th.vat-blocked-sort-header{padding:0}
+#vatBlockedTable .vat-blocked-sort-btn{display:flex;align-items:center;justify-content:flex-start;gap:6px;width:100%;min-height:38px;padding:10px;border:0;border-radius:0;background:transparent;color:#526071;text-align:left;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}
+#vatBlockedTable .vat-blocked-sort-btn.num{justify-content:flex-end;text-align:right}
+#vatBlockedTable .vat-blocked-sort-btn:hover{background:#eef3ff;color:var(--primary)}
+#vatBlockedTable .vat-blocked-sort-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+#vatBlockedTable .vat-blocked-sort-arrow{flex:0 0 auto;color:#a3adbb;font-size:10px}
+#vatBlockedTable .vat-blocked-sort-btn[data-active="true"] .vat-blocked-sort-arrow{color:var(--primary)}
 .vat-table-card{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}.vat-table-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#fafbfc;border-bottom:1px solid var(--line)}.vat-table-head strong{font-size:13px}.vat-table-head span{font-size:11px;color:var(--muted)}.vat-table{min-width:820px}.vat-table td,.vat-table th{font-size:12px}.vat-table .vat-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#eef3ff;color:#2757d7;font-size:10px;font-weight:850;white-space:nowrap}.vat-purchase .vat-badge{background:#edf7f0;color:#4b7659}.vat-blocked .vat-badge{background:#fff0f0;color:#b04444}.vat-empty{padding:28px!important;text-align:center!important;color:var(--muted)}.vat-divider{height:1px;background:var(--line);margin:28px 0}.vat-negative{color:#b42332}.vat-positive{color:#172033}
 @media(max-width:1050px){.vat-kpis{grid-template-columns:repeat(2,1fr)}.vat-tax-grid{grid-template-columns:1fr}}
 @media(max-width:720px){.vat-head{align-items:flex-start;flex-direction:column}.vat-kpis{grid-template-columns:1fr 1fr}.vat-filter-row{align-items:flex-start;flex-direction:column}.vat-filter-label{width:auto;flex-basis:auto}}
@@ -4387,6 +4395,7 @@ let VAT_REPORT_CACHE=new Map();
 let VAT_INITIALIZED=false;
 let VAT_LOADING=null;
 let VAT_STATE={salesCategory:'전체',salesMonth:'전체기간',purchaseCategory:'전체',purchaseMonth:'전체기간',blockedCard:'전체'};
+let VAT_BLOCKED_SORT={key:null,dir:'asc'}; // 불공제 상세 전용 정렬 상태
 
 function vatEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
 function vatNum(v){
@@ -4543,9 +4552,38 @@ function vatRenderPurchases(report){
   document.getElementById('vatPurchaseTable').innerHTML=`<thead><tr><th>구분</th><th>카드/증빙</th><th>계정과목</th><th>거래처명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td><span class="vat-badge">${vatEsc(r.category)}</span></td><td>${vatEsc(r.source||'-')}</td><td>${vatEsc(r.account||'-')}</td><td>${vatEsc(r.counterparty)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">해당 조건의 자료가 없습니다.</td></tr>`}</tbody>`;
 }
 function vatRenderBlocked(report){
-  let rows=report.blocked||[];if(VAT_STATE.blockedCard!=='전체')rows=rows.filter(r=>r.card===VAT_STATE.blockedCard);
+  // 카드 필터가 선택된 결과에만 정렬을 적용하며, 원본 신고자료의 순서와 값은 변경하지 않습니다.
+  let rows=(report.blocked||[]).filter(r=>VAT_STATE.blockedCard==='전체'||r.card===VAT_STATE.blockedCard);
+  const {key,dir}=VAT_BLOCKED_SORT;
+  const cols=[['card','카드',false],['account','계정과목',false],['merchant','가맹점명',false],['count','건수',true],['supply','공급가액',true],['tax','세액',true],['total','합계',true]];
+  if(key){
+    const isNumber=cols.some(col=>col[0]===key&&col[2]);
+    const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
+    const multiplier=dir==='asc'?1:-1;
+    rows=rows.map((row,index)=>({row,index})).sort((a,b)=>{
+      const comparison=isNumber
+        ? Number(a.row[key]||0)-Number(b.row[key]||0)
+        : collator.compare(String(a.row[key]??''),String(b.row[key]??''));
+      return comparison*multiplier||a.index-b.index;
+    }).map(entry=>entry.row);
+  }
   document.getElementById('vatBlockedCaption').textContent=`${VAT_STATE.blockedCard} · ${rows.length.toLocaleString('ko-KR')}건`;
-  document.getElementById('vatBlockedTable').innerHTML=`<thead><tr><th>카드</th><th>계정과목</th><th>가맹점명</th><th class="num">건수</th><th class="num">공급가액</th><th class="num">세액</th><th class="num">합계</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${vatEsc(r.card)}</td><td>${vatEsc(r.account)}</td><td>${vatEsc(r.merchant)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td><td class="num">${vatFmt(r.total,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">불공제 상세자료가 없습니다.</td></tr>`}</tbody>`;
+  const headers=cols.map(([col,label,numeric])=>{
+    const active=key===col;
+    const ariaSort=active?(dir==='asc'?'ascending':'descending'):'none';
+    const arrow=active?(dir==='asc'?'▲':'▼'):'↕';
+    const nextDir=active&&dir==='asc'?'내림차순':'오름차순';
+    return `<th scope="col" class="vat-blocked-sort-header${numeric?' num':''}" aria-sort="${ariaSort}"><button type="button" class="vat-blocked-sort-btn${numeric?' num':''}" data-vat-blocked-sort="${col}" data-active="${active}" aria-label="${label} ${nextDir} 정렬">${label}<span class="vat-blocked-sort-arrow" aria-hidden="true">${arrow}</span></button></th>`;
+  }).join('');
+  const table=document.getElementById('vatBlockedTable');
+  table.innerHTML=`<thead><tr>${headers}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${vatEsc(r.card)}</td><td>${vatEsc(r.account)}</td><td>${vatEsc(r.merchant)}</td><td class="num">${vatFmt(r.count,'')}</td><td class="num">${vatFmt(r.supply,'')}</td><td class="num">${vatFmt(r.tax,'')}</td><td class="num">${vatFmt(r.total,'')}</td></tr>`).join(''):`<tr><td colspan="7" class="vat-empty">불공제 상세자료가 없습니다.</td></tr>`}</tbody>`;
+  table.querySelectorAll('[data-vat-blocked-sort]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const selected=button.dataset.vatBlockedSort;
+      VAT_BLOCKED_SORT={key:selected,dir:key===selected&&dir==='asc'?'desc':'asc'};
+      vatRenderBlocked(report);
+    });
+  });
 }
 function vatRenderReport(report){vatRenderKpis(report);vatRenderTaxSummary(report);vatRenderFilters(report);vatRenderSales(report);vatRenderPurchases(report);vatRenderBlocked(report);vatSetState('')}
 async function vatLoadPeriod(sheetName,force=false){
