@@ -2847,7 +2847,29 @@ async function ghGetSheetIds(){if(GH_SHEET_IDS)return GH_SHEET_IDS;const id=INTE
 async function ghDeleteRow(sheet,rowNo){const ids=await ghGetSheetIds(),sid=ids[sheet];if(sid==null)throw new Error(sheet+' 시트를 찾을 수 없습니다.');const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.tripSpreadsheetId)}:batchUpdate`;return githubFetchJson(u,{method:'POST',body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sid,dimension:'ROWS',startIndex:rowNo-1,endIndex:rowNo}}}]})})}
 async function ghAuditRows(rows){if(!rows?.length)return;return ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.auditSheet,'A:H',rows)}
 function ghAuditRow(action,target,id,oldValue,newValue,field){return[ghNow(),action,target,id,field||'',String(oldValue??''),String(newValue??''),GITHUB_USER_EMAIL]}
-async function ghReadSourceData(){const sid=INTEGRATED_CONFIG.tripSpreadsheetId,range=`${ghQ(INTEGRATED_CONFIG.sourceSheet)}!A2:F`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sid)}?includeGridData=true&ranges=${encodeURIComponent(range)}`;const p=await githubFetchJson(u),rows=p.sheets?.[0]?.data?.[0]?.rowData||[],groups={},addresses={};rows.forEach((rr,i)=>{const cells=rr.values||[],a=cells[0]||{},bg=a.effectiveFormat?.backgroundColor||a.effectiveFormat?.backgroundColorStyle?.rgbColor||{};const gray=Math.abs((bg.red??1)-.85098)<.04&&Math.abs((bg.green??1)-.85098)<.04&&Math.abs((bg.blue??1)-.85098)<.04;if(!gray)return;const text=j=>ghText(cells[j]?.formattedValue??cells[j]?.effectiveValue?.stringValue??''),num=j=>cells[j]?.effectiveValue?.numberValue??ghNum(text(j));const date=ghDate(text(0));if(!date)return;const raw=text(1),item=text(4),mapped=ghMapCost(raw,item);if(!mapped)return;const address=text(5),rowNo=i+2;if(!groups[date])groups[date]={date,rows:[],costs:ghZeroCosts(),addresses:[],region:''};groups[date].rows.push({row:rowNo,type:raw,item,mapped,merchant:text(2),amount:num(3),address});groups[date].costs[mapped]+=num(3);if(address&&!groups[date].addresses.includes(address))groups[date].addresses.push(address);if(address){addresses[date]??=[];if(!addresses[date].includes(address))addresses[date].push(address)}});Object.values(groups).forEach(g=>g.region=g.addresses.join(' / '));return{groups,addresses}}
+async function ghReadSourceData(){
+  const sid=INTEGRATED_CONFIG.tripSpreadsheetId;
+  // 출장사용내역 A~F열의 2행부터 마지막 데이터까지 조회하며 배경색은 조건으로 사용하지 않음.
+  const rows=await ghValuesGet(sid,INTEGRATED_CONFIG.sourceSheet,'A2:F');
+  const groups={},addresses={};
+  rows.forEach((cells,i)=>{
+    cells=cells||[];
+    const text=j=>ghText(cells[j]??'');
+    const num=j=>ghNum(cells[j]??'');
+    const date=ghDate(text(0));
+    if(!date)return;
+    const raw=text(1),item=text(4),mapped=ghMapCost(raw,item);
+    if(!mapped)return;
+    const address=text(5),rowNo=i+2;
+    if(!groups[date])groups[date]={date,rows:[],costs:ghZeroCosts(),addresses:[],region:''};
+    groups[date].rows.push({row:rowNo,type:raw,item,mapped,merchant:text(2),amount:num(3),address});
+    groups[date].costs[mapped]+=num(3);
+    if(address&&!groups[date].addresses.includes(address))groups[date].addresses.push(address);
+    if(address){addresses[date]??=[];if(!addresses[date].includes(address))addresses[date].push(address)}
+  });
+  Object.values(groups).forEach(g=>g.region=g.addresses.join(' / '));
+  return{groups,addresses};
+}
 async function ghDeletedSourceKeys(){const rows=await ghValuesGet(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.auditSheet,'A2:H'),o={};rows.forEach(r=>{if(ghText(r[2])===INTEGRATED_CONFIG.tripSheet&&ghText(r[1])==='원본숨김'&&ghText(r[4])==='source_keys'&&ghText(r[6])==='삭제'&&ghText(r[5]))o[ghText(r[5])]=true});return o}
 function ghMergeTrips(sourceGroups,storedAll,hidden,sourceAddressOptions){const active=storedAll.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'),legacy=storedAll.filter(r=>String(r.삭제여부||'').toUpperCase()==='Y'),byDate={},byKeys={},hide={...(hidden||{})};active.forEach(r=>{const d=ghDate(r.출장일자),k=ghText(r.source_keys);if(d&&k)byDate[d]=r;if(k)byKeys[k]=r});legacy.forEach(r=>{const k=ghText(r.source_keys);if(k)hide[k]=true});const out=[];Object.keys(sourceGroups).forEach(date=>{const g=sourceGroups[date],opts=(sourceAddressOptions[date]||[]).slice(),keys=g.rows.map(r=>r.row).join(','),saved=byKeys[keys]||byDate[date];if(!saved&&hide[keys])return;if(saved){const x={...saved,source_keys:keys,경상비:g.costs.경상비,유류비:g.costs.유류비,접대비:g.costs.접대비,교통비:g.costs.교통비,숙박비:g.costs.숙박비,기타비:g.costs.기타비};x.합계=Object.values(g.costs).reduce((a,b)=>a+ghNum(b),0);if(!ghText(x.방문지역)&&opts.length===1)x.방문지역=opts[0];if(!ghText(x.이동수단))x.이동수단=ghDefaultTransport(g.costs);const t=ghNormTrip(x);t.sourceAddresses=opts;out.push(t)}else{const total=Object.values(g.costs).reduce((a,b)=>a+ghNum(b),0);out.push({recordId:'AUTO:'+date,sourceKeys:keys,tripDate:date,currentCosts:ghCostPayload(g.costs),total,person:'CEO',department:'',summary:'',purpose:'',region:opts.length===1?opts[0]:'',sourceAddresses:opts,transport:ghDefaultTransport(g.costs),payment:total?'법인카드':'비용 없음',status:'미정리',persisted:false})}});active.filter(r=>!ghText(r.source_keys)).forEach(r=>{const t=ghNormTrip(r);t.sourceAddresses=[];out.push(t)});out.sort((a,b)=>String(b.tripDate).localeCompare(String(a.tripDate))||String(a.recordId).localeCompare(String(b.recordId)));return out}
 function ghApplyDerived(driveLogs,vehicles){const vm={};(vehicles||[]).forEach(v=>{if(v.vehicle)vm[v.vehicle]=v});const groups={};driveLogs.forEach((d,i)=>{if(!d.vehicle)return;(groups[d.vehicle]??=[]).push({d,i})});Object.keys(groups).forEach(v=>{const rows=groups[v].sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);let carry=vm[v]?ghNum(vm[v].baseMileage):0;rows.forEach(x=>{const d=x.d;if(!carry&&ghNum(d.baseMileage)>0)carry=ghNum(d.baseMileage);if(carry>0)d.baseMileage=carry;if(ghNum(d.currentMileage)>0)carry=ghNum(d.currentMileage);else if(carry>0&&ghNum(d.distance)>0){d.currentMileage=carry+ghNum(d.distance);d.currentMileageDerived=true;carry=d.currentMileage}})});return driveLogs}
