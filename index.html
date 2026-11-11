@@ -1740,7 +1740,7 @@ body.frameby-auth-locked .github-auth-btn{
 
 
         <div class="card">
-          <div class="section-title"><h2>운행내역 입력</h2><div class="section-actions"><span class="note">셀에서 여러 항목 수정 후 [변경사항 저장] 클릭 · 자동 저장 없음</span><span id="driveDraftNotice" class="trip-draft-status" aria-live="polite">수정 후 한 번에 저장</span><button class="trip-manual-save-btn" type="button" id="saveDriveChanges" disabled>변경사항 저장</button><button class="add-trip-btn" type="button" id="addManualDrive">+ 운행 추가</button></div></div>
+          <div class="section-title"><h2>운행내역 입력</h2><div class="section-actions"><span class="note">셀에서 여러 항목 수정 후 [변경사항 저장] 클릭 · 자동 저장 없음</span><span id="driveDraftNotice" class="trip-draft-status" aria-live="polite">수정 후 한 번에 저장</span><label class="vehicle-quick-select" for="vehicleQuickSelect">기본 차량 <select id="vehicleQuickSelect" aria-label="기본 차량 선택"><option value="">차량 선택</option></select></label><button class="master-add" type="button" id="applyVehicleToBlanks">미지정 행에 적용</button><button class="trip-manual-save-btn" type="button" id="saveDriveChanges" disabled>변경사항 저장</button><button class="add-trip-btn" type="button" id="addManualDrive">+ 운행 추가</button></div></div>
           <div class="screen-guide" style="margin:0 0 12px"><b>사용 방법</b> · 출장기록에서 차량으로 연결된 건, 유류비만 있는 날짜의 작성 대기 건, 직접 운행건을 한 표에 나열합니다. 수정할 셀을 클릭해 입력하고, 완료한 뒤 [변경사항 저장]을 누르면 함께 저장됩니다. 입력 도중에는 서버에 저장 요청을 보내지 않습니다.</div>
           <div class="table-wrap">
             <table class="table inline-sheet" id="vehicleInlineSheet">
@@ -2715,77 +2715,72 @@ function tripRemapDraft(map,oldId,newId,snapshot,field){
 async function tripSaveAllPending(){
  if(tripManualSaveBusy)return;
  if(!(tripPendingDrafts.size||drivePendingDrafts.size||mileagePendingDrafts.size))return;
+ const tripBatch=[...tripPendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
+ const driveBatch=[...drivePendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
+ const mileageBatch=[...mileagePendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
+ const total=tripBatch.length+driveBatch.length+mileageBatch.length;
+ if(tripBatch.some(x=>!x.payload.tripDate)||driveBatch.some(x=>!x.payload.date)){
+  toast('날짜가 없는 입력 행이 있습니다. 날짜를 입력한 뒤 저장해 주세요.','error');return;
+ }
  tripManualSaveBusy=true;tripUpdateSaveUi();
- let completed=0;const failures=[];let skipped=0;
- const saveProgress=(msg)=>{
-  for(const id of ['tripDraftNotice','driveDraftNotice']){const el=document.getElementById(id);if(el)el.textContent=msg;}
- };
+ for(const id of ['tripDraftNotice','driveDraftNotice']){const el=document.getElementById(id);if(el)el.textContent=`${total}건 일괄 저장 중 · 추가 입력값은 유지됩니다`}
  try{
-  const tripBatch=[...tripPendingDrafts.entries()];
-  const driveBatch=[...drivePendingDrafts.entries()];
-  const mileageBatch=[...mileagePendingDrafts.entries()];
-  const total=tripBatch.length+driveBatch.length+mileageBatch.length;
-  for(const [id,snapshot] of tripBatch){
-   if(!tripPendingDrafts.has(id))continue;
-   if(!snapshot.tripDate){skipped++;failures.push('출장일자 미입력');continue;}
-   saveProgress(`출장기록 저장 중 ${completed+1}/${total} · 화면을 닫지 마세요`);
-   try{
-    const saved=await rpc('saveTrip',{...snapshot});
-    const newId=saved?.recordId||id;
-    remapTripId(id,newId);
-    const idx=state.trips.findIndex(t=>t.recordId===newId),old=idx>=0?state.trips[idx]:null;
-    const copy={...saved};delete copy._driveSync;
-    if(old?.sourceAddresses)copy.sourceAddresses=old.sourceAddresses;
-    if(idx>=0)state.trips[idx]=copy;else state.trips.unshift(copy);
-    applyDriveSync(saved?._driveSync||null,id,newId);
-    // A newly linked drive can acquire a permanent ID when its trip is saved.
-    const linked=saved?._driveSync?.driveLog;
-    if(linked){for(const [driveId,draft] of [...drivePendingDrafts]){
-     if(draft.tripRecordId!==id&&draft.tripRecordId!==newId)continue;
-     drivePendingDrafts.delete(driveId);
-     const assignedId=linked.driveId||driveId;
-     draft.driveId=assignedId;draft.tripRecordId=newId;drivePendingDrafts.set(assignedId,draft);
-    }}
-    tripRemapDraft(tripPendingDrafts,id,newId,snapshot,'recordId');
-    const tr=[...document.querySelectorAll('#tripInlineSheet tbody tr[data-record-id]')].find(x=>x.dataset.recordId===id);
-    if(tr)tr.dataset.recordId=newId;
-    completed++;
-   }catch(e){failures.push(`출장 ${snapshot.tripDate}: ${e.message||e}`);}
-   tripPersistDrafts();
+  const result=await rpc('savePendingBatch',{trips:tripBatch,drives:driveBatch,mileages:mileageBatch});
+  if(!result?.ok)throw new Error('저장 완료 여부를 확인할 수 없습니다.');
+  for(const saved of result.trips||[]){
+   const key=saved.clientKey,original=tripBatch.find(x=>x.key===key),newId=saved.recordId||key;
+   const ix=state.trips.findIndex(t=>t.recordId===key||t.recordId===newId);
+   const old=ix>=0?state.trips[ix]:null;
+   const copy={...saved};delete copy._driveSync;delete copy.clientKey;
+   if(old?.sourceAddresses)copy.sourceAddresses=old.sourceAddresses;
+   if(ix>=0)state.trips[ix]=copy;else state.trips.unshift(copy);
+   applyDriveSync(saved._driveSync||null,key,newId);
+   if(original){
+    const live=tripPendingDrafts.get(key);
+    if(live&&JSON.stringify(live)===JSON.stringify(original.payload))tripPendingDrafts.delete(key);
+    else if(live&&newId!==key){tripPendingDrafts.delete(key);tripPendingDrafts.set(newId,{...live,recordId:newId});}
+   }
+   // A linked drive may have been created in this batch. Remap pending drive edits.
+   for(const [driveKey,draft] of [...drivePendingDrafts]){
+    if(draft.tripRecordId!==key)continue;
+    const linked=saved._driveSync?.driveLog;
+    const driveId=linked?.driveId||driveKey;
+    drivePendingDrafts.delete(driveKey);
+    drivePendingDrafts.set(driveId,{...draft,driveId,tripRecordId:newId});
+   }
   }
-  // Vehicle drafts may have been remapped as a result of trip saves.
-  for(const [,originalSnapshot] of driveBatch){
-   const pending=[...drivePendingDrafts.entries()].find(([,draft])=>draft===originalSnapshot);
-   if(!pending)continue;
-   const [id,snapshot]=pending;
-   if(!snapshot.date){skipped++;failures.push('운행일자 미입력');continue;}
-   saveProgress(`차량운행일지 저장 중 ${completed+1}/${total} · 화면을 닫지 마세요`);
-   try{
-    const saved=await rpc('saveDriveLog',{...snapshot});
-    const newId=saved?.driveId||id;
-    const idx=state.driveLogs.findIndex(d=>d.driveId===id || (!!snapshot.tripRecordId&&d.tripRecordId===snapshot.tripRecordId));
-    if(idx>=0)state.driveLogs[idx]={...saved};else state.driveLogs.unshift(saved);
-    tripRemapDraft(drivePendingDrafts,id,newId,snapshot,'driveId');
-    completed++;
-   }catch(e){failures.push(`운행 ${snapshot.date}: ${e.message||e}`);}
-   tripPersistDrafts();
+  for(const saved of result.drives||[]){
+   const key=saved.clientKey,original=driveBatch.find(x=>x.key===key),newId=saved.driveId||key;
+   const ix=state.driveLogs.findIndex(d=>d.driveId===key||d.driveId===newId||
+        (saved.tripRecordId&&d.tripRecordId===saved.tripRecordId));
+   const copy={...saved};delete copy.clientKey;
+   if(ix>=0)state.driveLogs[ix]=copy;else state.driveLogs.unshift(copy);
+   if(original){
+    let live=drivePendingDrafts.get(key);
+    let actualKey=key;
+    if(!live&&newId!==key){live=drivePendingDrafts.get(newId);actualKey=newId;}
+    if(live){
+     const same=Object.entries(original.payload).every(([field,value])=>
+         field==='tripRecordId'||field==='driveId'||String(live[field]??'')===String(value??''));
+     if(same)drivePendingDrafts.delete(actualKey);
+     else if(actualKey!==newId){drivePendingDrafts.delete(actualKey);drivePendingDrafts.set(newId,{...live,driveId:newId});}
+    }
+   }
   }
-  for(const [vehicle,snapshot] of mileageBatch){
-   if(!mileagePendingDrafts.has(vehicle))continue;
-   saveProgress(`차량 주행거리 저장 중 ${completed+1}/${total} · 화면을 닫지 마세요`);
-   try{
-    const saved=await rpc('saveVehicleMileage',{...snapshot});
-    const idx=state.vehicles.findIndex(v=>v.vehicle===vehicle);
-    if(idx>=0)state.vehicles[idx]=saved;else state.vehicles.push(saved);
-    if(mileagePendingDrafts.get(vehicle)===snapshot)mileagePendingDrafts.delete(vehicle);
-    completed++;
-   }catch(e){failures.push(`주행거리 ${vehicle}: ${e.message||e}`);}
-   tripPersistDrafts();
+  for(const saved of result.mileages||[]){
+   const key=saved.clientKey,original=mileageBatch.find(x=>x.key===key);
+   const ix=state.vehicles.findIndex(v=>v.vehicle===saved.vehicle);
+   const copy={...saved};delete copy.clientKey;
+   if(ix>=0)state.vehicles[ix]=copy;else state.vehicles.push(copy);
+   if(original&&JSON.stringify(mileagePendingDrafts.get(key))===JSON.stringify(original.payload))mileagePendingDrafts.delete(key);
   }
-  applyAutoBaseMileages();initFilters(false);renderTripSystemAll();
-  if(failures.length){toast(`${completed}건 저장 · ${tripPendingDrafts.size+drivePendingDrafts.size+mileagePendingDrafts.size}건 미저장 (오류: ${failures.slice(0,2).join('; ')})`,'error');}
-  else toast(`${completed}건 저장 완료`);
- }finally{tripManualSaveBusy=false;tripPersistDrafts();tripUpdateSaveUi();}
+  tripPersistDrafts();applyAutoBaseMileages();initFilters(false);renderTripSystemAll();
+  const remaining=tripPendingDrafts.size+drivePendingDrafts.size+mileagePendingDrafts.size;
+  toast(remaining?`${result.count||total}건 저장 · 입력 중 변경된 ${remaining}건은 미저장으로 유지`:`${result.count||total}건 일괄 저장 완료`);
+ }catch(err){
+  tripPersistDrafts();
+  toast('일괄 저장 실패: '+(err.message||err)+' · 입력 내용은 유지됩니다.','error');
+ }finally{tripManualSaveBusy=false;tripUpdateSaveUi();}
 }
 document.getElementById('saveTripChanges')?.addEventListener('click',tripSaveAllPending);
 document.getElementById('saveDriveChanges')?.addEventListener('click',tripSaveAllPending);
@@ -2805,7 +2800,7 @@ function monthOf(d){return /^\d{4}-\d{2}/.test(d||'')?String(d).slice(0,7):''}
 function opts(values,current,blank='선택'){const arr=[...new Set((values||[]).filter(Boolean))];let h=blank!==null?`<option value="">${esc(blank)}</option>`:'';if(current&&!arr.includes(current))arr.unshift(current);return h+arr.map(v=>`<option ${v===current?'selected':''}>${esc(v)}</option>`).join('')}
 function statusPill(s){return s==='완료'?'<span class="pill green">완료</span>':'<span class="pill orange">'+esc(s||'미정리')+'</span>'}
 function driveStatusPill(s){return s==='완료'?'<span class="pill green">완료</span>':'<span class="pill orange">'+esc(s||'미작성')+'</span>'}
-const MUTATION_RPC_NAMES=new Set(['saveTrip','deleteTrip','saveDriveLog','saveVehicleMileage','addMaster','updateMaster','deleteMaster']);
+const MUTATION_RPC_NAMES=new Set(['savePendingBatch','saveTrip','deleteTrip','saveDriveLog','saveVehicleMileage','addMaster','updateMaster','deleteMaster']);
 let mutationRpcQueue=Promise.resolve();
 function rpcRaw(name,...args){return githubTripRpc(name,...args)}
 function rpc(name,...args){
@@ -2862,6 +2857,20 @@ function setupSortableTable(selector,scope,keys,rerender){const table=document.q
 function updateSortIndicators(){document.querySelectorAll('.sortable-th').forEach(th=>{const spec=state.sorts?.[th.dataset.sortScope];if(spec?.key===th.dataset.sortKey)th.dataset.sortDir=spec.dir;else delete th.dataset.sortDir})}
 function initSortableTables(){setupSortableTable('#trip-dashboard .card:last-child table','tripDashboard',['recordId','tripDate','person','summary','region','transport','routine','fuel','entertainment','transportCost','lodging','total','status'],renderTripDashboard);setupSortableTable('#tripInlineSheet','tripInput',['tripDate','person','department','summary','purpose','region','transport','payment','total',null,'status',null],renderTripInput);setupSortableTable('#vehicle-dashboard .vehicle-status-table','vehicleStatus',['vehicle','baseMileage','currentMileage','missingDistance'],renderVehicleDashboard);setupSortableTable('#vehicle-dashboard .card:last-child table','vehicleDashboard',['date','vehicle','driveType','route','roundTrip','distance','baseMileage','currentMileage','tripRecordId','status'],renderVehicleDashboard);setupSortableTable('#vehicleInlineSheet','vehicleInput',['date','tripRecordId','vehicle','driveType','route','route','roundTrip','distance','baseMileage','currentMileage','status'],renderVehicleInput)}
 function allMonths(){return [...new Set([...state.trips.map(t=>monthOf(t.tripDate)),...state.driveLogs.map(d=>monthOf(d.date))].filter(Boolean))].sort().reverse()}
+let preferredDriveVehicle='';
+try{preferredDriveVehicle=sessionStorage.getItem('FRAMEBY_DRIVE_PREF_VEHICLE')||''}catch(_){ }
+function rememberDriveVehicle(v){
+ if(!v)return;
+ preferredDriveVehicle=v;
+ try{sessionStorage.setItem('FRAMEBY_DRIVE_PREF_VEHICLE',v)}catch(_){ }
+ const sel=document.getElementById('vehicleQuickSelect');if(sel&&[...sel.options].some(x=>x.value===v))sel.value=v;
+}
+function refreshVehicleQuickSelect(){
+ const sel=document.getElementById('vehicleQuickSelect');if(!sel)return;
+ const names=allVehicles(),current=names.includes(sel.value)?sel.value:(names.includes(preferredDriveVehicle)?preferredDriveVehicle:'');
+ sel.innerHTML='<option value="">차량 선택</option>'+names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ sel.value=current;
+}
 function allVehicles(){return [...new Set([...state.vehicles.map(v=>v.vehicle),...state.driveLogs.map(v=>v.vehicle)].filter(Boolean))].sort()}
 function applyAutoBaseMileages(){const info={};state.vehicles.forEach(v=>{if(v.vehicle)info[v.vehicle]=v});const groups={};state.driveLogs.forEach((d,idx)=>{if(!d.vehicle)return;(groups[d.vehicle]||(groups[d.vehicle]=[])).push({d,idx})});Object.keys(groups).forEach(vehicle=>{const rows=groups[vehicle].sort((a,b)=>String(a.d.date||'').localeCompare(String(b.d.date||''))||(a.idx-b.idx));let carry=n(info[vehicle]?.baseMileage);rows.forEach(x=>{const d=x.d;if(!carry&&n(d.baseMileage)>0)carry=n(d.baseMileage);if(carry>0)d.baseMileage=carry;if(n(d.currentMileage)>0)carry=n(d.currentMileage);else if(carry>0&&n(d.distance)>0){d.currentMileage=carry+n(d.distance);d.currentMileageDerived=true;carry=d.currentMileage}})});return state.driveLogs}
 function tripFillSelect(sel,values,keep,allLabel){if(!sel)return;const cur=keep??sel.value;sel.innerHTML=(allLabel?`<option value="">${allLabel}</option>`:'')+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(cur)||(!cur&&allLabel))sel.value=cur;else if(values.length)sel.value=values[0]}
@@ -2913,18 +2922,32 @@ function renderVehicleDashboard(){applyAutoBaseMileages();const rows=sortDriveRo
  const statusBody=document.querySelector('#vehicle-dashboard .vehicle-status-table tbody');if(statusBody){const statusRows=names.map(v=>{const x=derivedVehicle(v),logged=state.driveLogs.filter(d=>d.vehicle===v).reduce((a,d)=>a+n(d.distance),0),gap=Math.max(0,x.currentMileage-x.baseMileage-logged);return {vehicle:v,baseMileage:x.baseMileage,currentMileage:x.currentMileage,missingDistance:gap}});const spec=state.sorts.vehicleStatus||{key:'vehicle',dir:'asc'},sorted=statusRows.sort((a,b)=>(spec.dir==='asc'?1:-1)*cmpSort(a[spec.key],b[spec.key]));statusBody.innerHTML=sorted.length?sorted.map(x=>`<tr><td><strong>${esc(x.vehicle)}</strong></td><td>${km(x.baseMileage)}</td><td>${km(x.currentMileage)}</td><td class="gap">${km(x.missingDistance)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="4">운행내역에서 차량명을 입력하면 표시됩니다.</td></tr>';}
  const typeSums={출장:0,출퇴근:0,'기타 업무':0};rows.forEach(d=>{if(typeSums[d.driveType]!==undefined)typeSums[d.driveType]+=n(d.distance)});const bars=document.querySelectorAll('#vehicle-dashboard .grid.two .card:nth-child(2) .summary-bar');const mx=Math.max(1,...Object.values(typeSums));['출장','출퇴근','기타 업무'].forEach((t,i)=>setBar(bars[i],t,typeSums[t],mx,'km'));
  const body=document.querySelector('#vehicle-dashboard .card:last-child tbody');if(body)body.innerHTML=rows.length?rows.map(d=>`<tr><td>${esc(d.date)}</td><td>${esc(d.vehicle||'-')}</td><td><span class="pill ${d.driveType==='출장'?'blue':'gray'}">${esc(d.driveType||'-')}</span></td><td class="route">${esc(d.start||'-')} → ${esc(d.end||'-')}${d.roundTrip==='왕복'?' → '+esc(d.start||'-'):''}</td><td>${esc(d.roundTrip||'-')}</td><td class="num"><b>${n(d.distance)?km(d.distance):'-'}</b></td><td class="num">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="num">${n(d.currentMileage)?n(d.currentMileage).toLocaleString('ko-KR'):'-'}</td><td>${d.tripRecordId?`<span class="link-tag">${esc(d.tripRecordId)}</span>`:(d.fuelSource?'<span class="link-tag">유류비 원본</span>':'')}</td><td>${driveStatusPill(d.status)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="10">조회할 운행내역이 없습니다.</td></tr>';finalizeTableColumns('vehicleDashboardTable')}
-function renderVehicleInput(){applyAutoBaseMileages();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true),temps=raw.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(raw.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(d=>driveRowHtml(driveMergeDraft(d))).join(''):'<tr class="empty-row"><td colspan="11">조회할 운행내역이 없습니다.</td></tr>';finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)})}
-function driveRowHtml(d){const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td>${d.tripRecordId?`<span class="link-tag">${esc(d.tripRecordId)}</span>`:(d.fuelSource?'<span class="link-tag">유류비 원본</span>':'')}</td><td class="editable-cell"><input class="cell-input vehicle-name-input" data-field="vehicle" value="${esc(d.vehicle||'')}" placeholder="차량명"></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell" data-field="baseMileage">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="editable-cell">${d.currentMileageDerived?`<div class="locked auto-mileage-cell" title="기초주행거리 + 실제거리 자동계산">${n(d.currentMileage).toLocaleString('ko-KR')}</div>`:`<input class="cell-input" data-field="currentMileage" inputmode="numeric" value="${n(d.currentMileage)||''}" placeholder="자동/실측">`}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`}
+function renderVehicleInput(){applyAutoBaseMileages();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true),temps=raw.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(raw.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(d=>driveRowHtml(driveMergeDraft(d))).join(''):'<tr class="empty-row"><td colspan="11">조회할 운행내역이 없습니다.</td></tr>';finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)})}
+function driveRowHtml(d){const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td>${d.tripRecordId?`<span class="link-tag">${esc(d.tripRecordId)}</span>`:(d.fuelSource?'<span class="link-tag">유류비 원본</span>':'')}</td><td class="editable-cell"><select class="cell-select vehicle-name-input" data-field="vehicle">${opts(allVehicles(),d.vehicle,"차량 선택")}</select></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell" data-field="baseMileage">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="editable-cell">${d.currentMileageDerived?`<div class="locked auto-mileage-cell" title="기초주행거리 + 실제거리 자동계산">${n(d.currentMileage).toLocaleString('ko-KR')}</div>`:`<input class="cell-input" data-field="currentMileage" inputmode="numeric" value="${n(d.currentMileage)||''}" placeholder="자동/실측">`}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`}
 function bindDriveRow(row){
  row.querySelectorAll('input,select,[contenteditable="true"]').forEach(el=>{
   el.addEventListener('input',()=>driveCaptureDraft(row));
-  el.addEventListener('change',()=>driveCaptureDraft(row));
+  el.addEventListener('change',()=>{if(el.dataset.field==='vehicle')rememberDriveVehicle(el.value);driveCaptureDraft(row)});
  });
 }
 function readDriveField(row,name){const el=row.querySelector(`[data-field="${name}"]`);if(!el)return '';return el.hasAttribute('contenteditable')||el.value===undefined?el.textContent.trim():el.value}
 function saveDriveRow(row){driveCaptureDraft(row)}
-document.getElementById('addManualDrive')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.driveTempSeq);state.driveLogs.unshift({driveId:id,tripRecordId:'',date:'',vehicle:vehicleFilterSel?.value||'',driveType:'출장',start:'',end:'',roundTrip:'왕복',distance:0,baseMileage:0,currentMileage:0,status:'미작성',persisted:false});renderVehicleInput();const newRow=document.querySelector(`#vehicleInlineSheet tr[data-drive-id="${CSS.escape(id)}"]`);if(newRow){driveCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
+document.getElementById('addManualDrive')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.driveTempSeq);state.driveLogs.unshift({driveId:id,tripRecordId:'',date:'',vehicle:preferredDriveVehicle||((vehicleFilterSel?.value&&allVehicles().includes(vehicleFilterSel.value))?vehicleFilterSel.value:''),driveType:'출장',start:'',end:'',roundTrip:'왕복',distance:0,baseMileage:0,currentMileage:0,status:'미작성',persisted:false});renderVehicleInput();const newRow=document.querySelector(`#vehicleInlineSheet tr[data-drive-id="${CSS.escape(id)}"]`);if(newRow){driveCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
 
+document.getElementById('vehicleQuickSelect')?.addEventListener('change',e=>rememberDriveVehicle(e.target.value));
+document.getElementById('applyVehicleToBlanks')?.addEventListener('click',()=>{
+ const vehicle=document.getElementById('vehicleQuickSelect')?.value||'';
+ if(!vehicle){toast('적용할 차량을 먼저 선택해 주세요.','error');return}
+ let count=0;
+ document.querySelectorAll('#vehicleInlineSheet tbody tr[data-drive-id]').forEach(row=>{
+  const sel=row.querySelector('select[data-field="vehicle"]');
+  if(!sel||sel.value)return;
+  sel.value=vehicle;driveCaptureDraft(row);count++;
+ });
+ rememberDriveVehicle(vehicle);
+ if(count)toast(`차량 미지정 ${count}건에 적용했습니다. 저장 버튼을 누르면 반영됩니다.`);
+ else toast('현재 표시된 운행내역에는 차량 미지정 행이 없습니다.');
+});
 function renderReconcile(){const sel=document.getElementById('reconcileVehicle'),base=document.getElementById('reconcileBase'),cur=document.getElementById('reconcileCurrent');if(!sel||!base||!cur)return;const names=allVehicles();const keep=sel.value;sel.innerHTML=names.length?names.map(v=>`<option>${esc(v)}</option>`).join(''):'<option value="">차량명 입력 필요</option>';if(names.includes(keep))sel.value=keep;const vehicle=sel.value;const x=vehicle?derivedVehicle(vehicle):{baseMileage:0,currentMileage:0};const draft=mileagePendingDrafts.get(vehicle);base.value=draft?draft.baseMileage:(x.baseMileage||'');cur.value=draft?draft.currentMileage:(x.currentMileage||'');updateReconcileNumbers()}
 function updateReconcileNumbers(){const vehicle=document.getElementById('reconcileVehicle')?.value||'';const base=n(document.getElementById('reconcileBase')?.value),current=n(document.getElementById('reconcileCurrent')?.value);const actual=Math.max(0,current-base),logged=state.driveLogs.filter(d=>d.vehicle===vehicle).reduce((s,d)=>s+n(d.distance),0),missing=Math.max(0,actual-logged),rate=actual?Math.min(100,logged/actual*100):0;document.getElementById('actualDistance').textContent=km(actual);document.getElementById('loggedDistance').textContent=km(logged);document.getElementById('missingDistance').textContent=km(missing);document.getElementById('recordRate').textContent=rate.toFixed(1)+'%';document.getElementById('recordProgress').style.width=rate.toFixed(1)+'%'}
 document.getElementById('reconcileVehicle')?.addEventListener('change',renderReconcile);
@@ -3137,7 +3160,247 @@ async function ghMasterRows(){const rows=await ghValuesGet(INTEGRATED_CONFIG.tri
 async function ghAddMaster(type,value){type=ghMasterType(type);value=ghText(value);if(!value)throw new Error('값을 입력해 주세요.');const rows=await ghMasterRows();if(rows.some(r=>r.type===type&&r.value===value&&r.active))return{ok:true,type,value};const order=rows.filter(r=>r.type===type).reduce((m,r)=>Math.max(m,r.order||0),0)+1,now=ghNow();await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.masterSheet,'A:F',[[type,value,order,'Y',now,now]]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.masterSheet,type+':'+value,'',value,'기초관리')]);return{ok:true,type,value}}
 async function ghUpdateMaster(type,oldValue,newValue){type=ghMasterType(type);oldValue=ghText(oldValue);newValue=ghText(newValue);if(!newValue)throw new Error('빈 값으로 저장할 수 없습니다.');const rows=await ghMasterRows(),hit=rows.find(r=>r.type===type&&r.value===oldValue&&r.active);if(!hit)throw new Error('수정할 기초관리 값을 찾지 못했습니다.');await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.masterSheet,`B${hit.rowNo}:F${hit.rowNo}`,[[newValue,hit.order,'Y',hit.created||ghNow(),ghNow()]]);await ghAuditRows([ghAuditRow('수정',INTEGRATED_CONFIG.masterSheet,type+':'+oldValue,oldValue,newValue,'기초관리')]);return{ok:true,type,oldValue,newValue}}
 async function ghDeleteMaster(type,value){type=ghMasterType(type);value=ghText(value);const rows=await ghMasterRows(),hit=rows.find(r=>r.type===type&&r.value===value&&r.active);if(!hit)return{ok:true};await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.masterSheet,`D${hit.rowNo}:F${hit.rowNo}`,[['N',hit.created||'',ghNow()]]);await ghAuditRows([ghAuditRow('삭제표시',INTEGRATED_CONFIG.masterSheet,type+':'+value,'Y','N','기초관리')]);return{ok:true,type,value}}
-function githubTripRpc(name,...args){const map={getInitialData:ghGetInitialData,saveTrip:ghSaveTrip,deleteTrip:ghDeleteTrip,saveDriveLog:ghSaveDriveLog,saveVehicleMileage:ghSaveVehicleMileage,addMaster:ghAddMaster,updateMaster:ghUpdateMaster,deleteMaster:ghDeleteMaster};if(!map[name])return Promise.reject(new Error('지원하지 않는 요청: '+name));return map[name](...args)}
+// 출장·차량 관리 전용 일괄 저장. 입력 건수에 관계없이 전체 원본을 일괄 조회하고 일괄 갱신한다.
+const GH_BULK_NUMERIC_FIELDS=new Set(['경상비','유류비','접대비','교통비','숙박비','기타비','합계','실제거리_km','기초주행거리_km','현재누적거리_km','기초키로수','누적거리']);
+function ghBulkCell(value,numeric=false){
+  if(value===null||value===undefined||value==='')return {userEnteredValue:{stringValue:''}};
+  if(numeric){const n=ghNum(value);return{userEnteredValue:{numberValue:n}};}
+  return{userEnteredValue:{stringValue:String(value)}};
+}
+function ghBulkRow(obj,headers){return{values:headers.map(h=>ghBulkCell(obj[h]??'',GH_BULK_NUMERIC_FIELDS.has(h)))}}
+function ghBulkObjectRows(data,headers){return (data||[]).map((values,i)=>{
+  if(!values?.some(v=>v!==''&&v!=null))return null;
+  const result={__rowNo:i+2};headers.forEach((h,j)=>result[h]=values[j]??'');return result;
+}).filter(Boolean)}
+function ghBulkSourceParse(rows){
+  const groups={},addresses={};
+  (rows||[]).forEach((cells,i)=>{
+    cells=cells||[];const text=j=>ghText(cells[j]),num=j=>ghNum(cells[j]),date=ghDate(text(0));
+    if(!date)return;
+    const raw=text(1),item=text(4),mapped=ghMapCost(raw,item);
+    if(!mapped)return;
+    const address=text(5),rowNo=i+2;
+    if(!groups[date])groups[date]={date,rows:[],costs:ghZeroCosts(),addresses:[],region:''};
+    groups[date].rows.push({row:rowNo,type:raw,item,mapped,merchant:text(2),amount:num(3),address});
+    groups[date].costs[mapped]+=num(3);
+    if(address&&!groups[date].addresses.includes(address))groups[date].addresses.push(address);
+    if(address){addresses[date]??=[];if(!addresses[date].includes(address))addresses[date].push(address)}
+  });
+  Object.values(groups).forEach(g=>g.region=g.addresses.join(' / '));
+  return{groups,addresses};
+}
+function ghBulkRetryable(status,message){return status===429||(status===403&&/quota|rate.limit|read.requests|too.many.requests|user.rate.limit/i.test(message||''))||status===503;}
+async function ghBulkRequest(url,body,method='POST'){
+  let error;
+  for(let attempt=0;attempt<(method==='POST'?1:4);attempt++){
+    try{
+      const res=await fetch(url,{method,headers:{Authorization:`Bearer ${GITHUB_ACCESS_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(res.ok)return res.json();
+      let raw={};try{raw=await res.json()}catch(_){}
+      const message=raw?.error?.message||`Google Sheets 오류 (HTTP ${res.status})`;
+      if(res.status===401)throw Object.assign(new Error('Google 로그인이 만료되었습니다. 다시 로그인해 주세요.'),{status:401});
+      if(ghBulkRetryable(res.status,message))throw Object.assign(new Error('Google Sheets 읽기/쓰기 요청 한도 초과. 잠시 후 다시 저장해 주세요.'),{status:res.status,retryable:true});
+      throw Object.assign(new Error(message),{status:res.status});
+    }catch(e){
+      error=e;
+      if(method==='POST'||!e.retryable||attempt>=3)break;
+      await new Promise(resolve=>setTimeout(resolve,[750,1500,3000][attempt]));
+    }
+  }
+  throw error;
+}
+async function ghBulkReadSnapshot(){
+  const id=INTEGRATED_CONFIG.tripSpreadsheetId;
+  const sheets=[INTEGRATED_CONFIG.sourceSheet,INTEGRATED_CONFIG.tripSheet,INTEGRATED_CONFIG.driveSheet,INTEGRATED_CONFIG.vehicleSheet];
+  const bounds=['A2:F','A2:U','A2:O','A2:H'];
+  const u=new URL(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}/values:batchGet`);
+  sheets.forEach((sheet,i)=>u.searchParams.append('ranges',`${ghQ(sheet)}!${bounds[i]}`));
+  u.searchParams.set('valueRenderOption','FORMATTED_VALUE');
+  u.searchParams.set('majorDimension','ROWS');
+  // batchGet 자체가 GET 이므로 재시도 로직을 공유한다.
+  const headers={Authorization:`Bearer ${GITHUB_ACCESS_TOKEN}`};
+  let result,last;
+  for(let i=0;i<4;i++){
+    try{
+      const res=await fetch(u.toString(),{headers});
+      const data=await res.json();
+      if(res.ok){result=data;break;}
+      const msg=data?.error?.message||`Google Sheets 오류 (HTTP ${res.status})`;
+      if(ghBulkRetryable(res.status,msg))throw Object.assign(new Error('Google Sheets 조회 한도가 초과됐습니다. 잠시 후 다시 저장해 주세요.'),{retryable:true});
+      throw new Error(msg);
+    }catch(e){last=e;if(!e.retryable||i===3)throw e;await new Promise(r=>setTimeout(r,[750,1500,3000][i]));}
+  }
+  const ranges=result?.valueRanges||[];
+  if(ranges.length!==4)throw new Error('출장·차량 시트 일괄 조회 결과가 누락되었습니다. 저장을 중단합니다.');
+  return{
+    source:ghBulkSourceParse(ranges[0].values||[]),
+    trips:ghBulkObjectRows(ranges[1].values,GH_TRIP_HEADERS),
+    drives:ghBulkObjectRows(ranges[2].values,GH_DRIVE_HEADERS),
+    vehicles:ghBulkObjectRows(ranges[3].values,GH_VEHICLE_HEADERS)
+  };
+}
+async function ghSavePendingBatch(request){
+  request=request||{};
+  const tripDrafts=request.trips||[],driveDrafts=request.drives||[],mileageDrafts=request.mileages||[];
+  if(!(tripDrafts.length||driveDrafts.length||mileageDrafts.length))return{ok:true,trips:[],drives:[],mileages:[],count:0};
+  // 검증 오류가 있으면 전체 저장 취소: 사용자에게 일부 저장 완료로 오인시키지 않는다.
+  for(const x of tripDrafts)if(!ghDate(x.payload?.tripDate))throw new Error('출장기록에 일자가 없는 행이 있습니다. 날짜를 입력한 뒤 일괄 저장해 주세요.');
+  for(const x of driveDrafts)if(!ghDate(x.payload?.date))throw new Error('차량운행일지에 일자가 없는 행이 있습니다. 날짜를 입력한 뒤 일괄 저장해 주세요.');
+  for(const x of mileageDrafts)if(!ghText(x.payload?.vehicle))throw new Error('주행거리 저장 항목에 차량명이 누락됐습니다.');
+  const id=INTEGRATED_CONFIG.tripSpreadsheetId;
+  const [snapshot,sheetIds]=await Promise.all([ghBulkReadSnapshot(),ghGetSheetIds()]);
+  for(const sheet of [INTEGRATED_CONFIG.tripSheet,INTEGRATED_CONFIG.driveSheet,INTEGRATED_CONFIG.vehicleSheet,INTEGRATED_CONFIG.auditSheet]){
+    if(!Number.isInteger(sheetIds[sheet]))throw new Error(`${sheet} 시트를 찾을 수 없어 저장을 중단합니다.`);
+  }
+  const tripOriginal=snapshot.trips,driveOriginal=snapshot.drives,vehicleOriginal=snapshot.vehicles;
+  const trips=[...tripOriginal],drives=[...driveOriginal],vehicles=[...vehicleOriginal];
+  const changed={trip:new Map(),drive:new Map(),vehicle:new Map()};
+  const appended={trip:[],drive:[],vehicle:[]};
+  const deletedDriveRows=new Set(),audit=[],tripResults=[],driveResults=[],mileageResults=[];
+  const touchedVehicles=new Set(),tripIdMap=new Map();
+  const now=ghNow();
+  const tripById=new Map(trips.map(r=>[ghText(r.record_id),r]));
+  const driveById=new Map(drives.map(r=>[ghText(r.drive_id),r]));
+  const allIds=new Set(tripById.keys());
+  const nextCounter=new Map();
+  function issueTripId(date,requested){
+    const fixed=ghText(requested);
+    if(fixed&&!allIds.has(fixed)){allIds.add(fixed);return fixed}
+    const prefix='D'+date.slice(2,4)+date.slice(5,7)+'-';
+    if(!nextCounter.has(prefix)){
+      let max=0;for(const a of allIds){if(a.startsWith(prefix))max=Math.max(max,Number(a.slice(prefix.length))||0)}
+      nextCounter.set(prefix,max);
+    }
+    let next=nextCounter.get(prefix)+1,code=prefix+String(next).padStart(2,'0');
+    while(allIds.has(code)){next++;code=prefix+String(next).padStart(2,'0')}
+    nextCounter.set(prefix,next);allIds.add(code);return code;
+  }
+  function mark(sheet,o){if(o.__rowNo)changed[sheet].set(o.__rowNo,o);else if(!appended[sheet].includes(o))appended[sheet].push(o)}
+  function diffAudit(sheet,old,o,headers,key){
+    if(!old){audit.push(ghAuditRow('생성',sheet,key,'','','일괄 입력'));return}
+    for(const h of headers){if(h==='수정일시')continue;if(String(old[h]??'')!==String(o[h]??''))audit.push(ghAuditRow('수정',sheet,key,old[h]??'',o[h]??'',h))}
+  }
+  function findActiveDrive(tripId){return drives.find(r=>ghText(r.trip_record_id)===tripId&&String(r.삭제여부||'').toUpperCase()!=='Y'&&!deletedDriveRows.has(r.__rowNo))}
+  for(const {key,payload} of tripDrafts){
+    const date=ghDate(payload.tripDate),clientId=ghText(payload.recordId)||ghText(key);
+    const sourceBacked=Boolean(ghText(payload.sourceKeys))||clientId.startsWith('AUTO:');
+    const g=sourceBacked?snapshot.source.groups[date]:null;
+    if(sourceBacked&&!g)throw new Error(`${date} 원본 출장사용내역을 찾을 수 없어 저장을 중단했습니다.`);
+    if(sourceBacked&&ghIsFuelOnlyGroup(g))throw new Error(`${date}은 유류비만 있는 날짜입니다. 출장기록 대신 차량운행일지에서 관리해 주세요.`);
+    const opts=sourceBacked?(snapshot.source.addresses[date]||[]):[],costs=g?g.costs:ghZeroCosts();
+    const sourceKeys=g?g.rows.map(r=>r.row).join(','):'';
+    let old=tripById.get(clientId)||null;
+    if(!old&&sourceKeys)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.source_keys)===sourceKeys)||null;
+    if(!old&&sourceKeys)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys))||null;
+    const recordId=old?ghText(old.record_id):issueTripId(date,payload._assignedId);
+    tripIdMap.set(clientId,recordId);
+    const total=Object.values(costs).reduce((a,b)=>a+ghNum(b),0);
+    const o={record_id:recordId,source_keys:sourceKeys,출장일자:date,경상비:costs.경상비,접대비:costs.접대비,
+      교통비:costs.교통비,숙박비:costs.숙박비,기타비:costs.기타비,합계:total,출장자:ghText(payload.person)||'CEO',
+      구분:ghText(payload.department),적요명:ghText(payload.summary),출장목적:ghText(payload.purpose),
+      방문지역:ghText(payload.region)||(opts.length===1?opts[0]:''),이동수단:ghText(payload.transport)||ghDefaultTransport(costs),
+      결제수단:ghText(payload.payment)||(total?'법인카드':'비용 없음'),상태:'',삭제여부:'N',
+      생성일시:old?old.생성일시:now,수정일시:now,유류비:costs.유류비};
+    o.상태=ghTripStatus(o);if(old?.__rowNo)o.__rowNo=old.__rowNo;
+    if(!old)trips.push(o);else trips[trips.indexOf(old)]=o;
+    tripById.set(recordId,o);mark('trip',o);diffAudit(INTEGRATED_CONFIG.tripSheet,old,o,GH_TRIP_HEADERS,recordId);
+    let sync={action:'none',tripRecordId:recordId};
+    const existing=findActiveDrive(recordId);
+    if(o.이동수단==='차량'){
+      let d;
+      if(existing){
+        const oldDrive={...existing};
+        d={...existing,일자:date,도착지:o.방문지역,삭제여부:'N',수정일시:now};
+        d.상태=ghDriveStatus(d);drives[drives.indexOf(existing)]=d;driveById.set(d.drive_id,d);
+        mark('drive',d);diffAudit(INTEGRATED_CONFIG.driveSheet,oldDrive,d,GH_DRIVE_HEADERS,d.drive_id);
+        sync={action:'updated',tripRecordId:recordId,driveLog:ghNormDrive(d)};
+      }else{
+        d={drive_id:'DRV-'+crypto.randomUUID().slice(0,8).toUpperCase(),trip_record_id:recordId,일자:date,
+          차량명:'',운행구분:'출장',출발지:'사무실',도착지:o.방문지역,왕복편도:'왕복',실제거리_km:0,
+          기초주행거리_km:0,현재누적거리_km:0,상태:'미작성',삭제여부:'N',생성일시:now,수정일시:now};
+        drives.push(d);driveById.set(d.drive_id,d);mark('drive',d);
+        audit.push(ghAuditRow('생성',INTEGRATED_CONFIG.driveSheet,d.drive_id,'',recordId,'출장기록 자동연결'));
+        sync={action:'created',tripRecordId:recordId,driveLog:ghNormDrive(d)};
+      }
+      if(d.차량명)touchedVehicles.add(d.차량명);
+    }else if(existing){
+      if(existing.차량명)touchedVehicles.add(existing.차량명);
+      if(existing.__rowNo)deletedDriveRows.add(existing.__rowNo);
+      else{const i=appended.drive.indexOf(existing);if(i>=0)appended.drive.splice(i,1)}
+      drives.splice(drives.indexOf(existing),1);driveById.delete(existing.drive_id);
+      audit.push(ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,existing.drive_id,JSON.stringify(existing),'삭제','출장 이동수단 변경'));
+      sync={action:'deleted',tripRecordId:recordId,driveId:existing.drive_id};
+    }
+    const result=ghNormTrip(o);result._driveSync=sync;result.clientKey=key;tripResults.push(result);
+  }
+  for(const {key,payload} of driveDrafts){
+    const tripRecordId=tripIdMap.get(ghText(payload.tripRecordId))||ghText(payload.tripRecordId);
+    const clientDriveId=ghText(payload.driveId)||ghText(key);
+    let old=driveById.get(clientDriveId)||null;
+    if(!old&&tripRecordId)old=findActiveDrive(tripRecordId)||null;
+    if(old&&deletedDriveRows.has(old.__rowNo))old=null;
+    const id=old?ghText(old.drive_id):'DRV-'+crypto.randomUUID().slice(0,8).toUpperCase();
+    const o={drive_id:id,trip_record_id:tripRecordId,일자:ghDate(payload.date),차량명:ghText(payload.vehicle)||ghText(old?.차량명),
+      운행구분:ghText(payload.driveType),출발지:ghText(payload.start),도착지:ghText(payload.end),
+      왕복편도:ghText(payload.roundTrip)||'왕복',실제거리_km:ghNum(payload.distance),
+      기초주행거리_km:old?ghNum(old.기초주행거리_km):0,현재누적거리_km:ghNum(payload.currentMileage),
+      상태:'',삭제여부:'N',생성일시:old?old.생성일시:now,수정일시:now};
+    o.상태=ghDriveStatus(o);if(old?.__rowNo)o.__rowNo=old.__rowNo;
+    if(!old)drives.push(o);else drives[drives.indexOf(old)]=o;
+    driveById.set(id,o);mark('drive',o);diffAudit(INTEGRATED_CONFIG.driveSheet,old,o,GH_DRIVE_HEADERS,id);
+    if(old?.차량명)touchedVehicles.add(old.차량명);
+    if(o.차량명)touchedVehicles.add(o.차량명);
+    driveResults.push({...ghNormDrive(o),clientKey:key});
+  }
+  for(const {key,payload} of mileageDrafts){
+    const vehicle=ghText(payload.vehicle);
+    const old=vehicles.find(r=>ghText(r.차량명)===vehicle&&String(r.사용여부||'Y').toUpperCase()!=='N');
+    const recordId=old?ghText(old.vehicle_id):'VEH-'+crypto.randomUUID().slice(0,8).toUpperCase();
+    const o=old?{...old}:{vehicle_id:recordId,차량명:vehicle,취득일:'',처분일:'',사용여부:'Y'};
+    o.기초키로수=ghNum(payload.baseMileage);o.누적거리=ghNum(payload.currentMileage);o.수정일시=now;
+    if(!old)vehicles.push(o);else vehicles[vehicles.indexOf(old)]=o;
+    mark('vehicle',o);
+    audit.push(ghAuditRow(old?'수정':'생성',INTEGRATED_CONFIG.vehicleSheet,recordId,
+      old?`${old.기초키로수}/${old.누적거리}`:'',`${o.기초키로수}/${o.누적거리}`,'주행거리'));
+    touchedVehicles.add(vehicle);mileageResults.push({...ghNormVehicle(o),clientKey:key});
+  }
+  // 변경된 차량만 한 번 메모리상 재계산. 기존 현재누적거리·운행거리 값을 덮어쓰지 않는다.
+  for(const name of touchedVehicles){
+    const rows=drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===name)
+      .sort((a,b)=>ghDate(a.일자).localeCompare(ghDate(b.일자))||(a.__rowNo||0)-(b.__rowNo||0));
+    const vi=vehicles.find(v=>ghText(v.차량명)===name&&String(v.사용여부||'Y').toUpperCase()!=='N');
+    let carry=vi?ghNum(vi.기초키로수):0;
+    if(!carry){const first=rows.find(r=>ghNum(r.기초주행거리_km)>0);carry=first?ghNum(first.기초주행거리_km):0}
+    for(const r of rows){
+      const stored=ghNum(r.기초주행거리_km),auto=carry||stored;
+      if(auto>0&&stored!==auto){r.기초주행거리_km=auto;mark('drive',r)}
+      const cur=ghNum(r.현재누적거리_km),distance=ghNum(r.실제거리_km);
+      if(cur>0)carry=cur;else if(auto>0&&distance>0)carry=auto+distance;
+    }
+  }
+  // 동일한 행은 마지막 갱신 상태 한 번만 전송한다.
+  const req=[];
+  for(const [type,sheet,headers] of [
+    ['trip',INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS],
+    ['drive',INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS],
+    ['vehicle',INTEGRATED_CONFIG.vehicleSheet,GH_VEHICLE_HEADERS]
+  ]){
+    const sheetId=sheetIds[sheet];
+    for(const [rowNo,row] of changed[type]){
+      if(type==='drive'&&deletedDriveRows.has(rowNo))continue;
+      req.push({updateCells:{start:{sheetId,rowIndex:rowNo-1,columnIndex:0},rows:[ghBulkRow(row,headers)],fields:'userEnteredValue'}});
+    }
+    if(appended[type].length)req.push({appendCells:{sheetId,rows:appended[type].map(o=>ghBulkRow(o,headers)),fields:'userEnteredValue'}});
+  }
+  if(audit.length)req.push({appendCells:{sheetId:sheetIds[INTEGRATED_CONFIG.auditSheet],rows:audit.map(r=>({values:r.map(v=>ghBulkCell(v))})),fields:'userEnteredValue'}});
+  // 삭제는 맨 마지막에 뒤쪽부터 처리하여 기존 행 번호가 어긋나지 않게 한다.
+  [...deletedDriveRows].sort((a,b)=>b-a).forEach(rowNo=>req.push({deleteDimension:{range:{sheetId:sheetIds[INTEGRATED_CONFIG.driveSheet],dimension:'ROWS',startIndex:rowNo-1,endIndex:rowNo}}}));
+  if(!req.length)return{ok:true,count:0,trips:[],drives:[],mileages:[]};
+  await ghBulkRequest(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}:batchUpdate`,{requests:req});
+  return{ok:true,count:tripDrafts.length+driveDrafts.length+mileageDrafts.length,trips:tripResults,drives:driveResults,mileages:mileageResults};
+}
+
+function githubTripRpc(name,...args){const map={getInitialData:ghGetInitialData,savePendingBatch:ghSavePendingBatch,saveTrip:ghSaveTrip,deleteTrip:ghDeleteTrip,saveDriveLog:ghSaveDriveLog,saveVehicleMileage:ghSaveVehicleMileage,addMaster:ghAddMaster,updateMaster:ghUpdateMaster,deleteMaster:ghDeleteMaster};if(!map[name])return Promise.reject(new Error('지원하지 않는 요청: '+name));return map[name](...args)}
 async function githubVerifySpreadsheetAccess(spreadsheetId){
   const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=spreadsheetId`;
   const data=await githubFetchJson(u);
@@ -15223,6 +15486,13 @@ document.addEventListener('toggle',function(event){
 #tripInlineSheet tr.trip-unsaved-row td:first-child,#vehicleInlineSheet tr.trip-unsaved-row td:first-child{box-shadow:inset 3px 0 #ec9a21!important}
 #trip-edit .section-actions,#vehicle-edit .section-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 @media(max-width:720px){.trip-manual-save-btn{min-height:36px}.trip-draft-status{flex:1 1 100%}}
+</style>
+<style id="bulk-vehicle-choice-style">
+#vehicle-edit .vehicle-quick-select{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;white-space:nowrap;color:#526071}
+#vehicle-edit .vehicle-quick-select select{min-width:145px;max-width:230px;height:34px;border:1px solid #dfe4ea;border-radius:8px;padding:5px 8px;font-size:11px}
+#vehicle-edit #applyVehicleToBlanks{height:34px;white-space:nowrap}
+#vehicleInlineSheet .vehicle-name-input{min-width:145px;max-width:100%;white-space:normal}
+@media(max-width:950px){#vehicle-edit .section-title{flex-wrap:wrap}#vehicle-edit .section-actions{width:100%;justify-content:flex-start}#vehicle-edit .vehicle-quick-select select{max-width:185px}}
 </style>
 </body>
 </html>
