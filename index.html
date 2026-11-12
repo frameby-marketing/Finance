@@ -51,7 +51,7 @@ html[data-theme="dark"]{color-scheme:light!important}
 @media(max-width:720px){.kpis.three{grid-template-columns:1fr 1fr}.inline-sheet{min-width:1700px}}
 
 /* v12: 기초관리 + 선택형 적요명/출장목적 */
-.master-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.master-grid{display:grid;grid-template-columns:1fr;gap:14px}
 .master-table{width:100%;border-collapse:collapse;background:#fff}
 .master-table th{background:#f7f9fc;color:#526071;font-size:11px;text-align:left;padding:10px;border-bottom:1px solid var(--line)}
 .master-table td{padding:0;border-bottom:1px solid #edf0f4;vertical-align:middle}
@@ -1921,37 +1921,11 @@ body.frameby-auth-locked .github-auth-btn{
 
     <section class="page" id="master">
       <div class="head">
-        <div><p style="margin:0">출장기록장 입력에서 선택할 업무구분·적요명·출장목적의 기준값을 관리합니다.</p></div>
+        <div><p style="margin:0">출장기록장 입력에서 선택할 출장목적의 기준값을 관리합니다.</p></div>
         <div class="master-info"><span class="pill blue">Google Sheets 연동</span><span class="trip-draft-status" id="masterSaveStatus">변경된 항목 없음</span><button type="button" class="trip-manual-save-btn" id="saveMasterChanges" disabled>변경사항 저장</button></div>
       </div>
-      <div class="screen-guide"><b>기초관리</b> · 업무구분·적요명·출장목적을 추가·수정·삭제한 뒤 상단 [변경사항 저장]을 누르세요. 저장 전에는 이 탭에 임시 보관되며, 저장 후 출장기록장 선택 목록에 반영됩니다.</div>
+      <div class="screen-guide"><b>기초관리</b> · 출장목적을 추가·수정·삭제한 뒤 상단 [변경사항 저장]을 누르세요. 저장 전에는 이 탭에 임시 보관되며, 저장 후 출장기록장 선택 목록에 반영됩니다.</div>
       <div class="master-grid">
-        <div class="card">
-          <div class="section-title">
-            <h2>업무구분 관리</h2>
-            <button class="master-add" type="button" data-master-add="department">+ 업무구분 추가</button>
-          </div>
-          <div class="table-wrap">
-            <table class="master-table">
-              <thead><tr><th>업무구분</th><th style="width:70px">관리</th></tr></thead>
-              <tbody id="departmentMasterBody"></tbody>
-            </table>
-          </div>
-          <div class="inline-note">※ 디자인·행정 외 다른 업무도 추가하면 출장기록장 구분 선택 목록에 바로 표시됩니다.</div>
-        </div>
-        <div class="card">
-          <div class="section-title">
-            <h2>적요명 관리</h2>
-            <button class="master-add" type="button" data-master-add="summary">+ 적요명 추가</button>
-          </div>
-          <div class="table-wrap">
-            <table class="master-table">
-              <thead><tr><th>적요명</th><th style="width:70px">관리</th></tr></thead>
-              <tbody id="summaryMasterBody"></tbody>
-            </table>
-          </div>
-          <div class="inline-note">※ 입력 후 [변경사항 저장] 버튼을 눌러 확정합니다. 편집 중 다른 칸을 눌러도 행이 사라지지 않습니다.</div>
-        </div>
         <div class="card">
           <div class="section-title">
             <h2>출장목적 관리</h2>
@@ -3219,7 +3193,7 @@ function applyDriveSync(sync,oldTripId,newTripId){if(!sync)return;if(sync.action
 async function deleteTripRow(row){const id=row.dataset.recordId;const payload={recordId:id,tripDate:readField(row,'tripDate')||row.dataset.tripDate||'',sourceKeys:row.dataset.sourceKeys||''};if(String(id).startsWith('TMP:')){tripPendingDrafts.delete(id);state.trips=state.trips.filter(t=>t.recordId!==id);selectedTripIds.delete(id);tripPersistDrafts();tripUpdateSaveUi();renderTripAll();return}row.classList.add('saving-cell');try{await rpc('deleteTrip',payload);tripPendingDrafts.delete(id);tripPersistDrafts();tripUpdateSaveUi();state.trips=state.trips.filter(t=>t.recordId!==id);toast('출장기록 삭제됨');await loadData(false)}catch(e){toast(e.message,'error');row.classList.remove('saving-cell')}}
 document.getElementById('addManualTrip')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.tempSeq);state.trips.unshift({recordId:id,sourceKeys:'',tripDate:tripTodayDate(),currentCosts:{routine:0,fuel:0,entertainment:0,transport:0,lodging:0,other:0},total:0,person:'CEO',department:'',summary:'',purpose:'',region:'',sourceAddresses:[],transport:'',payment:'비용 없음',status:'미정리',persisted:false});renderTripInput();const newRow=document.querySelector(`#tripInlineSheet tr[data-record-id="${CSS.escape(id)}"]`);if(newRow){tripCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
 
-const MASTER_DRAFT_TYPES=['department','summary','purpose'];
+const MASTER_DRAFT_TYPES=['purpose'];
 let masterDraftEntries={department:null,summary:null,purpose:null};
 let masterDraftStorageScope='',masterBatchSaving=false,masterRowSeq=0;
 function masterDraftKey(){return 'FRAMEBY:FINANCE:MASTER_DRAFTS:v1:'+encodeURIComponent(state.user||'account')}
