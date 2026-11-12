@@ -999,7 +999,7 @@ body.frameby-auth-locked .github-auth-btn{
 #vehicleInlineSheet .drive-row-check,#vehicleInlineSheet #selectAllDriveRows{width:16px;min-width:16px;height:16px;accent-color:#2b59d8;cursor:pointer;margin:0;vertical-align:middle}
 #vehicleInlineSheet tbody tr.drive-selected-row td{background:#f2f6ff!important}
 #vehicleInlineSheet tbody tr.drive-selected-row{box-shadow:inset 3px 0 #527ae6}
-@media(max-width:1250px){#vehicleInlineSheet tbody tr td.drive-check-col{display:flex!important;justify-content:flex-start;align-items:center;min-height:34px;width:100%!important;max-width:none!important;padding:4px 7px!important}#vehicleInlineSheet tbody tr td.drive-check-col::before{content:'삭제 선택';margin-right:8px;font-weight:750;min-width:65px}#vehicleInlineSheet tbody tr.drive-selected-row{outline:2px solid #8caaee;outline-offset:-1px}#vehicle-edit .section-actions{flex-wrap:wrap}}
+@media(max-width:760px){#vehicleInlineSheet tbody tr td.drive-check-col{display:flex!important;justify-content:flex-start;align-items:center;min-height:34px;width:100%!important;max-width:none!important;padding:4px 7px!important}#vehicleInlineSheet tbody tr td.drive-check-col::before{content:'삭제 선택';margin-right:8px;font-weight:750;min-width:65px}#vehicleInlineSheet tbody tr.drive-selected-row{outline:2px solid #8caaee;outline-offset:-1px}#vehicle-edit .section-actions{flex-wrap:wrap}}
 </style>
 <style id="vehicle-master-management-style">
 .vehicle-master-card{margin-top:14px}
@@ -1015,6 +1015,64 @@ body.frameby-auth-locked .github-auth-btn{
 .vehicle-master-table tr.vehicle-master-unsaved td:first-child{box-shadow:inset 3px 0 0 #c97916}
 .vehicle-master-table .vehicle-master-retired{background:#f8f9fa;color:#596274}
 @media(max-width:1100px){.vehicle-master-wrap{overflow:visible}.vehicle-master-table{min-width:0;width:100%;border-collapse:separate}.vehicle-master-table thead{display:none}.vehicle-master-table tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}.vehicle-master-table tbody tr{display:grid;grid-template-columns:1fr;gap:3px;padding:11px;border:1px solid #e2e7ef;border-radius:10px;background:#fff}.vehicle-master-table tbody td{display:grid;grid-template-columns:minmax(90px,34%) minmax(0,66%);align-items:center;gap:8px;padding:4px!important;border:0;min-width:0!important}.vehicle-master-table tbody td::before{content:attr(data-label);font-size:11px;color:#687386;font-weight:800}.vehicle-master-table tbody td.vehicle-master-action{width:100%;grid-template-columns:minmax(90px,34%) minmax(0,66%)}.vehicle-master-table .vehicle-master-save{width:100%}}
+</style>
+<style id="frameby-trip-vehicle-readability-search-v3">
+/* 출장/차량 모듈 한정: 입력 도구줄과 검색, 중간 화면 대응. */
+#trip-edit .record-searchbar,#vehicle-edit .record-searchbar{
+ display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;
+ margin:0 0 11px;padding:9px 12px;border:1px solid #dce5f3;
+ border-radius:10px;background:#fbfcff
+}
+#trip-edit .record-searchbar label,#vehicle-edit .record-searchbar label{
+ flex:0 0 auto;font-size:11px;font-weight:850;color:#435474;white-space:nowrap
+}
+#trip-edit .record-searchbar input,#vehicle-edit .record-searchbar input{
+ flex:1 1 230px;min-width:180px;max-width:640px;height:36px;
+ padding:7px 11px;font-size:12px;background:#fff;border:1px solid #cfd9eb;border-radius:8px
+}
+#trip-edit .record-search-clear,#vehicle-edit .record-search-clear{
+ height:34px;padding:0 11px;white-space:nowrap;background:#fff;color:#485c7b;
+ border:1px solid #d6deeb;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer
+}
+#trip-edit .record-search-count,#vehicle-edit .record-search-count{
+ margin-left:auto;white-space:nowrap;font-size:11px;font-weight:750;color:#6e7888
+}
+#trip-edit>.card,#vehicle-edit>.card{overflow:hidden}
+#trip-edit .section-title,#vehicle-edit .section-title{min-width:0;gap:10px}
+#trip-edit .section-title h2,#vehicle-edit .section-title h2{flex:0 0 auto;white-space:nowrap}
+#trip-edit .section-actions,#vehicle-edit .section-actions{min-width:0;justify-content:flex-end;gap:6px 8px}
+#trip-edit .section-actions .note,#vehicle-edit .section-actions .note{line-height:1.45}
+#trip-edit .inline-sheet-wrap,#vehicle-edit .table-wrap{max-width:100%;min-width:0;overscroll-behavior-x:contain;scrollbar-width:thin}
+#vehicleInlineSheet{min-width:1190px}
+#vehicleInlineSheet tbody td[data-col-key="date"],#vehicleInlineSheet thead th[data-col-key="date"]{position:sticky;left:0;z-index:4;background:#f8fafc!important;box-shadow:2px 0 0 #e8edf5}
+#vehicleInlineSheet thead th[data-col-key="date"]{z-index:6;background:#eef3f9!important}
+@media(max-width:1510px){
+ #trip-edit .section-title,#vehicle-edit .section-title{flex-direction:column;align-items:stretch}
+ #trip-edit .section-actions,#vehicle-edit .section-actions{justify-content:flex-start}
+ #trip-edit .section-actions .note,#vehicle-edit .section-actions .note{flex:1 1 100%}
+}
+@media(max-width:1050px){
+ #trip-edit .batch-toolbar,#vehicle-edit .batch-toolbar{gap:8px}
+ #trip-edit .batch-toolbar .batch-hint,#vehicle-edit .batch-toolbar .batch-hint{flex:1 1 100%}
+ #vehicle-edit .vehicle-quick-select{flex-wrap:wrap}
+ #vehicle-edit .section-actions button{max-width:100%}
+}
+@media(max-width:760px){
+ #vehicleInlineSheet tbody td[data-col-key="date"],#vehicleInlineSheet thead th[data-col-key="date"]{position:static!important;box-shadow:none!important}
+ #trip-edit .inline-sheet-wrap,#vehicle-edit .table-wrap{overflow:visible!important}
+ #trip-edit .record-searchbar input,#vehicle-edit .record-searchbar input{flex:1 1 100%;min-width:0;max-width:none;order:2}
+ #trip-edit .record-searchbar .record-search-clear,#vehicle-edit .record-searchbar .record-search-clear{order:3}
+ #trip-edit .record-search-count,#vehicle-edit .record-search-count{order:3}
+ #trip-edit .section-actions .note,#vehicle-edit .section-actions .note{font-size:10px}
+ #vehicle-edit .vehicle-quick-select{max-width:100%}
+}
+@media(max-width:560px){
+ #trip-edit>.card,#vehicle-edit>.card{padding:12px}
+ #trip-edit .section-actions,#vehicle-edit .section-actions{gap:7px}
+ #trip-edit .section-actions button,#vehicle-edit .section-actions button{flex:1 1 auto}
+ #vehicle-edit .vehicle-quick-select{flex:1 1 100%}
+ #vehicle-edit .vehicle-quick-select select{flex:1 1 auto;max-width:none;min-width:0}
+}
 </style>
 </head>
 <body class="frameby-auth-locked">
@@ -1700,6 +1758,7 @@ body.frameby-auth-locked .github-auth-btn{
       <div class="subview" id="trip-edit">
         <div class="card">
           <div class="section-title"><h2>출장기록 입력</h2><div class="section-actions"><span class="note">셀에서 수정 후 [변경사항 저장] 클릭 · 미저장 내용 임시 보관 · 비용 상세 열기</span><span id="tripDraftNotice" class="trip-draft-status" aria-live="polite">수정 후 한 번에 저장</span><button class="trip-manual-save-btn" type="button" id="saveTripChanges" disabled>변경사항 저장</button><button class="add-trip-btn" type="button" id="addManualTrip">+ 출장 추가</button></div></div>
+          <div class="record-searchbar" role="search" aria-label="출장기록 입력 내역 검색"><label for="tripRecordSearch">내역 검색</label><input id="tripRecordSearch" type="search" autocomplete="off" spellcheck="false" placeholder="날짜 · 출장자 · 적요명 · 출장목적 · 지역 검색"><button type="button" id="tripRecordSearchClear" class="record-search-clear" aria-label="출장 검색 초기화">초기화</button><span id="tripRecordSearchCount" class="record-search-count" aria-live="polite"></span></div>
           <div class="batch-toolbar" id="tripBatchBar"><label class="batch-check" for="selectAllTripRows"><input type="checkbox" id="selectAllTripRows" aria-label="표에 표시된 출장기록 전체 선택">전체 선택</label><span class="batch-count" id="tripBulkCount">0건 선택</span><label for="tripBulkField">일괄 설정 항목</label><select id="tripBulkField"><option value="">항목 선택</option><option value="department">업무구분</option><option value="summary">적요명</option><option value="purpose">출장목적</option><option value="person">출장자</option><option value="region">방문지역</option><option value="transport">이동수단</option><option value="payment">결제수단</option></select><select id="tripBulkValue" disabled aria-label="일괄 설정 값"><option value="">값 선택</option></select><input id="tripBulkText" class="batch-value-text" type="text" placeholder="값 입력" hidden><button id="applyTripBulk" class="master-add" type="button" disabled>선택 행에 적용</button></div>
           <div class="inline-sheet-wrap">
             <table class="inline-sheet" id="tripInlineSheet">
@@ -1819,6 +1878,7 @@ body.frameby-auth-locked .github-auth-btn{
         <div class="card">
           <div class="section-title"><h2>운행내역 입력</h2><div class="section-actions"><span class="note">셀에서 여러 항목 수정 후 [변경사항 저장] 클릭 · 자동 저장 없음</span><span id="driveDraftNotice" class="trip-draft-status" aria-live="polite">수정 후 한 번에 저장</span><label class="vehicle-quick-select" for="vehicleQuickSelect">기본 차량 <select id="vehicleQuickSelect" aria-label="기본 차량 선택"><option value="">차량 선택</option></select></label><button class="master-add" type="button" id="applyVehicleToBlanks">미지정 행에 적용</button><button class="trip-manual-save-btn" type="button" id="saveDriveChanges" disabled>변경사항 저장</button><button class="drive-delete-selected-btn" type="button" id="deleteSelectedDrives" disabled>선택 삭제</button><button class="add-trip-btn" type="button" id="addManualDrive">+ 운행 추가</button></div></div>
           <div class="screen-guide" style="margin:0 0 12px"><b>사용 방법</b> · 출장기록에서 차량으로 연결된 건, 유류비만 있는 날짜의 작성 대기 건, 직접 운행건을 한 표에 나열합니다. 수정할 셀을 클릭해 입력하고, 완료한 뒤 [변경사항 저장]을 누르면 함께 저장됩니다. 입력 도중에는 서버에 저장 요청을 보내지 않습니다.</div>
+          <div class="record-searchbar" role="search" aria-label="운행내역 입력 내역 검색"><label for="driveRecordSearch">내역 검색</label><input id="driveRecordSearch" type="search" autocomplete="off" spellcheck="false" placeholder="일자 · 차량 · 연결코드 · 출발지 · 도착지 검색"><button type="button" id="driveRecordSearchClear" class="record-search-clear" aria-label="운행 검색 초기화">초기화</button><span id="driveRecordSearchCount" class="record-search-count" aria-live="polite"></span></div>
           <div class="batch-toolbar" id="driveBatchBar"><span class="batch-count" id="driveBulkCount">0건 선택</span><label for="driveBulkField">선택 행 일괄 설정</label><select id="driveBulkField"><option value="">항목 선택</option><option value="vehicle">차량</option><option value="driveType">운행구분</option><option value="start">출발지</option><option value="end">도착지</option><option value="roundTrip">왕복/편도</option><option value="distance">실제거리(km)</option></select><select id="driveBulkValue" disabled aria-label="일괄 설정 값"><option value="">값 선택</option></select><input id="driveBulkText" class="batch-value-text" type="text" placeholder="값 입력" hidden><button id="applyDriveBulk" class="master-add" type="button" disabled>선택 행에 적용</button><span class="batch-hint">날짜 옆 체크박스로 선택한 행만 변경 · 저장은 별도</span></div>
           <div class="table-wrap">
             <table class="table inline-sheet" id="vehicleInlineSheet">
@@ -1917,7 +1977,7 @@ body.frameby-auth-locked .github-auth-btn{
             <tbody id="vehicleMasterBody"></tbody>
           </table>
         </div>
-        <div class="inline-note">※ 차량별로 <b>저장</b>을 누르면 등록 정보가 반영됩니다. 처분한 차량은 과거 운행기록과 주행거리에서 유지되며, 신규 운행기록의 차량 선택에서는 제외됩니다. 차량명은 연결 기록 보호를 위해 등록 후 변경할 수 없습니다.</div>
+        <div class="inline-note">※ 차량별로 <b>저장</b>을 누르면 등록 정보가 반영됩니다. 처분 차량은 과거 운행기록과 주행거리에서 유지됩니다. 운행일이 처분일 이전인 기록에는 차량을 선택할 수 있으며, 처분일 이후 날짜에는 선택할 수 없습니다. 차량명은 연결 기록 보호를 위해 등록 후 변경할 수 없습니다.</div>
       </div>
     </section>
   </main>
@@ -3056,12 +3116,26 @@ function rememberDriveVehicle(v){
 }
 function refreshVehicleQuickSelect(){
  const sel=document.getElementById('vehicleQuickSelect');if(!sel)return;
- const names=activeVehicles(),current=names.includes(sel.value)?sel.value:(names.includes(preferredDriveVehicle)?preferredDriveVehicle:'');
- sel.innerHTML='<option value="">차량 선택</option>'+names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ // 일괄 지정은 과거 운행일도 다룹니다. 처분 차량도 표시하고 개별 날짜에 적합한 행에만 적용합니다.
+ const names=allVehicles(),current=names.includes(sel.value)?sel.value:(names.includes(preferredDriveVehicle)?preferredDriveVehicle:'');
+ sel.innerHTML='<option value="">차량 선택</option>'+names.map(v=>{
+  const info=state.vehicles.find(x=>x.vehicle===v);
+  const label=info?.disposed?`${v} (처분 ${info.disposed})`:v;
+  return `<option value="${esc(v)}">${esc(label)}</option>`;
+ }).join('');
  sel.value=current;
 }
 function allVehicles(){return [...new Set([...state.vehicles.map(v=>v.vehicle),...state.driveLogs.map(v=>v.vehicle)].filter(Boolean))].sort()}
 function activeVehicles(){const inactive=new Set(state.vehicles.filter(v=>v.active===false||!!v.disposed).map(v=>v.vehicle));return allVehicles().filter(v=>!inactive.has(v))}
+function vehicleEligibleForDate(name,date){
+ if(!name||!date)return false;
+ const info=state.vehicles.find(v=>v.vehicle===name);
+ if(!info)return true; // 기존 운행기록에만 남은 차량은 기존 동작 유지
+ if(info.acquired&&date<info.acquired)return false;
+ if(info.disposed)return date<=info.disposed;
+ return info.active!==false;
+}
+function vehiclesForDriveDate(date){return allVehicles().filter(name=>vehicleEligibleForDate(name,date))}
 function vehicleIsRetired(name){return state.vehicles.some(v=>v.vehicle===name&&(v.active===false||!!v.disposed))}
 function vehicleMileageProjection(logs,initial,reported){
  const sorted=(logs||[]).filter(d=>d&&d.vehicle&&d.date)
@@ -3112,7 +3186,19 @@ function renderTripDashboard(){const rows=sortTripRows(currentTripRows(false),'t
  const sums={routine:0,fuel:0,entertainment:0,transport:0,lodging:0};rows.forEach(t=>Object.keys(sums).forEach(k=>sums[k]+=n(t.currentCosts?.[k])));const bars=document.querySelectorAll('#trip-dashboard .grid.two .card:first-child .summary-bar');const max=Math.max(1,...Object.values(sums));[['경상비',sums.routine],['유류비',sums.fuel],['접대비',sums.entertainment],['교통비',sums.transport],['숙박비',sums.lodging]].forEach((x,i)=>setBar(bars[i],x[0],x[1],max));
  const pb=document.querySelectorAll('#trip-dashboard .grid.two .card:nth-child(2) .summary-bar');setBar(pb[0],'정리완료',done,Math.max(1,rows.length),'건');setBar(pb[1],'미정리',rows.length-done,Math.max(1,rows.length),'건');
  const body=document.querySelector('#trip-dashboard .card:last-child tbody');if(body)body.innerHTML=rows.length?rows.map(t=>`<tr><td>${String(t.recordId||'').startsWith('AUTO:')?'-':esc(t.recordId||'-')}</td><td>${esc(t.tripDate)}</td><td>${esc(t.person||'CEO')}</td><td>${esc(t.summary||'-')}</td><td>${esc(t.region||'-')}</td><td>${esc(t.transport||'-')}</td><td class="num">${money(t.currentCosts?.routine)}</td><td class="num">${money(t.currentCosts?.fuel)}</td><td class="num">${money(t.currentCosts?.entertainment)}</td><td class="num">${money(t.currentCosts?.transport)}</td><td class="num">${money(t.currentCosts?.lodging)}</td><td class="num"><b>${money(t.total)}</b></td><td>${statusPill(t.status)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="13">조회할 출장기록이 없습니다.</td></tr>';finalizeTableColumns('tripDashboardTable')}
-function renderTripInput(){const body=document.querySelector('#tripInlineSheet tbody');if(!body)return;const raw=currentTripRows(true),temps=raw.filter(t=>String(t.recordId).startsWith('TMP:')),rows=[...temps,...sortTripRows(raw.filter(t=>!String(t.recordId).startsWith('TMP:')),'tripInput')];body.innerHTML=rows.length?rows.map(t=>tripRowHtml(tripMergeDraft(t))).join(''):'<tr class="empty-row"><td colspan="12">조회할 출장기록이 없습니다.</td></tr>';finalizeTableColumns('tripInlineSheet');labelResponsiveCells('tripInlineSheet');body.querySelectorAll('tr[data-record-id]').forEach(row=>{bindTripRow(row);if(tripPendingDrafts.has(row.dataset.recordId))tripMarkPending(row)});bulkUpdateTripSelectionUi()}
+let tripRecordSearchQuery='',driveRecordSearchQuery='';
+function recordSearchMatch(values,query){
+ const words=String(query||'').toLocaleLowerCase('ko').split(/\s+/).filter(Boolean);
+ if(!words.length)return true;
+ const haystack=values.map(v=>String(v??'')).join(' ').toLocaleLowerCase('ko');
+ return words.every(word=>haystack.includes(word));
+}
+function tripMatchesInputSearch(t){return recordSearchMatch([t.recordId,t.tripDate,t.person,t.department,t.summary,t.purpose,t.region,t.transport,t.payment,t.status,t.total],tripRecordSearchQuery)}
+function driveMatchesInputSearch(d){return recordSearchMatch([d.driveId,d.tripRecordId,d.date,d.vehicle,d.driveType,d.start,d.end,d.roundTrip,d.distance,d.baseMileage,d.currentMileage,d.status],driveRecordSearchQuery)}
+function recordSearchCount(id,shown,total,query){const el=document.getElementById(id);if(el)el.textContent=query?`${shown}건 검색됨 / 전체 ${total}건`:`전체 ${total}건`}
+function renderTripInput(){const body=document.querySelector('#tripInlineSheet tbody');if(!body)return;const raw=currentTripRows(true).map(tripMergeDraft),matching=raw.filter(tripMatchesInputSearch),temps=matching.filter(t=>String(t.recordId).startsWith('TMP:')),rows=[...temps,...sortTripRows(matching.filter(t=>!String(t.recordId).startsWith('TMP:')),'tripInput')];body.innerHTML=rows.length?rows.map(tripRowHtml).join(''):'<tr class="empty-row"><td colspan="12">조회할 출장기록이 없습니다.</td></tr>';recordSearchCount('tripRecordSearchCount',rows.length,raw.length,tripRecordSearchQuery);finalizeTableColumns('tripInlineSheet');labelResponsiveCells('tripInlineSheet');body.querySelectorAll('tr[data-record-id]').forEach(row=>{bindTripRow(row);if(tripPendingDrafts.has(row.dataset.recordId))tripMarkPending(row)});bulkUpdateTripSelectionUi()}
+document.getElementById('tripRecordSearch')?.addEventListener('input',e=>{tripRecordSearchQuery=e.target.value.trim();renderTripInput()});
+document.getElementById('tripRecordSearchClear')?.addEventListener('click',()=>{tripRecordSearchQuery='';const input=document.getElementById('tripRecordSearch');input.value='';renderTripInput();input.focus()});
 function regionEditorHtml(t){const addresses=[...new Set((t.sourceAddresses||[]).map(v=>String(v||'').trim()).filter(Boolean))];const listId='region_'+String(t.recordId||'').replace(/[^a-zA-Z0-9_-]/g,'_');const listAttr=addresses.length?` list="${listId}"`:'';const hint=addresses.length>1?`${addresses.length}개 주소 중 선택하거나 직접 입력`:'방문지역 직접입력';const dl=addresses.length?`<datalist id="${listId}">${addresses.map(a=>`<option value="${esc(a)}"></option>`).join('')}</datalist>`:'';return `<td class="editable-cell region-cell"><input class="cell-input region-input" data-field="region" value="${esc(t.region||'')}"${listAttr} placeholder="${esc(hint)}">${dl}</td>`}
 function tripRowHtml(t){const c=t.currentCosts||{};const source=!!t.sourceKeys;const choose=`<input class="trip-row-check" type="checkbox" aria-label="${esc(t.tripDate||'날짜 미입력')} 출장기록 선택" ${selectedTripIds.has(t.recordId)?'checked':''}>`;const dateCell=source?`<td class="locked"><div class="trip-date-select">${choose}<span>${esc(t.tripDate)}</span></div></td>`:`<td class="editable-cell"><div class="trip-date-select">${choose}<input class="cell-input" data-field="tripDate" type="date" value="${esc(t.tripDate||'')}"></div></td>`;const details=`<details class="cost-group"><summary>상세</summary><div class="cost-detail-pop"><div class="cost-detail-line"><span>경상비</span><strong>${money(c.routine)}</strong></div><div class="cost-detail-line"><span>유류비</span><strong>${money(c.fuel)}</strong></div><div class="cost-detail-line"><span>접대비</span><strong>${money(c.entertainment)}</strong></div><div class="cost-detail-line"><span>교통비</span><strong>${money(c.transport)}</strong></div><div class="cost-detail-line"><span>숙박비</span><strong>${money(c.lodging)}</strong></div><div class="cost-detail-line"><span>기타</span><strong>${money(c.other)}</strong></div></div></details>`;return `<tr data-record-id="${esc(t.recordId)}" data-source-keys="${esc(t.sourceKeys||'')}" data-trip-date="${esc(t.tripDate||'')}" data-last-transport="${esc(t.transport||'')}">${dateCell}<td class="editable-cell"><input class="cell-input" data-field="person" value="${esc(t.person||'CEO')}"></td><td class="editable-cell"><select class="cell-select" data-field="department">${opts(state.master.department,t.department,'선택')}</select></td><td class="editable-cell"><select class="cell-select" data-field="summary">${opts(state.master.summary,t.summary,'선택')}</select></td><td class="editable-cell"><select class="cell-select" data-field="purpose">${opts(state.master.purpose,t.purpose,'선택')}</select></td>${regionEditorHtml(t)}<td class="editable-cell"><select class="cell-select" data-field="transport">${opts(['대중교통','차량','도보'],t.transport,'선택')}</select></td><td class="editable-cell"><select class="cell-select" data-field="payment">${opts(['법인카드','비용 없음','기타'],t.payment,'선택')}</select></td><td class="cost-total">${money(t.total)}</td><td class="cost-detail-cell">${details}</td><td class="locked" data-status>${statusPill(t.status)}</td><td><button type="button" class="row-delete-btn">삭제</button></td></tr>`}
 function bindTripRow(row){
@@ -3365,7 +3451,7 @@ function bulkOptions(mode,field){
   if(field==='payment')return ['법인카드','비용 없음','기타'];
  }
  if(mode==='drive'){
-  if(field==='vehicle')return activeVehicles();
+  if(field==='vehicle')return allVehicles(); // 처분 전 날짜의 과거 내역에도 지정 가능
   if(field==='driveType')return ['출장','출퇴근','기타 업무'];
   if(field==='roundTrip')return ['왕복','편도'];
  }
@@ -3395,16 +3481,17 @@ function bulkApply(mode){
  const rows=[...document.querySelectorAll(trip?'#tripInlineSheet tbody tr[data-record-id]':'#vehicleInlineSheet tbody tr[data-drive-id]')];
  const chosen=rows.filter(r=>(trip?selectedTripIds:selectedDriveIds).has(trip?r.dataset.recordId:r.dataset.driveId));
  if(!chosen.length){toast('변경할 행을 체크해 주세요.','error');return}
- let n=0;
+ let n=0,skipped=0;
  for(const row of chosen){
   const el=row.querySelector('[data-field="'+field+'"]');if(!el)continue;
+  if(!trip&&field==='vehicle'&&!vehicleEligibleForDate(val,readDriveField(row,'date')||row.dataset.date||'')){skipped++;continue}
   if(el.hasAttribute('contenteditable'))el.textContent=val;else el.value=val;
   if(el.tagName==='SELECT'&&el.value!==val){toast('선택할 수 없는 값이 포함되어 있습니다.','error');return}
   if(trip)tripCaptureDraft(row);else{if(field==='vehicle')rememberDriveVehicle(val);driveCaptureDraft(row)}
   n++;
  }
  if(!n){toast('변경 가능한 행이 없습니다.','error');return}
- toast(n+'건 일괄 설정됨 · [변경사항 저장]을 눌러 저장하세요.');
+ toast(n+'건 일괄 설정됨'+(skipped?` · 운행일 기준 선택 불가 ${skipped}건 제외`:'')+' · [변경사항 저장]을 눌러 저장하세요.');
 }
 document.getElementById('selectAllTripRows')?.addEventListener('change',e=>{
  document.querySelectorAll('#tripInlineSheet tbody tr[data-record-id]').forEach(r=>{if(e.target.checked)selectedTripIds.add(r.dataset.recordId);else selectedTripIds.delete(r.dataset.recordId)});
@@ -3415,7 +3502,9 @@ document.getElementById('driveBulkField')?.addEventListener('change',()=>bulkRef
 document.getElementById('applyTripBulk')?.addEventListener('click',()=>bulkApply('trip'));
 document.getElementById('applyDriveBulk')?.addEventListener('click',()=>bulkApply('drive'));
 
-function renderVehicleInput(){applyAutoBaseMileages();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true),temps=raw.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(raw.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(d=>driveRowHtml(driveMergeDraft(d))).join(''):'<tr class="empty-row"><td colspan="12">조회할 운행내역이 없습니다.</td></tr>';finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
+function renderVehicleInput(){applyAutoBaseMileages();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true).map(driveMergeDraft),matching=raw.filter(driveMatchesInputSearch),temps=matching.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(matching.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(driveRowHtml).join(''):'<tr class="empty-row"><td colspan="12">조회할 운행내역이 없습니다.</td></tr>';recordSearchCount('driveRecordSearchCount',rows.length,raw.length,driveRecordSearchQuery);finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
+document.getElementById('driveRecordSearch')?.addEventListener('input',e=>{driveRecordSearchQuery=e.target.value.trim();renderVehicleInput()});
+document.getElementById('driveRecordSearchClear')?.addEventListener('click',()=>{driveRecordSearchQuery='';const input=document.getElementById('driveRecordSearch');input.value='';renderVehicleInput();input.focus()});
 // 운행일지의 연결코드는 웹_차량운행일지.trip_record_id가 원본입니다.
 // 빈 값은 날짜나 장소만으로 임의 연결하지 않습니다.
 function driveTripRefChoices(d){
@@ -3444,7 +3533,16 @@ function driveTripRefHtml(d,editing=false){
  }
  return '<span class="drive-direct-label" title="출장기록장에 연결되지 않은 직접 입력 행">직접 입력 · 코드 없음</span>';
 }
-function driveRowHtml(d){const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;const chosen=selectedDriveIds.has(d.driveId);return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td class="drive-check-col"><input type="checkbox" class="drive-row-check" aria-label="${esc(d.date||'날짜 미입력')} 운행내역 선택" ${chosen?'checked':''}></td><td class="drive-trip-ref-cell">${driveTripRefHtml(d,true)}</td><td class="editable-cell"><select class="cell-select vehicle-name-input" data-field="vehicle">${opts(activeVehicles(),d.vehicle,"차량 선택")}</select></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell" data-field="baseMileage">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="editable-cell">${d.currentMileageDerived?`<div class="locked auto-mileage-cell" title="기초주행거리 + 실제거리 자동계산">${n(d.currentMileage).toLocaleString('ko-KR')}</div>`:`<input class="cell-input" data-field="currentMileage" inputmode="numeric" value="${n(d.currentMileage)||''}" placeholder="자동/실측">`}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`}
+function driveRowHtml(d){const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;const chosen=selectedDriveIds.has(d.driveId);return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td class="drive-check-col"><input type="checkbox" class="drive-row-check" aria-label="${esc(d.date||'날짜 미입력')} 운행내역 선택" ${chosen?'checked':''}></td><td class="drive-trip-ref-cell">${driveTripRefHtml(d,true)}</td><td class="editable-cell"><select class="cell-select vehicle-name-input" data-field="vehicle">${opts(vehiclesForDriveDate(d.date),d.vehicle,"차량 선택")}</select></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell" data-field="baseMileage">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="editable-cell">${d.currentMileageDerived?`<div class="locked auto-mileage-cell" title="기초주행거리 + 실제거리 자동계산">${n(d.currentMileage).toLocaleString('ko-KR')}</div>`:`<input class="cell-input" data-field="currentMileage" inputmode="numeric" value="${n(d.currentMileage)||''}" placeholder="자동/실측">`}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`}
+function refreshDriveRowVehicleChoice(row){
+ const select=row.querySelector('select[data-field="vehicle"]');if(!select)return;
+ const date=readDriveField(row,'date')||row.dataset.date||'';
+ const chosen=select.value,eligible=vehiclesForDriveDate(date);
+ if(chosen&&!eligible.includes(chosen)){
+  select.innerHTML=opts(eligible,'','차량 선택');
+  toast('선택한 차량은 해당 운행일에 사용 가능한 차량이 아닙니다. 차량을 다시 선택해 주세요.','error');
+ }else select.innerHTML=opts(eligible,chosen,'차량 선택');
+}
 function bindDriveRow(row){
  row.querySelector('.drive-row-check')?.addEventListener('change',e=>{
   const id=row.dataset.driveId; if(e.target.checked)selectedDriveIds.add(id);else selectedDriveIds.delete(id);
@@ -3452,7 +3550,7 @@ function bindDriveRow(row){
  });
  row.querySelectorAll('input:not(.drive-row-check),select,[contenteditable="true"]').forEach(el=>{
   el.addEventListener('input',()=>driveCaptureDraft(row));
-  el.addEventListener('change',()=>{if(el.dataset.field==='vehicle')rememberDriveVehicle(el.value);if(el.dataset.field==='tripRecordId'){row.dataset.tripId=el.value;driveCaptureDraft(row);renderVehicleInput();return;}driveCaptureDraft(row)});
+  el.addEventListener('change',()=>{if(el.dataset.field==='vehicle')rememberDriveVehicle(el.value);if(el.dataset.field==='date')refreshDriveRowVehicleChoice(row);if(el.dataset.field==='tripRecordId'){row.dataset.tripId=el.value;driveCaptureDraft(row);renderVehicleInput();return;}driveCaptureDraft(row)});
  });
 }
 function updateDriveSelectionUi(){
@@ -3497,15 +3595,19 @@ document.getElementById('vehicleQuickSelect')?.addEventListener('change',e=>reme
 document.getElementById('applyVehicleToBlanks')?.addEventListener('click',()=>{
  const vehicle=document.getElementById('vehicleQuickSelect')?.value||'';
  if(!vehicle){toast('적용할 차량을 먼저 선택해 주세요.','error');return}
- let count=0;
+ let count=0,skipped=0;
  document.querySelectorAll('#vehicleInlineSheet tbody tr[data-drive-id]').forEach(row=>{
   const sel=row.querySelector('select[data-field="vehicle"]');
   if(!sel||sel.value)return;
-  sel.value=vehicle;driveCaptureDraft(row);count++;
+  const date=readDriveField(row,'date')||row.dataset.date||'';
+  if(!vehicleEligibleForDate(vehicle,date)){skipped++;return}
+  sel.value=vehicle;
+  if(sel.value!==vehicle){skipped++;return}
+  driveCaptureDraft(row);count++;
  });
  rememberDriveVehicle(vehicle);
- if(count)toast(`차량 미지정 ${count}건에 적용했습니다. 저장 버튼을 누르면 반영됩니다.`);
- else toast('현재 표시된 운행내역에는 차량 미지정 행이 없습니다.');
+ if(count)toast(`차량 미지정 ${count}건에 적용했습니다.`+(skipped?` 운행일이 맞지 않는 ${skipped}건은 제외했습니다.`:'')+' 저장 버튼을 누르면 반영됩니다.');
+ else toast(skipped?`해당 차량을 지정할 수 없는 날짜 ${skipped}건입니다. 운행일과 처분일을 확인해 주세요.`:'현재 표시된 운행내역에는 차량 미지정 행이 없습니다.');
 });
 function renderReconcile(){const sel=document.getElementById('reconcileVehicle'),base=document.getElementById('reconcileBase'),cur=document.getElementById('reconcileCurrent');if(!sel||!base||!cur)return;const names=allVehicles();const keep=sel.value;sel.innerHTML=names.length?names.map(v=>`<option>${esc(v)}</option>`).join(''):'<option value="">차량명 입력 필요</option>';if(names.includes(keep))sel.value=keep;const vehicle=sel.value;const x=vehicle?derivedVehicle(vehicle):{baseMileage:0,currentMileage:0};const draft=mileagePendingDrafts.get(vehicle);base.value=draft?draft.baseMileage:(x.baseMileage||'');cur.value=draft?draft.currentMileage:(x.currentMileage||'');updateReconcileNumbers()}
 function updateReconcileNumbers(){const vehicle=document.getElementById('reconcileVehicle')?.value||'';const base=n(document.getElementById('reconcileBase')?.value),current=n(document.getElementById('reconcileCurrent')?.value);const actual=Math.max(0,current-base),logged=state.driveLogs.filter(d=>d.vehicle===vehicle).reduce((s,d)=>s+n(d.distance),0),missing=Math.max(0,actual-logged),rate=actual?Math.min(100,logged/actual*100):0;document.getElementById('actualDistance').textContent=km(actual);document.getElementById('loggedDistance').textContent=km(logged);document.getElementById('missingDistance').textContent=km(missing);document.getElementById('recordRate').textContent=rate.toFixed(1)+'%';document.getElementById('recordProgress').style.width=rate.toFixed(1)+'%'}
@@ -16278,7 +16380,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   width:min(300px,calc(100vw - 20px));max-height:calc(100dvh - 24px);
   overflow-y:auto;overflow-x:hidden;box-shadow:0 14px 36px rgba(20,36,55,.2)
 }
-@media (max-width:1250px){
+@media (max-width:760px){
   #trip-edit .inline-sheet-wrap,#vehicle-edit .table-wrap{overflow:visible}
   #tripInlineSheet,#vehicleInlineSheet{
     display:block;width:100%!important;min-width:0!important;
@@ -16327,7 +16429,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   #tripInlineSheet tbody tr.empty-row td,#vehicleInlineSheet tbody tr.empty-row td{display:block}
   #tripInlineSheet tbody tr.empty-row td::before,#vehicleInlineSheet tbody tr.empty-row td::before{display:none}
 }
-@media (max-width:800px){
+@media (max-width:560px){
   #tripInlineSheet tbody tr,#vehicleInlineSheet tbody tr{grid-template-columns:minmax(0,1fr)}
   #tripInlineSheet tbody td[data-col-key="purpose"],
   #tripInlineSheet tbody td[data-col-key="region"],
