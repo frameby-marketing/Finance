@@ -1910,6 +1910,18 @@ body.frameby-auth-locked .github-auth-btn{
     <div class="subscription-modal-foot"><button class="subscription-ghost-btn" id="subscriptionCancelBtn" type="button">취소</button><button class="subscription-primary-btn" id="subscriptionSaveBtn" type="button">저장</button></div>
   </div>
 </div>
+<style id="frameby-card-drag-order-style">
+/* 결제일별 카드 묶음의 순서만 드래그 변경: 기존 표/색/컬럼 유지 */
+#paymentBody .pay-head-left{display:flex;align-items:center;gap:10px;min-width:0}
+#paymentBody .pay-drag-handle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 23px;width:23px;height:28px;border:0;border-radius:6px;color:#8793a7;font-size:22px;line-height:1;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+#paymentBody .pay-drag-handle:hover{background:#e8effb;color:#2757d7}
+#paymentBody .pay-drag-handle:active{cursor:grabbing}
+#paymentBody .pay-drag-handle:focus-visible{outline:2px solid #2757d7;outline-offset:2px}
+#paymentBody .pay-card.pay-dragging{opacity:.50}
+#paymentBody .pay-card.pay-drop-before{box-shadow:0 -4px 0 #2757d7,0 7px 24px rgba(22,36,67,.07)}
+#paymentBody .pay-card.pay-drop-after{box-shadow:0 4px 0 #2757d7,0 7px 24px rgba(22,36,67,.07)}
+#paymentBody[aria-busy="true"] .pay-drag-handle{cursor:wait;opacity:.55}
+</style>
 <style id="live-extra-style">
 .save-toast{position:fixed;right:22px;bottom:22px;z-index:5000;min-width:220px;max-width:420px;padding:12px 15px;border-radius:10px;background:#111a2d;color:white;box-shadow:0 12px 36px rgba(17,26,45,.2);font-size:12px;font-weight:750;opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s}.save-toast.show{opacity:1;transform:none}.save-toast.error{background:#a52a38}.save-toast.ok{background:#106e55}.loading-mask{position:fixed;inset:0;z-index:4500;background:rgba(244,246,249,.72);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;font-weight:850;color:#344054}.loading-mask.hidden{display:none}.saving-cell{box-shadow:inset 3px 0 0 #2757d7}.unsaved-note{font-size:10px;color:#c97916;font-weight:800}.vehicle-name-input{min-width:150px}.empty-row td{padding:24px!important;text-align:center;color:#8a94a3!important}
 </style>
@@ -2059,9 +2071,79 @@ function renderPayment(){
   }
   const total=base.reduce((a,r)=>a+r.total,0),exec=base.filter(r=>card(r.cardId)?.group==='임원').reduce((a,r)=>a+r.total,0),staff=total-exec;
   let html=`<div class="pay-total"><div>${escapeHtml(title)}</div><div class="big">${fmt(total)}</div><div style="opacity:.8;margin-bottom:10px">${escapeHtml(periodText)}</div><div class="split"><div>임원<strong>${fmt(exec)}</strong></div><div>임직원<strong>${fmt(staff)}</strong></div></div></div>`;
-  cards.forEach(c=>{const tableId=`payment_${c.id}`,original=base.filter(r=>r.cardId===c.id),sum=original.reduce((a,r)=>a+r.total,0),cr=applyTableState(original,tableId);html+=`<div class="pay-card"><div class="pay-head"><h3>${escapeHtml(cardDisplay(c))}</h3><strong>${fmt(sum)}</strong></div><div class="table-wrap"><table class="table"><thead><tr>${th(tableId,'date','사용일')}${th(tableId,'account','계정과목')}${th(tableId,'merchant','사용처')}${th(tableId,'type','유형')}${th(tableId,'total','금액',true)}</tr></thead><tbody>${cr.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div></div>`});
+  cards.forEach(c=>{const tableId=`payment_${c.id}`,original=base.filter(r=>r.cardId===c.id),sum=original.reduce((a,r)=>a+r.total,0),cr=applyTableState(original,tableId);html+=`<div class="pay-card" data-card-name="${escapeHtml(c.name)}"><div class="pay-head"><div class="pay-head-left"><span class="pay-drag-handle" draggable="true" title="마우스로 드래그하여 카드 순서 변경" aria-label="${escapeHtml(cardDisplay(c))} 순서 이동">⠿</span><h3>${escapeHtml(cardDisplay(c))}</h3></div><strong>${fmt(sum)}</strong></div><div class="table-wrap"><table class="table"><thead><tr>${th(tableId,'date','사용일')}${th(tableId,'account','계정과목')}${th(tableId,'merchant','사용처')}${th(tableId,'type','유형')}${th(tableId,'total','금액',true)}</tr></thead><tbody>${cr.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div></div>`});
   $('paymentBody').innerHTML=html;
 }
+/* 법인카드 결제일별 내역: 카드 묶음 단위 드래그 앤 드롭 */
+let paymentDraggedCard=null;
+let paymentOrderSaving=false;
+function paymentClearDropTargets(){
+  document.querySelectorAll('#paymentBody .pay-drop-before,#paymentBody .pay-drop-after').forEach(el=>el.classList.remove('pay-drop-before','pay-drop-after'));
+}
+function initCardPaymentDragDrop(){
+  const container=$('paymentBody');
+  if(!container||container.dataset.dragBound==='1')return;
+  container.dataset.dragBound='1';
+  container.addEventListener('dragstart',event=>{
+    const grip=event.target.closest?.('.pay-drag-handle');
+    if(!grip||paymentOrderSaving){event.preventDefault();return}
+    const cardEl=grip.closest('.pay-card');
+    if(!cardEl)return;
+    paymentDraggedCard=cardEl;
+    event.dataTransfer.effectAllowed='move';
+    event.dataTransfer.setData('text/plain',cardEl.dataset.cardName||'');
+    requestAnimationFrame(()=>cardEl.classList.add('pay-dragging'));
+  });
+  container.addEventListener('dragover',event=>{
+    if(!paymentDraggedCard||paymentOrderSaving)return;
+    const target=event.target.closest?.('.pay-card');
+    if(!target||target===paymentDraggedCard)return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect='move';
+    paymentClearDropTargets();
+    const peers=Array.from(container.querySelectorAll('.pay-card'));
+    const before=peers.indexOf(paymentDraggedCard)>peers.indexOf(target);
+    target.classList.add(before?'pay-drop-before':'pay-drop-after');
+  });
+  container.addEventListener('drop',async event=>{
+    if(!paymentDraggedCard||paymentOrderSaving)return;
+    const target=event.target.closest?.('.pay-card');
+    if(!target||target===paymentDraggedCard)return;
+    event.preventDefault();
+    const moving=paymentDraggedCard;
+    const peers=Array.from(container.querySelectorAll('.pay-card'));
+    const before=peers.indexOf(paymentDraggedCard)>peers.indexOf(target);
+    const oldOrder=cards.slice();
+    paymentClearDropTargets();
+    moving.classList.remove('pay-dragging');
+    paymentDraggedCard=null;
+    container.insertBefore(moving,before?target:target.nextSibling);
+    const byName=new Map(cards.map(c=>[c.name,c]));
+    const next=Array.from(container.querySelectorAll('.pay-card')).map(el=>byName.get(el.dataset.cardName)).filter(Boolean);
+    if(next.length!==cards.length||next.every((c,i)=>c===cards[i]))return;
+    cards=next;
+    paymentOrderSaving=true;
+    container.setAttribute('aria-busy','true');
+    try{
+      await githubSaveSharedCardOrder(cards);
+      toast('카드 표시 순서를 공통 저장했습니다.');
+    }catch(error){
+      cards=oldOrder;
+      renderPayment();
+      toast('순서 저장 실패: 스프레드시트 편집 권한을 확인해 주세요.','error');
+      console.error('[법인카드 순서 공통 저장]',error);
+    }finally{
+      paymentOrderSaving=false;
+      container.removeAttribute('aria-busy');
+    }
+  });
+  container.addEventListener('dragend',()=>{
+    paymentDraggedCard?.classList.remove('pay-dragging');
+    paymentDraggedCard=null;
+    paymentClearDropTargets();
+  });
+}
+
 function renderAll(){
   const m=$('allMonth').value,c=$('allCard').value,q=$('allSearch').value.trim().toLowerCase();let data=rows.filter(r=>(!m||r.date.startsWith(m))&&(!c||r.cardId===c)&&(!q||`${r.account} ${r.merchant}`.toLowerCase().includes(q)));data=applyTableState(data,'all');
   $('allTable').innerHTML=`<div class="table-wrap"><table class="table"><thead><tr>${th('all','date','사용일')}${th('all','account','계정과목')}${th('all','merchant','사용처')}${th('all','card','카드')}${th('all','type','유형')}${th('all','total','금액',true)}</tr></thead><tbody>${data.map(r=>`<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.account)}</td><td>${escapeHtml(r.merchant)}</td><td>${escapeHtml(cardDisplay(card(r.cardId)))}</td><td><span class="pill ${r.type==='불공제'?'bad':''}">${escapeHtml(r.type)}</span></td><td class="num">${fmt(r.total)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">조건에 맞는 내역 없음</td></tr>'}</tbody></table></div>`;
@@ -2665,6 +2747,7 @@ function initResearchShell(){
 }
 
 function bindEvents(){
+  initCardPaymentDragDrop();
   document.querySelectorAll('.module-tab[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
   $('monthFilter').addEventListener('change',renderDashboard);$('cardFilter').addEventListener('change',renderDashboard);$('payMonth').addEventListener('change',renderPayment);$('allMonth').addEventListener('change',renderAll);$('allCard').addEventListener('change',renderAll);$('allSearch').addEventListener('input',renderAll);
   $('subscriptionStatusFilter')?.addEventListener('change',renderSubscriptions);
@@ -4214,8 +4297,68 @@ function githubOpenAuthorizedInitialModule(){
   return true;
 }
 async function githubGetCardSheetValues(){const range=`${ghQ(INTEGRATED_CONFIG.cardDataSheet)}!B${INTEGRATED_CONFIG.cardDataStartRow}:K`;const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId)}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`;return(await githubFetchJson(u)).values||[]}
-function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);const userMatch=rawCard.match(/\[\s*([^\]]+?)\s*\]/),userName=userMatch?ghText(userMatch[1]):'';let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));if(!cardMap[cardName])cardMap[cardName]={name:cardName,group,userName};else if(!cardMap[cardName].userName&&userName)cardMap[cardName].userName=userName;raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원',userName:''});const names=Object.keys(cardMap).sort((a,b)=>{const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b);if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1),info=cardMap[name],userName=info.userName||'';idBy[name]=id;return{id,name,userName,displayName:userName?`${name} [${userName}]`:name,group:info.group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
-async function githubLoadCardData(){return githubBuildCardData(await githubGetCardSheetValues())}
+function githubBuildCardData(values){const preferredOrder=['롯데카드_3728','롯데카드_5301','롯데카드_0501','롯데카드_3403'],defaultGroup={'롯데카드_3728':'임원','롯데카드_5301':'임원','롯데카드_0501':'임직원','롯데카드_3403':'임직원'},cardMap={},raw=[];values.forEach((v,index)=>{const row=(v||[]).slice();while(row.length<10)row.push('');const date=ghDate(row[0]),account=ghText(row[2]),merchant=ghText(row[3]),total=ghNum(row[6]),rawCard=ghText(row[7]),type=ghText(row[8]);const userMatch=rawCard.match(/\[\s*([^\]]+?)\s*\]/),userName=userMatch?ghText(userMatch[1]):'';let first=rawCard.replace(/\r/g,' ').split('\n')[0].trim().replace(/\s*\[[^\]]*\]\s*$/,'').trim(),match=first.match(/([가-힣A-Za-z]+카드_\d{4})/),cardName=match?match[1]:first;if(!date||!cardName)return;let group=/\[\s*대표자2?\s*\]/.test(rawCard)?'임원':(/\[[^\]]+\]/.test(rawCard)?'임직원':(defaultGroup[cardName]||'임직원'));if(!cardMap[cardName])cardMap[cardName]={name:cardName,group,userName};else if(!cardMap[cardName].userName&&userName)cardMap[cardName].userName=userName;raw.push({date,account:account||'미분류',merchant,total,cardName,type:type||''})});preferredOrder.forEach(n=>cardMap[n]??={name:n,group:defaultGroup[n]||'임직원',userName:''});const names=Object.keys(cardMap).sort((a,b)=>{const ga=cardMap[a].group==='임원'?0:1,gb=cardMap[b].group==='임원'?0:1;if(ga!==gb)return ga-gb;const ai=preferredOrder.indexOf(a),bi=preferredOrder.indexOf(b);if(ai<0&&bi<0)return a.localeCompare(b,'ko');if(ai<0)return 1;if(bi<0)return-1;return ai-bi}),idBy={},outCards=names.map((name,i)=>{const id='c'+(i+1),info=cardMap[name],userName=info.userName||'';idBy[name]=id;return{id,name,userName,displayName:userName?`${name} [${userName}]`:name,group:info.group}}),outRows=raw.map((r,i)=>({id:i+1,date:r.date,account:r.account,merchant:r.merchant,total:r.total,cardId:idBy[r.cardName],type:r.type}));return{ok:true,cards:outCards,rows:outRows}}
+/* 법인카드 표시 순서는 같은 원본 스프레드시트의 전용 탭에 저장합니다.
+   권한은 원본 스프레드시트와 동일하며 localStorage에만 남기지 않습니다.
+   카드번호가 교체돼도 보유자명이 유일하면 기존 위치를 이어받습니다. */
+const GH_CARD_ORDER_SHEET='웹_카드표시순서';
+let GH_CARD_ORDER_SHEET_EXISTS=null;
+async function githubCardOrderSheetExists(force=false){
+  if(!force&&GH_CARD_ORDER_SHEET_EXISTS!==null)return GH_CARD_ORDER_SHEET_EXISTS;
+  const spreadsheetId=encodeURIComponent(INTEGRATED_CONFIG.cardSpreadsheetId);
+  const meta=await githubFetchJson(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`);
+  GH_CARD_ORDER_SHEET_EXISTS=(meta.sheets||[]).some(x=>x.properties?.title===GH_CARD_ORDER_SHEET);
+  return GH_CARD_ORDER_SHEET_EXISTS;
+}
+function githubApplySavedCardOrder(cardList,saved){
+  if(!Array.isArray(saved)||!saved.length)return cardList;
+  const remaining=cardList.slice(),ordered=[];
+  for(const item of saved){
+    if(!item||typeof item!=='object')continue;
+    let index=remaining.findIndex(c=>c.name===item.name);
+    if(index<0&&item.holder){
+      const replacements=remaining.filter(c=>c.userName&&c.userName===item.holder);
+      if(replacements.length===1)index=remaining.indexOf(replacements[0]);
+    }
+    if(index>=0)ordered.push(...remaining.splice(index,1));
+  }
+  return ordered.concat(remaining);
+}
+async function githubLoadSharedCardOrder(cardList){
+  try{
+    if(!(await githubCardOrderSheetExists()))return cardList;
+    const values=await ghValuesGet(INTEGRATED_CONFIG.cardSpreadsheetId,GH_CARD_ORDER_SHEET,'A2:A2');
+    const raw=String(values[0]?.[0]||'').trim();
+    if(!raw)return cardList;
+    return githubApplySavedCardOrder(cardList,JSON.parse(raw));
+  }catch(error){
+    console.warn('[법인카드 저장 순서 읽기 실패, 기본 순서 표시]',error);
+    return cardList;
+  }
+}
+async function githubSaveSharedCardOrder(cardList){
+  const spreadsheetId=INTEGRATED_CONFIG.cardSpreadsheetId;
+  if(!(await githubCardOrderSheetExists())){
+    const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}:batchUpdate`;
+    try{
+      await githubFetchJson(u,{method:'POST',body:JSON.stringify({requests:[{addSheet:{properties:{title:GH_CARD_ORDER_SHEET,gridProperties:{rowCount:100,columnCount:2}}}}]})});
+    }catch(error){
+      // 다른 사용자가 같은 시점에 먼저 탭을 만들었다면 그대로 이어서 저장합니다.
+      if(!(await githubCardOrderSheetExists(true)))throw error;
+    }
+    GH_CARD_ORDER_SHEET_EXISTS=true;
+  }
+  const order=cardList.map(c=>({name:c.name,holder:c.userName||''}));
+  await ghValuesUpdate(spreadsheetId,GH_CARD_ORDER_SHEET,'A1:B2',[
+    ['카드 표시 순서(JSON)','수정일시'],
+    [JSON.stringify(order),ghNow()]
+  ]);
+}
+async function githubLoadCardData(){
+  const payload=githubBuildCardData(await githubGetCardSheetValues());
+  payload.cards=await githubLoadSharedCardOrder(payload.cards);
+  return payload;
+}
 
 /* ===== 법인카드 · 온라인 구입내역 직접 조회 ===== */
 let ONLINE_PURCHASE_ROWS=[];
