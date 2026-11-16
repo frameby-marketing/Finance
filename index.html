@@ -3479,7 +3479,7 @@ function renderVehicleMaster(){
 }
 function vehicleMasterRowHtml(v={}){
  const isNew=!v.vehicleId,retired=v.active===false||!!v.disposed;
- const cells=[['차량명',`<input data-key="vehicle" value="${esc(v.vehicle||'')}" ${isNew?'':'readonly title="기존 운행기록 연결을 위해 차량명 수정은 제한됩니다"'} placeholder="차량명">`],
+ const cells=[['차량명',`<input data-key="vehicle" value="${esc(v.vehicle||'')}" placeholder="차량명" title="차량명 변경 시 연결된 운행기록 보호 규칙을 확인합니다">`],
  ['기초 키로수',`<input data-key="baseMileage" type="number" min="0" step="1" value="${v.baseMileage??''}">`],
  ['누적거리',`<input data-key="currentMileage" type="number" min="0" step="1" value="${v.currentMileage||''}" placeholder="미확인 · 알고 있을 때만 입력">`],
  ['취득일',`<input data-key="acquired" type="date" value="${esc(v.acquired||'')}">`],
@@ -3497,12 +3497,28 @@ function bindVehicleMasterRow(tr){
  });
  tr.querySelector('.vehicle-master-save')?.addEventListener('click',async()=>{
    const payload=vehicleMasterPayload(tr);
+   const oldProfile=state.vehicles.find(v=>v.vehicleId===payload.vehicleId);
    if(!payload.vehicle){toast('차량명을 입력해 주세요.','error');return}
+   if(oldProfile&&oldProfile.vehicle!==payload.vehicle){
+     const duplicates=state.vehicles.filter(v=>v.vehicle===oldProfile.vehicle).length>1;
+     const msg=duplicates
+       ?`기존 차량명(${oldProfile.vehicle})과 같은 이름의 다른 등록 차량이 있습니다.\n이 행의 이름만 ${payload.vehicle}(으)로 변경하며, 기존 운행기록은 원래 차량명에 남습니다.\n계속할까요?`
+       :`차량명을 ${oldProfile.vehicle} → ${payload.vehicle}(으)로 변경할까요?\n해당 차량명으로 작성된 운행기록도 새 이름으로 연결됩니다.`;
+     if(!window.confirm(msg))return;
+   }
    if(payload.status==='처분'&&!payload.disposed){toast('처분한 차량은 처분일을 입력해 주세요.','error');return}
    if(payload.status==='운행중'&&payload.disposed){toast('처분일이 입력된 차량은 상태를 처분으로 변경하거나 처분일을 지워 주세요.','error');return}
    const button=tr.querySelector('.vehicle-master-save');button.disabled=true;button.textContent='저장 중';
    try{
      const saved=await rpc('saveVehicleProfile',payload);
+     // Unique registered vehicle rename: the server updates all linked drive rows in the same batch.
+     if(saved.renameHistoryUpdated&&saved.previousVehicle){
+       for(const d of state.driveLogs)if(d.vehicle===saved.previousVehicle)d.vehicle=saved.vehicle;
+       for(const draft of drivePendingDrafts.values())if(draft.vehicle===saved.previousVehicle)draft.vehicle=saved.vehicle;
+       if(preferredDriveVehicle===saved.previousVehicle)preferredDriveVehicle=saved.vehicle;
+       if(vehicleMasterDrafts.has(saved.vehicleId))vehicleMasterDrafts.delete(saved.vehicleId);
+       tripPersistDrafts();
+     }
      const idx=state.vehicles.findIndex(v=>v.vehicleId===saved.vehicleId);
      if(idx>=0)state.vehicles[idx]=saved;else state.vehicles.push(saved);
      vehicleMasterDrafts.delete(tr.dataset.vehicleId);vehicleMasterSelectedIds.delete(tr.dataset.vehicleId);vehicleMasterPersist();
@@ -3533,7 +3549,7 @@ document.getElementById('deleteSelectedVehicleMasters')?.addEventListener('click
  const localNew=ids.includes('NEW');
  const names=saved.map(v=>v.vehicle).concat(localNew?['새 차량(미저장)']:[]);
  if(!names.length)return;
- if(!window.confirm(`선택한 차량 ${names.length}대를 삭제할까요?\n\n${names.join(' / ')}\n\n연결된 운행기록이 있는 차량은 삭제할 수 없습니다. 삭제된 등록 차량은 복구하려면 다시 등록해야 합니다.`))return;
+ if(!window.confirm(`선택한 차량 ${names.length}대를 삭제할까요?\n\n${names.join(' / ')}\n\n같은 이름의 다른 차량정보가 남아 있으면 중복 행만 삭제할 수 있습니다.\n운행기록에 연결된 차량명의 마지막 등록 행은 삭제되지 않습니다.\n삭제된 행은 다시 등록해야 합니다.`))return;
  vehicleMasterDeleting=true;vehicleMasterUpdateDeleteUi();
  try{
    // 서버에서 운행기록 전체를 다시 대조하여 차량 삭제 가능 여부를 판단한다.
@@ -4522,27 +4538,48 @@ async function ghSaveVehicleProfile(payload){
  const id=INTEGRATED_CONFIG.tripSpreadsheetId;
  const [snapshot,ids]=await Promise.all([ghBulkReadSnapshot(),ghGetSheetIds()]);
  const rows=snapshot.vehicles;
- let old=vehicleId?rows.find(r=>ghText(r.vehicle_id)===vehicleId):null;
+ const old=vehicleId?rows.find(r=>ghText(r.vehicle_id)===vehicleId):null;
  if(vehicleId&&!old)throw new Error('수정할 기존 차량을 찾을 수 없습니다. 다시 불러와 주세요.');
- if(!old&&rows.some(r=>ghText(r.차량명)===vehicle))throw new Error('동일한 이름의 차량이 이미 등록되어 있습니다.');
- if(old&&ghText(old.차량명)!==vehicle)throw new Error('기존 차량명은 연결 기록 보호를 위해 변경할 수 없습니다.');
- // 누적거리는 운행일지 계산값이 아닌, 사용자가 등록한 실제 계기판 주행거리다.
- // 빈칸은 실제 누적거리를 확인하지 못했다는 뜻이므로 기초 키로수로 대체하지 않는다.
+ if(rows.some(r=>ghText(r.차량명)===vehicle && (!old||r.__rowNo!==old.__rowNo)))
+   throw new Error('변경하려는 이름은 다른 차량정보에서 이미 사용 중입니다. 먼저 중복 행을 정리해 주세요.');
+ // 누적거리는 수동 입력한 계기판 확인값이다. 공란은 미확인으로 남긴다.
  const hasCurrent=String(payload.currentMileage??'').trim()!=='';
  const requested=hasCurrent?ghNum(payload.currentMileage):'';
  if(hasCurrent&&requested<0)throw new Error('누적거리는 음수로 입력할 수 없습니다.');
  if(hasCurrent&&requested<base)throw new Error('누적거리는 기초 키로수보다 작을 수 없습니다.');
+ const previousVehicle=old?ghText(old.차량명):'';
+ const changedName=!!old&&previousVehicle!==vehicle;
+ const hasOldNamePeer=changedName&&rows.some(r=>r.__rowNo!==old.__rowNo&&ghText(r.차량명)===previousVehicle);
+ // 운행기록은 차량명으로 연결돼 있다. 다른 동명 차량이 없을 때만 연결 기록명을 일괄 수정한다.
+ const renameHistoryUpdated=changedName&&!hasOldNamePeer;
  const recId=old?ghText(old.vehicle_id):'VEH-'+crypto.randomUUID().slice(0,8).toUpperCase();
  const o={vehicle_id:recId,차량명:vehicle,기초키로수:base,
     누적거리:requested,취득일:acquired,처분일:disposed,
     사용여부:active?'Y':'N',수정일시:ghNow()};
- const sheetId=ids[INTEGRATED_CONFIG.vehicleSheet];if(!Number.isInteger(sheetId))throw new Error('차량정보 시트를 찾을 수 없습니다.');
- const request=old?{updateCells:{start:{sheetId,rowIndex:old.__rowNo-1,columnIndex:0},rows:[ghBulkRow(o,GH_VEHICLE_HEADERS)],fields:'userEnteredValue'}}:
-   {appendCells:{sheetId,rows:[ghBulkRow(o,GH_VEHICLE_HEADERS)],fields:'userEnteredValue'}};
- await ghBulkRequest(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}:batchUpdate`,{requests:[request]});
- return ghNormVehicle(o);
+ const sheetId=ids[INTEGRATED_CONFIG.vehicleSheet],driveSheetId=ids[INTEGRATED_CONFIG.driveSheet],auditSheetId=ids[INTEGRATED_CONFIG.auditSheet];
+ if(!Number.isInteger(sheetId))throw new Error('차량정보 시트를 찾을 수 없습니다.');
+ const requests=[old?{updateCells:{start:{sheetId,rowIndex:old.__rowNo-1,columnIndex:0},rows:[ghBulkRow(o,GH_VEHICLE_HEADERS)],fields:'userEnteredValue'}}:
+   {appendCells:{sheetId,rows:[ghBulkRow(o,GH_VEHICLE_HEADERS)],fields:'userEnteredValue'}}];
+ if(changedName){
+   if(!Number.isInteger(auditSheetId))throw new Error('차량 변경이력 시트를 찾을 수 없습니다.');
+   const audit=[ghAuditRow('차량명변경',INTEGRATED_CONFIG.vehicleSheet,recId,previousVehicle,vehicle,'차량명')];
+   if(renameHistoryUpdated){
+     const affected=snapshot.drives.filter(d=>ghText(d.차량명)===previousVehicle);
+     if(affected.length&&!Number.isInteger(driveSheetId))throw new Error('연결된 운행일지 시트를 찾을 수 없습니다.');
+     for(const d of affected){
+       // D열(차량명) 단일 셀만 변경한다. 거리·일자·삭제 상태 등은 손대지 않는다.
+       requests.push({updateCells:{start:{sheetId:driveSheetId,rowIndex:d.__rowNo-1,columnIndex:3},rows:[{values:[ghBulkCell(vehicle)]}],fields:'userEnteredValue'}});
+       audit.push(ghAuditRow('운행기록차량명변경',INTEGRATED_CONFIG.driveSheet,ghText(d.drive_id),previousVehicle,vehicle,'차량명'));
+     }
+   }
+   requests.push({appendCells:{sheetId:auditSheetId,rows:audit.map(row=>({values:row.map(v=>ghBulkCell(v))})),fields:'userEnteredValue'}});
+ }
+ // 차량정보와 연결된 운행일지의 이름은 한 번의 Google Sheets batchUpdate 요청으로 저장한다.
+ await ghBulkRequest(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}:batchUpdate`,{requests});
+ return {...ghNormVehicle(o),previousVehicle:changedName?previousVehicle:'',renameHistoryUpdated};
 }
 // 운행기록 및 과거 삭제표시 기록에 연결된 차량은 삭제하지 않는다.
+// 차량명 연결을 유지할 등록 행이 남으면, 운행이력과 이름이 겹치는 중복 행도 삭제할 수 있다.
 async function ghDeleteVehicleProfiles(payload){
  const ids=[...new Set((payload?.ids||[]).map(ghText).filter(Boolean))];
  if(!ids.length)return{ok:true,deletedIds:[]};
@@ -4551,12 +4588,13 @@ async function ghDeleteVehicleProfiles(payload){
  if(targets.some(v=>!v))throw new Error('선택한 차량 중 등록 정보를 찾지 못한 항목이 있습니다. 새로고침 후 다시 시도해 주세요.');
  const duplicates=targets.filter(v=>snapshot.vehicles.some(x=>x!==v&&ghText(x.vehicle_id)===ghText(v.vehicle_id)));
  if(duplicates.length)throw new Error('차량 ID가 중복돼 있어 안전하게 삭제할 수 없습니다. 원본 차량정보를 확인해 주세요.');
- const names=new Set(targets.map(v=>ghText(v.차량명)));
- const linked=snapshot.drives.filter(d=>names.has(ghText(d.차량명)));
- if(linked.length){
-  const namesWithLogs=[...new Set(linked.map(d=>ghText(d.차량명)))];
-  throw new Error(`${namesWithLogs.join(', ')}: 기존 운행기록이 있어 삭제할 수 없습니다. 처분 상태로 관리해 주세요.`);
- }
+ // 운행일지는 vehicle_id가 아니라 차량명으로 연결된다. 연결된 이름은 등록 행이 최소 한 개 남아야 한다.
+ const deletedRowNos=new Set(targets.map(v=>v.__rowNo));
+ const orphanNames=[...new Set(targets.map(v=>ghText(v.차량명)))].filter(name=>
+   snapshot.drives.some(d=>ghText(d.차량명)===name)&&
+   !snapshot.vehicles.some(v=>ghText(v.차량명)===name&&!deletedRowNos.has(v.__rowNo))
+ );
+ if(orphanNames.length)throw new Error(`${orphanNames.join(', ')}: 운행기록이 연결된 차량명의 마지막 등록 행은 삭제할 수 없습니다. 같은 이름의 중복 행만 선택해 삭제하거나, 기존 차량을 처분 상태로 관리해 주세요.`);
  const sheetId=sheetIds[INTEGRATED_CONFIG.vehicleSheet],auditId=sheetIds[INTEGRATED_CONFIG.auditSheet];
  if(!Number.isInteger(sheetId)||!Number.isInteger(auditId))throw new Error('차량정보/수정이력 시트를 찾지 못했습니다.');
  const audit=targets.map(v=>ghAuditRow('차량정보삭제',INTEGRATED_CONFIG.vehicleSheet,ghText(v.vehicle_id),JSON.stringify(v),'삭제','전체행'));
@@ -17056,5 +17094,87 @@ document.addEventListener('toggle',function(event){
 @media(max-width:950px){#trip-dashboard .tripdash-kpis{grid-template-columns:1fr 1fr 1fr}#trip-dashboard .tripdash-kpi{padding:15px}#trip-dashboard .tripdash-kpi strong{font-size:23px}#trip-dashboard .tripdash-bars{gap:4px}#trip-dashboard .tripdash-month{padding-left:2px;padding-right:2px}#trip-dashboard .tripdash-bar-month{font-size:10px}}
 @media(max-width:650px){#trip-dashboard .tripdash-heading{flex-wrap:wrap}#trip-dashboard .tripdash-kpis{grid-template-columns:1fr}#trip-dashboard .tripdash-bars{min-width:610px;gap:4px}#trip-dashboard .tripdash-chart-card{overflow-x:auto}#trip-dashboard .tripdash-section-heading{flex-wrap:wrap}}
 </style>
+
+<style id="frameby-trip-vehicle-entry-alignment-20261116">
+/* 출장기록장 / 차량운행일지 입력 화면의 정렬만 보정. 다른 페이지 공통 스타일에 영향 없음. */
+@media (min-width:761px){
+ #trip-edit .entry-toolrow,#vehicle-edit .entry-toolrow{
+   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;
+   width:100%;min-width:0;margin:10px 0 12px
+ }
+ #trip-edit .record-searchbar,#vehicle-edit .record-searchbar{
+   display:flex;align-items:center;gap:8px;min-width:0;width:100%;margin:0!important;
+   padding:8px 10px
+ }
+ #trip-edit .record-searchbar input,#vehicle-edit .record-searchbar input{
+   min-width:160px;flex:1 1 auto;max-width:none;width:100%
+ }
+ #trip-edit .record-search-count,#vehicle-edit .record-search-count{margin-left:0}
+ #trip-edit .entry-main-actions,#vehicle-edit .entry-main-actions{
+   display:flex;align-items:center;justify-content:flex-end;flex-wrap:nowrap;gap:8px;min-width:max-content
+ }
+ #trip-edit .entry-main-actions button,#vehicle-edit .entry-main-actions button{
+   height:38px;min-height:38px;white-space:nowrap;padding:8px 12px
+ }
+ #trip-edit .batch-toolbar,#vehicle-edit .batch-toolbar{
+   display:flex;align-items:center;justify-content:flex-start;gap:8px 10px;flex-wrap:wrap;
+   min-height:52px;padding:9px 0;margin:0 0 12px
+ }
+ #vehicle-edit .entry-quick-vehicle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0}
+ #vehicle-edit .entry-quick-vehicle>*{margin:0}
+ #trip-edit .inline-sheet-wrap,#vehicle-edit .table-wrap{overflow-x:auto;overflow-y:visible;max-width:100%}
+ #tripInlineSheet,#vehicleInlineSheet{
+   table-layout:fixed;border-collapse:collapse;width:100%;max-width:none
+ }
+ #tripInlineSheet{min-width:1530px}
+ #vehicleInlineSheet{min-width:1650px}
+ #tripInlineSheet thead th,#vehicleInlineSheet thead th{
+   box-sizing:border-box;white-space:nowrap;vertical-align:middle;padding:12px 8px!important;
+   text-align:center;min-width:0!important
+ }
+ #tripInlineSheet tbody td,#vehicleInlineSheet tbody td{
+   box-sizing:border-box;min-width:0!important;vertical-align:middle;
+   overflow:visible;text-align:left
+ }
+ #tripInlineSheet tbody .cell-input,#tripInlineSheet tbody .cell-select,
+ #vehicleInlineSheet tbody .cell-input,#vehicleInlineSheet tbody .cell-select{
+   box-sizing:border-box;display:block;width:100%;max-width:100%;min-width:0!important;min-height:35px;
+   padding:8px 9px;font-size:12px
+ }
+ #tripInlineSheet th[data-col-key="tripDate"]{width:165px}
+ #tripInlineSheet th[data-col-key="person"]{width:112px}
+ #tripInlineSheet th[data-col-key="purpose"]{width:245px}
+ #tripInlineSheet th[data-col-key="region"]{width:185px}
+ #tripInlineSheet th[data-col-key="transport"]{width:115px}
+ #tripInlineSheet th[data-col-key="payment"]{width:115px}
+ #tripInlineSheet th[data-col-key="total"]{width:103px}
+ #tripInlineSheet th[data-col-key="costDetail"]{width:93px}
+ #tripInlineSheet th[data-col-key="status"]{width:103px}
+ #tripInlineSheet th[data-col-key="delete"]{width:78px}
+ #vehicleInlineSheet th[data-col-key="date"]{width:142px}
+ #vehicleInlineSheet th[data-col-key="selected"]{width:60px}
+ #vehicleInlineSheet th[data-col-key="tripRecordId"]{width:115px}
+ #vehicleInlineSheet th[data-col-key="vehicle"]{width:160px}
+ #vehicleInlineSheet th[data-col-key="driveType"]{width:115px}
+ #vehicleInlineSheet th[data-col-key="start"]{width:156px}
+ #vehicleInlineSheet th[data-col-key="end"]{width:156px}
+ #vehicleInlineSheet th[data-col-key="roundTrip"]{width:110px}
+ #vehicleInlineSheet th[data-col-key="distance"]{width:112px}
+ #vehicleInlineSheet th[data-col-key="baseMileage"]{width:135px}
+ #vehicleInlineSheet th[data-col-key="currentMileage"]{width:135px}
+ #vehicleInlineSheet th[data-col-key="status"]{width:105px}
+ #vehicleInlineSheet .drive-check-col{width:60px!important;min-width:60px!important;max-width:60px!important;text-align:center!important}
+}
+@media (min-width:761px) and (max-width:1260px){
+ #trip-edit .entry-toolrow,#vehicle-edit .entry-toolrow{grid-template-columns:1fr;gap:9px}
+ #trip-edit .entry-main-actions,#vehicle-edit .entry-main-actions{justify-content:flex-end;min-width:0}
+}
+@media (max-width:760px){
+ #trip-edit .entry-toolrow,#vehicle-edit .entry-toolrow{display:flex;flex-direction:column;align-items:stretch;gap:9px}
+ #trip-edit .entry-main-actions,#vehicle-edit .entry-main-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+ #trip-edit .entry-main-actions button,#vehicle-edit .entry-main-actions button{min-height:35px}
+}
+</style>
+
 </body>
 </html>
