@@ -1024,14 +1024,20 @@ body.frameby-auth-locked .github-auth-btn{
 .vehicle-master-table{min-width:1000px}
 .vehicle-master-table th{padding:10px 8px;white-space:nowrap}
 .vehicle-master-table td{padding:6px 5px;min-width:110px}
-.vehicle-master-table td:first-child{min-width:190px}
+.vehicle-master-table td:nth-child(2){min-width:190px}
 .vehicle-master-table input,.vehicle-master-table select{width:100%;min-width:0;padding:8px 9px;font-size:12px}
 .vehicle-master-table .vehicle-master-action{min-width:80px;width:90px;text-align:center}
 .vehicle-master-table .vehicle-master-save{border:1px solid #2757d7;background:#2757d7;color:#fff;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:800}
 .vehicle-master-table .vehicle-master-save:disabled{opacity:.5;cursor:wait}
-.vehicle-master-table tr.vehicle-master-unsaved td:first-child{box-shadow:inset 3px 0 0 #c97916}
+.vehicle-master-table tr.vehicle-master-unsaved td:nth-child(2){box-shadow:inset 3px 0 0 #c97916}
 .vehicle-master-table .vehicle-master-retired{background:#f8f9fa;color:#596274}
-@media(max-width:1100px){.vehicle-master-wrap{overflow:visible}.vehicle-master-table{min-width:0;width:100%;border-collapse:separate}.vehicle-master-table thead{display:none}.vehicle-master-table tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}.vehicle-master-table tbody tr{display:grid;grid-template-columns:1fr;gap:3px;padding:11px;border:1px solid #e2e7ef;border-radius:10px;background:#fff}.vehicle-master-table tbody td{display:grid;grid-template-columns:minmax(90px,34%) minmax(0,66%);align-items:center;gap:8px;padding:4px!important;border:0;min-width:0!important}.vehicle-master-table tbody td::before{content:attr(data-label);font-size:11px;color:#687386;font-weight:800}.vehicle-master-table tbody td.vehicle-master-action{width:100%;grid-template-columns:minmax(90px,34%) minmax(0,66%)}.vehicle-master-table .vehicle-master-save{width:100%}}
+.vehicle-master-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.vehicle-master-delete-selected{border:1px solid #e9b5bc;background:#fff5f6;color:#b42332;padding:7px 11px;border-radius:8px;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+.vehicle-master-delete-selected:disabled{opacity:.48;cursor:not-allowed}
+.vehicle-master-table th.vehicle-master-check-col,.vehicle-master-table td.vehicle-master-check-col{width:48px;min-width:48px!important;max-width:48px;text-align:center;padding:6px 4px}
+.vehicle-master-table .vehicle-master-row-check,#selectAllVehicleMasters{width:16px;height:16px;min-width:16px;margin:0;accent-color:#2757d7;cursor:pointer}
+.vehicle-master-table tr.vehicle-master-selected td{background:#f3f7ff!important}
+@media(max-width:1100px){.vehicle-master-wrap{overflow:visible}.vehicle-master-table{min-width:0;width:100%;border-collapse:separate}.vehicle-master-table thead{display:none}.vehicle-master-table tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}.vehicle-master-table tbody tr{display:grid;grid-template-columns:1fr;gap:3px;padding:11px;border:1px solid #e2e7ef;border-radius:10px;background:#fff}.vehicle-master-table tbody td{display:grid;grid-template-columns:minmax(90px,34%) minmax(0,66%);align-items:center;gap:8px;padding:4px!important;border:0;min-width:0!important}.vehicle-master-table tbody td::before{content:attr(data-label);font-size:11px;color:#687386;font-weight:800}.vehicle-master-table tbody td.vehicle-master-check-col{grid-template-columns:minmax(90px,34%) minmax(0,66%)}.vehicle-master-table tbody td.vehicle-master-action{width:100%;grid-template-columns:minmax(90px,34%) minmax(0,66%)}.vehicle-master-table .vehicle-master-save{width:100%}}
 </style>
 <style id="frameby-trip-vehicle-readability-search-v3">
 /* 출장/차량 모듈 한정: 입력 도구줄과 검색, 중간 화면 대응. */
@@ -2016,15 +2022,18 @@ body.frameby-auth-locked .github-auth-btn{
       <div class="card vehicle-master-card" id="vehicleMasterCard">
         <div class="section-title">
           <div><h2>차량정보 관리</h2><div class="note">등록 차량 · 기초/누적거리 · 취득일 · 처분일 · 사용 상태</div></div>
-          <button class="master-add" type="button" id="addVehicleMasterRow">+ 차량 추가</button>
+          <div class="vehicle-master-toolbar">
+            <button class="master-delete vehicle-master-delete-selected" type="button" id="deleteSelectedVehicleMasters" disabled>선택 삭제</button>
+            <button class="master-add" type="button" id="addVehicleMasterRow">+ 차량 추가</button>
+          </div>
         </div>
         <div class="table-wrap vehicle-master-wrap">
           <table class="master-table vehicle-master-table">
-            <thead><tr><th>차량명</th><th>기초 키로수 (km)</th><th>누적거리 (km)</th><th>취득일</th><th>처분일</th><th>상태</th><th>관리</th></tr></thead>
+            <thead><tr><th class="vehicle-master-check-col"><label title="전체 차량 선택"><input type="checkbox" id="selectAllVehicleMasters" aria-label="전체 차량 선택"></label></th><th>차량명</th><th>기초 키로수 (km)</th><th>누적거리 (km)</th><th>취득일</th><th>처분일</th><th>상태</th><th>관리</th></tr></thead>
             <tbody id="vehicleMasterBody"></tbody>
           </table>
         </div>
-        <div class="inline-note">※ 차량별로 <b>저장</b>을 누르면 등록 정보가 반영됩니다. 처분 차량은 과거 운행기록과 주행거리에서 유지됩니다. 운행일이 처분일 이전인 기록에는 차량을 선택할 수 있으며, 처분일 이후 날짜에는 선택할 수 없습니다. 차량명은 연결 기록 보호를 위해 등록 후 변경할 수 없습니다.</div>
+        <div class="inline-note">※ 잘못 등록한 차량은 체크박스로 선택한 뒤 <b>선택 삭제</b>할 수 있습니다. 운행기록이 연결된 차량은 삭제할 수 없으므로 <b>처분</b>으로 관리해 주세요. 차량별로 <b>저장</b>을 누르면 등록 정보가 반영됩니다. 처분 차량은 과거 운행기록과 주행거리에서 유지됩니다. 운행일이 처분일 이전인 기록에는 차량을 선택할 수 있으며, 처분일 이후 날짜에는 선택할 수 없습니다. 차량명은 연결 기록 보호를 위해 등록 후 변경할 수 없습니다.</div>
       </div>
     </section>
   </main>
@@ -3084,7 +3093,7 @@ function monthOf(d){return /^\d{4}-\d{2}/.test(d||'')?String(d).slice(0,7):''}
 function opts(values,current,blank='선택'){const arr=[...new Set((values||[]).filter(Boolean))];let h=blank!==null?`<option value="">${esc(blank)}</option>`:'';if(current&&!arr.includes(current))arr.unshift(current);return h+arr.map(v=>`<option ${v===current?'selected':''}>${esc(v)}</option>`).join('')}
 function statusPill(s){return s==='완료'?'<span class="pill green">완료</span>':'<span class="pill orange">'+esc(s||'미정리')+'</span>'}
 function driveStatusPill(s){return s==='완료'?'<span class="pill green">완료</span>':'<span class="pill orange">'+esc(s||'미작성')+'</span>'}
-const MUTATION_RPC_NAMES=new Set(['savePendingBatch','deleteDriveLogs','saveTrip','deleteTrip','saveDriveLog','saveVehicleMileage','saveVehicleProfile','addMaster','updateMaster','deleteMaster','saveMasterBatch']);
+const MUTATION_RPC_NAMES=new Set(['savePendingBatch','deleteDriveLogs','saveTrip','deleteTrip','saveDriveLog','saveVehicleMileage','saveVehicleProfile','addMaster','updateMaster','deleteMaster','saveMasterBatch','deleteVehicleProfiles']);
 let mutationRpcQueue=Promise.resolve();
 function rpcRaw(name,...args){return githubTripRpc(name,...args)}
 function rpc(name,...args){
@@ -3410,6 +3419,23 @@ async function masterSavePending(){
 document.getElementById('saveMasterChanges')?.addEventListener('click',masterSavePending);
 // 차량정보 개별 저장 화면도 새 행/수정 중 입력값을 같은 탭에 임시 보관합니다.
 const vehicleMasterDrafts=new Map();
+const vehicleMasterSelectedIds=new Set();
+let vehicleMasterDeleting=false;
+function vehicleMasterUpdateDeleteUi(){
+ const rows=[...document.querySelectorAll('#vehicleMasterBody tr[data-vehicle-id]')];
+ const all=rows.length>0&&rows.every(tr=>vehicleMasterSelectedIds.has(tr.dataset.vehicleId));
+ const chosen=rows.filter(tr=>vehicleMasterSelectedIds.has(tr.dataset.vehicleId)).length;
+ const selectAll=document.getElementById('selectAllVehicleMasters');
+ if(selectAll){selectAll.checked=all;selectAll.indeterminate=!all&&chosen>0;selectAll.disabled=vehicleMasterDeleting||!rows.length;}
+ const button=document.getElementById('deleteSelectedVehicleMasters');
+ if(button){button.disabled=vehicleMasterDeleting||chosen===0;button.textContent=vehicleMasterDeleting?'삭제 중…':chosen?`선택 삭제 (${chosen})`:'선택 삭제';}
+ rows.forEach(tr=>{
+   const selected=vehicleMasterSelectedIds.has(tr.dataset.vehicleId);
+   tr.classList.toggle('vehicle-master-selected',selected);
+   const checkbox=tr.querySelector('.vehicle-master-row-check');if(checkbox)checkbox.checked=selected;
+ });
+}
+
 let vehicleMasterDraftScope='';
 function vehicleMasterDraftKey(){return 'FRAMEBY:FINANCE:VEHICLE_MASTER_DRAFTS:v1:'+encodeURIComponent(state.user||'account')}
 function vehicleMasterRestore(){
@@ -3445,8 +3471,11 @@ function renderVehicleMaster(){
   return patch?{...v,...patch,active:patch.status!=='처분'}:v;
  });
  const fresh=vehicleMasterDrafts.get('NEW');if(fresh)existing.push({...fresh,vehicleId:''});
- tbody.innerHTML=existing.length?existing.map(v=>vehicleMasterRowHtml(v)).join(''):'<tr><td colspan="7" class="master-empty">등록된 차량이 없습니다. 차량 추가를 눌러 등록해 주세요.</td></tr>';
+ tbody.innerHTML=existing.length?existing.map(v=>vehicleMasterRowHtml(v)).join(''):'<tr><td colspan="8" class="master-empty">등록된 차량이 없습니다. 차량 추가를 눌러 등록해 주세요.</td></tr>';
+ const visible=new Set([...tbody.querySelectorAll('tr[data-vehicle-id]')].map(tr=>tr.dataset.vehicleId));
+ for(const id of [...vehicleMasterSelectedIds])if(!visible.has(id))vehicleMasterSelectedIds.delete(id);
  tbody.querySelectorAll('tr[data-vehicle-id]').forEach(tr=>{bindVehicleMasterRow(tr);if(vehicleMasterDrafts.has(tr.dataset.vehicleId))tr.classList.add('vehicle-master-unsaved')});
+ vehicleMasterUpdateDeleteUi();
 }
 function vehicleMasterRowHtml(v={}){
  const isNew=!v.vehicleId,retired=v.active===false||!!v.disposed;
@@ -3457,10 +3486,15 @@ function vehicleMasterRowHtml(v={}){
  ['처분일',`<input data-key="disposed" type="date" value="${esc(v.disposed||'')}">`],
  ['상태',`<select data-key="status"><option value="운행중" ${retired?'':'selected'}>운행중</option><option value="처분" ${retired?'selected':''}>처분</option></select>`],
  ['관리','<button type="button" class="vehicle-master-save">저장</button>']];
- return `<tr data-vehicle-id="${esc(v.vehicleId||'NEW')}" class="${retired?'vehicle-master-retired':''}">${cells.map(([name,html])=>`<td data-label="${name}" ${name==='관리'?'class="vehicle-master-action"':''}>${html}</td>`).join('')}</tr>`;
+ return `<tr data-vehicle-id="${esc(v.vehicleId||'NEW')}" class="${retired?'vehicle-master-retired':''}"><td class="vehicle-master-check-col" data-label="선택"><input type="checkbox" class="vehicle-master-row-check" aria-label="${esc(v.vehicle||'새 차량')} 선택"></td>${cells.map(([name,html])=>`<td data-label="${name}" ${name==='관리'?'class="vehicle-master-action"':''}>${html}</td>`).join('')}</tr>`;
 }
 function bindVehicleMasterRow(tr){
- tr.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',()=>vehicleMasterCapture(tr));el.addEventListener('change',()=>vehicleMasterCapture(tr))});
+ tr.querySelectorAll('input[data-key],select[data-key]').forEach(el=>{el.addEventListener('input',()=>vehicleMasterCapture(tr));el.addEventListener('change',()=>vehicleMasterCapture(tr))});
+ tr.querySelector('.vehicle-master-row-check')?.addEventListener('change',event=>{
+   if(event.target.checked)vehicleMasterSelectedIds.add(tr.dataset.vehicleId);
+   else vehicleMasterSelectedIds.delete(tr.dataset.vehicleId);
+   vehicleMasterUpdateDeleteUi();
+ });
  tr.querySelector('.vehicle-master-save')?.addEventListener('click',async()=>{
    const payload=vehicleMasterPayload(tr);
    if(!payload.vehicle){toast('차량명을 입력해 주세요.','error');return}
@@ -3471,7 +3505,7 @@ function bindVehicleMasterRow(tr){
      const saved=await rpc('saveVehicleProfile',payload);
      const idx=state.vehicles.findIndex(v=>v.vehicleId===saved.vehicleId);
      if(idx>=0)state.vehicles[idx]=saved;else state.vehicles.push(saved);
-     vehicleMasterDrafts.delete(tr.dataset.vehicleId);vehicleMasterPersist();
+     vehicleMasterDrafts.delete(tr.dataset.vehicleId);vehicleMasterSelectedIds.delete(tr.dataset.vehicleId);vehicleMasterPersist();
      if(saved.active===false&&preferredDriveVehicle===saved.vehicle)preferredDriveVehicle='';
      applyAutoBaseMileages();initFilters(false);renderVehicleMaster();renderVehicleAll();
      toast(`차량정보 저장됨: ${saved.vehicle}${saved.active?'':' (처분)'}`);
@@ -3485,6 +3519,35 @@ document.getElementById('addVehicleMasterRow')?.addEventListener('click',()=>{
  vehicleMasterDrafts.set('NEW',{vehicleId:'',vehicle:'',baseMileage:'',currentMileage:'',acquired:'',disposed:'',status:'운행중'});
  vehicleMasterPersist();renderVehicleMaster();
  tbody.querySelector('tr[data-vehicle-id="NEW"] [data-key="vehicle"]')?.focus();
+});
+
+document.getElementById('selectAllVehicleMasters')?.addEventListener('change',event=>{
+ const rows=[...document.querySelectorAll('#vehicleMasterBody tr[data-vehicle-id]')];
+ for(const tr of rows){if(event.target.checked)vehicleMasterSelectedIds.add(tr.dataset.vehicleId);else vehicleMasterSelectedIds.delete(tr.dataset.vehicleId)}
+ vehicleMasterUpdateDeleteUi();
+});
+document.getElementById('deleteSelectedVehicleMasters')?.addEventListener('click',async()=>{
+ if(vehicleMasterDeleting||!vehicleMasterSelectedIds.size)return;
+ const ids=[...vehicleMasterSelectedIds];
+ const saved=state.vehicles.filter(v=>ids.includes(v.vehicleId));
+ const localNew=ids.includes('NEW');
+ const names=saved.map(v=>v.vehicle).concat(localNew?['새 차량(미저장)']:[]);
+ if(!names.length)return;
+ if(!window.confirm(`선택한 차량 ${names.length}대를 삭제할까요?\n\n${names.join(' / ')}\n\n연결된 운행기록이 있는 차량은 삭제할 수 없습니다. 삭제된 등록 차량은 복구하려면 다시 등록해야 합니다.`))return;
+ vehicleMasterDeleting=true;vehicleMasterUpdateDeleteUi();
+ try{
+   // 서버에서 운행기록 전체를 다시 대조하여 차량 삭제 가능 여부를 판단한다.
+   if(saved.length)await rpc('deleteVehicleProfiles',{ids:saved.map(v=>v.vehicleId)});
+   for(const v of saved){vehicleMasterDrafts.delete(v.vehicleId);mileagePendingDrafts.delete(v.vehicle);}
+   if(localNew)vehicleMasterDrafts.delete('NEW');
+   vehicleMasterPersist();tripPersistDrafts();
+   const deleted=new Set(saved.map(v=>v.vehicleId));
+   state.vehicles=state.vehicles.filter(v=>!deleted.has(v.vehicleId));
+   vehicleMasterSelectedIds.clear();
+   applyAutoBaseMileages();initFilters(false);renderVehicleMaster();renderVehicleAll();tripUpdateSaveUi();
+   toast(`차량정보 ${names.length}건 삭제 완료`);
+ }catch(e){toast('차량정보 삭제 실패: '+(e?.message||e),'error');}
+ finally{vehicleMasterDeleting=false;vehicleMasterUpdateDeleteUi();}
 });
 
 document.querySelectorAll('[data-master-add]').forEach(btn=>btn.addEventListener('click',()=>masterAddPending(btn.dataset.masterAdd)));
@@ -4082,7 +4145,7 @@ async function ghSaveTrip(payload){payload=payload||{};const date=ghDate(payload
 async function ghHardDeleteDriveByTrip(tripId){const rows=(await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true)).filter(r=>ghText(r.trip_record_id)===tripId).sort((a,b)=>b.__rowNo-a.__rowNo),vehicles={};for(const r of rows){if(ghText(r.차량명))vehicles[ghText(r.차량명)]=true;await ghAuditRows([ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,ghText(r.drive_id),JSON.stringify(r),'삭제','연결 출장 삭제')]);await ghDeleteRow(INTEGRATED_CONFIG.driveSheet,r.__rowNo)}for(const v of Object.keys(vehicles))await ghRecalculateVehicle(v)}
 async function ghDeleteTrip(payload){payload=typeof payload==='string'?{recordId:payload}:(payload||{});const id=ghText(payload.recordId),sourceKeys=ghText(payload.sourceKeys);if(!id||id.startsWith('TMP:'))return{ok:true,recordId:id};if(id.startsWith('AUTO:')){if(sourceKeys)await ghAuditRows([ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sourceKeys,'삭제','source_keys')]);return{ok:true,recordId:id}}const row=await ghFindTripRow(id);if(!row)return{ok:true,recordId:id};await ghHardDeleteDriveByTrip(id);const sk=ghText(row.source_keys)||sourceKeys,a=[];if(sk)a.push(ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sk,'삭제','source_keys'));a.push(ghAuditRow('실제삭제',INTEGRATED_CONFIG.tripSheet,id,JSON.stringify(row),'삭제','전체행'));await ghAuditRows(a);await ghDeleteRow(INTEGRATED_CONFIG.tripSheet,row.__rowNo);return{ok:true,recordId:id}}
 async function ghSaveDriveLog(payload){payload=payload||{};const date=ghDate(payload.date||payload.일자);if(!date)throw new Error('운행일자를 먼저 입력해 주세요.');const rows=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true);let id=ghText(payload.driveId),old=rows.find(r=>id&&!id.startsWith('TMP:')&&ghText(r.drive_id)===id)||null;if(!old&&ghText(payload.tripRecordId))old=rows.find(r=>ghText(r.trip_record_id)===ghText(payload.tripRecordId)&&String(r.삭제여부||'').toUpperCase()!=='Y')||null;if(old)id=ghText(old.drive_id);if(!old)id='DRV-'+crypto.randomUUID().slice(0,8).toUpperCase();const o={drive_id:id,trip_record_id:ghText(payload.tripRecordId)||(old?ghText(old.trip_record_id):''),일자:date,차량명:ghText(payload.vehicle),운행구분:ghText(payload.driveType),출발지:ghText(payload.start),도착지:ghText(payload.end),왕복편도:ghText(payload.roundTrip)||'왕복',실제거리_km:ghNum(payload.distance),기초주행거리_km:old?ghNum(old.기초주행거리_km):0,현재누적거리_km:ghNum(payload.currentMileage),상태:'',삭제여부:'N',생성일시:old?old.생성일시:ghNow(),수정일시:ghNow()};o.상태=ghDriveStatus(o);const vals=GH_DRIVE_HEADERS.map(h=>o[h]??'');if(old){await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,`A${old.__rowNo}:O${old.__rowNo}`,[vals]);const audits=[];GH_DRIVE_HEADERS.forEach(h=>{if(h==='수정일시')return;if(String(old[h]??'')!==String(o[h]??''))audits.push(ghAuditRow('수정',INTEGRATED_CONFIG.driveSheet,id,old[h]??'',o[h]??'',h))});await ghAuditRows(audits)}else{await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,'A:O',[vals]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.driveSheet,id,'','','차량운행일지 생성')])}const oldVehicle=old?ghText(old.차량명):'';if(oldVehicle&&oldVehicle!==o.차량명)await ghRecalculateVehicle(oldVehicle);if(o.차량명)await ghRecalculateVehicle(o.차량명);const latest=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),saved=latest.find(r=>ghText(r.drive_id)===id)||o;return ghNormDrive(saved)}
-async function ghSaveVehicleMileage(payload){payload=payload||{};const vehicle=ghText(payload.vehicle);if(!vehicle)throw new Error('차량명을 먼저 입력해 주세요.');const base=ghNum(payload.baseMileage),cur=ghNum(payload.currentMileage),rows=await ghTripObjects(INTEGRATED_CONFIG.vehicleSheet,GH_VEHICLE_HEADERS,true),hit=rows.find(r=>ghText(r.차량명)===vehicle),now=ghNow();if(hit){const o={...hit,기초키로수:base,누적거리:cur,수정일시:now};await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,`A${hit.__rowNo}:H${hit.__rowNo}`,[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('수정',INTEGRATED_CONFIG.vehicleSheet,ghText(hit.vehicle_id),`${hit.기초키로수}/${hit.누적거리}`,`${base}/${cur}`,'주행거리')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}const id='VEH-'+crypto.randomUUID().slice(0,8).toUpperCase(),o={vehicle_id:id,차량명:vehicle,기초키로수:base,누적거리:cur,취득일:'',처분일:'',사용여부:'Y',수정일시:now};await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,'A:H',[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.vehicleSheet,id,'',vehicle,'차량정보')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}
+async function ghSaveVehicleMileage(payload){payload=payload||{};const vehicle=ghText(payload.vehicle);if(!vehicle)throw new Error('차량명을 먼저 입력해 주세요.');const base=ghNum(payload.baseMileage),cur=ghNum(payload.currentMileage),rows=await ghTripObjects(INTEGRATED_CONFIG.vehicleSheet,GH_VEHICLE_HEADERS,true),hit=rows.find(r=>ghText(r.차량명)===vehicle),now=ghNow();if(!hit)throw new Error('차량정보가 등록되지 않았습니다. 기초관리에서 차량을 먼저 추가해 주세요.');if(hit){const o={...hit,기초키로수:base,누적거리:cur,수정일시:now};await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,`A${hit.__rowNo}:H${hit.__rowNo}`,[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('수정',INTEGRATED_CONFIG.vehicleSheet,ghText(hit.vehicle_id),`${hit.기초키로수}/${hit.누적거리}`,`${base}/${cur}`,'주행거리')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}const id='VEH-'+crypto.randomUUID().slice(0,8).toUpperCase(),o={vehicle_id:id,차량명:vehicle,기초키로수:base,누적거리:cur,취득일:'',처분일:'',사용여부:'Y',수정일시:now};await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,'A:H',[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.vehicleSheet,id,'',vehicle,'차량정보')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}
 function ghMasterType(type){type=ghText(type);if(type==='department'||type==='업무구분'||type==='구분')return'업무구분';if(type==='summary'||type==='적요명')return'적요명';if(type==='purpose'||type==='출장목적')return'출장목적';throw new Error('기초관리 구분이 올바르지 않습니다.')}
 async function ghMasterRows(){const [rows]=await ghTripBatchReadRanges([[INTEGRATED_CONFIG.masterSheet,'A2:F']]);return rows.map((r,i)=>({rowNo:i+2,type:ghText(r[0]),value:ghText(r[1]),order:ghNum(r[2]),active:String(r[3]||'Y').toUpperCase()!=='N',created:r[4]||'',updated:r[5]||''}))}
 async function ghSaveMasterBatch(changes){
@@ -4360,7 +4423,8 @@ async function ghSavePendingBatch(request){
   for(const {key,payload} of mileageDrafts){
     const vehicle=ghText(payload.vehicle);
     const old=vehicles.find(r=>ghText(r.차량명)===vehicle&&String(r.사용여부||'Y').toUpperCase()!=='N');
-    const recordId=old?ghText(old.vehicle_id):'VEH-'+crypto.randomUUID().slice(0,8).toUpperCase();
+    if(!old)throw new Error(`${vehicle}: 등록된 운행 중 차량이 없습니다. 기초관리에서 차량을 먼저 등록해 주세요.`);
+    const recordId=ghText(old.vehicle_id);
     const o=old?{...old}:{vehicle_id:recordId,차량명:vehicle,취득일:'',처분일:'',사용여부:'Y'};
     const requestedBase=ghNum(payload.baseMileage);
     const requestedCurrent=String(payload.currentMileage??'').trim()===''?(old?ghNum(old.누적거리):requestedBase):ghNum(payload.currentMileage);
@@ -4478,13 +4542,38 @@ async function ghSaveVehicleProfile(payload){
  await ghBulkRequest(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(id)}:batchUpdate`,{requests:[request]});
  return ghNormVehicle(o);
 }
+// 운행기록 및 과거 삭제표시 기록에 연결된 차량은 삭제하지 않는다.
+async function ghDeleteVehicleProfiles(payload){
+ const ids=[...new Set((payload?.ids||[]).map(ghText).filter(Boolean))];
+ if(!ids.length)return{ok:true,deletedIds:[]};
+ const [snapshot,sheetIds]=await Promise.all([ghBulkReadSnapshot(),ghGetSheetIds()]);
+ const targets=ids.map(id=>snapshot.vehicles.find(v=>ghText(v.vehicle_id)===id));
+ if(targets.some(v=>!v))throw new Error('선택한 차량 중 등록 정보를 찾지 못한 항목이 있습니다. 새로고침 후 다시 시도해 주세요.');
+ const duplicates=targets.filter(v=>snapshot.vehicles.some(x=>x!==v&&ghText(x.vehicle_id)===ghText(v.vehicle_id)));
+ if(duplicates.length)throw new Error('차량 ID가 중복돼 있어 안전하게 삭제할 수 없습니다. 원본 차량정보를 확인해 주세요.');
+ const names=new Set(targets.map(v=>ghText(v.차량명)));
+ const linked=snapshot.drives.filter(d=>names.has(ghText(d.차량명)));
+ if(linked.length){
+  const namesWithLogs=[...new Set(linked.map(d=>ghText(d.차량명)))];
+  throw new Error(`${namesWithLogs.join(', ')}: 기존 운행기록이 있어 삭제할 수 없습니다. 처분 상태로 관리해 주세요.`);
+ }
+ const sheetId=sheetIds[INTEGRATED_CONFIG.vehicleSheet],auditId=sheetIds[INTEGRATED_CONFIG.auditSheet];
+ if(!Number.isInteger(sheetId)||!Number.isInteger(auditId))throw new Error('차량정보/수정이력 시트를 찾지 못했습니다.');
+ const audit=targets.map(v=>ghAuditRow('차량정보삭제',INTEGRATED_CONFIG.vehicleSheet,ghText(v.vehicle_id),JSON.stringify(v),'삭제','전체행'));
+ const requests=[{appendCells:{sheetId:auditId,rows:audit.map(row=>({values:row.map(value=>ghBulkCell(value))})),fields:'userEnteredValue'}}];
+ for(const v of [...targets].sort((a,b)=>b.__rowNo-a.__rowNo)){
+  requests.push({deleteDimension:{range:{sheetId,dimension:'ROWS',startIndex:v.__rowNo-1,endIndex:v.__rowNo}}});
+ }
+ await ghBulkRequest(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(INTEGRATED_CONFIG.tripSpreadsheetId)}:batchUpdate`,{requests});
+ return{ok:true,deletedIds:ids};
+}
 function ghVehicleRecordedProjection(rows,base,actual){
  let carry=Math.max(0,ghNum(base));
  const sorted=rows.map((r,i)=>({r,i})).filter(x=>ghDate(x.r.date)).sort((a,b)=>ghDate(a.r.date).localeCompare(ghDate(b.r.date))||a.i-b.i);
  for(const {r} of sorted){carry=Math.max(carry,ghNum(r.baseMileage));if(ghNum(r.distance)>0)carry+=ghNum(r.distance);carry=Math.max(carry,ghNum(r.currentMileage));}
  return Math.max(carry,ghNum(actual));
 }
-function githubTripRpc(name,...args){const map={getInitialData:ghGetInitialData,savePendingBatch:ghSavePendingBatch,deleteDriveLogs:ghDeleteDriveLogs,saveTrip:ghSaveTrip,deleteTrip:ghDeleteTrip,saveDriveLog:ghSaveDriveLog,saveVehicleMileage:ghSaveVehicleMileage,saveVehicleProfile:ghSaveVehicleProfile,addMaster:ghAddMaster,updateMaster:ghUpdateMaster,deleteMaster:ghDeleteMaster,saveMasterBatch:ghSaveMasterBatch};if(!map[name])return Promise.reject(new Error('지원하지 않는 요청: '+name));return map[name](...args)}
+function githubTripRpc(name,...args){const map={getInitialData:ghGetInitialData,savePendingBatch:ghSavePendingBatch,deleteDriveLogs:ghDeleteDriveLogs,saveTrip:ghSaveTrip,deleteTrip:ghDeleteTrip,saveDriveLog:ghSaveDriveLog,saveVehicleMileage:ghSaveVehicleMileage,saveVehicleProfile:ghSaveVehicleProfile,deleteVehicleProfiles:ghDeleteVehicleProfiles,addMaster:ghAddMaster,updateMaster:ghUpdateMaster,deleteMaster:ghDeleteMaster,saveMasterBatch:ghSaveMasterBatch};if(!map[name])return Promise.reject(new Error('지원하지 않는 요청: '+name));return map[name](...args)}
 async function githubVerifySpreadsheetAccess(spreadsheetId){
   const u=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=spreadsheetId`;
   const data=await githubFetchJson(u);
