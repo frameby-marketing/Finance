@@ -1091,6 +1091,76 @@ body.frameby-auth-locked .github-auth-btn{
  #vehicle-edit .vehicle-quick-select select{flex:1 1 auto;max-width:none;min-width:0}
 }
 </style>
+<style id="vehicle-dashboard-redesign-2026">
+#vehicle-dashboard{padding:2px 0 20px}
+#vehicle-dashboard .vdb-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:0 0 22px;padding:0 5px}
+#vehicle-dashboard .vdb-heading h1{margin:0;font-size:26px;line-height:1.28;font-weight:900;color:#14213a;letter-spacing:-.4px}
+#vehicle-dashboard .vdb-heading p{margin:6px 0 0;font-size:12px;color:#70809a}
+#vehicle-dashboard .vdb-year-control{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid #dce5f5;border-radius:16px;box-shadow:0 5px 17px rgba(31,64,122,.06);min-height:48px;padding:4px 6px;flex:0 0 auto}
+#vehicle-dashboard .vdb-year-control select{min-width:92px;padding:6px 2px;border:0;box-shadow:none!important;appearance:none;text-align:center;text-align-last:center;font-size:16px;font-weight:900;color:#183567;background:transparent;cursor:pointer}
+#vehicle-dashboard .vdb-year-arrow{width:37px;height:37px;display:grid;place-items:center;border:0;background:transparent;color:#1c427d;font-size:28px;line-height:1;border-radius:10px;cursor:pointer}
+#vehicle-dashboard .vdb-year-arrow:hover:not(:disabled){background:#eef4ff}
+#vehicle-dashboard .vdb-year-arrow:disabled{opacity:.25;cursor:default}
+#vehicle-dashboard .vdb-fleet-panel{display:flex;align-items:stretch;gap:20px;padding:20px 24px;background:linear-gradient(145deg,#fff,#fbfcff);border:1px solid #e0e6f1;border-radius:18px;margin-bottom:20px;box-shadow:0 6px 24px rgba(35,67,111,.05)}
+#vehicle-dashboard .vdb-fleet-summary{display:flex;align-items:center;gap:14px;flex:0 0 240px;border-right:1px solid #e2e9f4;padding-right:20px;min-width:0}
+#vehicle-dashboard .vdb-car-icon{width:56px;height:56px;border-radius:50%;background:#eaf1ff;display:grid;place-items:center;flex:0 0 auto;color:#285bd7}
+#vehicle-dashboard .vdb-car-icon svg{width:30px;height:30px}
+#vehicle-dashboard .vdb-fleet-summary span{display:block;font-size:13px;color:#41526c;font-weight:800}
+#vehicle-dashboard .vdb-fleet-summary strong{display:block;font-size:30px;line-height:1.2;color:#285bd7;font-weight:900;margin-top:5px}
+#vehicle-dashboard .vdb-fleet-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;flex:1;min-width:0}
+#vehicle-dashboard .vdb-vehicle-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:9px;text-align:left;min-height:96px;padding:15px 34px 14px 17px;border:1px solid #d9e3f3;background:#fff;border-radius:13px;box-shadow:0 2px 7px rgba(28,57,102,.045);color:#142b4d;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s}
+#vehicle-dashboard .vdb-vehicle-card:hover,#vehicle-dashboard .vdb-vehicle-card.selected{border-color:#7c9ded;background:#f8fbff;box-shadow:0 4px 14px rgba(42,84,177,.11)}
+#vehicle-dashboard .vdb-vehicle-name{display:block;font-weight:850;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+#vehicle-dashboard .vdb-vehicle-meta{display:flex;align-items:center;gap:7px;color:#60738e;font-size:11px;font-weight:750}
+#vehicle-dashboard .vdb-status-dot{width:17px;height:17px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;background:#6688ef;color:#fff}
+#vehicle-dashboard .vdb-status-dot::after{content:'✓';font-size:11px;line-height:1}
+#vehicle-dashboard .vdb-status-dot.retired{background:#9da6b8}
+#vehicle-dashboard .vdb-vehicle-chevron{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:25px;color:#45638c}
+#vehicle-dashboard .vdb-empty-cards{padding:28px 14px;color:#7b8799;font-size:12px}
+#vehicle-dashboard .vdb-month-panel{padding:23px 22px 19px;background:#fff;border:1px solid #dfe6f2;border-radius:18px;box-shadow:0 6px 23px rgba(35,67,111,.045)}
+#vehicle-dashboard .vdb-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 6px 12px}
+#vehicle-dashboard .vdb-section-title{display:flex;align-items:center;gap:11px}
+#vehicle-dashboard .vdb-section-title svg{width:27px;height:27px;stroke:#2860e5}
+#vehicle-dashboard .vdb-section-title h2{margin:0;color:#17243a;font-size:19px;font-weight:900}
+#vehicle-dashboard .vdb-section-caption{color:#7c899f;font-size:11px}
+#vehicle-dashboard .vdb-accent-line{border-bottom:2px solid #e3e9f5;position:relative;margin:0 6px 18px;height:2px}
+#vehicle-dashboard .vdb-accent-line::before{content:'';position:absolute;left:0;bottom:-2px;height:3px;width:66px;background:#2d61e8;border-radius:4px}
+#vehicle-dashboard .vdb-table-wrap{overflow-x:auto;border:1px solid #e0e7f2;border-radius:12px;scrollbar-width:thin;outline-offset:2px}
+#vehicle-dashboard .vdb-month-table{border-collapse:separate;border-spacing:0;width:100%;min-width:1410px;table-layout:fixed;font-variant-numeric:tabular-nums}
+#vehicle-dashboard .vdb-month-table th,#vehicle-dashboard .vdb-month-table td{padding:11px 5px;text-align:center;border-bottom:1px solid #e8edf5;font-size:12px;white-space:nowrap}
+#vehicle-dashboard .vdb-month-table thead th{background:#f2f5fa;color:#4a5a73;font-size:12px;font-weight:850;padding:15px 5px}
+#vehicle-dashboard .vdb-month-table thead th:first-child,#vehicle-dashboard .vdb-month-table tbody th{width:202px;text-align:left;padding-left:17px;position:sticky;left:0;z-index:2;background:#f8faff;white-space:normal;overflow-wrap:anywhere}
+#vehicle-dashboard .vdb-month-table thead th:first-child{background:#f2f5fa;z-index:4}
+#vehicle-dashboard .vdb-month-table th:last-child,#vehicle-dashboard .vdb-month-table td:last-child{width:154px}
+#vehicle-dashboard .vdb-month-table tbody tr:last-child th,#vehicle-dashboard .vdb-month-table tbody tr:last-child td{border-bottom:0}
+#vehicle-dashboard .vdb-month-table tbody tr:hover th,#vehicle-dashboard .vdb-month-table tbody tr:hover td,#vehicle-dashboard .vdb-month-table tbody tr.selected th,#vehicle-dashboard .vdb-month-table tbody tr.selected td{background:#f6f9ff}
+#vehicle-dashboard .vdb-row-name{font-size:13px;font-weight:850;color:#182841;display:block}
+#vehicle-dashboard .vdb-row-sub{font-size:10px;color:#8995a4;display:block;margin-top:5px}
+#vehicle-dashboard .vdb-month-value{display:block;padding:11px 3px;min-height:40px;line-height:18px;border:1px solid #deebff;background:#eaf2ff;color:#223754;border-radius:9px;font-weight:750}
+#vehicle-dashboard .vdb-month-empty{display:block;padding:11px 3px;min-height:40px;line-height:18px;border:1px solid #edf1f7;background:#fbfcff;color:#a4aebb;border-radius:9px}
+#vehicle-dashboard .vdb-last-heading{color:#2857b0!important;background:#e8efff!important}
+#vehicle-dashboard .vdb-last-cell{padding:10px 7px!important}
+#vehicle-dashboard .vdb-last-cell strong{display:block;background:#2758d7;color:#fff;font-size:15px;font-weight:900;padding:11px 3px;line-height:18px;min-height:42px;border-radius:9px}
+#vehicle-dashboard .vdb-last-cell small{font-size:10px;font-weight:700}
+#vehicle-dashboard .vdb-empty-cell{padding:28px!important;text-align:center!important;color:#8190a5}
+#vehicle-dashboard .vdb-footnote{margin:15px 8px 2px;color:#7c899b;font-size:11px;line-height:1.65}
+#vehicle-dashboard .vdb-overlay{position:fixed;inset:0;z-index:9200;background:rgba(20,33,55,.50);display:flex;align-items:center;justify-content:center;padding:18px}
+#vehicle-dashboard .vdb-overlay[hidden]{display:none!important}
+#vehicle-dashboard .vdb-dialog{width:min(520px,100%);background:#fff;border:1px solid #dbe4f1;border-radius:17px;box-shadow:0 20px 80px rgba(13,31,65,.27);overflow:hidden}
+#vehicle-dashboard .vdb-dialog-head{padding:22px 24px 18px;border-bottom:1px solid #e6ecf4;display:flex;justify-content:space-between;align-items:flex-start}
+#vehicle-dashboard .vdb-dialog-eyebrow{font-size:11px;font-weight:800;color:#2a5ccf}
+#vehicle-dashboard .vdb-dialog-head h2{margin:7px 0 0;font-size:21px;color:#17233d}
+#vehicle-dashboard .vdb-dialog-close{border:0;background:#f2f5fa;color:#50617a;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:21px}
+#vehicle-dashboard .vdb-dialog-content{padding:8px 24px 14px;max-height:70vh;overflow:auto}
+#vehicle-dashboard .vdb-info-pair{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 3px;border-bottom:1px solid #edf1f6}
+#vehicle-dashboard .vdb-info-pair:last-child{border-bottom:0}
+#vehicle-dashboard .vdb-info-pair span{color:#738096;font-size:12px}
+#vehicle-dashboard .vdb-info-pair strong{font-size:13px;color:#253955;text-align:right;overflow-wrap:anywhere}
+#vehicle-dashboard .vdb-info-missing{padding:22px 3px;color:#6d798d;font-size:13px;line-height:1.7}
+#vehicle-dashboard .vdb-dialog-foot{padding:14px 24px;background:#f8faff;color:#7b8699;font-size:11px}
+@media(max-width:1160px){#vehicle-dashboard .vdb-fleet-panel{flex-direction:column;gap:15px}#vehicle-dashboard .vdb-fleet-summary{flex:0 0 auto;border-right:0;border-bottom:1px solid #e2e9f4;padding:0 0 14px}}
+@media(max-width:720px){#vehicle-dashboard .vdb-heading{align-items:flex-start;flex-wrap:wrap}#vehicle-dashboard .vdb-heading h1{font-size:22px}#vehicle-dashboard .vdb-fleet-panel{padding:15px}#vehicle-dashboard .vdb-month-panel{padding:18px 12px}#vehicle-dashboard .vdb-fleet-cards{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}#vehicle-dashboard .vdb-vehicle-card{min-height:86px}}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -1822,49 +1892,58 @@ body.frameby-auth-locked .github-auth-btn{
               <button class="vehicle-range-preset" type="button" id="vehicleAllPeriod">전체 기간</button>
             </div></div>
           </div>
-          <span class="vehicle-dashboard-basis" id="vehicleDashboardBasis">차량별 월간 주행거리 · 기록 기준</span>
+          <span class="vehicle-dashboard-basis" id="vehicleDashboardBasis">운행일지 기준 · 월별 기말 키로수</span>
           <button class="excel-btn" type="button" data-export="vehicle" title="조회기간과 다운로드할 차량을 선택한 뒤 엑셀로 저장합니다">엑셀 다운로드</button>
         </div>
       </div>
 
       <div class="subview active" id="vehicle-dashboard">
-      <div class="grid two">
-        <div class="card">
-          <div class="section-title"><h2>차량 사용현황</h2><span class="note">전체 등록 차량 · 누적거리 기준</span></div>
-          <div class="table-wrap">
-            <table class="vehicle-status-table">
-              <thead><tr><th>차량</th><th>기초 키로수</th><th>누적 거리</th></tr></thead>
-              <tbody>
-                <tr><td colspan="3" class="empty">불러오는 중...</td></tr>
-              </tbody>
+        <div class="vdb-heading">
+          <div>
+            <h1>차량 운행 대시보드</h1>
+            <p>운행일지 기록 기준 · 월별 기말 키로수</p>
+          </div>
+          <div class="vdb-year-control" aria-label="조회 연도 선택">
+            <button type="button" id="vehicleYearPrev" class="vdb-year-arrow" aria-label="이전 연도">‹</button>
+            <select id="vehicleDashboardYear" aria-label="차량 월별 기말 키로수 조회 연도"></select>
+            <button type="button" id="vehicleYearNext" class="vdb-year-arrow" aria-label="다음 연도">›</button>
+          </div>
+        </div>
+
+        <section class="vdb-fleet-panel" aria-label="등록 차량 현황">
+          <div class="vdb-fleet-summary">
+            <div class="vdb-car-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M5.5 17H4a1 1 0 0 1-1-1v-4l2-5a2 2 0 0 1 2-1.2h10A2 2 0 0 1 19 7l2 5v4a1 1 0 0 1-1 1h-1.5"/><path d="M4 12h16M6 17v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m6 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2M7 14h2m6 0h2"/></svg>
+            </div>
+            <div><span>등록 차량</span><strong id="vehicleRegisteredCount">0대</strong></div>
+          </div>
+          <div id="vehicleDashboardCards" class="vdb-fleet-cards" aria-label="차량 기초정보 조회">
+            <div class="vdb-empty-cards">차량정보를 불러오는 중...</div>
+          </div>
+        </section>
+
+        <section class="vdb-month-panel" aria-label="월별 기말 키로수 현황">
+          <div class="vdb-section-head">
+            <div class="vdb-section-title"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg><h2>월별 기말 키로수</h2></div>
+            <span class="vdb-section-caption">운행기록이 없는 월은 — 표시</span>
+          </div>
+          <div class="vdb-accent-line"></div>
+          <div class="vdb-table-wrap" tabindex="0" aria-label="차량별 월별 기말 키로수 표, 가로 스크롤 가능">
+            <table id="vehicleMonthlyTable" class="vdb-month-table">
+              <thead><tr><th scope="col">차량명</th><th scope="col">1월</th><th scope="col">2월</th><th scope="col">3월</th><th scope="col">4월</th><th scope="col">5월</th><th scope="col">6월</th><th scope="col">7월</th><th scope="col">8월</th><th scope="col">9월</th><th scope="col">10월</th><th scope="col">11월</th><th scope="col">12월</th><th scope="col">최종 기말거리</th></tr></thead>
+              <tbody><tr><td colspan="14" class="vdb-empty-cell">불러오는 중...</td></tr></tbody>
             </table>
           </div>
-        </div>
-        <div class="card">
-          <div class="vehicle-expense-section">
-            <div class="vehicle-expense-title"><strong>차량 관련 비용</strong><span>전체 기간 · 출장사용내역 기준</span></div>
-            <div class="vehicle-expense-grid">
-              <div class="vehicle-expense-item"><span>유류비</span><strong id="vehicleFuelTotal">—</strong></div>
-              <div class="vehicle-expense-item"><span>차량유지비</span><strong id="vehicleMaintenanceTotal">—</strong></div>
-            </div>
-            <p class="vehicle-expense-note">차량별 배분 금액이 아닌 원본 시트의 전체 비용입니다. 유류비로 분류된 결제는 차량유지비와 중복 합산하지 않습니다.</p>
+          <div class="vdb-footnote">운행일지에 저장된 기록의 월별 마지막 기말 키로수입니다. 기초관리의 확인 누적거리와 차이는 입력 메뉴에서 확인합니다.</div>
+        </section>
+
+        <div id="vehicleInfoOverlay" class="vdb-overlay" hidden>
+          <div class="vdb-dialog" role="dialog" aria-modal="true" aria-labelledby="vehicleInfoTitle" tabindex="-1">
+            <div class="vdb-dialog-head"><div><span class="vdb-dialog-eyebrow">차량 기초정보</span><h2 id="vehicleInfoTitle">차량정보</h2></div><button type="button" id="vehicleInfoClose" class="vdb-dialog-close" aria-label="닫기">×</button></div>
+            <div id="vehicleInfoContent" class="vdb-dialog-content"></div>
+            <div class="vdb-dialog-foot">조회 전용 · 수정은 기초관리에서 가능합니다.</div>
           </div>
         </div>
-      </div>
-
-      <div class="card vehicle-monthly-card">
-        <div class="section-title vehicle-monthly-heading">
-          <div><h2>차량별 월별 주행거리</h2><span class="note">월간 기록거리 · 해당 월 마지막 누적거리 (km)</span></div>
-          <div class="field vehicle-month-year"><label for="vehicleDashboardYear">조회 연도</label><select id="vehicleDashboardYear" aria-label="차량 월간 주행거리 조회 연도"></select></div>
-        </div>
-        <div class="table-wrap">
-          <table class="table vehicle-monthly-table" id="vehicleMonthlyTable">
-            <thead><tr><th>월</th><th>차량별 기록</th><th>전체 월간 주행거리</th></tr></thead>
-            <tbody><tr><td colspan="3" class="empty">불러오는 중...</td></tr></tbody>
-          </table>
-        </div>
-        <div class="inline-note">※ 등록된 운행기록의 실제거리를 월별 합산합니다. 누적거리는 해당 월 마지막 운행기록의 값(자동 승계 포함)입니다. 작성 대기 건은 별도 표시하며, 기록이 없는 월은 0km로 간주하지 않습니다.</div>
-      </div>
       </div>
 
       <div class="subview" id="vehicle-edit">
@@ -3387,68 +3466,122 @@ document.querySelectorAll('[data-master-add]').forEach(btn=>btn.addEventListener
 function renderVehicleAll(){renderVehicleDashboard();renderVehicleInput();renderReconcile()}
 function vehicleViewRows(){return currentDriveRows(false)}
 function vehicleInfoFor(name){return state.vehicles.find(v=>v.vehicle===name)||null}
-function derivedVehicle(name){const logs=state.driveLogs.filter(d=>d.vehicle===name);const info=vehicleInfoFor(name),positiveBases=logs.map(d=>n(d.baseMileage)).filter(x=>x>0),base=info?n(info.baseMileage):(positiveBases.length?Math.min(...positiveBases):0);return{vehicle:name,baseMileage:base,currentMileage:vehicleMileageProjection(logs,base,info?.currentMileage)}}
+function derivedVehicle(name){const logs=state.driveLogs.filter(d=>d.vehicle===name);const info=vehicleInfoFor(name),positiveBases=logs.map(d=>n(d.baseMileage)).filter(x=>x>0),base=info?n(info.baseMileage):(positiveBases.length?Math.min(...positiveBases):0);return{vehicle:name,baseMileage:base,currentMileage:info?n(info.currentMileage):vehicleMileageProjection(logs,base,0)}}
+let vehicleDashboardSelected = '';
+let vehicleDashboardReturnFocus = null;
+function vehicleDashboardEmphasize(){
+ document.querySelectorAll('#vehicleDashboardCards [data-vdb-vehicle]').forEach(el=>el.classList.toggle('selected',el.dataset.vdbVehicle===vehicleDashboardSelected));
+ document.querySelectorAll('#vehicleMonthlyTable [data-vdb-row]').forEach(el=>el.classList.toggle('selected',el.dataset.vdbRow===vehicleDashboardSelected));
+}
+function vehicleDashboardCloseInfo(){
+ const overlay=document.getElementById('vehicleInfoOverlay');
+ if(!overlay||overlay.hidden)return;
+ overlay.hidden=true;
+ if(vehicleDashboardReturnFocus?.isConnected)vehicleDashboardReturnFocus.focus();
+ vehicleDashboardReturnFocus=null;
+}
+function vehicleDashboardOpenInfo(name,trigger){
+ const overlay=document.getElementById('vehicleInfoOverlay'),content=document.getElementById('vehicleInfoContent'),title=document.getElementById('vehicleInfoTitle');
+ if(!overlay||!content||!title)return;
+ const info=state.vehicles.find(v=>v.vehicle===name);
+ vehicleDashboardSelected=name;
+ vehicleDashboardEmphasize();
+ vehicleDashboardReturnFocus=trigger||null;
+ title.textContent=name;
+ if(!info){
+  content.innerHTML='<div class="vdb-info-missing">기초관리에서 등록한 차량정보가 없습니다. 과거 운행기록에만 남아 있는 차량입니다.</div>';
+ }else{
+  const mileage=v=>n(v)>0?km(v):'미입력';
+  const fields=[
+   ['차량명',info.vehicle],
+   ['기초 키로수',mileage(info.baseMileage)],
+   ['확인 누적거리',mileage(info.currentMileage)],
+   ['취득일',info.acquired||'미입력'],
+   ['처분일',info.disposed||'미입력'],
+   ['사용 상태',info.disposed||info.active===false?'처분':'운행중']
+  ];
+  content.innerHTML=fields.map(([k,v])=>`<div class="vdb-info-pair"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('');
+ }
+ overlay.hidden=false;
+ overlay.querySelector('.vdb-dialog-close')?.focus();
+}
 function renderVehicleDashboard(){
  applyAutoBaseMileages();
- const allRows=state.driveLogs.filter(d=>d&&d.date&&!String(d.driveId||'').startsWith('TMP:'));
- const names=allVehicles();
- const statusBody=document.querySelector('#vehicle-dashboard .vehicle-status-table tbody');
- if(statusBody){
-  const statusRows=names.map(v=>{const x=derivedVehicle(v);return {vehicle:v,baseMileage:x.baseMileage,currentMileage:x.currentMileage}});
-  const spec=state.sorts.vehicleStatus||{key:'vehicle',dir:'asc'};
-  const sorted=statusRows.sort((a,b)=>(spec.dir==='asc'?1:-1)*cmpSort(a[spec.key],b[spec.key]));
-  statusBody.innerHTML=sorted.length?sorted.map(x=>`<tr><td><strong>${esc(x.vehicle)}</strong></td><td>${km(x.baseMileage)}</td><td>${km(x.currentMileage)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="3">등록된 차량이 없습니다.</td></tr>';
+ // 이 화면은 운행일지의 기말 키로수만 읽습니다. 기초관리의 누적거리를 더하거나 덮어쓰지 않습니다.
+ const allRows=state.driveLogs.map((d,i)=>({d,i})).filter(x=>x.d&&x.d.date&&!String(x.d.driveId||'').startsWith('TMP:'));
+ const names=allVehicles().slice().sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
+ const registered=[...new Map(state.vehicles.filter(v=>v.vehicle).map(v=>[v.vehicle,v])).values()].sort((a,b)=>a.vehicle.localeCompare(b.vehicle,'ko',{numeric:true}));
+ const count=document.getElementById('vehicleRegisteredCount'),cards=document.getElementById('vehicleDashboardCards');
+ if(count)count.textContent=registered.length.toLocaleString('ko-KR')+'대';
+ if(cards){
+  cards.innerHTML=registered.length?registered.map(v=>{
+   const status=v.disposed||v.active===false?'처분':'운행중';
+   return `<button type="button" class="vdb-vehicle-card ${vehicleDashboardSelected===v.vehicle?'selected':''}" data-vdb-vehicle="${esc(v.vehicle)}" aria-label="${esc(v.vehicle)} 기초정보 보기"><span class="vdb-vehicle-name">${esc(v.vehicle)}</span><span class="vdb-vehicle-meta"><span class="vdb-status-dot ${status==='처분'?'retired':''}"></span>${esc(status)}</span><span class="vdb-vehicle-chevron" aria-hidden="true">›</span></button>`;
+  }).join(''):'<div class="vdb-empty-cards">등록된 차량이 없습니다. 기초관리에서 차량을 추가해 주세요.</div>';
  }
- const costs=state.vehicleCosts||{};
- const fuel=document.getElementById('vehicleFuelTotal'),maintenance=document.getElementById('vehicleMaintenanceTotal');
- if(fuel)fuel.textContent=n(costs.fuel).toLocaleString('ko-KR')+'원';
- if(maintenance)maintenance.textContent=n(costs.maintenance).toLocaleString('ko-KR')+'원';
-
- const yearSelect=document.getElementById('vehicleDashboardYear'),table=document.getElementById('vehicleMonthlyTable');
- if(!yearSelect||!table)return;
+ const select=document.getElementById('vehicleDashboardYear'),table=document.getElementById('vehicleMonthlyTable');
+ if(!select||!table)return;
  const currentYear=tripTodayDate().slice(0,4);
- const years=[...new Set([currentYear,...allRows.map(d=>String(d.date).slice(0,4)).filter(y=>/^20\d{2}$/.test(y))])].sort((a,b)=>b.localeCompare(a));
- const keepYear=yearSelect.value;
- yearSelect.innerHTML=years.map(y=>`<option value="${y}">${y}년</option>`).join('');
- yearSelect.value=years.includes(keepYear)?keepYear:currentYear;
- const year=yearSelect.value;
- const vehicleNames=names.slice().sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
- const fmt=x=>n(x).toLocaleString('ko-KR');
- const latest=(a,b)=>String(a.date).localeCompare(String(b.date))||allRows.indexOf(a)-allRows.indexOf(b);
- const monthly=new Map(),annual=new Map();
- vehicleNames.forEach(name=>annual.set(name,{distance:0,logs:0,pending:0,last:null}));
- for(const d of allRows){
-  if(!d.vehicle||!annual.has(d.vehicle)||!String(d.date).startsWith(year+'-'))continue;
-  const month=monthOf(d.date),key=month+'\u001f'+d.vehicle;
-  if(!monthly.has(key))monthly.set(key,{distance:0,logs:0,pending:0,last:null});
-  const item=monthly.get(key),total=annual.get(d.vehicle);
-  for(const group of [item,total]){
-   group.logs++;
-   if(d.status!=='완료')group.pending++;
-   if(n(d.distance)>0)group.distance+=n(d.distance);
-   if(n(d.currentMileage)>0&&(!group.last||latest(group.last,d)<0))group.last=d;
-  }
+ const years=[...new Set([currentYear,...allRows.map(x=>String(x.d.date).slice(0,4)).filter(y=>/^20\d{2}$/.test(y))])].sort((a,b)=>Number(b)-Number(a));
+ const previous=select.value;
+ select.innerHTML=years.map(y=>`<option value="${y}">${y}년</option>`).join('');
+ select.value=years.includes(previous)?previous:currentYear;
+ const year=select.value;
+ const idx=years.indexOf(year);
+ const prev=document.getElementById('vehicleYearPrev'),next=document.getElementById('vehicleYearNext');
+ if(prev)prev.disabled=idx>=years.length-1;
+ if(next)next.disabled=idx<=0;
+ // 각 월의 마지막 기록 한 건만 사용합니다. 월별 거리 합계나 기초관리의 확인 누적거리로 대체하지 않습니다.
+ const monthLast=new Map(),yearLast=new Map();
+ for(const {d,i} of allRows){
+  if(!d.vehicle||!String(d.date).startsWith(year+'-'))continue;
+  const mon=Number(String(d.date).slice(5,7));
+  if(mon<1||mon>12)continue;
+  const val={d,i};
+  const key=d.vehicle+'\u001f'+mon;
+  const prev=monthLast.get(key);
+  if(!prev||String(d.date)>String(prev.d.date)||(String(d.date)===String(prev.d.date)&&i>prev.i))monthLast.set(key,val);
+  const last=yearLast.get(d.vehicle);
+  if(!last||String(d.date)>String(last.d.date)||(String(d.date)===String(last.d.date)&&i>last.i))yearLast.set(d.vehicle,val);
  }
  const thead=table.querySelector('thead'),tbody=table.querySelector('tbody');
- thead.innerHTML='<tr><th>월</th>'+vehicleNames.map(v=>`<th>${esc(v)}</th>`).join('')+'<th>월 합계</th></tr>';
- if(!vehicleNames.length){tbody.innerHTML='<tr><td colspan="2" class="empty">등록된 차량이 없습니다.</td></tr>';return}
- const monthRows=[];
- for(let m=1;m<=12;m++){
-  const month=year+'-'+String(m).padStart(2,'0');let sum=0,hasAny=false;
-  const cells=vehicleNames.map(v=>{
-   const o=monthly.get(month+'\u001f'+v);
-   if(!o)return '<td class="vehicle-month-empty">—</td>';
-   hasAny=true;sum+=o.distance;
-   const lastOdo=n(o.last?.currentMileage);
-   return `<td class="vehicle-month-cell"><strong>${fmt(o.distance)} km</strong><span>마지막 누적 ${lastOdo?fmt(lastOdo)+' km':'미입력'}</span>${o.pending?`<em>작성 대기 ${o.pending}건</em>`:''}</td>`;
-  });
-  monthRows.push(`<tr><th scope="row">${m}월</th>${cells.join('')}<td class="vehicle-month-sum">${hasAny?fmt(sum)+' km':'—'}</td></tr>`);
- }
- const yearTotal=[...annual.values()].reduce((s,o)=>s+o.distance,0);
- const totals=vehicleNames.map(v=>{const o=annual.get(v);return `<td class="vehicle-month-cell"><strong>${o.logs?fmt(o.distance)+' km':'—'}</strong><span>${o.logs?'기록 '+o.logs+'건':'기록 없음'}</span>${o.pending?`<em>작성 대기 ${o.pending}건</em>`:''}</td>`}).join('');
- tbody.innerHTML=monthRows.join('')+`<tr class="vehicle-month-total"><th scope="row">연간 합계</th>${totals}<td class="vehicle-month-sum">${fmt(yearTotal)} km</td></tr>`;
+ if(!thead||!tbody)return;
+ thead.innerHTML='<tr><th scope="col">차량명</th>'+Array.from({length:12},(_,i)=>`<th scope="col">${i+1}월</th>`).join('')+'<th scope="col" class="vdb-last-heading">최종 기말거리</th></tr>';
+ if(!names.length){tbody.innerHTML='<tr><td colspan="14" class="vdb-empty-cell">등록된 차량이 없습니다.</td></tr>';return}
+ const displayOdo=record=>record&&n(record.d.currentMileage)>0?n(record.d.currentMileage).toLocaleString('ko-KR'):null;
+ tbody.innerHTML=names.map(name=>{
+  const info=state.vehicles.find(v=>v.vehicle===name);
+  const months=Array.from({length:12},(_,j)=>{
+   const record=monthLast.get(name+'\u001f'+(j+1));
+   const odo=displayOdo(record);
+   const hint=record?.d.currentMileageDerived?'운행일지 자동 계산값':'운행일지에 기록된 기말 키로수';
+   return `<td>${odo?`<span class="vdb-month-value" title="${hint}">${odo}</span>`:'<span class="vdb-month-empty">—</span>'}</td>`;
+  }).join('');
+  const last=yearLast.get(name),lastOdo=displayOdo(last);
+  const lastCell=lastOdo?`${lastOdo}<small> km</small>`:'—';
+  return `<tr data-vdb-row="${esc(name)}" class="${vehicleDashboardSelected===name?'selected':''}"><th scope="row"><span class="vdb-row-name">${esc(name)}</span>${!info?'<span class="vdb-row-sub">과거 운행기록</span>':''}</th>${months}<td class="vdb-last-cell"><strong>${lastCell}</strong></td></tr>`;
+ }).join('');
 }
 document.getElementById('vehicleDashboardYear')?.addEventListener('change',renderVehicleDashboard);
+['vehicleYearPrev','vehicleYearNext'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>{
+ const select=document.getElementById('vehicleDashboardYear');if(!select)return;
+ const ix=select.selectedIndex,step=id==='vehicleYearPrev'?1:-1,option=select.options[ix+step];
+ if(!option)return;select.value=option.value;renderVehicleDashboard();
+}));
+document.getElementById('vehicleDashboardCards')?.addEventListener('click',event=>{
+ const btn=event.target.closest('[data-vdb-vehicle]');
+ if(btn)vehicleDashboardOpenInfo(btn.dataset.vdbVehicle,btn);
+});
+document.getElementById('vehicleInfoClose')?.addEventListener('click',vehicleDashboardCloseInfo);
+document.getElementById('vehicleInfoOverlay')?.addEventListener('click',event=>{
+ if(event.target?.id==='vehicleInfoOverlay')vehicleDashboardCloseInfo();
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!document.getElementById('vehicleInfoOverlay')?.hidden)vehicleDashboardCloseInfo();
+});
+document.querySelectorAll('[data-sub]').forEach(btn=>btn.addEventListener('click',()=>{
+ if(btn.dataset.sub!=='vehicle-dashboard')vehicleDashboardCloseInfo();
+}));
 
 function bulkUpdateTripSelectionUi(){
  const rows=[...document.querySelectorAll('#tripInlineSheet tbody tr[data-record-id]')];
@@ -4161,15 +4294,18 @@ async function ghSavePendingBatch(request){
     const old=vehicles.find(r=>ghText(r.차량명)===vehicle&&String(r.사용여부||'Y').toUpperCase()!=='N');
     const recordId=old?ghText(old.vehicle_id):'VEH-'+crypto.randomUUID().slice(0,8).toUpperCase();
     const o=old?{...old}:{vehicle_id:recordId,차량명:vehicle,취득일:'',처분일:'',사용여부:'Y'};
-    o.기초키로수=ghNum(payload.baseMileage);o.누적거리=ghNum(payload.currentMileage);o.수정일시=now;
+    const requestedBase=ghNum(payload.baseMileage);
+    const requestedCurrent=String(payload.currentMileage??'').trim()===''?(old?ghNum(old.누적거리):requestedBase):ghNum(payload.currentMileage);
+    if(requestedCurrent<requestedBase)throw new Error(`${vehicle}: 누적거리는 기초 키로수보다 작을 수 없습니다.`);
+    o.기초키로수=requestedBase;o.누적거리=requestedCurrent;o.수정일시=now;
     if(!old)vehicles.push(o);else vehicles[vehicles.indexOf(old)]=o;
     mark('vehicle',o);
     audit.push(ghAuditRow(old?'수정':'생성',INTEGRATED_CONFIG.vehicleSheet,recordId,
       old?`${old.기초키로수}/${old.누적거리}`:'',`${o.기초키로수}/${o.누적거리}`,'주행거리'));
     touchedVehicles.add(vehicle);mileageResults.push({...ghNormVehicle(o),clientKey:key});
   }
-  // 변경된 차량의 운행거리와 누적거리를 메모리에서 한 번 계산하고 함께 저장한다.
-  // 기존에 입력한 양수 누적거리는 유지하고, 0인 경우에만 계산값으로 보완한다.
+  // 운행기록의 기초/누적 계산값만 정리한다. 차량정보의 실측 누적거리는 수정하지 않는다.
+  // 기존 운행기록의 양수 누적값은 유지하고, 0인 경우에만 계산값으로 보완한다.
   for(const name of touchedVehicles){
     const rows=drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===name)
       .sort((a,b)=>ghDate(a.일자).localeCompare(ghDate(b.일자))||(a.__rowNo||0)-(b.__rowNo||0));
@@ -4185,10 +4321,7 @@ async function ghSavePendingBatch(request){
       if(existingCur>0)carry=Math.max(carry,existingCur);
       if(existingCur===0&&distance>0&&carry>0){r.현재누적거리_km=carry;mark('drive',r)}
     }
-    if(vi){
-      const savedCurrent=ghNum(vi.누적거리),updated=Math.max(savedCurrent,carry,ghNum(vi.기초키로수));
-      if(updated>savedCurrent){vi.누적거리=updated;vi.수정일시=now;mark('vehicle',vi)}
-    }
+    // 차량정보의 누적거리는 계기판 실측 입력값이다. 운행일지 저장으로 자동 덮어쓰지 않는다.
   }
   // 동일한 행은 마지막 갱신 상태 한 번만 전송한다.
   const req=[];
@@ -4247,12 +4380,12 @@ async function ghSaveVehicleProfile(payload){
  payload=payload||{};
  const vehicle=ghText(payload.vehicle),vehicleId=ghText(payload.vehicleId);
  if(!vehicle)throw new Error('차량명을 입력해 주세요.');
- const base=ghNum(payload.baseMileage),requested=payload.currentMileage===''?0:ghNum(payload.currentMileage);
+ const base=ghNum(payload.baseMileage);
  const acquired=ghDate(payload.acquired),disposed=ghDate(payload.disposed);
  const active=ghText(payload.status)!=='처분';
  if(!active&&!disposed)throw new Error('처분일이 입력되지 않았습니다.');
  if(active&&disposed)throw new Error('처분일이 입력된 차량은 처분 상태로 저장해야 합니다.');
- if(base<0||requested<0)throw new Error('주행거리는 음수로 입력할 수 없습니다.');
+ if(base<0)throw new Error('기초 키로수는 음수로 입력할 수 없습니다.');
  if(acquired&&disposed&&disposed<acquired)throw new Error('처분일은 취득일 이후여야 합니다.');
  const id=INTEGRATED_CONFIG.tripSpreadsheetId;
  const [snapshot,ids]=await Promise.all([ghBulkReadSnapshot(),ghGetSheetIds()]);
@@ -4261,13 +4394,15 @@ async function ghSaveVehicleProfile(payload){
  if(vehicleId&&!old)throw new Error('수정할 기존 차량을 찾을 수 없습니다. 다시 불러와 주세요.');
  if(!old&&rows.some(r=>ghText(r.차량명)===vehicle))throw new Error('동일한 이름의 차량이 이미 등록되어 있습니다.');
  if(old&&ghText(old.차량명)!==vehicle)throw new Error('기존 차량명은 연결 기록 보호를 위해 변경할 수 없습니다.');
+ // 누적거리는 운행일지 계산값이 아닌, 사용자가 등록한 실제 계기판 주행거리다.
+ // 비워 두면 기존 값을 유지하고, 신규 차량만 기초 키로수로 초기화한다.
+ const hasCurrent=String(payload.currentMileage??'').trim()!=='';
+ const requested=hasCurrent?ghNum(payload.currentMileage):(old?ghNum(old.누적거리):base);
+ if(requested<0)throw new Error('누적거리는 음수로 입력할 수 없습니다.');
+ if(requested<base)throw new Error('누적거리는 기초 키로수보다 작을 수 없습니다.');
  const recId=old?ghText(old.vehicle_id):'VEH-'+crypto.randomUUID().slice(0,8).toUpperCase();
- const driveRows=snapshot.drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===vehicle)
-   .map(r=>({vehicle,date:ghDate(r.일자),distance:ghNum(r.실제거리_km),baseMileage:ghNum(r.기초주행거리_km),currentMileage:ghNum(r.현재누적거리_km)}));
- // When no manual cumulative reading exists, derive from the entered trip distance.
- const estimated=ghVehicleRecordedProjection(driveRows,base,requested||ghNum(old?.누적거리));
  const o={vehicle_id:recId,차량명:vehicle,기초키로수:base,
-    누적거리:Math.max(requested,estimated,base),취득일:acquired,처분일:disposed,
+    누적거리:requested,취득일:acquired,처분일:disposed,
     사용여부:active?'Y':'N',수정일시:ghNow()};
  const sheetId=ids[INTEGRATED_CONFIG.vehicleSheet];if(!Number.isInteger(sheetId))throw new Error('차량정보 시트를 찾을 수 없습니다.');
  const request=old?{updateCells:{start:{sheetId,rowIndex:old.__rowNo-1,columnIndex:0},rows:[ghBulkRow(o,GH_VEHICLE_HEADERS)],fields:'userEnteredValue'}}:
