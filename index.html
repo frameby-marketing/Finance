@@ -1951,7 +1951,7 @@ body.frameby-auth-locked .github-auth-btn{
             <div class="field"><label for="vehicleMonthSelect">조회월</label><select id="vehicleMonthSelect" aria-label="차량운행일지 조회월"></select></div>
             <input type="hidden" id="vehicleStartDate"><input type="hidden" id="vehicleEndDate">
           </div>
-          <span class="vehicle-dashboard-basis" id="vehicleDashboardBasis">운행일지 기준 · 월별 기말 키로수</span>
+          <span class="vehicle-dashboard-basis" id="vehicleDashboardBasis">운행일지 기준 · 월별 실제 주행거리</span>
           <button class="excel-btn" type="button" data-export="vehicle" title="조회기간과 다운로드할 차량을 선택한 뒤 엑셀로 저장합니다">엑셀 다운로드</button>
         </div>
       </div>
@@ -1960,11 +1960,11 @@ body.frameby-auth-locked .github-auth-btn{
         <div class="vdb-heading">
           <div>
             <h1>차량 운행 대시보드</h1>
-            <p>운행일지 기록 기준 · 월별 기말 키로수</p>
+            <p>운행일지 기록 기준 · 월별 실제 주행거리</p>
           </div>
           <div class="vdb-year-control" aria-label="조회 연도 선택">
             <button type="button" id="vehicleYearPrev" class="vdb-year-arrow" aria-label="이전 연도">‹</button>
-            <select id="vehicleDashboardYear" aria-label="차량 월별 기말 키로수 조회 연도"></select>
+            <select id="vehicleDashboardYear" aria-label="차량 월별 실제 주행거리 조회 연도"></select>
             <button type="button" id="vehicleYearNext" class="vdb-year-arrow" aria-label="다음 연도">›</button>
           </div>
         </div>
@@ -1981,19 +1981,19 @@ body.frameby-auth-locked .github-auth-btn{
           </div>
         </section>
 
-        <section class="vdb-month-panel" aria-label="월별 기말 키로수 현황">
+        <section class="vdb-month-panel" aria-label="월별 실제 주행거리 현황">
           <div class="vdb-section-head">
-            <div class="vdb-section-title"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg><h2>월별 기말 키로수</h2></div>
+            <div class="vdb-section-title"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg><h2>월별 실제 주행거리</h2></div>
             <span class="vdb-section-caption">운행기록이 없는 월은 — 표시</span>
           </div>
           <div class="vdb-accent-line"></div>
-          <div class="vdb-table-wrap" tabindex="0" aria-label="차량별 월별 기말 키로수 표, 가로 스크롤 가능">
+          <div class="vdb-table-wrap" tabindex="0" aria-label="차량별 월별 실제 주행거리 표, 가로 스크롤 가능">
             <table id="vehicleMonthlyTable" class="vdb-month-table">
-              <thead><tr><th scope="col">차량명</th><th scope="col">1월</th><th scope="col">2월</th><th scope="col">3월</th><th scope="col">4월</th><th scope="col">5월</th><th scope="col">6월</th><th scope="col">7월</th><th scope="col">8월</th><th scope="col">9월</th><th scope="col">10월</th><th scope="col">11월</th><th scope="col">12월</th><th scope="col">최종 기말거리</th></tr></thead>
+              <thead><tr><th scope="col">차량명</th><th scope="col">1월</th><th scope="col">2월</th><th scope="col">3월</th><th scope="col">4월</th><th scope="col">5월</th><th scope="col">6월</th><th scope="col">7월</th><th scope="col">8월</th><th scope="col">9월</th><th scope="col">10월</th><th scope="col">11월</th><th scope="col">12월</th><th scope="col">연간 실제거리 합계</th></tr></thead>
               <tbody><tr><td colspan="14" class="vdb-empty-cell">불러오는 중...</td></tr></tbody>
             </table>
           </div>
-          <div class="vdb-footnote">운행일지에 저장된 기록의 월별 마지막 기말 키로수입니다. 숫자를 누르면 해당 차량의 월별 운행기록이 아래에 표시됩니다. 기초관리의 확인 누적거리와 차이는 입력 메뉴에서 확인합니다.</div>
+          <div class="vdb-footnote">운행일지의 실제거리를 차량별·월별로 합산한 값입니다. 숫자를 누르면 해당 차량의 월별 운행기록이 아래에 표시됩니다. 기초관리의 확인 누적거리와 차이는 입력 메뉴에서 확인합니다.</div>
         </section>
         <section id="vehicleMonthRecords" class="vdb-drill-panel" aria-label="차량 월별 운행기록" hidden>
           <div class="vdb-drill-heading">
@@ -2016,14 +2016,15 @@ body.frameby-auth-locked .github-auth-btn{
 
       <div class="subview" id="vehicle-edit">
       <div class="card odometer-panel entry-odometer-panel">
-        <div class="section-title entry-heading"><div><h2>누적거리 작성 대조</h2><p>기초관리에 미리 입력한 실제 누적거리와 운행일지의 마지막 기말 키로수를 비교합니다.</p></div></div>
+        <div class="section-title entry-heading"><div><h2>차량별 주행거리 작성 현황</h2><p>선택한 차량의 기초 키로수와 실제거리 합계를 대조합니다. 기초관리 확인 누적거리는 별도 비교값입니다.</p></div></div>
         <div class="entry-odometer-grid">
-          <div class="entry-odometer-card entry-odometer-select"><label for="reconcileVehicle">비교 차량</label><select id="reconcileVehicle" aria-label="누적거리 비교 차량"><option value="">차량 선택</option></select></div>
-          <div class="entry-odometer-card"><span>기초관리 누적거리</span><strong id="reconcileKnown">미확인</strong></div>
-          <div class="entry-odometer-card"><span>운행일지 현재누적거리</span><strong id="reconcileLogged">미작성</strong></div>
-          <div class="entry-odometer-card entry-odometer-delta"><span>차이 · 남은 작성 확인 거리</span><strong id="reconcileGap">비교 불가</strong></div>
+          <div class="entry-odometer-card entry-odometer-select"><label for="reconcileVehicle">조회 차량 · 운행내역 연동</label><select id="reconcileVehicle" aria-label="주행거리 조회 차량"><option value="">전체 차량</option></select></div>
+          <div class="entry-odometer-card"><span>기초 키로수</span><strong id="reconcileBaseValue">—</strong></div>
+          <div class="entry-odometer-card"><span>실제거리 합계 · 전체 기록</span><strong id="reconcileDistanceTotal">—</strong></div>
+          <div class="entry-odometer-card"><span>계산 누적거리</span><strong id="reconcileLogged">—</strong></div>
+          <div class="entry-odometer-card entry-odometer-delta"><span>기초관리 확인 누적거리</span><strong id="reconcileKnown">미확인</strong><div class="entry-reconcile-gap-line"><span>차이 (확인값 − 계산값)</span><strong id="reconcileGap">비교 불가</strong></div></div>
         </div>
-        <div class="entry-odometer-note" id="reconcileHint" aria-live="polite">기초관리 누적거리를 입력하지 않았거나 운행기록이 없으면 비교할 수 없습니다. 표시값은 참고용이며 기존 기록을 자동 변경하지 않습니다.</div>
+        <div class="entry-odometer-note" id="reconcileHint" aria-live="polite">차량을 선택하면 해당 차량의 운행기록만 아래에 표시됩니다. 확인 누적거리를 입력하지 않은 차량은 차이를 계산하지 않습니다.</div>
       </div>
 
 
@@ -3291,7 +3292,7 @@ function applyAutoBaseMileages(){
  return state.driveLogs;
 }
 function tripFillSelect(sel,values,keep,allLabel){if(!sel)return;const cur=keep??sel.value;sel.innerHTML=(allLabel?`<option value="">${allLabel}</option>`:'')+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(cur)||(!cur&&allLabel))sel.value=cur;else if(values.length)sel.value=values[0]}
-function latestTripRecordedMonth(){const list=(state.trips||[]).filter(t=>t.tripDate&&!String(t.recordId||'').startsWith('TMP:')&&t.persisted!==false).map(t=>monthOf(t.tripDate)).filter(Boolean).sort();return list.length?list[list.length-1]:tripTodayDate().slice(0,7)}
+function latestTripRecordedMonth(){const list=(state.trips||[]).filter(t=>t.tripDate&&!String(t.recordId||'').startsWith('TMP:')).map(t=>monthOf(t.tripDate)).filter(Boolean).sort();return list.length?list[list.length-1]:tripTodayDate().slice(0,7)}
 function syncTripInputPeriodButton(){const button=document.getElementById('tripInputAllPeriod');if(button){const all=!tripMonthSel?.value;button.classList.toggle('active',all);button.setAttribute('aria-pressed',String(all));}}
 function initFilters(forceLatest=false){
  const months=allMonths(),latestMonth=latestTripRecordedMonth();
@@ -3329,7 +3330,8 @@ function renderTripDashboard(){
  const select=document.getElementById('tripDashboardYear'),monthSelect=document.getElementById('tripDashboardMonthSelect'),chart=document.getElementById('tripDashMonthBars'),body=document.querySelector('#tripDashboardTable tbody');
  if(!select||!monthSelect||!chart||!body)return;
  const currentYear=tripTodayDate().slice(0,4);
- const tripRows=state.trips.filter(t=>t.tripDate&&!String(t.recordId||'').startsWith('TMP:')&&t.persisted!==false);
+ // 원본 카드내역에서 생성된 AUTO 미정리 기록도 입력 화면과 동일하게 집계합니다. TMP 신규 입력은 저장 전까지 제외합니다.
+ const tripRows=state.trips.filter(t=>t.tripDate&&!String(t.recordId||'').startsWith('TMP:'));
  const recordedMonths=tripRows.map(t=>monthOf(t.tripDate)).filter(Boolean).sort();
  const latestMonth=recordedMonths.length?recordedMonths[recordedMonths.length-1]:tripTodayDate().slice(0,7);
  if(!tripDashboardFilterTouched){tripDashboardSelectedYear=latestMonth.slice(0,4);tripDashboardSelectedMonth=Number(latestMonth.slice(5,7));}
@@ -3379,7 +3381,7 @@ document.getElementById('tripDashboardAllPeriod')?.addEventListener('click',()=>
  tripDashboardFilterTouched=true;tripDashboardShowAll=true;renderTripDashboard();
 });
 document.getElementById('tripDashboardYear')?.addEventListener('change',e=>{
- const year=e.target.value;const matches=state.trips.filter(t=>String(t.tripDate||'').startsWith(year+'-')&&t.persisted!==false);
+ const year=e.target.value;const matches=state.trips.filter(t=>String(t.tripDate||'').startsWith(year+'-')&&!String(t.recordId||'').startsWith('TMP:'));
  tripDashboardSelectedYear=year;
  tripDashboardSelectedMonth=matches.length?Math.max(...matches.map(t=>Number(String(t.tripDate).slice(5,7))).filter(n=>n>=1&&n<=12)):1;
  tripDashboardFilterTouched=true;tripDashboardShowAll=false;renderTripDashboard();
@@ -3758,69 +3760,62 @@ function vehicleDashboardOpenInfo(name,trigger){
   const rows=vehicleMonthRecordRows(selected);
   if(!rows.length){section.hidden=true;vehicleDashboardDrilldown=null;return;}
   title.textContent=`${selected.year}년 ${selected.month}월 운행기록`;
-  caption.textContent=`${selected.vehicle} · ${rows.length}건 · 운행일지 저장 기록`;
+  caption.textContent=`${selected.vehicle} · ${rows.length}건 · 실제거리 합계 ${rows.reduce((sum,x)=>sum+n(x.d.distance),0).toLocaleString('ko-KR')}km`;
   body.innerHTML=rows.map(({d})=>`<tr><td>${esc(d.date||'-')}</td><td>${esc(d.driveType||(d.tripRecordId?'출장 연동':'직접 입력'))}</td><td class="vdb-drill-address" title="${esc(d.start||'')}">${esc(d.start||'-')}</td><td class="vdb-drill-address" title="${esc(d.end||'')}">${esc(d.end||'-')}</td><td>${esc(d.roundTrip||'-')}</td><td class="vdb-drill-distance">${n(d.distance).toLocaleString('ko-KR')} km</td><td class="vdb-drill-distance">${n(d.currentMileage)>0?n(d.currentMileage).toLocaleString('ko-KR')+' km':'-'}</td><td>${driveStatusPill(d.status)}</td></tr>`).join('');
   section.hidden=false;
  }
 function renderVehicleDashboard(){
- applyAutoBaseMileages();
- // 이 화면은 운행일지의 기말 키로수만 읽습니다. 기초관리의 누적거리를 더하거나 덮어쓰지 않습니다.
- const allRows=state.driveLogs.map((d,i)=>({d,i})).filter(x=>x.d&&x.d.date&&!String(x.d.driveId||'').startsWith('TMP:'));
- const names=allVehicles().slice().sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
- const registered=[...new Map(state.vehicles.filter(v=>v.vehicle).map(v=>[v.vehicle,v])).values()].sort((a,b)=>a.vehicle.localeCompare(b.vehicle,'ko',{numeric:true}));
- const count=document.getElementById('vehicleRegisteredCount'),cards=document.getElementById('vehicleDashboardCards');
- if(count)count.textContent=registered.length.toLocaleString('ko-KR')+'대';
- if(cards){
-  cards.innerHTML=registered.length?registered.map(v=>{
-   const status=v.disposed||v.active===false?'처분':'운행중';
-   return `<button type="button" class="vdb-vehicle-card ${vehicleDashboardSelected===v.vehicle?'selected':''}" data-vdb-vehicle="${esc(v.vehicle)}" aria-label="${esc(v.vehicle)} 기초정보 보기"><span class="vdb-vehicle-name">${esc(v.vehicle)}</span><span class="vdb-vehicle-meta"><span class="vdb-status-dot ${status==='처분'?'retired':''}"></span>${esc(status)}</span><span class="vdb-vehicle-chevron" aria-hidden="true">›</span></button>`;
-  }).join(''):'<div class="vdb-empty-cards">등록된 차량이 없습니다. 기초관리에서 차량을 추가해 주세요.</div>';
- }
- const select=document.getElementById('vehicleDashboardYear'),table=document.getElementById('vehicleMonthlyTable');
- if(!select||!table)return;
- const currentYear=tripTodayDate().slice(0,4);
- const years=[...new Set([currentYear,...allRows.map(x=>String(x.d.date).slice(0,4)).filter(y=>/^20\d{2}$/.test(y))])].sort((a,b)=>Number(b)-Number(a));
- const previous=select.value;
- select.innerHTML=years.map(y=>`<option value="${y}">${y}년</option>`).join('');
- select.value=years.includes(previous)?previous:currentYear;
- const year=select.value;
- const idx=years.indexOf(year);
- const prev=document.getElementById('vehicleYearPrev'),next=document.getElementById('vehicleYearNext');
- if(prev)prev.disabled=idx>=years.length-1;
- if(next)next.disabled=idx<=0;
- // 각 월의 마지막 기록 한 건만 사용합니다. 월별 거리 합계나 기초관리의 확인 누적거리로 대체하지 않습니다.
- const monthLast=new Map(),yearLast=new Map();
- for(const {d,i} of allRows){
-  if(!d.vehicle||!String(d.date).startsWith(year+'-'))continue;
-  const mon=Number(String(d.date).slice(5,7));
-  if(mon<1||mon>12)continue;
-  const val={d,i};
-  const key=d.vehicle+'\u001f'+mon;
-  const prev=monthLast.get(key);
-  if(!prev||String(d.date)>String(prev.d.date)||(String(d.date)===String(prev.d.date)&&i>prev.i))monthLast.set(key,val);
-  const last=yearLast.get(d.vehicle);
-  if(!last||String(d.date)>String(last.d.date)||(String(d.date)===String(last.d.date)&&i>last.i))yearLast.set(d.vehicle,val);
- }
- const thead=table.querySelector('thead'),tbody=table.querySelector('tbody');
- if(!thead||!tbody)return;
- thead.innerHTML='<tr><th scope="col">차량명</th>'+Array.from({length:12},(_,i)=>`<th scope="col">${i+1}월</th>`).join('')+'<th scope="col" class="vdb-last-heading">최종 기말거리</th></tr>';
- if(!names.length){tbody.innerHTML='<tr><td colspan="14" class="vdb-empty-cell">등록된 차량이 없습니다.</td></tr>';return}
- const displayOdo=record=>record&&n(record.d.currentMileage)>0?n(record.d.currentMileage).toLocaleString('ko-KR'):null;
- tbody.innerHTML=names.map(name=>{
-  const info=state.vehicles.find(v=>v.vehicle===name);
-  const months=Array.from({length:12},(_,j)=>{
-   const record=monthLast.get(name+'\u001f'+(j+1));
-   const odo=displayOdo(record);
-   const hint=record?.d.currentMileageDerived?'운행일지 자동 계산값':'운행일지에 기록된 기말 키로수';
-   return `<td>${odo?`<button type="button" class="vdb-month-value vdb-month-trigger ${vehicleDashboardDrilldown?.vehicle===name&&vehicleDashboardDrilldown?.year===year&&vehicleDashboardDrilldown?.month===j+1?'active':''}" data-vdb-month="${j+1}" data-vdb-month-vehicle="${esc(name)}" aria-pressed="${vehicleDashboardDrilldown?.vehicle===name&&vehicleDashboardDrilldown?.year===year&&vehicleDashboardDrilldown?.month===j+1?'true':'false'}" title="${hint} · 클릭하여 월별 운행기록 보기">${odo}</button>`:'<span class="vdb-month-empty">—</span>'}</td>`;
+  applyAutoBaseMileages();
+  // 월별 값은 마지막 계기판 수치가 아닌 해당 달에 작성된 '실제거리'의 합계입니다.
+  const allRows=state.driveLogs.map((d,i)=>({d,i})).filter(x=>x.d&&x.d.date&&!String(x.d.driveId||'').startsWith('TMP:'));
+  const names=allVehicles().slice().sort((a,b)=>a.localeCompare(b,'ko',{numeric:true}));
+  const registered=[...new Map(state.vehicles.filter(v=>v.vehicle).map(v=>[v.vehicle,v])).values()].sort((a,b)=>a.vehicle.localeCompare(b.vehicle,'ko',{numeric:true}));
+  const count=document.getElementById('vehicleRegisteredCount'),cards=document.getElementById('vehicleDashboardCards');
+  if(count)count.textContent=registered.length.toLocaleString('ko-KR')+'대';
+  if(cards){
+   cards.innerHTML=registered.length?registered.map(v=>{
+    const status=v.disposed||v.active===false?'처분':'운행중';
+    return `<button type="button" class="vdb-vehicle-card ${vehicleDashboardSelected===v.vehicle?'selected':''}" data-vdb-vehicle="${esc(v.vehicle)}" aria-label="${esc(v.vehicle)} 기초정보 보기"><span class="vdb-vehicle-name">${esc(v.vehicle)}</span><span class="vdb-vehicle-meta"><span class="vdb-status-dot ${status==='처분'?'retired':''}"></span>${esc(status)}</span><span class="vdb-vehicle-chevron" aria-hidden="true">›</span></button>`;
+   }).join(''):'<div class="vdb-empty-cards">등록된 차량이 없습니다. 기초관리에서 차량을 추가해 주세요.</div>';
+  }
+  const select=document.getElementById('vehicleDashboardYear'),table=document.getElementById('vehicleMonthlyTable');
+  if(!select||!table)return;
+  const currentYear=tripTodayDate().slice(0,4);
+  const years=[...new Set([currentYear,...allRows.map(x=>String(x.d.date).slice(0,4)).filter(y=>/^20\d{2}$/.test(y))])].sort((a,b)=>Number(b)-Number(a));
+  const previous=select.value;
+  select.innerHTML=years.map(y=>`<option value="${y}">${y}년</option>`).join('');
+  select.value=years.includes(previous)?previous:currentYear;
+  const year=select.value;
+  const idx=years.indexOf(year);
+  const prev=document.getElementById('vehicleYearPrev'),next=document.getElementById('vehicleYearNext');
+  if(prev)prev.disabled=idx>=years.length-1;
+  if(next)next.disabled=idx<=0;
+  const monthSums=new Map(),yearSums=new Map();
+  for(const {d} of allRows){
+   if(!d.vehicle||!String(d.date).startsWith(year+'-'))continue;
+   const mon=Number(String(d.date).slice(5,7));
+   if(mon<1||mon>12)continue;
+   const key=d.vehicle+'\u001f'+mon;
+   monthSums.set(key,(monthSums.get(key)||0)+n(d.distance));
+   yearSums.set(d.vehicle,(yearSums.get(d.vehicle)||0)+n(d.distance));
+  }
+  const thead=table.querySelector('thead'),tbody=table.querySelector('tbody');
+  if(!thead||!tbody)return;
+  thead.innerHTML='<tr><th scope="col">차량명</th>'+Array.from({length:12},(_,i)=>`<th scope="col">${i+1}월</th>`).join('')+'<th scope="col" class="vdb-last-heading">연간 실제거리 합계</th></tr>';
+  if(!names.length){tbody.innerHTML='<tr><td colspan="14" class="vdb-empty-cell">등록된 차량이 없습니다.</td></tr>';return;}
+  tbody.innerHTML=names.map(name=>{
+   const info=state.vehicles.find(v=>v.vehicle===name);
+   const months=Array.from({length:12},(_,j)=>{
+    const key=name+'\u001f'+(j+1),recorded=monthSums.has(key),distance=monthSums.get(key)||0;
+    const active=vehicleDashboardDrilldown?.vehicle===name&&vehicleDashboardDrilldown?.year===year&&vehicleDashboardDrilldown?.month===j+1;
+    return `<td>${recorded?`<button type="button" class="vdb-month-value vdb-month-trigger ${active?'active':''}" data-vdb-month="${j+1}" data-vdb-month-vehicle="${esc(name)}" aria-pressed="${active?'true':'false'}" title="${j+1}월 실제 주행거리 합계 · 클릭하여 운행기록 보기">${distance.toLocaleString('ko-KR')}</button>`:'<span class="vdb-month-empty">—</span>'}</td>`;
+   }).join('');
+   const sum=yearSums.get(name),lastCell=sum===undefined?'—':`${sum.toLocaleString('ko-KR')}<small> km</small>`;
+   return `<tr data-vdb-row="${esc(name)}" class="${vehicleDashboardSelected===name?'selected':''}"><th scope="row"><span class="vdb-row-name">${esc(name)}</span>${!info?'<span class="vdb-row-sub">과거 운행기록</span>':''}</th>${months}<td class="vdb-last-cell"><strong>${lastCell}</strong></td></tr>`;
   }).join('');
-  const last=yearLast.get(name),lastOdo=displayOdo(last);
-  const lastCell=lastOdo?`${lastOdo}<small> km</small>`:'—';
-  return `<tr data-vdb-row="${esc(name)}" class="${vehicleDashboardSelected===name?'selected':''}"><th scope="row"><span class="vdb-row-name">${esc(name)}</span>${!info?'<span class="vdb-row-sub">과거 운행기록</span>':''}</th>${months}<td class="vdb-last-cell"><strong>${lastCell}</strong></td></tr>`;
- }).join('');
- renderVehicleMonthRecords();
+  renderVehicleMonthRecords();
 }
- document.getElementById('vehicleMonthlyTable')?.addEventListener('click',event=>{
+document.getElementById('vehicleMonthlyTable')?.addEventListener('click',event=>{
   const button=event.target.closest('button[data-vdb-month][data-vdb-month-vehicle]');
   if(!button)return;
   const year=document.getElementById('vehicleDashboardYear')?.value;
@@ -3956,7 +3951,7 @@ document.getElementById('driveBulkField')?.addEventListener('change',()=>bulkRef
 document.getElementById('applyTripBulk')?.addEventListener('click',()=>bulkApply('trip'));
 document.getElementById('applyDriveBulk')?.addEventListener('click',()=>bulkApply('drive'));
 
-function renderVehicleInput(){applyAutoBaseMileages();updateVehiclePeriodSummary();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true).map(driveMergeDraft),matching=raw.filter(driveMatchesInputSearch),temps=matching.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(matching.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(driveRowHtml).join(''):'<tr class="empty-row"><td colspan="11">조회할 운행내역이 없습니다.</td></tr>';recordSearchCount('driveRecordSearchCount',rows.length,raw.length,driveRecordSearchQuery);finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
+function renderVehicleInput(){applyAutoBaseMileages();updateVehiclePeriodSummary();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const selectedVehicle=document.getElementById('reconcileVehicle')?.value||'';const raw=currentDriveRows(true).map(driveMergeDraft).filter(d=>!selectedVehicle||d.vehicle===selectedVehicle),matching=raw.filter(driveMatchesInputSearch),temps=matching.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(matching.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(driveRowHtml).join(''):'<tr class="empty-row"><td colspan="11">조회할 운행내역이 없습니다.</td></tr>';recordSearchCount('driveRecordSearchCount',rows.length,raw.length,driveRecordSearchQuery);finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
 document.getElementById('driveRecordSearch')?.addEventListener('input',e=>{driveRecordSearchQuery=e.target.value.trim();renderVehicleInput()});
 document.getElementById('driveRecordSearchClear')?.addEventListener('click',()=>{driveRecordSearchQuery='';const input=document.getElementById('driveRecordSearch');input.value='';renderVehicleInput();input.focus()});
 // 운행일지의 연결코드는 웹_차량운행일지.trip_record_id가 원본입니다.
@@ -4049,7 +4044,7 @@ async function deleteSelectedDriveRows(){
 document.getElementById('deleteSelectedDrives')?.addEventListener('click',deleteSelectedDriveRows);
 function readDriveField(row,name){const el=row.querySelector(`[data-field="${name}"]`);if(!el)return '';return el.hasAttribute('contenteditable')||el.value===undefined?el.textContent.trim():el.value}
 function saveDriveRow(row){driveCaptureDraft(row)}
-document.getElementById('addManualDrive')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.driveTempSeq);state.driveLogs.unshift({driveId:id,tripRecordId:'',date:tripTodayDate(),vehicle:(activeVehicles().includes(preferredDriveVehicle)?preferredDriveVehicle:((vehicleFilterSel?.value&&activeVehicles().includes(vehicleFilterSel.value))?vehicleFilterSel.value:'')),driveType:'출장',start:'',end:'',roundTrip:'왕복',distance:0,baseMileage:0,currentMileage:0,status:'미작성',persisted:false});renderVehicleInput();const newRow=document.querySelector(`#vehicleInlineSheet tr[data-drive-id="${CSS.escape(id)}"]`);if(newRow){driveCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
+document.getElementById('addManualDrive')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.driveTempSeq);state.driveLogs.unshift({driveId:id,tripRecordId:'',date:tripTodayDate(),vehicle:(activeVehicles().includes(document.getElementById('reconcileVehicle')?.value)?document.getElementById('reconcileVehicle').value:(activeVehicles().includes(preferredDriveVehicle)?preferredDriveVehicle:'')),driveType:'출장',start:'',end:'',roundTrip:'왕복',distance:0,baseMileage:0,currentMileage:0,status:'미작성',persisted:false});renderVehicleInput();const newRow=document.querySelector(`#vehicleInlineSheet tr[data-drive-id="${CSS.escape(id)}"]`);if(newRow){driveCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
 
 document.getElementById('vehicleQuickSelect')?.addEventListener('change',e=>rememberDriveVehicle(e.target.value));
 document.getElementById('applyVehicleToBlanks')?.addEventListener('click',()=>{
@@ -4086,28 +4081,32 @@ function updateVehiclePeriodSummary(){
 function renderReconcile(){
  const sel=document.getElementById('reconcileVehicle');if(!sel)return;
  const names=allVehicles();const keep=sel.value;
- sel.innerHTML=names.length?names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''):'<option value="">등록 차량 없음</option>';
- if(names.includes(keep))sel.value=keep;
+ sel.innerHTML='<option value="">전체 차량</option>'+names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ sel.value=names.includes(keep)?keep:'';
  updateReconcileNumbers();updateVehiclePeriodSummary();
 }
 function updateReconcileNumbers(){
  const vehicle=document.getElementById('reconcileVehicle')?.value||'';
- const info=vehicleInfoFor(vehicle);
- // 기초관리 누적거리는 이용자가 확인해서 직접 저장한 값만 표시한다. 비어 있는 값은 미확인.
- const known=info&&Number(info.currentMileage)>0?Number(info.currentMileage):null;
- // 운행일지의 가장 마지막 날짜에 작성한 기말 키로수. 선택 월/검색어에 상관없이 1년 기록 전체에서 찾는다.
- const rows=state.driveLogs.map((d,i)=>({d,i})).filter(x=>x.d.vehicle===vehicle&&x.d.date&&!String(x.d.driveId||'').startsWith('TMP:')&&x.d.persisted!==false).sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);
- const last=rows.length?rows[rows.length-1].d:null;
- const logged=last&&Number(last.currentMileage)>0?Number(last.currentMileage):null;
- const gap=known!==null&&logged!==null?known-logged:null;
+ const info=vehicle?vehicleInfoFor(vehicle):null;
+ // 미저장 수정이 있으면 수정 중인 차량·거리로 합계를 구하되, 시트 원본은 변경하지 않습니다.
+ const rows=state.driveLogs.map((d,i)=>({d:{...d,...(drivePendingDrafts.get(d.driveId)||{})},i}))
+  .filter(x=>x.d.date&&(!vehicle||x.d.vehicle===vehicle));
+ const total=rows.reduce((sum,x)=>sum+n(x.d.distance),0);
+ const base=info?n(info.baseMileage):0;
+ const calculated=vehicle&&base>0?base+total:null;
+ const known=vehicle&&info&&n(info.currentMileage)>0?n(info.currentMileage):null;
+ const gap=known!==null&&calculated!==null?known-calculated:null;
+ const baseEl=document.getElementById('reconcileBaseValue'),totalEl=document.getElementById('reconcileDistanceTotal');
  const knownEl=document.getElementById('reconcileKnown'),loggedEl=document.getElementById('reconcileLogged'),gapEl=document.getElementById('reconcileGap'),hint=document.getElementById('reconcileHint');
+ if(baseEl)baseEl.textContent=!vehicle?'—':base>0?km(base):'미등록';
+ if(totalEl)totalEl.textContent=km(total);
  if(knownEl)knownEl.textContent=known===null?'미확인':km(known);
- if(loggedEl)loggedEl.textContent=logged===null?'미작성':km(logged);
+ if(loggedEl)loggedEl.textContent=calculated===null?'계산 불가':km(calculated);
  if(gapEl){gapEl.textContent=gap===null?'비교 불가':(gap>0?'+':'')+km(gap);gapEl.classList.toggle('over',gap!==null&&gap<0);}
  const panel=document.querySelector('#vehicle-edit .entry-odometer-delta');if(panel)panel.classList.toggle('over',gap!==null&&gap<0);
- if(hint)hint.textContent=!vehicle?'비교할 차량을 선택해 주세요.':known===null?'기초관리의 누적거리가 미입력 상태입니다. 알고 있는 실제 주행거리를 기초관리에서 저장하면 차이가 표시됩니다.':logged===null?'운행일지에 기말 키로수가 작성된 기록이 없습니다. 차이는 계산하지 않습니다.':gap<0?'운행일지의 기말 키로수가 기초관리의 확인 누적거리보다 큽니다. 두 수치의 기준 시점과 기록을 비교해 주세요.':gap===0?'기초관리의 확인 누적거리와 운행일지의 마지막 기말 키로수가 같습니다.':'표시된 차이는 작성 상태를 확인하기 위한 참고값입니다. 차량 운행기록과 실제 확인 누적거리를 자동 수정하지 않습니다.';
+ if(hint)hint.textContent=!vehicle?'조회 차량을 선택하면 해당 차량의 모든 운행기록만 아래에 표시됩니다.':base<=0?'기초관리의 기초 키로수가 없어 계산 누적거리를 산출할 수 없습니다.':known===null?'기초관리의 확인 누적거리가 미입력 상태입니다. 실제거리 합계와 계산 누적거리는 표시되지만 차이는 비교하지 않습니다.':gap<0?'계산 누적거리가 기초관리의 확인 누적거리보다 큽니다. 기준 시점과 실제거리 입력 내역을 확인해 주세요.':gap===0?'기초관리 확인 누적거리와 운행기록 계산 누적거리가 같습니다.':'차이는 기초관리 확인 누적거리에서 계산 누적거리를 뺀 값이며, 기존 기록을 자동 수정하지 않습니다.';
 }
-document.getElementById('reconcileVehicle')?.addEventListener('change',()=>{updateReconcileNumbers();updateVehiclePeriodSummary()});
+document.getElementById('reconcileVehicle')?.addEventListener('change',()=>{const chosen=document.getElementById('reconcileVehicle')?.value||'';if(chosen&&activeVehicles().includes(chosen))rememberDriveVehicle(chosen);driveRecordSearchQuery='';const query=document.getElementById('driveRecordSearch');if(query)query.value='';updateReconcileNumbers();updateVehiclePeriodSummary();renderVehicleInput();});
 function b64Workbook(b64,opts={}){return XLSX.read(b64,{type:'base64',cellDates:true,cellStyles:true,...opts})}
 function cloneSheet(ws){return JSON.parse(JSON.stringify(ws))}
 function exportTrip(){if(!window.XLSX){toast('엑셀 모듈을 불러오지 못했습니다.','error');return}const dashActive=document.getElementById('trip-dashboard')?.classList.contains('active');const month=dashActive?(tripDashboardShowAll?'':tripDashboardSelectedYear+'-'+String(tripDashboardSelectedMonth).padStart(2,'0')):(tripMonthSel?.value||'');const rows=state.trips.filter(t=>(!month||monthOf(t.tripDate)===month)&&!String(t.recordId).startsWith('TMP:')).sort((a,b)=>String(a.tripDate).localeCompare(String(b.tripDate)));const wb=b64Workbook(TRIP_TEMPLATE_B64);const baseName=wb.SheetNames[0],base=cloneSheet(wb.Sheets[baseName]);const chunks=[];for(let i=0;i<rows.length;i+=16)chunks.push(rows.slice(i,i+16));if(!chunks.length)chunks.push([]);wb.SheetNames=[];wb.Sheets={};chunks.forEach((chunk,ix)=>{const ws=cloneSheet(base),name=ix?`${baseName} ${ix+1}`:baseName;fillTripSheet(ws,chunk);wb.SheetNames.push(name);wb.Sheets[name]=ws});XLSX.writeFile(wb,`출장기록부_${month||'전체'}.xlsx`,{bookType:'xlsx',cellStyles:true})}
@@ -17470,6 +17469,20 @@ document.addEventListener('toggle',function(event){
 .trip-cost-backdrop .trip-cost-footer{padding:9px 14px 12px}
 .trip-cost-backdrop .trip-cost-footer button{min-width:65px;padding:7px 12px;font-size:11px}
 @media(max-width:750px){#vehicle-dashboard .vdb-drill-heading{align-items:flex-start}#vehicle-dashboard .vdb-drill-panel{padding:12px}#vehicle-dashboard .vdb-drill-heading h2{font-size:15px}}
+</style>
+
+<style id="frameby-vehicle-distance-summary-20261117">
+#vehicle-edit .entry-odometer-grid{grid-template-columns:minmax(190px,1.2fr) repeat(3,minmax(145px,.92fr)) minmax(210px,1.2fr);gap:10px}
+#vehicle-edit .entry-odometer-card{min-height:119px}
+#vehicle-edit .entry-odometer-delta{gap:5px}
+#vehicle-edit .entry-odometer-delta>strong{font-size:18px!important;color:#3b516f!important}
+#vehicle-edit .entry-reconcile-gap-line{border-top:1px solid #d6e2f4;padding-top:7px;margin-top:4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+#vehicle-edit .entry-reconcile-gap-line span{font-size:11px;color:#5c7291;font-weight:750}
+#vehicle-edit .entry-reconcile-gap-line strong{color:#2054c6;font-weight:900;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vehicle-edit .entry-odometer-delta.over .entry-reconcile-gap-line strong{color:#b0691d}
+@media(max-width:1350px){#vehicle-edit .entry-odometer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#vehicle-edit .entry-odometer-delta{grid-column:span 2}}
+@media(max-width:760px){#vehicle-edit .entry-odometer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#vehicle-edit .entry-odometer-delta{grid-column:span 2}}
+@media(max-width:460px){#vehicle-edit .entry-odometer-grid{grid-template-columns:1fr}#vehicle-edit .entry-odometer-delta{grid-column:auto}}
 </style>
 </body>
 </html>
