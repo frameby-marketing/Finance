@@ -1224,6 +1224,56 @@ body.frameby-auth-locked .github-auth-btn{
 @media(max-width:1160px){#vehicle-dashboard .vdb-fleet-panel{flex-direction:column;gap:15px}#vehicle-dashboard .vdb-fleet-summary{flex:0 0 auto;border-right:0;border-bottom:1px solid #e2e9f4;padding:0 0 14px}}
 @media(max-width:720px){#vehicle-dashboard .vdb-heading{align-items:flex-start;flex-wrap:wrap}#vehicle-dashboard .vdb-heading h1{font-size:22px}#vehicle-dashboard .vdb-fleet-panel{padding:15px}#vehicle-dashboard .vdb-month-panel{padding:18px 12px}#vehicle-dashboard .vdb-fleet-cards{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}#vehicle-dashboard .vdb-vehicle-card{min-height:86px}}
 </style>
+
+<style id="frameby-dashboard-selected-design-20261117">
+/* 차량 대시보드의 등록차량 개요 - 가로 표형 디자인 */
+#vehicle-dashboard .vdb-fleet-panel{gap:22px;align-items:stretch}
+#vehicle-dashboard .vdb-fleet-summary{flex:0 0 176px;padding-right:20px}
+#vehicle-dashboard .vdb-fleet-cards{display:block;flex:1;min-width:0;overflow-x:auto;border-radius:12px;scrollbar-width:thin}
+#vehicle-dashboard .vdb-overview-table{width:100%;min-width:1020px;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
+#vehicle-dashboard .vdb-overview-table th,#vehicle-dashboard .vdb-overview-table td{padding:12px 10px;font-size:12px;text-align:center;white-space:nowrap;border-bottom:2px solid #fff}
+#vehicle-dashboard .vdb-overview-table thead th{padding:12px 8px;color:#2a3b59;background:#eaf0ff;font-size:12px;font-weight:850}
+#vehicle-dashboard .vdb-overview-table thead th:first-child{border-radius:11px 0 0 11px;text-align:left;padding-left:17px;width:18%}
+#vehicle-dashboard .vdb-overview-table thead th:last-child{border-radius:0 11px 11px 0}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(2){width:10%}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(3){width:14%}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(4){width:16%}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(5){width:15%}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(6){width:13%}
+#vehicle-dashboard .vdb-overview-table thead th:nth-child(7){width:13%}
+#vehicle-dashboard .vdb-overview-table tbody th{text-align:left;padding-left:17px;font-size:13px;font-weight:850;overflow:hidden;text-overflow:ellipsis}
+#vehicle-dashboard .vdb-overview-table tbody tr>*{background:#fff;border-top:1px solid #e3e9f5;border-bottom:1px solid #e3e9f5}
+#vehicle-dashboard .vdb-overview-table tbody tr.vdb-overview-retired>*{background:#f2f4f7;color:#697588;border-color:#f2f4f7}
+#vehicle-dashboard .vdb-overview-table tbody tr>*:first-child{border-left:1px solid #e3e9f5;border-radius:11px 0 0 11px}
+#vehicle-dashboard .vdb-overview-table tbody tr>*:last-child{border-right:1px solid #e3e9f5;border-radius:0 11px 11px 0}
+#vehicle-dashboard .vdb-overview-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 11px;min-width:61px;font-size:11px;font-weight:850;border-radius:99px}
+#vehicle-dashboard .vdb-overview-status.active{color:#fff;background:#2859db}
+#vehicle-dashboard .vdb-overview-status.retired{color:#344154;background:#dfe3e9}
+#vehicle-dashboard .vdb-overview-distance{font-weight:900;color:#2458d4}
+#vehicle-dashboard .vdb-overview-total{display:inline-block;min-width:112px;padding:6px 10px;background:#e9efff;color:#13274c;border-radius:10px;font-weight:900}
+#vehicle-dashboard .vdb-overview-retired .vdb-overview-total{background:#e4e8f3}
+@media(max-width:1160px){#vehicle-dashboard .vdb-fleet-panel{gap:14px}#vehicle-dashboard .vdb-fleet-summary{flex:0 0 auto;padding:0 0 12px}}
+/* 출장기록 대시보드 월별 목록 - 원본 기록·저장 기능은 유지 */
+#trip-dashboard .tripdash-log-table{width:100%;min-width:1260px;table-layout:fixed}
+#trip-dashboard .tripdash-log-table th,#trip-dashboard .tripdash-log-table td{padding:11px 9px;vertical-align:middle}
+#trip-dashboard .tripdash-log-table thead th:nth-child(1){width:9%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(2){width:7%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(3){width:17%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(4){width:17%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(5){width:8%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(6){width:13%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(7){width:8%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(8){width:10%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(9){width:5%}
+#trip-dashboard .tripdash-log-table thead th:nth-child(10){width:6%}
+#trip-dashboard .tripdash-log-table .tripdash-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#trip-dashboard .tripdash-log-table td:nth-child(4){min-width:0}
+#trip-dashboard .tripdash-log-table th:nth-child(6),#trip-dashboard .tripdash-log-table th:nth-child(7){background:#e6eeff;color:#2758d6}
+#trip-dashboard .tripdash-log-table td.tripdash-vehicle,#trip-dashboard .tripdash-log-table td.tripdash-mileage{background:#f4f7ff;color:#1d4cb3;font-weight:800}
+#trip-dashboard .tripdash-log-table td.tripdash-vehicle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#trip-dashboard .tripdash-log-table td.tripdash-mileage{white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
+#trip-dashboard .tripdash-log-table tbody tr:hover td.tripdash-vehicle,#trip-dashboard .tripdash-log-table tbody tr:hover td.tripdash-mileage{background:#eaf1ff}
+</style>
 </head>
 <body class="frameby-auth-locked">
 <div id="githubAuthGate" class="github-auth-gate">
@@ -1885,10 +1935,10 @@ body.frameby-auth-locked .github-auth-btn{
           <div class="tripdash-bars" id="tripDashMonthBars" aria-label="월별 출장 건수 선택"></div>
         </div>
         <div class="card tripdash-log-card">
-          <div class="tripdash-section-heading"><h3 id="tripDashboardVisibleMonthTitle">월별 출장기록</h3><span id="tripDashboardVisibleCount">0건</span></div>
+          <div class="tripdash-section-heading"><h3 id="tripDashboardVisibleMonthTitle">월별 출장기록</h3></div>
           <div class="table-wrap"><table class="table tripdash-log-table" id="tripDashboardTable">
-            <thead><tr><th>출장일자</th><th>출장자</th><th>출장지</th><th>출장목적</th><th>이동수단</th><th>출장비용</th><th>상세</th><th>상태</th></tr></thead>
-            <tbody><tr><td colspan="8" class="empty">출장기록을 불러오는 중입니다.</td></tr></tbody>
+            <thead><tr><th>출장일자</th><th>출장자</th><th>출장지</th><th>출장목적</th><th>이동수단</th><th>차종</th><th>주행거리</th><th>출장비용</th><th>상세</th><th>상태</th></tr></thead>
+            <tbody><tr><td colspan="10" class="empty">출장기록을 불러오는 중입니다.</td></tr></tbody>
           </table></div>
         </div>
       </div>
@@ -3196,12 +3246,12 @@ function cmpSort(a,b){const an=typeof a==='number'?a:Number(String(a??'').replac
 function tripSortValue(t,key){const c=t.currentCosts||{};return ({recordId:t.recordId,tripDate:t.tripDate,person:t.person,department:t.department,summary:t.summary,purpose:t.purpose,region:t.region,transport:t.transport,payment:t.payment,routine:n(c.routine),fuel:n(c.fuel),entertainment:n(c.entertainment),transportCost:n(c.transport),lodging:n(c.lodging),other:n(c.other),total:n(t.total),status:t.status})[key]??''}
 function driveSortValue(d,key){return ({date:d.date,vehicle:d.vehicle,driveType:d.driveType,route:(d.start||'')+' '+(d.end||''),roundTrip:d.roundTrip,distance:n(d.distance),baseMileage:n(d.baseMileage),currentMileage:n(d.currentMileage),tripRecordId:d.tripRecordId,status:d.status})[key]??''}
 const COLUMN_LAYOUTS={
-  tripDashboardTable:{keys:['tripDate','person','region','purpose','transport','total','costDetail','status'],locked:[]},
+  tripDashboardTable:{keys:['tripDate','person','region','purpose','transport','vehicle','distance','total','costDetail','status'],locked:[]},
   tripInlineSheet:{keys:['tripDate','person','purpose','region','transport','payment','total','costDetail','status','delete'],locked:['tripDate']},
   vehicleInlineSheet:{keys:['date','select','tripRecordId','vehicle','driveType','start','end','roundTrip','distance','currentMileage','status'],locked:['date','select']}
 };
 let columnDragJustEnded=0;
-function columnOrderKey(tableId){return `frameby.travel.columnOrder.${tableId}.${tableId==='tripDashboardTable'?'v2':'v1'}`}
+function columnOrderKey(tableId){return `frameby.travel.columnOrder.${tableId}.${tableId==='tripDashboardTable'?'v3':'v1'}`}
 function normalizeColumnOrder(tableId,order){const cfg=COLUMN_LAYOUTS[tableId];if(!cfg)return[];const valid=(Array.isArray(order)?order:[]).filter((k,i,a)=>cfg.keys.includes(k)&&a.indexOf(k)===i);cfg.keys.forEach(k=>{if(!valid.includes(k))valid.push(k)});const locked=cfg.locked||[];return [...locked,...valid.filter(k=>!locked.includes(k))]}
 function getColumnOrder(tableId){try{return normalizeColumnOrder(tableId,JSON.parse(localStorage.getItem(columnOrderKey(tableId))||'[]'))}catch(_){return normalizeColumnOrder(tableId,[])}}
 function saveColumnOrder(tableId,order){try{localStorage.setItem(columnOrderKey(tableId),JSON.stringify(normalizeColumnOrder(tableId,order)))}catch(_){}}
@@ -3224,7 +3274,7 @@ function sortTripRows(rows,scope){return sortWithSpec(rows,scope,tripSortValue)}
 function sortDriveRows(rows,scope){return sortWithSpec(rows,scope,driveSortValue)}
 function setupSortableTable(selector,scope,keys,rerender){const table=document.querySelector(selector);if(!table)return;const ths=[...table.querySelectorAll('thead th')];ths.forEach((th,i)=>{const key=keys[i];if(!key)return;th.classList.add('sortable-th');th.dataset.sortScope=scope;th.dataset.sortKey=key;th.addEventListener('click',()=>{if(Date.now()<columnDragJustEnded)return;const cur=state.sorts[scope]||{};state.sorts[scope]={key,dir:cur.key===key&&cur.dir==='asc'?'desc':'asc'};updateSortIndicators();rerender()})});updateSortIndicators()}
 function updateSortIndicators(){document.querySelectorAll('.sortable-th').forEach(th=>{const spec=state.sorts?.[th.dataset.sortScope];if(spec?.key===th.dataset.sortKey)th.dataset.sortDir=spec.dir;else delete th.dataset.sortDir})}
-function initSortableTables(){setupSortableTable('#trip-dashboard .card:last-child table','tripDashboard',['tripDate','person','region','purpose','transport','total',null,'status'],renderTripDashboard);setupSortableTable('#tripInlineSheet','tripInput',['tripDate','person','purpose','region','transport','payment','total',null,'status',null],renderTripInput);setupSortableTable('#vehicle-dashboard .vehicle-status-table','vehicleStatus',['vehicle','baseMileage','currentMileage'],renderVehicleDashboard);setupSortableTable('#vehicleInlineSheet','vehicleInput',['date',null,'tripRecordId','vehicle','driveType','route','route','roundTrip','distance','currentMileage','status'],renderVehicleInput)}
+function initSortableTables(){setupSortableTable('#trip-dashboard .card:last-child table','tripDashboard',['tripDate','person','region','purpose','transport',null,null,'total',null,'status'],renderTripDashboard);setupSortableTable('#tripInlineSheet','tripInput',['tripDate','person','purpose','region','transport','payment','total',null,'status',null],renderTripInput);setupSortableTable('#vehicle-dashboard .vehicle-status-table','vehicleStatus',['vehicle','baseMileage','currentMileage'],renderVehicleDashboard);setupSortableTable('#vehicleInlineSheet','vehicleInput',['date',null,'tripRecordId','vehicle','driveType','route','route','roundTrip','distance','currentMileage','status'],renderVehicleInput)}
 function allMonths(){const thisMonth=tripTodayDate().slice(0,7);return [...new Set([thisMonth,...state.trips.map(t=>monthOf(t.tripDate)),...state.driveLogs.map(d=>monthOf(d.date))].filter(Boolean))].sort().reverse()}
 let preferredDriveVehicle='';
 try{preferredDriveVehicle=sessionStorage.getItem('FRAMEBY_DRIVE_PREF_VEHICLE')||''}catch(_){ }
@@ -3361,9 +3411,24 @@ function renderTripDashboard(){
  }).join('');
  const filtered=sortTripRows(tripDashboardShowAll?tripRows:tripRows.filter(t=>monthOf(t.tripDate)===monthSelect.value),'tripDashboard');
  const title=tripDashboardShowAll?'전체기간 출장기록':`${Number(monthSelect.value.slice(5,7))}월 출장기록`;
- document.getElementById('tripDashboardVisibleMonthTitle').textContent=`${title} (총 ${filtered.length}건)`;
- document.getElementById('tripDashboardVisibleCount').textContent=`${filtered.length}건`;
- body.innerHTML=filtered.length?filtered.map(t=>`<tr><td>${esc(t.tripDate)}</td><td>${esc(t.person||'-')}</td><td>${esc(t.region||'-')}</td><td>${esc(t.purpose||'-')}</td><td>${esc(t.transport||'-')}</td><td class="tripdash-money">${n(t.total).toLocaleString('ko-KR')}원</td><td class="tripdash-detail"><button type="button" class="trip-cost-detail-btn" data-trip-cost-id="${esc(t.recordId)}">상세</button></td><td>${statusPill(t.status)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="8">조회할 출장기록이 없습니다.</td></tr>';
+ document.getElementById('tripDashboardVisibleMonthTitle').textContent=title;
+ // 출장기록 ID로 연결된 운행일지에서만 차종과 실제거리 합계를 가져옵니다.
+ // 단순 날짜 일치는 다른 차량/출장의 거리를 혼합할 수 있으므로 사용하지 않습니다.
+ const linkedDrives=new Map();
+ for(const drive of state.driveLogs){
+  const tripId=String(drive.tripRecordId||'');
+  if(!tripId||!drive.date||String(drive.driveId||'').startsWith('TMP:'))continue;
+  const bucket=linkedDrives.get(tripId)||{vehicles:new Set(),distance:0,count:0};
+  if(drive.vehicle)bucket.vehicles.add(drive.vehicle);
+  bucket.distance+=n(drive.distance);bucket.count++;
+  linkedDrives.set(tripId,bucket);
+ }
+ body.innerHTML=filtered.length?filtered.map(t=>{
+  const linked=linkedDrives.get(String(t.recordId||''));
+  const vehicle=linked&&linked.vehicles.size?[...linked.vehicles].join(' / '):'-';
+  const distance=linked&&linked.count?`${linked.distance.toLocaleString('ko-KR')} km`:'-';
+  return `<tr><td>${esc(t.tripDate)}</td><td>${esc(t.person||'-')}</td><td class="tripdash-truncate" title="${esc(t.region||'-')}">${esc(t.region||'-')}</td><td class="tripdash-truncate" title="${esc(t.purpose||'-')}">${esc(t.purpose||'-')}</td><td>${esc(t.transport||'-')}</td><td class="tripdash-vehicle" title="${esc(vehicle)}">${esc(vehicle)}</td><td class="tripdash-mileage">${esc(distance)}</td><td class="tripdash-money">${n(t.total).toLocaleString('ko-KR')}원</td><td class="tripdash-detail"><button type="button" class="trip-cost-detail-btn" data-trip-cost-id="${esc(t.recordId)}">상세</button></td><td>${statusPill(t.status)}</td></tr>`;
+ }).join(''):'<tr class="empty-row"><td colspan="10">조회할 출장기록이 없습니다.</td></tr>';
  finalizeTableColumns('tripDashboardTable');updateSortIndicators();
 }
 document.getElementById('tripDashMonthBars')?.addEventListener('click',e=>{
@@ -3772,12 +3837,6 @@ function renderVehicleDashboard(){
   const registered=[...new Map(state.vehicles.filter(v=>v.vehicle).map(v=>[v.vehicle,v])).values()].sort((a,b)=>a.vehicle.localeCompare(b.vehicle,'ko',{numeric:true}));
   const count=document.getElementById('vehicleRegisteredCount'),cards=document.getElementById('vehicleDashboardCards');
   if(count)count.textContent=registered.length.toLocaleString('ko-KR')+'대';
-  if(cards){
-   cards.innerHTML=registered.length?registered.map(v=>{
-    const status=v.disposed||v.active===false?'처분':'운행중';
-    return `<button type="button" class="vdb-vehicle-card ${vehicleDashboardSelected===v.vehicle?'selected':''}" data-vdb-vehicle="${esc(v.vehicle)}" aria-label="${esc(v.vehicle)} 기초정보 보기"><span class="vdb-vehicle-name">${esc(v.vehicle)}</span><span class="vdb-vehicle-meta"><span class="vdb-status-dot ${status==='처분'?'retired':''}"></span>${esc(status)}</span><span class="vdb-vehicle-chevron" aria-hidden="true">›</span></button>`;
-   }).join(''):'<div class="vdb-empty-cards">등록된 차량이 없습니다. 기초관리에서 차량을 추가해 주세요.</div>';
-  }
   const select=document.getElementById('vehicleDashboardYear'),table=document.getElementById('vehicleMonthlyTable');
   if(!select||!table)return;
   const currentYear=tripTodayDate().slice(0,4);
@@ -3798,6 +3857,28 @@ function renderVehicleDashboard(){
    const key=d.vehicle+'\u001f'+mon;
    monthSums.set(key,(monthSums.get(key)||0)+n(d.distance));
    yearSums.set(d.vehicle,(yearSums.get(d.vehicle)||0)+n(d.distance));
+  }
+  // 등록차량 영역: 실제 등록 정보와 선택 연도의 운행거리로 가로형 차량정보 표 표시.
+  // 누적거리 = 기초거리 + 선택 연도 말일까지 기록된 실제거리의 총합.
+  if(cards){
+   const ordered=registered.slice().sort((a,b)=>{
+    const retiredA=!!(a.disposed||a.active===false),retiredB=!!(b.disposed||b.active===false);
+    return Number(retiredA)-Number(retiredB)||a.vehicle.localeCompare(b.vehicle,'ko',{numeric:true});
+   });
+   const throughYear=new Map();
+   for(const {d} of allRows){
+    if(!d.vehicle||String(d.date).slice(0,4)>year)continue;
+    throughYear.set(d.vehicle,(throughYear.get(d.vehicle)||0)+n(d.distance));
+   }
+   cards.innerHTML=ordered.length?`<table class="vdb-overview-table" aria-label="등록차량 기초정보 및 실제 운행거리">
+    <thead><tr><th>차량(차종)</th><th>상태</th><th>기초거리</th><th>주행거리(합계)</th><th>누적거리</th><th>취득일</th><th>처분일</th></tr></thead>
+    <tbody>${ordered.map(v=>{
+     const retired=!!(v.disposed||v.active===false),base=n(v.baseMileage),hasBase=v.baseMileage!==''&&v.baseMileage!==null&&v.baseMileage!==undefined&&Number.isFinite(Number(v.baseMileage));
+     const yearly=yearSums.get(v.vehicle),total=throughYear.get(v.vehicle)||0;
+     const value=x=>x.toLocaleString('ko-KR')+' km';
+     return `<tr class="${retired?'vdb-overview-retired':'vdb-overview-active'}"><th scope="row">${esc(v.vehicle)}</th><td><span class="vdb-overview-status ${retired?'retired':'active'}">${retired?'처분':'운행중'}</span></td><td>${hasBase?value(base):'미입력'}</td><td class="vdb-overview-distance">${yearly===undefined?'—':value(yearly)}</td><td><span class="vdb-overview-total">${hasBase?value(base+total):'미확인'}</span></td><td>${esc(v.acquired||'—')}</td><td>${esc(v.disposed||'—')}</td></tr>`;
+    }).join('')}</tbody>
+   </table>`:'<div class="vdb-empty-cards">등록된 차량이 없습니다. 기초관리에서 차량을 추가해 주세요.</div>';
   }
   const thead=table.querySelector('thead'),tbody=table.querySelector('tbody');
   if(!thead||!tbody)return;
