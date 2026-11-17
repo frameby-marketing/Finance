@@ -1917,7 +1917,7 @@ body.frameby-auth-locked .github-auth-btn{
     </section>
 
 <div id="tripCostModal" class="trip-cost-backdrop" hidden>
-  <div class="trip-cost-dialog" role="dialog" aria-modal="true" aria-labelledby="tripCostModalTitle" tabindex="-1">
+  <div class="trip-cost-dialog" role="dialog" aria-modal="false" aria-labelledby="tripCostModalTitle" tabindex="-1">
     <div class="trip-cost-head"><div><h3 id="tripCostModalTitle">출장비용 상세</h3><p id="tripCostModalSubtitle"></p></div><button type="button" id="tripCostModalClose" class="trip-cost-close" aria-label="상세 닫기">×</button></div>
     <div id="tripCostModalRows" class="trip-cost-rows"></div>
     <div class="trip-cost-total"><strong>합계</strong><strong id="tripCostModalTotal">0원</strong></div>
@@ -1993,7 +1993,16 @@ body.frameby-auth-locked .github-auth-btn{
               <tbody><tr><td colspan="14" class="vdb-empty-cell">불러오는 중...</td></tr></tbody>
             </table>
           </div>
-          <div class="vdb-footnote">운행일지에 저장된 기록의 월별 마지막 기말 키로수입니다. 기초관리의 확인 누적거리와 차이는 입력 메뉴에서 확인합니다.</div>
+          <div class="vdb-footnote">운행일지에 저장된 기록의 월별 마지막 기말 키로수입니다. 숫자를 누르면 해당 차량의 월별 운행기록이 아래에 표시됩니다. 기초관리의 확인 누적거리와 차이는 입력 메뉴에서 확인합니다.</div>
+        </section>
+        <section id="vehicleMonthRecords" class="vdb-drill-panel" aria-label="차량 월별 운행기록" hidden>
+          <div class="vdb-drill-heading">
+            <div><h2 id="vehicleMonthRecordsTitle">월별 운행기록</h2><p id="vehicleMonthRecordsCaption">차량·월별 실제 운행기록</p></div>
+            <button type="button" id="vehicleMonthRecordsClose" class="vdb-drill-close" aria-label="월별 운행기록 닫기">닫기 ×</button>
+          </div>
+          <div class="vdb-drill-table-wrap" tabindex="0" aria-label="선택한 차량의 월별 운행기록 목록, 가로 스크롤 가능">
+            <table class="vdb-drill-table"><thead><tr><th>일자</th><th>연결·구분</th><th>출발지</th><th>도착지</th><th>왕복/편도</th><th>실제거리</th><th>현재누적거리</th><th>상태</th></tr></thead><tbody id="vehicleMonthRecordsBody"></tbody></table>
+          </div>
         </section>
 
         <div id="vehicleInfoOverlay" class="vdb-overlay" hidden>
@@ -3383,7 +3392,18 @@ for(const [id,delta] of [['tripDashboardYearPrev',1],['tripDashboardYearNext',-1
 }
 
 let tripCostLastFocus=null;
-function closeTripCostModal(){const backdrop=document.getElementById('tripCostModal');if(!backdrop||backdrop.hidden)return;backdrop.hidden=true;if(tripCostLastFocus?.isConnected)tripCostLastFocus.focus();tripCostLastFocus=null;}
+ function closeTripCostModal(returnFocus=true){const backdrop=document.getElementById('tripCostModal');if(!backdrop||backdrop.hidden)return;backdrop.hidden=true;if(returnFocus&&tripCostLastFocus?.isConnected)tripCostLastFocus.focus();tripCostLastFocus=null;}
+ function positionTripCostPopover(){
+  const dialog=document.querySelector('#tripCostModal .trip-cost-dialog');
+  if(!dialog||!tripCostLastFocus?.isConnected)return;
+  const bounds=tripCostLastFocus.getBoundingClientRect(),margin=12,gap=9,vw=window.innerWidth,vh=window.innerHeight;
+  const w=Math.min(320,vw-margin*2);dialog.style.width=w+'px';
+  const left=bounds.right+gap+w<=vw-margin?bounds.right+gap:bounds.left-gap-w>=margin?bounds.left-gap-w:Math.max(margin,Math.min(vw-margin-w,bounds.left));
+  dialog.style.left=Math.round(left)+'px';
+  const h=dialog.offsetHeight;
+  const top=Math.min(Math.max(margin,bounds.top),Math.max(margin,vh-margin-h));
+  dialog.style.top=Math.round(top)+'px';
+ }
 function openTripCostModal(recordId,trigger){
  const found=state.trips.find(t=>String(t.recordId)===String(recordId));if(!found)return;
  const t=tripMergeDraft(found),c=t.currentCosts||{},backdrop=document.getElementById('tripCostModal');if(!backdrop)return;
@@ -3391,12 +3411,19 @@ function openTripCostModal(recordId,trigger){
  document.getElementById('tripCostModalSubtitle').textContent=[t.tripDate,t.person,t.purpose].filter(Boolean).join(' · ');
  document.getElementById('tripCostModalRows').innerHTML=fields.map(([label,key])=>`<div class="trip-cost-line"><span>${label}</span><strong>${n(c[key])?n(c[key]).toLocaleString('ko-KR')+'원':'-'}</strong></div>`).join('');
  document.getElementById('tripCostModalTotal').textContent=n(t.total).toLocaleString('ko-KR')+'원';
- tripCostLastFocus=trigger||document.activeElement;backdrop.hidden=false;
- document.getElementById('tripCostModalClose')?.focus();
+  if(!backdrop.hidden&&tripCostLastFocus===trigger){closeTripCostModal(false);return;}
+  tripCostLastFocus=trigger||document.activeElement;backdrop.hidden=false;
+  positionTripCostPopover();
+  document.getElementById('tripCostModalClose')?.focus();
 }
 document.getElementById('trip')?.addEventListener('click',e=>{const btn=e.target.closest('[data-trip-cost-id]');if(btn)openTripCostModal(btn.dataset.tripCostId,btn)});
 for(const id of ['tripCostModalClose','tripCostModalDone'])document.getElementById(id)?.addEventListener('click',closeTripCostModal);
-document.getElementById('tripCostModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeTripCostModal()});
+ document.addEventListener('pointerdown',e=>{
+  const backdrop=document.getElementById('tripCostModal');if(!backdrop||backdrop.hidden)return;
+  if(!e.target.closest('#tripCostModal .trip-cost-dialog')&&!e.target.closest('[data-trip-cost-id]'))closeTripCostModal(false);
+ },true);
+ window.addEventListener('resize',()=>{if(!document.getElementById('tripCostModal')?.hidden)positionTripCostPopover()});
+ window.addEventListener('scroll',()=>{if(!document.getElementById('tripCostModal')?.hidden)positionTripCostPopover()},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTripCostModal()});
 let tripRecordSearchQuery='',driveRecordSearchQuery='';
 function recordSearchMatch(values,query){
@@ -3716,6 +3743,25 @@ function vehicleDashboardOpenInfo(name,trigger){
  overlay.hidden=false;
  overlay.querySelector('.vdb-dialog-close')?.focus();
 }
+ let vehicleDashboardDrilldown=null;
+ function vehicleMonthRecordRows(selected){
+  if(!selected)return [];
+  const prefix=selected.year+'-'+String(selected.month).padStart(2,'0')+'-';
+  return state.driveLogs.map((d,i)=>({d,i})).filter(({d})=>d&&d.vehicle===selected.vehicle&&String(d.date||'').startsWith(prefix)&&!String(d.driveId||'').startsWith('TMP:'))
+   .sort((a,b)=>String(b.d.date||'').localeCompare(String(a.d.date||''))||b.i-a.i);
+ }
+ function renderVehicleMonthRecords(){
+  const section=document.getElementById('vehicleMonthRecords'),title=document.getElementById('vehicleMonthRecordsTitle'),caption=document.getElementById('vehicleMonthRecordsCaption'),body=document.getElementById('vehicleMonthRecordsBody');
+  if(!section||!title||!caption||!body)return;
+  const selected=vehicleDashboardDrilldown;
+  if(!selected||document.getElementById('vehicleDashboardYear')?.value!==selected.year){section.hidden=true;return;}
+  const rows=vehicleMonthRecordRows(selected);
+  if(!rows.length){section.hidden=true;vehicleDashboardDrilldown=null;return;}
+  title.textContent=`${selected.year}년 ${selected.month}월 운행기록`;
+  caption.textContent=`${selected.vehicle} · ${rows.length}건 · 운행일지 저장 기록`;
+  body.innerHTML=rows.map(({d})=>`<tr><td>${esc(d.date||'-')}</td><td>${esc(d.driveType||(d.tripRecordId?'출장 연동':'직접 입력'))}</td><td class="vdb-drill-address" title="${esc(d.start||'')}">${esc(d.start||'-')}</td><td class="vdb-drill-address" title="${esc(d.end||'')}">${esc(d.end||'-')}</td><td>${esc(d.roundTrip||'-')}</td><td class="vdb-drill-distance">${n(d.distance).toLocaleString('ko-KR')} km</td><td class="vdb-drill-distance">${n(d.currentMileage)>0?n(d.currentMileage).toLocaleString('ko-KR')+' km':'-'}</td><td>${driveStatusPill(d.status)}</td></tr>`).join('');
+  section.hidden=false;
+ }
 function renderVehicleDashboard(){
  applyAutoBaseMileages();
  // 이 화면은 운행일지의 기말 키로수만 읽습니다. 기초관리의 누적거리를 더하거나 덮어쓰지 않습니다.
@@ -3766,13 +3812,32 @@ function renderVehicleDashboard(){
    const record=monthLast.get(name+'\u001f'+(j+1));
    const odo=displayOdo(record);
    const hint=record?.d.currentMileageDerived?'운행일지 자동 계산값':'운행일지에 기록된 기말 키로수';
-   return `<td>${odo?`<span class="vdb-month-value" title="${hint}">${odo}</span>`:'<span class="vdb-month-empty">—</span>'}</td>`;
+   return `<td>${odo?`<button type="button" class="vdb-month-value vdb-month-trigger ${vehicleDashboardDrilldown?.vehicle===name&&vehicleDashboardDrilldown?.year===year&&vehicleDashboardDrilldown?.month===j+1?'active':''}" data-vdb-month="${j+1}" data-vdb-month-vehicle="${esc(name)}" aria-pressed="${vehicleDashboardDrilldown?.vehicle===name&&vehicleDashboardDrilldown?.year===year&&vehicleDashboardDrilldown?.month===j+1?'true':'false'}" title="${hint} · 클릭하여 월별 운행기록 보기">${odo}</button>`:'<span class="vdb-month-empty">—</span>'}</td>`;
   }).join('');
   const last=yearLast.get(name),lastOdo=displayOdo(last);
   const lastCell=lastOdo?`${lastOdo}<small> km</small>`:'—';
   return `<tr data-vdb-row="${esc(name)}" class="${vehicleDashboardSelected===name?'selected':''}"><th scope="row"><span class="vdb-row-name">${esc(name)}</span>${!info?'<span class="vdb-row-sub">과거 운행기록</span>':''}</th>${months}<td class="vdb-last-cell"><strong>${lastCell}</strong></td></tr>`;
  }).join('');
+ renderVehicleMonthRecords();
 }
+ document.getElementById('vehicleMonthlyTable')?.addEventListener('click',event=>{
+  const button=event.target.closest('button[data-vdb-month][data-vdb-month-vehicle]');
+  if(!button)return;
+  const year=document.getElementById('vehicleDashboardYear')?.value;
+  const month=Number(button.dataset.vdbMonth),vehicle=button.dataset.vdbMonthVehicle;
+  if(!year||!month||!vehicle)return;
+  const prev=vehicleDashboardDrilldown;
+  vehicleDashboardDrilldown=prev&&prev.year===year&&prev.month===month&&prev.vehicle===vehicle?null:{year,month,vehicle};
+  document.querySelectorAll('#vehicleMonthlyTable .vdb-month-trigger').forEach(el=>{
+   const active=!!vehicleDashboardDrilldown&&el.dataset.vdbMonth===String(vehicleDashboardDrilldown.month)&&el.dataset.vdbMonthVehicle===vehicleDashboardDrilldown.vehicle;
+   el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));
+  });
+  renderVehicleMonthRecords();
+ });
+ document.getElementById('vehicleMonthRecordsClose')?.addEventListener('click',()=>{
+  vehicleDashboardDrilldown=null;renderVehicleMonthRecords();
+  document.querySelectorAll('#vehicleMonthlyTable .vdb-month-trigger').forEach(el=>{el.classList.remove('active');el.setAttribute('aria-pressed','false')});
+ });
 document.getElementById('vehicleDashboardYear')?.addEventListener('change',renderVehicleDashboard);
 ['vehicleYearPrev','vehicleYearNext'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>{
  const select=document.getElementById('vehicleDashboardYear');if(!select)return;
@@ -17364,6 +17429,47 @@ document.addEventListener('toggle',function(event){
 .trip-cost-footer{padding:13px 22px 18px;display:flex;justify-content:flex-end}
 .trip-cost-footer button{background:#2757d7;color:white;border:0;border-radius:9px;min-width:80px;padding:9px 16px;cursor:pointer;font-weight:800}
 @media(max-width:800px){#trip-dashboard .tripdash-period-controls{margin-left:0}#trip .head{align-items:flex-start;flex-wrap:wrap}#trip .head .head-actions{width:100%;justify-content:space-between}#trip .head .head-actions .filters{flex-wrap:wrap}}
+</style>
+<style id="frameby-vehicle-month-drill-cost-popover-20261117">
+/* vehicle dashboard monthly mileage: click cell -> detail records immediately below table */
+#vehicle-dashboard .vdb-month-trigger{display:block;width:100%;margin:0;font:inherit;font-weight:800;cursor:pointer;appearance:none;-webkit-appearance:none;transition:background .12s,border-color .12s;color:#223754}
+#vehicle-dashboard .vdb-month-trigger:hover,#vehicle-dashboard .vdb-month-trigger:focus-visible{background:#d9e8ff;border-color:#87a8e9;outline:2px solid #8fb0ff;outline-offset:1px}
+#vehicle-dashboard .vdb-month-trigger.active{background:#2757d7!important;color:white!important;border-color:#2757d7!important}
+#vehicle-dashboard .vdb-drill-panel[hidden]{display:none!important}
+#vehicle-dashboard .vdb-drill-panel{margin-top:16px;background:#fff;border:1px solid #dfe6f2;border-radius:15px;padding:19px;box-shadow:0 5px 18px rgba(22,36,67,.055)}
+#vehicle-dashboard .vdb-drill-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+#vehicle-dashboard .vdb-drill-heading h2{margin:0 0 5px;font-size:17px;font-weight:900;color:#182641}
+#vehicle-dashboard .vdb-drill-heading p{margin:0;font-size:12px;color:#728097}
+#vehicle-dashboard .vdb-drill-close{border:1px solid #d4e0f3;background:white;color:#355788;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:800;white-space:nowrap}
+#vehicle-dashboard .vdb-drill-close:hover{background:#f0f5ff}
+#vehicle-dashboard .vdb-drill-table-wrap{overflow-x:auto;max-width:100%;border:1px solid #e5ebf4;border-radius:10px}
+#vehicle-dashboard .vdb-drill-table{border-collapse:collapse;min-width:980px;width:100%;table-layout:fixed;font-size:12px;color:#253551}
+#vehicle-dashboard .vdb-drill-table th{background:#f3f6fb;text-align:left;font-size:11px;color:#536783;font-weight:850;padding:12px;white-space:nowrap;border-bottom:1px solid #e4ebf5}
+#vehicle-dashboard .vdb-drill-table td{padding:11px 12px;border-bottom:1px solid #eef1f6;vertical-align:middle}
+#vehicle-dashboard .vdb-drill-table tbody tr:last-child td{border-bottom:0}
+#vehicle-dashboard .vdb-drill-table th:nth-child(1){width:108px}
+#vehicle-dashboard .vdb-drill-table th:nth-child(2){width:115px}
+#vehicle-dashboard .vdb-drill-table th:nth-child(3),#vehicle-dashboard .vdb-drill-table th:nth-child(4){width:210px}
+#vehicle-dashboard .vdb-drill-table th:nth-child(5){width:90px}
+#vehicle-dashboard .vdb-drill-table th:nth-child(6),#vehicle-dashboard .vdb-drill-table th:nth-child(7){width:115px}
+#vehicle-dashboard .vdb-drill-table th:nth-child(8){width:75px}
+#vehicle-dashboard .vdb-drill-address{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0}
+#vehicle-dashboard .vdb-drill-distance{text-align:right;font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+/* travel expense detail: narrow unobtrusive popover beside the button, with X and close button retained */
+.trip-cost-backdrop{position:fixed!important;inset:0!important;padding:0!important;display:block!important;pointer-events:none!important;background:transparent!important;z-index:9000!important}
+.trip-cost-backdrop[hidden]{display:none!important}
+.trip-cost-backdrop .trip-cost-dialog{position:fixed!important;top:0;left:0;right:auto!important;bottom:auto!important;box-sizing:border-box;pointer-events:auto!important;width:320px;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:12px;box-shadow:0 13px 34px rgba(22,36,67,.22);overflow-y:auto}
+.trip-cost-backdrop .trip-cost-head{padding:12px 14px 10px}
+.trip-cost-backdrop .trip-cost-head h3{font-size:14px}
+.trip-cost-backdrop .trip-cost-head p{font-size:10px;line-height:1.4;max-width:250px}
+.trip-cost-backdrop .trip-cost-close{width:26px;height:26px;font-size:18px}
+.trip-cost-backdrop .trip-cost-rows{padding:3px 14px}
+.trip-cost-backdrop .trip-cost-line{padding:8px 0;font-size:12px}
+.trip-cost-backdrop .trip-cost-total{padding:11px 14px;font-size:12px}
+.trip-cost-backdrop .trip-cost-total strong:last-child{font-size:17px}
+.trip-cost-backdrop .trip-cost-footer{padding:9px 14px 12px}
+.trip-cost-backdrop .trip-cost-footer button{min-width:65px;padding:7px 12px;font-size:11px}
+@media(max-width:750px){#vehicle-dashboard .vdb-drill-heading{align-items:flex-start}#vehicle-dashboard .vdb-drill-panel{padding:12px}#vehicle-dashboard .vdb-drill-heading h2{font-size:15px}}
 </style>
 </body>
 </html>
