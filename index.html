@@ -4666,8 +4666,17 @@ function ghMergeTrips(sourceGroups,storedAll,hidden,sourceAddressOptions){
    const opts=(sourceAddressOptions[date]||[]).slice(),keys=g.rows.map(r=>r.row).join(',');
    // 원본 행 번호는 정렬/삽입 때 달라집니다. 날짜가 다른 기록은 절대 연결하지 않습니다.
    const candidates=active.filter(r=>ghDate(r.출장일자)===date&&ghText(r.source_keys)&&!matched.has(ghText(r.record_id)));
-   const saved=candidates.find(r=>ghText(r.source_keys)===keys)||candidates[0]||null;
-   if(!saved&&hide[keys])return;
+   let saved=candidates.find(r=>ghText(r.source_keys)===keys)||candidates[0]||null;
+   if(!saved&&hide[keys]){
+     // 예전에 두 차량 출장 중 하나를 삭제하고 카드 원본 연결이 숨겨진 경우,
+     // 동일 날짜에 남은 차량 출장 단 한 건에만 실제 카드 비용을 복원합니다.
+     // 항공·대중교통과 차량이 섞인 날에는 자동 배분하지 않습니다.
+     const survivors=active.filter(r=>ghDate(r.출장일자)===date);
+     if(survivors.length===1 && ghText(survivors[0].이동수단)==='차량' &&
+        !ghNum(g.costs.교통비)){
+       saved=survivors[0];
+     }else return;
+   }
    if(saved){
      matched.add(ghText(saved.record_id));
      const x={...saved,source_keys:keys,경상비:g.costs.경상비,유류비:g.costs.유류비,접대비:g.costs.접대비,교통비:g.costs.교통비,숙박비:g.costs.숙박비,기타비:g.costs.기타비};
@@ -4764,6 +4773,27 @@ async function ghGetInitialData(){
       status:'미작성',persisted:false,fuelSource:true
     });
   });
+  // 카드 사용액이 연결된 차량 출장 행을 삭제했더라도, 동일 날짜에 남아 있는
+  // 단독 '출장' 운행일지 1건에는 원본 결제액과 실제 km를 같이 표시합니다.
+  // 운행일지의 원본 셀은 읽기만 하며 여기서 값을 변경하지 않습니다.
+  Object.keys(src.groups).forEach(date=>{
+    const g=src.groups[date],others=trips.filter(t=>t.tripDate===date);
+    if(ghNum(g.costs.교통비)!==0)return;
+    if(others.length>1 || (others.length===1 && others[0].recordId!=='AUTO:'+date))return;
+    const candidates=driveLogs.filter(d=>d.persisted&&d.date===date&&d.driveType==='출장'&&
+      !d.tripRecordId&&!d.fuelSource&&ghText(d.driveId));
+    if(candidates.length!==1)return;
+    const d=candidates[0],keys=g.rows.map(r=>r.row).join(','),amount=Object.values(g.costs).reduce((a,v)=>a+ghNum(v),0);
+    if(!amount)return;
+    // 원본 그룹의 합계를 가상 운행출장 행에 한 번만 배정합니다.
+    // 기존에 입력해 둔 차량명·거리·도착지는 해당 운행행에서 불러옵니다.
+    if(others.length)trips.splice(trips.indexOf(others[0]),1);
+    trips.push({recordId:'DRIVEONLY:'+d.driveId,originDriveId:d.driveId,sourceKeys:keys,tripDate:date,
+      currentCosts:ghCostPayload(g.costs),total:amount,person:'',department:'',summary:'',purpose:'',
+      region:d.end||'',sourceAddresses:(src.addresses[date]||[]).slice(),transport:'차량',
+      payment:'법인카드',status:'미정리',persisted:false});
+  });
+  trips.sort((a,b)=>String(b.tripDate).localeCompare(String(a.tripDate))||String(a.recordId).localeCompare(String(b.recordId)));
   const vehicles=vehiclesRaw.map(ghNormVehicle);
   ghApplyDerived(driveLogs,vehicles);
   return {
@@ -4784,7 +4814,38 @@ async function ghRecalculateVehicle(vehicle){
 async function ghSyncDriveFromTrip(trip){const rows=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),hit=rows.find(r=>ghText(r.trip_record_id)===ghText(trip.record_id)&&String(r.삭제여부||'').toUpperCase()!=='Y');if(ghText(trip.이동수단)!=='차량'){if(hit){const oldVehicle=ghText(hit.차량명);await ghAuditRows([ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,ghText(hit.drive_id),JSON.stringify(hit),'삭제','출장 이동수단 변경')]);await ghDeleteRow(INTEGRATED_CONFIG.driveSheet,hit.__rowNo);if(oldVehicle)await ghRecalculateVehicle(oldVehicle);return{action:'deleted',tripRecordId:ghText(trip.record_id),driveId:ghText(hit.drive_id)}}return{action:'none',tripRecordId:ghText(trip.record_id)}}if(hit){const u={...hit,일자:trip.출장일자,도착지:trip.방문지역,삭제여부:'N',수정일시:ghNow()};u.상태=ghDriveStatus(u);await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,`A${hit.__rowNo}:O${hit.__rowNo}`,[GH_DRIVE_HEADERS.map(h=>u[h]??'')]);if(ghText(u.차량명))await ghRecalculateVehicle(ghText(u.차량명));const latest=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),saved=latest.find(r=>ghText(r.drive_id)===ghText(u.drive_id))||u;return{action:'updated',tripRecordId:ghText(trip.record_id),driveLog:ghNormDrive(saved)}}const id='DRV-'+crypto.randomUUID().slice(0,8).toUpperCase(),o={drive_id:id,trip_record_id:trip.record_id,일자:trip.출장일자,차량명:'',운행구분:'출장',출발지:'사무실',도착지:trip.방문지역,왕복편도:'왕복',실제거리_km:0,기초주행거리_km:0,현재누적거리_km:0,상태:'미작성',삭제여부:'N',생성일시:ghNow(),수정일시:ghNow()};await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,'A:O',[GH_DRIVE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.driveSheet,id,'',trip.record_id,'출장기록 자동연결')]);return{action:'created',tripRecordId:ghText(trip.record_id),driveLog:ghNormDrive(o)}}
 async function ghSaveTrip(payload){payload=payload||{};const date=ghDate(payload.tripDate||payload['출장일자']);if(!date)throw new Error('출장일자를 먼저 입력해 주세요.');const src=await ghReadSourceData(),sourceBacked=Boolean(payload.sourceKeys&&String(payload.sourceKeys).trim())||String(payload.recordId||'').startsWith('AUTO:'),sourceGroup=sourceBacked?src.groups[date]:null,g=sourceGroup,opts=g?(src.addresses[date]||[]):[],costs=g?g.costs:ghZeroCosts(),sourceKeys=g?g.rows.map(r=>r.row).join(','):'';let id=ghText(payload.recordId),row=null,old=null;if(id&&!id.startsWith('AUTO:')&&!id.startsWith('TMP:')){row=await ghFindTripRow(id);old=row}if(!row&&sourceKeys){const all=await ghTripObjects(INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS,true),same=all.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys)===sourceKeys).sort((a,b)=>b.__rowNo-a.__rowNo)[0];if(same){row=same;old=same;id=ghText(same.record_id)}}if(!row)id=await ghNextTripId(date);const total=Object.values(costs).reduce((a,b)=>a+ghNum(b),0),o={record_id:id,source_keys:sourceKeys,출장일자:date,경상비:costs.경상비,접대비:costs.접대비,교통비:costs.교통비,숙박비:costs.숙박비,기타비:costs.기타비,합계:total,출장자:ghText(payload.person)||'CEO',구분:ghText(payload.department),적요명:ghText(payload.summary),출장목적:ghText(payload.purpose),방문지역:ghText(payload.region)||(opts.length===1?opts[0]:''),이동수단:ghText(payload.transport)||ghDefaultTransport(costs),결제수단:ghText(payload.payment)||(total?'법인카드':'비용 없음'),상태:'',삭제여부:'N',생성일시:old?old.생성일시:ghNow(),수정일시:ghNow(),유류비:costs.유류비};o.상태=ghTripStatus(o);const vals=GH_TRIP_HEADERS.map(h=>o[h]??'');if(row){await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,`A${row.__rowNo}:U${row.__rowNo}`,[vals]);const audits=[];GH_TRIP_HEADERS.forEach(h=>{if(h==='수정일시')return;if(String(old?.[h]??'')!==String(o[h]??''))audits.push(ghAuditRow('수정',INTEGRATED_CONFIG.tripSheet,id,old?.[h]??'',o[h]??'',h))});await ghAuditRows(audits)}else{await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,'A:U',[vals]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.tripSheet,id,'','','출장기록 생성')])}const sync=await ghSyncDriveFromTrip(o),result=ghNormTrip(o);result._driveSync=sync;return result}
 async function ghHardDeleteDriveByTrip(tripId){const rows=(await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true)).filter(r=>ghText(r.trip_record_id)===tripId).sort((a,b)=>b.__rowNo-a.__rowNo),vehicles={};for(const r of rows){if(ghText(r.차량명))vehicles[ghText(r.차량명)]=true;await ghAuditRows([ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,ghText(r.drive_id),JSON.stringify(r),'삭제','연결 출장 삭제')]);await ghDeleteRow(INTEGRATED_CONFIG.driveSheet,r.__rowNo)}for(const v of Object.keys(vehicles))await ghRecalculateVehicle(v)}
-async function ghDeleteTrip(payload){payload=typeof payload==='string'?{recordId:payload}:(payload||{});const id=ghText(payload.recordId),sourceKeys=ghText(payload.sourceKeys);if(!id||id.startsWith('TMP:'))return{ok:true,recordId:id};if(id.startsWith('AUTO:')){if(sourceKeys)await ghAuditRows([ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sourceKeys,'삭제','source_keys')]);return{ok:true,recordId:id}}const row=await ghFindTripRow(id);if(!row)return{ok:true,recordId:id};await ghHardDeleteDriveByTrip(id);const sk=ghText(row.source_keys)||sourceKeys,a=[];if(sk)a.push(ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sk,'삭제','source_keys'));a.push(ghAuditRow('실제삭제',INTEGRATED_CONFIG.tripSheet,id,JSON.stringify(row),'삭제','전체행'));await ghAuditRows(a);await ghDeleteRow(INTEGRATED_CONFIG.tripSheet,row.__rowNo);return{ok:true,recordId:id}}
+async function ghDeleteTrip(payload){payload=typeof payload==='string'?{recordId:payload}:(payload||{});const id=ghText(payload.recordId),sourceKeys=ghText(payload.sourceKeys);if(!id||id.startsWith('TMP:'))return{ok:true,recordId:id};if(id.startsWith('AUTO:')){if(sourceKeys)await ghAuditRows([ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sourceKeys,'삭제','source_keys')]);return{ok:true,recordId:id}}const row=await ghFindTripRow(id);if(!row)return{ok:true,recordId:id};await ghHardDeleteDriveByTrip(id);const sk=ghText(row.source_keys)||sourceKeys,a=[];
+// 동일 날짜·동일 이동수단의 기존 출장 한 건이 남으면 카드 원본의 실제 합계를 그 행에 승계합니다.
+// 삭제된 행의 저장 금액을 단순 가산하지 않아 이중 계산을 막습니다.
+let transfer=null;
+if(sk){
+ const date=ghDate(row.출장일자),mode=ghText(row.이동수단);
+ const all=await ghTripObjects(INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS,true);
+ const peers=all.filter(r=>ghText(r.record_id)!==id&&String(r.삭제여부||'').toUpperCase()!=='Y'&&
+    ghDate(r.출장일자)===date&&ghText(r.이동수단)===mode);
+ const differentSourceOwner=all.some(r=>ghText(r.record_id)!==id&&String(r.삭제여부||'').toUpperCase()!=='Y'&&
+    ghDate(r.출장일자)===date&&ghText(r.source_keys)&&ghText(r.이동수단)!==mode);
+ if(peers.length===1&&!differentSourceOwner){
+   const g=(await ghReadSourceData()).groups[date];
+   if(g && !(mode==='차량'&&ghNum(g.costs.교통비)>0) &&
+      !(mode==='대중교통'&&ghNum(g.costs.유류비)>0)){
+     const target=peers[0],keys=g.rows.map(r=>r.row).join(','),costs=g.costs,
+       total=Object.values(costs).reduce((sum,v)=>sum+ghNum(v),0);
+     const updated={...target,source_keys:keys,경상비:costs.경상비,유류비:costs.유류비,
+       접대비:costs.접대비,교통비:costs.교통비,숙박비:costs.숙박비,기타비:costs.기타비,
+       합계:total,결제수단:'법인카드',수정일시:ghNow()};
+     await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,
+       `A${target.__rowNo}:U${target.__rowNo}`,[GH_TRIP_HEADERS.map(h=>updated[h]??'')]);
+     transfer={recordId:ghText(target.record_id),total};
+     a.push(ghAuditRow('연결승계',INTEGRATED_CONFIG.tripSheet,id,
+       ghText(target.record_id),keys,'카드원본'));
+   }
+ }
+}
+if(sk&&!transfer)a.push(ghAuditRow('원본숨김',INTEGRATED_CONFIG.tripSheet,id,sk,'삭제','source_keys'));
+a.push(ghAuditRow('실제삭제',INTEGRATED_CONFIG.tripSheet,id,JSON.stringify(row),'삭제','전체행'));
+await ghAuditRows(a);await ghDeleteRow(INTEGRATED_CONFIG.tripSheet,row.__rowNo);
+return{ok:true,recordId:id,transfer}}
 async function ghSaveDriveLog(payload){payload=payload||{};const date=ghDate(payload.date||payload.일자);if(!date)throw new Error('운행일자를 먼저 입력해 주세요.');const rows=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true);let id=ghText(payload.driveId),old=rows.find(r=>id&&!id.startsWith('TMP:')&&ghText(r.drive_id)===id)||null;if(!old&&ghText(payload.tripRecordId))old=rows.find(r=>ghText(r.trip_record_id)===ghText(payload.tripRecordId)&&String(r.삭제여부||'').toUpperCase()!=='Y')||null;if(old)id=ghText(old.drive_id);if(!old)id='DRV-'+crypto.randomUUID().slice(0,8).toUpperCase();const o={drive_id:id,trip_record_id:ghText(payload.tripRecordId)||(old?ghText(old.trip_record_id):''),일자:date,차량명:ghText(payload.vehicle),운행구분:ghText(payload.driveType),출발지:ghText(payload.start),도착지:ghText(payload.end),왕복편도:ghText(payload.roundTrip)||'왕복',실제거리_km:ghNum(payload.distance),기초주행거리_km:old?ghNum(old.기초주행거리_km):0,현재누적거리_km:ghNum(payload.currentMileage),상태:'',삭제여부:'N',생성일시:old?old.생성일시:ghNow(),수정일시:ghNow()};o.상태=ghDriveStatus(o);const vals=GH_DRIVE_HEADERS.map(h=>o[h]??'');if(old){await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,`A${old.__rowNo}:O${old.__rowNo}`,[vals]);const audits=[];GH_DRIVE_HEADERS.forEach(h=>{if(h==='수정일시')return;if(String(old[h]??'')!==String(o[h]??''))audits.push(ghAuditRow('수정',INTEGRATED_CONFIG.driveSheet,id,old[h]??'',o[h]??'',h))});await ghAuditRows(audits)}else{await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,'A:O',[vals]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.driveSheet,id,'','','차량운행일지 생성')])}const oldVehicle=old?ghText(old.차량명):'';if(oldVehicle&&oldVehicle!==o.차량명)await ghRecalculateVehicle(oldVehicle);if(o.차량명)await ghRecalculateVehicle(o.차량명);const latest=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),saved=latest.find(r=>ghText(r.drive_id)===id)||o;return ghNormDrive(saved)}
 async function ghSaveVehicleMileage(payload){payload=payload||{};const vehicle=ghText(payload.vehicle);if(!vehicle)throw new Error('차량명을 먼저 입력해 주세요.');const base=ghNum(payload.baseMileage),cur=ghNum(payload.currentMileage),rows=await ghTripObjects(INTEGRATED_CONFIG.vehicleSheet,GH_VEHICLE_HEADERS,true),hit=rows.find(r=>ghText(r.차량명)===vehicle),now=ghNow();if(!hit)throw new Error('차량정보가 등록되지 않았습니다. 기초관리에서 차량을 먼저 추가해 주세요.');if(hit){const o={...hit,기초키로수:base,누적거리:cur,수정일시:now};await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,`A${hit.__rowNo}:H${hit.__rowNo}`,[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('수정',INTEGRATED_CONFIG.vehicleSheet,ghText(hit.vehicle_id),`${hit.기초키로수}/${hit.누적거리}`,`${base}/${cur}`,'주행거리')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}const id='VEH-'+crypto.randomUUID().slice(0,8).toUpperCase(),o={vehicle_id:id,차량명:vehicle,기초키로수:base,누적거리:cur,취득일:'',처분일:'',사용여부:'Y',수정일시:now};await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.vehicleSheet,'A:H',[GH_VEHICLE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.vehicleSheet,id,'',vehicle,'차량정보')]);await ghRecalculateVehicle(vehicle);return ghNormVehicle(o)}
 function ghMasterType(type){type=ghText(type);if(type==='department'||type==='업무구분'||type==='구분')return'업무구분';if(type==='summary'||type==='적요명')return'적요명';if(type==='purpose'||type==='출장목적')return'출장목적';throw new Error('기초관리 구분이 올바르지 않습니다.')}
