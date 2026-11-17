@@ -4669,8 +4669,9 @@ async function ghReadSourceData(inputRows=null){
   return{groups,addresses,vehicleCosts};
 }
 async function ghDeletedSourceKeys(inputRows=null){const rows=inputRows??await ghValuesGet(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.auditSheet,'A2:H'),o={};rows.forEach(r=>{if(ghText(r[2])===INTEGRATED_CONFIG.tripSheet&&ghText(r[1])==='원본숨김'&&ghText(r[4])==='source_keys'&&ghText(r[6])==='삭제'&&ghText(r[5]))o[ghText(r[5])]=true;if(ghText(r[2])===INTEGRATED_CONFIG.driveSheet&&ghText(r[1])==='운행내역숨김'&&ghText(r[5]))o['DRIVE:'+ghText(r[5])]=true});return o}
-// 유류비만 있는 날짜도 카드 결제 날짜의 출장비용으로 처리합니다.
-// 별도 운행일지의 출장기록은 같은 날짜라도 독립적으로 유지합니다.
+// 유류비만 있는 날짜는 비용만으로 새 출장을 생성하지 않습니다.
+// 기존 출장 또는 운행구분=출장인 실제 운행이 있을 때만 출장에 연결하고,
+// 운행구분=출퇴근 기록은 출장으로 변환하지 않습니다.
 function ghIsFuelOnlyGroup(group){
   return !!(group&&group.rows&&group.rows.length) &&
     group.rows.every(item=>item.mapped==='유류비');
@@ -4682,11 +4683,20 @@ function ghMergeTrips(sourceGroups,storedAll,hidden,sourceAddressOptions){
  legacy.forEach(r=>{const k=ghText(r.source_keys);if(k)hide[k]=true});
  Object.keys(sourceGroups).forEach(date=>{
    const g=sourceGroups[date];
-   // 유류비 단독 결제도 해당 결제일의 출장비용으로 표시합니다.
+   // 결제일에 출장기록이 없고 유류비만 있다면 새 출장을 만들지 않습니다.
+   // 실제 출장 운행이 있는 날짜는 아래 ghGetInitialData의 DRIVEONLY 연결에서 별도 처리합니다.
    const opts=(sourceAddressOptions[date]||[]).slice(),keys=g.rows.map(r=>r.row).join(',');
    // 원본 행 번호는 정렬/삽입 때 달라집니다. 날짜가 다른 기록은 절대 연결하지 않습니다.
    const candidates=active.filter(r=>ghDate(r.출장일자)===date&&ghText(r.source_keys)&&!matched.has(ghText(r.record_id)));
    let saved=candidates.find(r=>ghText(r.source_keys)===keys)||candidates[0]||null;
+   if(!saved&&ghIsFuelOnlyGroup(g)&&!hide[keys]){
+     // 사용자가 기존 출장기록을 직접 작성한 경우만 단독 차량 출장에 유류비를 연결.
+     // 같은 날짜에 차량 출장 2건 이상이면 어느 출장의 비용인지 단정하지 않습니다.
+     const existing=active.filter(r=>ghDate(r.출장일자)===date&&
+       ghText(r.이동수단)==='차량'&&!matched.has(ghText(r.record_id)));
+     if(existing.length===1)saved=existing[0];
+   }
+   if(!saved&&ghIsFuelOnlyGroup(g)&&!hide[keys])return;
    if(!saved&&hide[keys]){
      // 예전에 두 차량 출장 중 하나를 삭제하고 카드 원본 연결이 숨겨진 경우,
      // 동일 날짜에 남은 차량 출장 단 한 건에만 실제 카드 비용을 복원합니다.
@@ -4705,6 +4715,8 @@ function ghMergeTrips(sourceGroups,storedAll,hidden,sourceAddressOptions){
      if(!ghText(x.이동수단))x.이동수단=ghDefaultTransport(g.costs);
      const t=ghNormTrip(x);t.sourceAddresses=opts;out.push(t);
    }else{
+     // 과거 삭제 이력 등으로 연결할 출장도 없다면 유류비는 카드 원본에만 남깁니다.
+     if(ghIsFuelOnlyGroup(g))return;
      const total=Object.values(g.costs).reduce((a,b)=>a+ghNum(b),0);
      out.push({recordId:'AUTO:'+date,sourceKeys:keys,tripDate:date,currentCosts:ghCostPayload(g.costs),total,person:'CEO',department:'',summary:'',purpose:'',region:opts.length===1?opts[0]:'',sourceAddresses:opts,transport:ghDefaultTransport(g.costs),payment:total?'법인카드':'비용 없음',status:'미정리',persisted:false});
    }
