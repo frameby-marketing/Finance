@@ -1097,6 +1097,63 @@ body.frameby-auth-locked .github-auth-btn{
  #vehicle-edit .vehicle-quick-select select{flex:1 1 auto;max-width:none;min-width:0}
 }
 </style>
+
+<style id="frameby-vehicle-range-responsive-2026">
+/* 차량운행일지 입력 범위만 수정: 다른 모듈·로그인·공통 UI는 유지 */
+#vehicle .head{display:flex!important;flex-wrap:wrap!important;gap:10px 16px!important;align-items:center!important}
+#vehicle .head-actions{display:flex!important;flex:1 1 620px!important;min-width:0!important;flex-wrap:wrap!important;justify-content:flex-end!important;gap:8px!important}
+#vehicleRangeControls{min-width:0!important;flex:0 1 auto!important;max-width:100%!important}
+#vehicleRangeControls .field{min-width:0!important;max-width:100%!important;flex-wrap:wrap!important;gap:6px!important}
+#vehicle .vehicle-date-range{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:6px!important;min-width:0!important;max-width:100%!important}
+#vehicle .vehicle-date-range input[type=date]{width:145px!important;min-width:130px!important;max-width:100%!important}
+#vehicle .vehicle-date-range button{min-height:34px!important;white-space:nowrap!important}
+#vehicle-edit{min-width:0!important;width:100%!important}
+#vehicle-edit .entry-workspace{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important}
+#vehicle-edit .entry-toolrow{display:flex!important;flex-wrap:wrap!important;gap:10px!important;align-items:center!important;min-width:0!important}
+#vehicle-edit .entry-toolrow .record-searchbar{flex:1 1 470px!important;min-width:0!important;margin:0!important}
+#vehicle-edit .entry-toolrow .entry-main-actions{display:flex!important;gap:7px!important;align-items:center!important;flex-wrap:wrap!important;justify-content:flex-end!important;min-width:0!important}
+#vehicle-edit .table-wrap{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:auto!important;position:relative!important;-webkit-overflow-scrolling:touch!important}
+#vehicleInlineSheet{width:100%!important;min-width:1360px!important;table-layout:fixed!important;border-collapse:collapse!important}
+#vehicleInlineSheet thead th,#vehicleInlineSheet tbody td{box-sizing:border-box!important;min-width:0!important;max-width:none!important;overflow:hidden!important;vertical-align:middle!important}
+#vehicleInlineSheet tr>:nth-child(1){width:144px!important}
+#vehicleInlineSheet tr>:nth-child(2){width:53px!important;min-width:53px!important;max-width:53px!important}
+#vehicleInlineSheet tr>:nth-child(3){width:126px!important}
+#vehicleInlineSheet tr>:nth-child(4){width:148px!important}
+#vehicleInlineSheet tr>:nth-child(5){width:106px!important}
+#vehicleInlineSheet tr>:nth-child(6),#vehicleInlineSheet tr>:nth-child(7){width:210px!important}
+#vehicleInlineSheet tr>:nth-child(8){width:90px!important}
+#vehicleInlineSheet tr>:nth-child(9){width:102px!important}
+#vehicleInlineSheet tr>:nth-child(10){width:137px!important}
+#vehicleInlineSheet tr>:nth-child(11){width:85px!important}
+#vehicleInlineSheet td.region-cell{display:table-cell!important;min-width:0!important;max-width:0!important;padding:10px 11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;word-break:normal!important;overflow-wrap:normal!important;cursor:text!important}
+#vehicleInlineSheet td.region-cell:focus{outline:2px solid #8fb0ff!important;outline-offset:-2px!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;overflow-y:auto!important;max-height:104px!important}
+#vehicleInlineSheet .cell-input,#vehicleInlineSheet .cell-select{min-width:0!important;width:100%!important;max-width:100%!important;padding:10px 7px!important;text-overflow:ellipsis!important}
+#vehicleInlineSheet .auto-mileage-cell{padding:9px 5px!important;font-variant-numeric:tabular-nums;white-space:normal!important}
+#vehicleInlineSheet .drive-odo-alert{display:block;color:#a75a11;font-size:10px;line-height:1.2;margin-top:3px;white-space:nowrap}
+#vehicleInlineSheet .drive-ending-cell strong{color:#244c9a;font-weight:900}
+#vehicle .vehicle-period-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
+#vehicle .vehicle-period-stat{display:flex;flex-direction:column;gap:5px;padding:16px 18px;border:1px solid #dce5f1;background:#fff;border-radius:12px;min-width:0}
+#vehicle .vehicle-period-stat span{color:#66758c;font-size:12px;font-weight:700}
+#vehicle .vehicle-period-stat strong{font-size:26px;color:#224b9e;font-weight:900;font-variant-numeric:tabular-nums}
+#vehicle .vehicle-period-stat small{font-size:11px;color:#7c8799;overflow-wrap:anywhere}
+@media(max-width:1100px){
+ #vehicle .head-actions{justify-content:flex-start!important;flex-basis:100%!important}
+ #vehicle .entry-toolrow .entry-main-actions{justify-content:flex-start!important}
+}
+@media(max-width:720px){
+ #vehicle .vehicle-period-stats{grid-template-columns:1fr}
+ #vehicle .head-actions{flex-basis:100%!important}
+ #vehicle .vehicle-date-range input[type=date]{width:min(42vw,150px)!important;min-width:125px!important}
+ #vehicle-edit .table-wrap{overflow-x:auto!important;overflow-y:auto!important}
+ #vehicleInlineSheet{min-width:1460px!important}
+ #vehicleInlineSheet tbody tr{display:table-row!important}
+ #vehicleInlineSheet tbody tr td{display:table-cell!important}
+ #vehicleInlineSheet tbody td.drive-check-col{display:table-cell!important;text-align:center!important;min-height:0!important}
+ #vehicleInlineSheet tbody td.drive-check-col::before{content:none!important}
+ #vehicleInlineSheet td.region-cell{display:table-cell!important}
+}
+</style>
+
 <style id="vehicle-dashboard-redesign-2026">
 #vehicle-dashboard{padding:2px 0 20px}
 #vehicle-dashboard .vdb-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:0 0 22px;padding:0 5px}
@@ -1939,12 +1996,16 @@ body.frameby-auth-locked .github-auth-btn{
       </div>
 
       <div class="subview" id="vehicle-edit">
+      <section class="vehicle-period-stats" id="vehiclePeriodStats" aria-label="조회 기간 주행거리 요약">
+        <div class="vehicle-period-stat"><span>조회기간 실제거리 합계 · 전체 차량</span><strong id="vehiclePeriodDistance">—</strong><small id="vehiclePeriodRecords">기록 없음</small></div>
+        <div class="vehicle-period-stat"><span>기간 마지막 현재누적거리 · 선택 차량</span><strong id="vehiclePeriodEnding">—</strong><small id="vehiclePeriodEndingVehicle">비교 차량을 선택해 주세요</small></div>
+      </section>
       <div class="card odometer-panel entry-odometer-panel">
         <div class="section-title entry-heading"><div><h2>누적거리 작성 대조</h2><p>기초관리에 미리 입력한 실제 누적거리와 운행일지의 마지막 기말 키로수를 비교합니다.</p></div></div>
         <div class="entry-odometer-grid">
           <div class="entry-odometer-card entry-odometer-select"><label for="reconcileVehicle">비교 차량</label><select id="reconcileVehicle" aria-label="누적거리 비교 차량"><option value="">차량 선택</option></select></div>
           <div class="entry-odometer-card"><span>기초관리 누적거리</span><strong id="reconcileKnown">미확인</strong></div>
-          <div class="entry-odometer-card"><span>운행일지 기말 키로수</span><strong id="reconcileLogged">미작성</strong></div>
+          <div class="entry-odometer-card"><span>운행일지 현재누적거리</span><strong id="reconcileLogged">미작성</strong></div>
           <div class="entry-odometer-card entry-odometer-delta"><span>차이 · 남은 작성 확인 거리</span><strong id="reconcileGap">비교 불가</strong></div>
         </div>
         <div class="entry-odometer-note" id="reconcileHint" aria-live="polite">기초관리 누적거리를 입력하지 않았거나 운행기록이 없으면 비교할 수 없습니다. 표시값은 참고용이며 기존 기록을 자동 변경하지 않습니다.</div>
@@ -1961,39 +2022,11 @@ body.frameby-auth-locked .github-auth-btn{
           <div class="batch-toolbar" id="driveBatchBar"><span class="batch-count" id="driveBulkCount">0건 선택</span><label for="driveBulkField">선택 행 일괄 설정</label><select id="driveBulkField"><option value="">항목 선택</option><option value="vehicle">차량</option><option value="driveType">운행구분</option><option value="start">출발지</option><option value="end">도착지</option><option value="roundTrip">왕복/편도</option><option value="distance">실제거리(km)</option></select><select id="driveBulkValue" disabled aria-label="일괄 설정 값"><option value="">값 선택</option></select><input id="driveBulkText" class="batch-value-text" type="text" placeholder="값 입력" hidden><button id="applyDriveBulk" class="master-add" type="button" disabled>선택 행에 적용</button><span class="batch-hint">날짜 옆 체크박스로 선택한 행만 변경 · 저장은 별도</span></div>
           <div class="table-wrap">
             <table class="table inline-sheet" id="vehicleInlineSheet">
-              <thead><tr><th>일자</th><th class="drive-check-col"><label class="drive-check-label" title="현재 보이는 운행내역 전체 선택"><input id="selectAllDriveRows" type="checkbox" aria-label="운행내역 전체 선택"><span class="drive-check-label-text">선택</span></label></th><th>연결/원본</th><th>차량</th><th>운행구분</th><th>출발지</th><th>도착지</th><th>왕복/편도</th><th>실제거리</th><th>기초주행거리(자동)</th><th>현재누적거리</th><th>상태</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td>2026-09-07</td><td><span class="link-tag">D2609-02</span></td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>회사차량 A</option><option>회사차량 B</option></select></td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>출장</option><option>출퇴근</option><option>기타 업무</option></select></td>
-                  <td contenteditable="true" class="region-cell">사무실</td><td contenteditable="true" class="region-cell">경기 성남시</td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>왕복</option><option>편도</option></select></td>
-                  <td class="editable-cell"><input class="cell-input" value="84 km"></td><td class="editable-cell"><input class="cell-input" value="18,948"></td><td class="editable-cell"><input class="cell-input" value="19,032"></td>
-                  <td><span class="pill green">완료</span></td>
-                </tr>
-                <tr>
-                  <td>2026-09-12</td><td><span class="link-tag">D2609-04</span></td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>회사차량 A</option><option>회사차량 B</option></select></td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>출장</option><option>출퇴근</option><option>기타 업무</option></select></td>
-                  <td contenteditable="true" class="region-cell">사무실</td><td contenteditable="true" class="region-cell">서울 성동구</td>
-                  <td class="editable-cell"><select class="cell-select"><option selected>왕복</option><option>편도</option></select></td>
-                  <td class="editable-cell"><input class="cell-input" value="" placeholder="km"></td><td class="editable-cell"><input class="cell-input" value="19,032"></td><td class="editable-cell"><input class="cell-input" value="" placeholder="입력"></td>
-                  <td><span class="pill orange">미작성</span></td>
-                </tr>
-                <tr>
-                  <td class="editable-cell"><input class="cell-input" type="date" value="2026-09-15"></td><td>-</td>
-                  <td class="editable-cell"><select class="cell-select"><option>회사차량 A</option><option selected>회사차량 B</option></select></td>
-                  <td class="editable-cell"><select class="cell-select"><option>출장</option><option selected>출퇴근</option><option>기타 업무</option></select></td>
-                  <td contenteditable="true" class="region-cell">회사</td><td contenteditable="true" class="region-cell">자택</td>
-                  <td class="editable-cell"><select class="cell-select"><option>왕복</option><option selected>편도</option></select></td>
-                  <td class="editable-cell"><input class="cell-input" value="21 km"></td><td class="editable-cell"><input class="cell-input" value="42,271"></td><td class="editable-cell"><input class="cell-input" value="42,292"></td>
-                  <td><span class="pill green">완료</span></td>
-                </tr>
-              </tbody>
+              <thead><tr><th>일자</th><th class="drive-check-col"><label class="drive-check-label" title="현재 보이는 운행내역 전체 선택"><input id="selectAllDriveRows" type="checkbox" aria-label="운행내역 전체 선택"><span class="drive-check-label-text">선택</span></label></th><th>연결/원본</th><th>차량</th><th>운행구분</th><th>출발지</th><th>도착지</th><th>왕복/편도</th><th>실제거리 (km)</th><th>현재누적거리 (자동)</th><th>상태</th></tr></thead>
+              <tbody><tr class="empty-row"><td colspan="11">운행내역을 불러오는 중입니다.</td></tr></tbody>
             </table>
           </div>
-          <div class="inline-note entry-footer-note">수정한 내용은 <b>[변경사항 저장]</b>을 눌러야 반영됩니다. 출장기록장과 연결된 일자·출장번호는 자동 표시되며, 기초주행거리는 차량별 기준값과 앞선 운행기록을 참고해 표시됩니다.</div>
+          <div class="inline-note entry-footer-note">수정한 내용은 <b>[변경사항 저장]</b>을 눌러야 반영됩니다. 출장기록장과 연결된 일자·출장번호는 자동 표시됩니다. 현재누적거리는 기초관리에 등록한 기초 키로수에 실제거리를 날짜순으로 누적해 자동 계산됩니다.</div>
         </div>
       </div>
     </section>
@@ -2986,11 +3019,17 @@ function tripCaptureDraft(row){
  tripPendingDrafts.set(id,buildTripPayload(row));
  tripMarkPending(row);tripPersistDrafts();tripUpdateSaveUi();
 }
-function driveBuildPayload(row){return {driveId:row.dataset.driveId,tripRecordId:row.dataset.tripId||'',date:readDriveField(row,'date')||row.dataset.date||'',vehicle:readDriveField(row,'vehicle'),driveType:readDriveField(row,'driveType'),start:readDriveField(row,'start'),end:readDriveField(row,'end'),roundTrip:readDriveField(row,'roundTrip'),distance:readDriveField(row,'distance'),currentMileage:readDriveField(row,'currentMileage')};}
+function driveBuildPayload(row){return {driveId:row.dataset.driveId,tripRecordId:row.dataset.tripId||'',date:readDriveField(row,'date')||row.dataset.date||'',vehicle:readDriveField(row,'vehicle'),driveType:readDriveField(row,'driveType'),start:readDriveField(row,'start'),end:readDriveField(row,'end'),roundTrip:readDriveField(row,'roundTrip'),distance:readDriveField(row,'distance')};}
 function driveCaptureDraft(row){
  const id=row?.dataset?.driveId;if(!id)return;
  drivePendingDrafts.set(id,driveBuildPayload(row));
  tripMarkPending(row);tripPersistDrafts();tripUpdateSaveUi();
+ applyAutoBaseMileages();updateVehiclePeriodSummary();updateReconcileNumbers();
+  document.querySelectorAll('#vehicleInlineSheet tbody tr[data-drive-id]').forEach(tr=>{
+    const drive=state.driveLogs.find(d=>d.driveId===tr.dataset.driveId);if(!drive)return;
+    const end=tr.querySelector('.drive-ending-cell strong');
+    if(end)end.textContent=n(drive.currentMileage)>0?n(drive.currentMileage).toLocaleString('ko-KR'):'—';
+  });
 }
 function mileageCaptureDraft(){
  const vehicle=document.getElementById('reconcileVehicle')?.value;if(!vehicle)return;
@@ -2998,7 +3037,9 @@ function mileageCaptureDraft(){
  tripPersistDrafts();tripUpdateSaveUi();
 }
 function tripMergeDraft(record){const patch=tripPendingDrafts.get(record.recordId);return patch?{...record,...patch,status:'미저장'}:record;}
-function driveMergeDraft(record){const patch=drivePendingDrafts.get(record.driveId);return patch?{...record,...patch,status:'미저장'}:record;}
+function driveMergeDraft(record){const patch=drivePendingDrafts.get(record.driveId);if(!patch)return record;
+ const {currentMileage,...fields}=patch;return {...record,...fields,currentMileage:record.currentMileage,status:'미저장'};
+}
 function tripRemapDraft(map,oldId,newId,snapshot,field){
  const latest=map.get(oldId);
  if(latest===snapshot){map.delete(oldId);return;}
@@ -3139,7 +3180,7 @@ function driveSortValue(d,key){return ({date:d.date,vehicle:d.vehicle,driveType:
 const COLUMN_LAYOUTS={
   tripDashboardTable:{keys:['tripDate','person','region','purpose','transport','status'],locked:[]},
   tripInlineSheet:{keys:['tripDate','person','purpose','region','transport','payment','total','costDetail','status','delete'],locked:['tripDate']},
-  vehicleInlineSheet:{keys:['date','select','tripRecordId','vehicle','driveType','start','end','roundTrip','distance','baseMileage','currentMileage','status'],locked:['date','select']}
+  vehicleInlineSheet:{keys:['date','select','tripRecordId','vehicle','driveType','start','end','roundTrip','distance','currentMileage','status'],locked:['date','select']}
 };
 let columnDragJustEnded=0;
 function columnOrderKey(tableId){return `frameby.travel.columnOrder.${tableId}.v1`}
@@ -3165,7 +3206,7 @@ function sortTripRows(rows,scope){return sortWithSpec(rows,scope,tripSortValue)}
 function sortDriveRows(rows,scope){return sortWithSpec(rows,scope,driveSortValue)}
 function setupSortableTable(selector,scope,keys,rerender){const table=document.querySelector(selector);if(!table)return;const ths=[...table.querySelectorAll('thead th')];ths.forEach((th,i)=>{const key=keys[i];if(!key)return;th.classList.add('sortable-th');th.dataset.sortScope=scope;th.dataset.sortKey=key;th.addEventListener('click',()=>{if(Date.now()<columnDragJustEnded)return;const cur=state.sorts[scope]||{};state.sorts[scope]={key,dir:cur.key===key&&cur.dir==='asc'?'desc':'asc'};updateSortIndicators();rerender()})});updateSortIndicators()}
 function updateSortIndicators(){document.querySelectorAll('.sortable-th').forEach(th=>{const spec=state.sorts?.[th.dataset.sortScope];if(spec?.key===th.dataset.sortKey)th.dataset.sortDir=spec.dir;else delete th.dataset.sortDir})}
-function initSortableTables(){setupSortableTable('#trip-dashboard .card:last-child table','tripDashboard',['tripDate','person','region','purpose','transport','status'],renderTripDashboard);setupSortableTable('#tripInlineSheet','tripInput',['tripDate','person','purpose','region','transport','payment','total',null,'status',null],renderTripInput);setupSortableTable('#vehicle-dashboard .vehicle-status-table','vehicleStatus',['vehicle','baseMileage','currentMileage'],renderVehicleDashboard);setupSortableTable('#vehicleInlineSheet','vehicleInput',['date',null,'tripRecordId','vehicle','driveType','route','route','roundTrip','distance','baseMileage','currentMileage','status'],renderVehicleInput)}
+function initSortableTables(){setupSortableTable('#trip-dashboard .card:last-child table','tripDashboard',['tripDate','person','region','purpose','transport','status'],renderTripDashboard);setupSortableTable('#tripInlineSheet','tripInput',['tripDate','person','purpose','region','transport','payment','total',null,'status',null],renderTripInput);setupSortableTable('#vehicle-dashboard .vehicle-status-table','vehicleStatus',['vehicle','baseMileage','currentMileage'],renderVehicleDashboard);setupSortableTable('#vehicleInlineSheet','vehicleInput',['date',null,'tripRecordId','vehicle','driveType','route','route','roundTrip','distance','currentMileage','status'],renderVehicleInput)}
 function allMonths(){const thisMonth=tripTodayDate().slice(0,7);return [...new Set([thisMonth,...state.trips.map(t=>monthOf(t.tripDate)),...state.driveLogs.map(d=>monthOf(d.date))].filter(Boolean))].sort().reverse()}
 let preferredDriveVehicle='';
 try{preferredDriveVehicle=sessionStorage.getItem('FRAMEBY_DRIVE_PREF_VEHICLE')||''}catch(_){ }
@@ -3199,36 +3240,36 @@ function vehicleEligibleForDate(name,date){
 function vehiclesForDriveDate(date){return allVehicles().filter(name=>vehicleEligibleForDate(name,date))}
 function vehicleIsRetired(name){return state.vehicles.some(v=>v.vehicle===name&&(v.active===false||!!v.disposed))}
 function vehicleMileageProjection(logs,initial,reported){
- const sorted=(logs||[]).filter(d=>d&&d.vehicle&&d.date)
-   .map((d,i)=>({d,i})).sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);
- let carry=Math.max(0,n(initial));
- for(const {d} of sorted){
-   const storedBase=n(d.baseMileage),recorded=n(d.currentMileage);
-   // Older sheets may contain an odometer anchor which reflects unlogged journeys.
-   // Use anchors, never fabricate a travelled distance for an empty record.
-   carry=Math.max(carry,storedBase);
-   if(n(d.distance)>0)carry+=n(d.distance);
-   if(recorded>0&&!d.currentMileageDerived)carry=Math.max(carry,recorded);
- }
- return Math.max(n(initial),n(reported),carry);
+ // 주행일지 계산값은 확인 누적거리와 별도입니다. 기존 입력 누적값을 계산식에 더하지 않습니다.
+ const sorted=(logs||[]).filter(d=>d&&d.date).map((d,i)=>({d,i})).sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);
+ const fallback=sorted[0]?n(sorted[0].d.baseMileage):0;
+ const base=n(initial)||fallback;
+ return base?base+sorted.reduce((sum,x)=>sum+n(x.d.distance),0):0;
 }
 function applyAutoBaseMileages(){
  const info=new Map(state.vehicles.map(v=>[v.vehicle,v]));
  const groups=new Map();
- state.driveLogs.forEach((d,i)=>{if(!d.vehicle)return;if(!groups.has(d.vehicle))groups.set(d.vehicle,[]);groups.get(d.vehicle).push({d,i})});
+ state.driveLogs.forEach((d,i)=>{
+  // 원본 시트의 과거 기말 키로수는 별도 보관해 계산 오류 검토를 가능하게 합니다.
+  if(!Object.prototype.hasOwnProperty.call(d,'_storedCurrentMileage'))d._storedCurrentMileage=d.currentMileageDerived?0:n(d.currentMileage);
+  const draft=drivePendingDrafts.get(d.driveId);
+  const name=String(draft?.vehicle??d.vehicle??'').trim();
+  if(!name)return;
+  if(!groups.has(name))groups.set(name,[]);
+  groups.get(name).push({d,i,draft});
+ });
  for(const [vehicle,group] of groups){
-   group.sort((a,b)=>String(a.d.date||'').localeCompare(String(b.d.date||''))||a.i-b.i);
-   let carry=n(info.get(vehicle)?.baseMileage)||0;
-   for(const {d} of group){
-     const storedBase=n(d.baseMileage),storedCurrent=d.currentMileageDerived?0:n(d.currentMileage);
-     carry=Math.max(carry,storedBase);
-     if(carry>0)d.baseMileage=carry;
-     if(n(d.distance)>0)carry+=n(d.distance);
-     if(storedCurrent>0)carry=Math.max(carry,storedCurrent);
-     // Display calculated cumulative km immediately, while keeping explicit entries intact.
-     if(storedCurrent<=0){d.currentMileage=carry;d.currentMileageDerived=true}
-     else{d.currentMileage=storedCurrent;d.currentMileageDerived=false}
-   }
+  group.sort((a,b)=>String(a.draft?.date??a.d.date??'').localeCompare(String(b.draft?.date??b.d.date??''))||a.i-b.i);
+  const baseline=info.has(vehicle)?n(info.get(vehicle).baseMileage):0;
+  let carry=baseline;
+  for(const {d,draft} of group){
+   const distance=n(draft?.distance??d.distance);
+   d.baseMileage=carry;
+   d.currentMileage=carry>0?carry+distance:0;
+   d.currentMileageDerived=true;
+   d.mileageMismatch=carry>0&&d._storedCurrentMileage>0&&Math.abs(d._storedCurrentMileage-d.currentMileage)>0.001;
+   if(carry>0)carry=d.currentMileage;
+  }
  }
  return state.driveLogs;
 }
@@ -3785,7 +3826,7 @@ document.getElementById('driveBulkField')?.addEventListener('change',()=>bulkRef
 document.getElementById('applyTripBulk')?.addEventListener('click',()=>bulkApply('trip'));
 document.getElementById('applyDriveBulk')?.addEventListener('click',()=>bulkApply('drive'));
 
-function renderVehicleInput(){applyAutoBaseMileages();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true).map(driveMergeDraft),matching=raw.filter(driveMatchesInputSearch),temps=matching.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(matching.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(driveRowHtml).join(''):'<tr class="empty-row"><td colspan="12">조회할 운행내역이 없습니다.</td></tr>';recordSearchCount('driveRecordSearchCount',rows.length,raw.length,driveRecordSearchQuery);finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
+function renderVehicleInput(){applyAutoBaseMileages();updateVehiclePeriodSummary();refreshVehicleQuickSelect();const body=document.querySelector('#vehicleInlineSheet tbody');if(!body)return;const raw=currentDriveRows(true).map(driveMergeDraft),matching=raw.filter(driveMatchesInputSearch),temps=matching.filter(d=>String(d.driveId).startsWith('TMP:')),rows=[...temps,...sortDriveRows(matching.filter(d=>!String(d.driveId).startsWith('TMP:')),'vehicleInput')];body.innerHTML=rows.length?rows.map(driveRowHtml).join(''):'<tr class="empty-row"><td colspan="11">조회할 운행내역이 없습니다.</td></tr>';recordSearchCount('driveRecordSearchCount',rows.length,raw.length,driveRecordSearchQuery);finalizeTableColumns('vehicleInlineSheet');labelResponsiveCells('vehicleInlineSheet');body.querySelectorAll('tr[data-drive-id]').forEach(row=>{bindDriveRow(row);if(drivePendingDrafts.has(row.dataset.driveId))tripMarkPending(row)});updateDriveSelectionUi()}
 document.getElementById('driveRecordSearch')?.addEventListener('input',e=>{driveRecordSearchQuery=e.target.value.trim();renderVehicleInput()});
 document.getElementById('driveRecordSearchClear')?.addEventListener('click',()=>{driveRecordSearchQuery='';const input=document.getElementById('driveRecordSearch');input.value='';renderVehicleInput();input.focus()});
 // 운행일지의 연결코드는 웹_차량운행일지.trip_record_id가 원본입니다.
@@ -3816,7 +3857,14 @@ function driveTripRefHtml(d,editing=false){
  }
  return '<span class="drive-direct-label" title="출장기록장에 연결되지 않은 직접 입력 행">직접 입력 · 코드 없음</span>';
 }
-function driveRowHtml(d){const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;const chosen=selectedDriveIds.has(d.driveId);return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td class="drive-check-col"><input type="checkbox" class="drive-row-check" aria-label="${esc(d.date||'날짜 미입력')} 운행내역 선택" ${chosen?'checked':''}></td><td class="drive-trip-ref-cell">${driveTripRefHtml(d,true)}</td><td class="editable-cell"><select class="cell-select vehicle-name-input" data-field="vehicle">${opts(vehiclesForDriveDate(d.date),d.vehicle,"차량 선택")}</select></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell" data-field="baseMileage">${n(d.baseMileage)?n(d.baseMileage).toLocaleString('ko-KR'):'-'}</td><td class="editable-cell">${d.currentMileageDerived?`<div class="locked auto-mileage-cell" title="기초주행거리 + 실제거리 자동계산">${n(d.currentMileage).toLocaleString('ko-KR')}</div>`:`<input class="cell-input" data-field="currentMileage" inputmode="numeric" value="${n(d.currentMileage)||''}" placeholder="자동/실측">`}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`}
+function driveRowHtml(d){
+ const linked=!!d.tripRecordId||String(d.driveId||'').startsWith('FUEL:');
+ const date=linked?`<td class="locked">${esc(d.date)}</td>`:`<td class="editable-cell"><input class="cell-input" data-field="date" type="date" value="${esc(d.date||'')}"></td>`;
+ const chosen=selectedDriveIds.has(d.driveId);
+ const mileageWarning=d.mileageMismatch?`<span class="drive-odo-alert" title="과거 저장된 누적거리 ${esc(n(d._storedCurrentMileage).toLocaleString('ko-KR'))}km와 자동 계산값이 다릅니다. 원본은 보존됩니다.">기존값 차이</span>`:'';
+ const endKm=n(d.currentMileage)>0?n(d.currentMileage).toLocaleString('ko-KR'):'—';
+ return `<tr data-drive-id="${esc(d.driveId)}" data-trip-id="${esc(d.tripRecordId||'')}" data-date="${esc(d.date||'')}">${date}<td class="drive-check-col"><input type="checkbox" class="drive-row-check" aria-label="${esc(d.date||'날짜 미입력')} 운행내역 선택" ${chosen?'checked':''}></td><td class="drive-trip-ref-cell">${driveTripRefHtml(d,true)}</td><td class="editable-cell"><select class="cell-select vehicle-name-input" data-field="vehicle">${opts(vehiclesForDriveDate(d.date),d.vehicle,"차량 선택")}</select></td><td class="editable-cell"><select class="cell-select" data-field="driveType">${opts(['출장','출퇴근','기타 업무'],d.driveType,'선택')}</select></td><td contenteditable="true" class="region-cell" data-field="start" title="${esc(d.start||'')}">${esc(d.start||'')}</td><td contenteditable="true" class="region-cell" data-field="end" title="${esc(d.end||'')}">${esc(d.end||'')}</td><td class="editable-cell"><select class="cell-select" data-field="roundTrip">${opts(['왕복','편도'],d.roundTrip,'선택')}</select></td><td class="editable-cell"><input class="cell-input" data-field="distance" inputmode="decimal" value="${n(d.distance)||''}" placeholder="km"></td><td class="locked auto-mileage-cell drive-ending-cell" data-field="currentMileage" title="기초관리 기초 키로수 + 날짜순 실제거리 누적 (자동 계산)"><strong>${endKm}</strong>${mileageWarning}</td><td data-status>${driveStatusPill(d.status)}</td></tr>`;
+}
 function refreshDriveRowVehicleChoice(row){
  const select=row.querySelector('select[data-field="vehicle"]');if(!select)return;
  const date=readDriveField(row,'date')||row.dataset.date||'';
@@ -3892,12 +3940,26 @@ document.getElementById('applyVehicleToBlanks')?.addEventListener('click',()=>{
  if(count)toast(`차량 미지정 ${count}건에 적용했습니다.`+(skipped?` 운행일이 맞지 않는 ${skipped}건은 제외했습니다.`:'')+' 저장 버튼을 누르면 반영됩니다.');
  else toast(skipped?`해당 차량을 지정할 수 없는 날짜 ${skipped}건입니다. 운행일과 처분일을 확인해 주세요.`:'현재 표시된 운행내역에는 차량 미지정 행이 없습니다.');
 });
+function updateVehiclePeriodSummary(){
+ const sumEl=document.getElementById('vehiclePeriodDistance'),recordsEl=document.getElementById('vehiclePeriodRecords'),endEl=document.getElementById('vehiclePeriodEnding'),vehicleEl=document.getElementById('vehiclePeriodEndingVehicle');
+ if(!sumEl)return;
+ const rows=state.driveLogs.map((d,i)=>({d:{...d,...(drivePendingDrafts.get(d.driveId)||{})},original:d,i}))
+  .filter(x=>x.d.date&&vehiclePeriodIncludes(x.d.date));
+ const total=rows.reduce((sum,x)=>sum+n(x.d.distance),0);
+ sumEl.textContent=km(total);if(recordsEl)recordsEl.textContent=`조회기간 운행 ${rows.length}건 · 전체 차량 합계`;
+ const name=document.getElementById('reconcileVehicle')?.value||'';
+ const same=rows.filter(x=>x.d.vehicle===name).sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);
+ const last=same[same.length-1];
+ const end=last?n(last.original.currentMileage):0;
+ if(endEl)endEl.textContent=end>0?km(end):'—';
+ if(vehicleEl)vehicleEl.textContent=!name?'비교 차량을 선택해 주세요':!last?`${name} · 조회기간 내 기록 없음`:`${name} · ${last.d.date} 마지막 기록 기준`;
+}
 function renderReconcile(){
  const sel=document.getElementById('reconcileVehicle');if(!sel)return;
  const names=allVehicles();const keep=sel.value;
  sel.innerHTML=names.length?names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''):'<option value="">등록 차량 없음</option>';
  if(names.includes(keep))sel.value=keep;
- updateReconcileNumbers();
+ updateReconcileNumbers();updateVehiclePeriodSummary();
 }
 function updateReconcileNumbers(){
  const vehicle=document.getElementById('reconcileVehicle')?.value||'';
@@ -3916,7 +3978,7 @@ function updateReconcileNumbers(){
  const panel=document.querySelector('#vehicle-edit .entry-odometer-delta');if(panel)panel.classList.toggle('over',gap!==null&&gap<0);
  if(hint)hint.textContent=!vehicle?'비교할 차량을 선택해 주세요.':known===null?'기초관리의 누적거리가 미입력 상태입니다. 알고 있는 실제 주행거리를 기초관리에서 저장하면 차이가 표시됩니다.':logged===null?'운행일지에 기말 키로수가 작성된 기록이 없습니다. 차이는 계산하지 않습니다.':gap<0?'운행일지의 기말 키로수가 기초관리의 확인 누적거리보다 큽니다. 두 수치의 기준 시점과 기록을 비교해 주세요.':gap===0?'기초관리의 확인 누적거리와 운행일지의 마지막 기말 키로수가 같습니다.':'표시된 차이는 작성 상태를 확인하기 위한 참고값입니다. 차량 운행기록과 실제 확인 누적거리를 자동 수정하지 않습니다.';
 }
-document.getElementById('reconcileVehicle')?.addEventListener('change',updateReconcileNumbers);
+document.getElementById('reconcileVehicle')?.addEventListener('change',()=>{updateReconcileNumbers();updateVehiclePeriodSummary()});
 function b64Workbook(b64,opts={}){return XLSX.read(b64,{type:'base64',cellDates:true,cellStyles:true,...opts})}
 function cloneSheet(ws){return JSON.parse(JSON.stringify(ws))}
 function exportTrip(){if(!window.XLSX){toast('엑셀 모듈을 불러오지 못했습니다.','error');return}const dashActive=document.getElementById('trip-dashboard')?.classList.contains('active');const month=dashActive?(document.getElementById('tripDashboardYear')?.value+'-'+String(tripDashboardSelectedMonth).padStart(2,'0')):(tripMonthSel?.value||'');const rows=state.trips.filter(t=>(!month||monthOf(t.tripDate)===month)&&!String(t.recordId).startsWith('TMP:')).sort((a,b)=>String(a.tripDate).localeCompare(String(b.tripDate)));const wb=b64Workbook(TRIP_TEMPLATE_B64);const baseName=wb.SheetNames[0],base=cloneSheet(wb.Sheets[baseName]);const chunks=[];for(let i=0;i<rows.length;i+=16)chunks.push(rows.slice(i,i+16));if(!chunks.length)chunks.push([]);wb.SheetNames=[];wb.Sheets={};chunks.forEach((chunk,ix)=>{const ws=cloneSheet(base),name=ix?`${baseName} ${ix+1}`:baseName;fillTripSheet(ws,chunk);wb.SheetNames.push(name);wb.Sheets[name]=ws});XLSX.writeFile(wb,`출장기록부_${month||'전체'}.xlsx`,{bookType:'xlsx',cellStyles:true})}
@@ -4072,7 +4134,10 @@ function ghIsFuelOnlyGroup(group){
     group.rows.every(item=>item.mapped==='유류비');
 }
 function ghMergeTrips(sourceGroups,storedAll,hidden,sourceAddressOptions){const active=storedAll.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'),legacy=storedAll.filter(r=>String(r.삭제여부||'').toUpperCase()==='Y'),byDate={},byKeys={},hide={...(hidden||{})};active.forEach(r=>{const d=ghDate(r.출장일자),k=ghText(r.source_keys);if(d&&k)byDate[d]=r;if(k)byKeys[k]=r});legacy.forEach(r=>{const k=ghText(r.source_keys);if(k)hide[k]=true});const out=[];Object.keys(sourceGroups).forEach(date=>{const g=sourceGroups[date];if(ghIsFuelOnlyGroup(g))return;const opts=(sourceAddressOptions[date]||[]).slice(),keys=g.rows.map(r=>r.row).join(','),saved=byKeys[keys]||byDate[date];if(!saved&&hide[keys])return;if(saved){const x={...saved,source_keys:keys,경상비:g.costs.경상비,유류비:g.costs.유류비,접대비:g.costs.접대비,교통비:g.costs.교통비,숙박비:g.costs.숙박비,기타비:g.costs.기타비};x.합계=Object.values(g.costs).reduce((a,b)=>a+ghNum(b),0);if(!ghText(x.방문지역)&&opts.length===1)x.방문지역=opts[0];if(!ghText(x.이동수단))x.이동수단=ghDefaultTransport(g.costs);const t=ghNormTrip(x);t.sourceAddresses=opts;out.push(t)}else{const total=Object.values(g.costs).reduce((a,b)=>a+ghNum(b),0);out.push({recordId:'AUTO:'+date,sourceKeys:keys,tripDate:date,currentCosts:ghCostPayload(g.costs),total,person:'CEO',department:'',summary:'',purpose:'',region:opts.length===1?opts[0]:'',sourceAddresses:opts,transport:ghDefaultTransport(g.costs),payment:total?'법인카드':'비용 없음',status:'미정리',persisted:false})}});active.filter(r=>!ghText(r.source_keys)).forEach(r=>{const t=ghNormTrip(r);t.sourceAddresses=[];out.push(t)});out.sort((a,b)=>String(b.tripDate).localeCompare(String(a.tripDate))||String(a.recordId).localeCompare(String(b.recordId)));return out}
-function ghApplyDerived(driveLogs,vehicles){const vm={};(vehicles||[]).forEach(v=>{if(v.vehicle)vm[v.vehicle]=v});const groups={};driveLogs.forEach((d,i)=>{if(!d.vehicle)return;(groups[d.vehicle]??=[]).push({d,i})});Object.keys(groups).forEach(v=>{const rows=groups[v].sort((a,b)=>String(a.d.date).localeCompare(String(b.d.date))||a.i-b.i);let carry=vm[v]?ghNum(vm[v].baseMileage):0;rows.forEach(x=>{const d=x.d;if(!carry&&ghNum(d.baseMileage)>0)carry=ghNum(d.baseMileage);if(carry>0)d.baseMileage=carry;if(ghNum(d.currentMileage)>0)carry=ghNum(d.currentMileage);else if(carry>0&&ghNum(d.distance)>0){d.currentMileage=carry+ghNum(d.distance);d.currentMileageDerived=true;carry=d.currentMileage}})});return driveLogs}
+function ghApplyDerived(driveLogs,vehicles){
+ // Google 시트 원본은 변형하지 않습니다. 기말 키로수 표시 계산은 화면에서 별도로 합니다.
+ return driveLogs;
+}
 async function ghReadMaster(inputRows=null){const rows=inputRows??await ghValuesGet(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.masterSheet,'A2:F'),x=rows.map((r,i)=>({rowNo:i+2,type:ghText(r[0]),value:ghText(r[1]),order:ghNum(r[2]),active:String(r[3]||'Y').toUpperCase()!=='N'})).filter(r=>r.active).sort((a,b)=>a.order-b.order||a.value.localeCompare(b.value,'ko'));return{department:x.filter(r=>r.type==='업무구분').map(r=>r.value),summary:x.filter(r=>r.type==='적요명').map(r=>r.value),purpose:x.filter(r=>r.type==='출장목적').map(r=>r.value)}}
 async function ghGetInitialData(){
   const sheets=await ghTripBatchReadRanges([
@@ -4155,7 +4220,11 @@ async function ghGetInitialData(){
 }
 async function ghFindTripRow(id){const rows=await ghTripObjects(INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS,true);return rows.find(r=>ghText(r.record_id)===ghText(id))||null}
 async function ghNextTripId(date){const rows=await ghValuesGet(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,'A2:A'),prefix='D'+date.slice(2,4)+date.slice(5,7)+'-';let max=0;rows.forEach(r=>{const id=ghText(r[0]);if(id.startsWith(prefix))max=Math.max(max,Number(id.slice(prefix.length))||0)});return prefix+String(max+1).padStart(2,'0')}
-async function ghRecalculateVehicle(vehicle){vehicle=ghText(vehicle);if(!vehicle)return;const [drives,vehicles]=await Promise.all([ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),ghTripObjects(INTEGRATED_CONFIG.vehicleSheet,GH_VEHICLE_HEADERS)]);const rows=drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===vehicle).sort((a,b)=>ghDate(a.일자).localeCompare(ghDate(b.일자))||a.__rowNo-b.__rowNo);if(!rows.length)return;const vi=vehicles.find(r=>ghText(r.차량명)===vehicle&&String(r.사용여부||'Y').toUpperCase()!=='N');let carry=vi?ghNum(vi.기초키로수):0;if(!carry){const x=rows.find(r=>ghNum(r.기초주행거리_km)>0);carry=x?ghNum(x.기초주행거리_km):0}for(const r of rows){const stored=ghNum(r.기초주행거리_km),auto=carry||stored;if(auto>0&&stored!==auto)await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,`J${r.__rowNo}` ,[[auto]]);const cur=ghNum(r.현재누적거리_km),dist=ghNum(r.실제거리_km);if(cur>0)carry=cur;else if(auto>0&&dist>0)carry=auto+dist}}
+async function ghRecalculateVehicle(vehicle){
+ // 과거 운행기록의 원본 주행거리·누적거리를 자동으로 일괄 덮어쓰지 않습니다.
+ // 화면 계산은 applyAutoBaseMileages에서 차량별 날짜순으로 처리합니다.
+ return;
+}
 async function ghSyncDriveFromTrip(trip){const rows=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),hit=rows.find(r=>ghText(r.trip_record_id)===ghText(trip.record_id)&&String(r.삭제여부||'').toUpperCase()!=='Y');if(ghText(trip.이동수단)!=='차량'){if(hit){const oldVehicle=ghText(hit.차량명);await ghAuditRows([ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,ghText(hit.drive_id),JSON.stringify(hit),'삭제','출장 이동수단 변경')]);await ghDeleteRow(INTEGRATED_CONFIG.driveSheet,hit.__rowNo);if(oldVehicle)await ghRecalculateVehicle(oldVehicle);return{action:'deleted',tripRecordId:ghText(trip.record_id),driveId:ghText(hit.drive_id)}}return{action:'none',tripRecordId:ghText(trip.record_id)}}if(hit){const u={...hit,일자:trip.출장일자,도착지:trip.방문지역,삭제여부:'N',수정일시:ghNow()};u.상태=ghDriveStatus(u);await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,`A${hit.__rowNo}:O${hit.__rowNo}`,[GH_DRIVE_HEADERS.map(h=>u[h]??'')]);if(ghText(u.차량명))await ghRecalculateVehicle(ghText(u.차량명));const latest=await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true),saved=latest.find(r=>ghText(r.drive_id)===ghText(u.drive_id))||u;return{action:'updated',tripRecordId:ghText(trip.record_id),driveLog:ghNormDrive(saved)}}const id='DRV-'+crypto.randomUUID().slice(0,8).toUpperCase(),o={drive_id:id,trip_record_id:trip.record_id,일자:trip.출장일자,차량명:'',운행구분:'출장',출발지:'사무실',도착지:trip.방문지역,왕복편도:'왕복',실제거리_km:0,기초주행거리_km:0,현재누적거리_km:0,상태:'미작성',삭제여부:'N',생성일시:ghNow(),수정일시:ghNow()};await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.driveSheet,'A:O',[GH_DRIVE_HEADERS.map(h=>o[h]??'')]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.driveSheet,id,'',trip.record_id,'출장기록 자동연결')]);return{action:'created',tripRecordId:ghText(trip.record_id),driveLog:ghNormDrive(o)}}
 async function ghSaveTrip(payload){payload=payload||{};const date=ghDate(payload.tripDate||payload['출장일자']);if(!date)throw new Error('출장일자를 먼저 입력해 주세요.');const src=await ghReadSourceData(),sourceBacked=Boolean(payload.sourceKeys&&String(payload.sourceKeys).trim())||String(payload.recordId||'').startsWith('AUTO:'),g=sourceBacked?src.groups[date]:null,opts=sourceBacked?(src.addresses[date]||[]):[],costs=g?g.costs:ghZeroCosts(),sourceKeys=g?g.rows.map(r=>r.row).join(','):'';let id=ghText(payload.recordId),row=null,old=null;if(id&&!id.startsWith('AUTO:')&&!id.startsWith('TMP:')){row=await ghFindTripRow(id);old=row}if(!row&&sourceKeys){const all=await ghTripObjects(INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS,true),same=all.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.source_keys)===sourceKeys).sort((a,b)=>b.__rowNo-a.__rowNo)[0];if(same){row=same;old=same;id=ghText(same.record_id)}}if(!row)id=await ghNextTripId(date);const total=Object.values(costs).reduce((a,b)=>a+ghNum(b),0),o={record_id:id,source_keys:sourceKeys,출장일자:date,경상비:costs.경상비,접대비:costs.접대비,교통비:costs.교통비,숙박비:costs.숙박비,기타비:costs.기타비,합계:total,출장자:ghText(payload.person)||'CEO',구분:ghText(payload.department),적요명:ghText(payload.summary),출장목적:ghText(payload.purpose),방문지역:ghText(payload.region)||(opts.length===1?opts[0]:''),이동수단:ghText(payload.transport)||ghDefaultTransport(costs),결제수단:ghText(payload.payment)||(total?'법인카드':'비용 없음'),상태:'',삭제여부:'N',생성일시:old?old.생성일시:ghNow(),수정일시:ghNow(),유류비:costs.유류비};o.상태=ghTripStatus(o);const vals=GH_TRIP_HEADERS.map(h=>o[h]??'');if(row){await ghValuesUpdate(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,`A${row.__rowNo}:U${row.__rowNo}`,[vals]);const audits=[];GH_TRIP_HEADERS.forEach(h=>{if(h==='수정일시')return;if(String(old?.[h]??'')!==String(o[h]??''))audits.push(ghAuditRow('수정',INTEGRATED_CONFIG.tripSheet,id,old?.[h]??'',o[h]??'',h))});await ghAuditRows(audits)}else{await ghValuesAppend(INTEGRATED_CONFIG.tripSpreadsheetId,INTEGRATED_CONFIG.tripSheet,'A:U',[vals]);await ghAuditRows([ghAuditRow('생성',INTEGRATED_CONFIG.tripSheet,id,'','','출장기록 생성')])}const sync=await ghSyncDriveFromTrip(o),result=ghNormTrip(o);result._driveSync=sync;return result}
 async function ghHardDeleteDriveByTrip(tripId){const rows=(await ghTripObjects(INTEGRATED_CONFIG.driveSheet,GH_DRIVE_HEADERS,true)).filter(r=>ghText(r.trip_record_id)===tripId).sort((a,b)=>b.__rowNo-a.__rowNo),vehicles={};for(const r of rows){if(ghText(r.차량명))vehicles[ghText(r.차량명)]=true;await ghAuditRows([ghAuditRow('실제삭제',INTEGRATED_CONFIG.driveSheet,ghText(r.drive_id),JSON.stringify(r),'삭제','연결 출장 삭제')]);await ghDeleteRow(INTEGRATED_CONFIG.driveSheet,r.__rowNo)}for(const v of Object.keys(vehicles))await ghRecalculateVehicle(v)}
@@ -4427,7 +4496,7 @@ async function ghSavePendingBatch(request){
     const o={drive_id:id,trip_record_id:tripRecordId,일자:ghDate(payload.date),차량명:ghText(payload.vehicle)||ghText(old?.차량명),
       운행구분:ghText(payload.driveType),출발지:ghText(payload.start),도착지:ghText(payload.end),
       왕복편도:ghText(payload.roundTrip)||'왕복',실제거리_km:ghNum(payload.distance),
-      기초주행거리_km:old?ghNum(old.기초주행거리_km):0,현재누적거리_km:ghNum(payload.currentMileage),
+      기초주행거리_km:old?ghNum(old.기초주행거리_km):0,현재누적거리_km:old?ghNum(old.현재누적거리_km):0,
       상태:'',삭제여부:'N',생성일시:old?old.생성일시:now,수정일시:now};
     o.상태=ghDriveStatus(o);if(old?.__rowNo)o.__rowNo=old.__rowNo;
     if(!old)drives.push(o);else drives[drives.indexOf(old)]=o;
@@ -4452,26 +4521,22 @@ async function ghSavePendingBatch(request){
       old?`${old.기초키로수}/${old.누적거리}`:'',`${o.기초키로수}/${o.누적거리}`,'주행거리'));
     touchedVehicles.add(vehicle);mileageResults.push({...ghNormVehicle(o),clientKey:key});
   }
-  // 운행기록의 기초/누적 계산값만 정리한다. 차량정보의 실측 누적거리는 수정하지 않는다.
-  // 기존 운행기록의 양수 누적값은 유지하고, 0인 경우에만 계산값으로 보완한다.
-  for(const name of touchedVehicles){
-    const rows=drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===name)
-      .sort((a,b)=>ghDate(a.일자).localeCompare(ghDate(b.일자))||(a.__rowNo||0)-(b.__rowNo||0));
-    const vi=vehicles.find(v=>ghText(v.차량명)===name);
-    let carry=vi?ghNum(vi.기초키로수):0;
-    if(!carry){const first=rows.find(r=>ghNum(r.기초주행거리_km)>0);carry=first?ghNum(first.기초주행거리_km):0}
-    for(const r of rows){
-      const stored=ghNum(r.기초주행거리_km),auto=Math.max(carry,stored);
-      if(auto>0&&stored!==auto){r.기초주행거리_km=auto;mark('drive',r)}
-      const existingCur=ghNum(r.현재누적거리_km),distance=ghNum(r.실제거리_km);
-      carry=auto;
-      if(distance>0)carry+=distance;
-      if(existingCur>0)carry=Math.max(carry,existingCur);
-      if(existingCur===0&&distance>0&&carry>0){r.현재누적거리_km=carry;mark('drive',r)}
-    }
-    // 차량정보의 누적거리는 계기판 실측 입력값이다. 운행일지 저장으로 자동 덮어쓰지 않는다.
-  }
-  // 동일한 행은 마지막 갱신 상태 한 번만 전송한다.
+     // 과거 원본의 현재누적거리 값은 임의로 고치지 않습니다. 이번에 저장하는 운행 행만 계산합니다.
+   // 기초키로수 + 실제거리의 누적 결과로 기말 키로수를 연결하고 기존 임의 입력값은 계산에 사용하지 않습니다.
+   for(const name of touchedVehicles){
+     const rows=drives.filter(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghText(r.차량명)===name)
+       .sort((a,b)=>ghDate(a.일자).localeCompare(ghDate(b.일자))||(a.__rowNo||0)-(b.__rowNo||0));
+     const vi=vehicles.find(v=>ghText(v.차량명)===name);
+     let carry=vi?ghNum(vi.기초키로수):0;
+     for(const r of rows){
+       if(!carry)break;
+       const startKm=carry;
+       carry+=ghNum(r.실제거리_km);
+       const edited=(r.__rowNo&&changed.drive.has(r.__rowNo))||appended.drive.includes(r);
+       if(edited){r.기초주행거리_km=startKm;r.현재누적거리_km=carry;mark('drive',r)}
+     }
+   }
+// 동일한 행은 마지막 갱신 상태 한 번만 전송한다.
   const req=[];
   for(const [type,sheet,headers] of [
     ['trip',INTEGRATED_CONFIG.tripSheet,GH_TRIP_HEADERS],
@@ -17021,7 +17086,7 @@ document.addEventListener('toggle',function(event){
 #vehicleInlineSheet td[data-col-key='tripRecordId']{min-width:160px}
 #vehicleInlineSheet td[data-col-key='vehicle']{min-width:165px}
 #vehicleInlineSheet td[data-col-key='start'],#vehicleInlineSheet td[data-col-key='end']{min-width:165px}
-#vehicleInlineSheet td[data-col-key='baseMileage'],#vehicleInlineSheet td[data-col-key='currentMileage']{min-width:125px}
+#vehicleInlineSheet td[data-col-key='currentMileage']{min-width:125px}
 #vehicleInlineSheet .drive-trip-ref-cell{min-width:160px}
 #trip-edit .inline-note,#vehicle-edit .entry-footer-note{margin:12px 0 0;color:#748197;line-height:1.6;font-size:11px}
 #vehicle-edit .entry-quick-vehicle{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:0 0 12px;color:#8090a7;font-size:11px}
@@ -17127,7 +17192,7 @@ document.addEventListener('toggle',function(event){
    table-layout:fixed;border-collapse:collapse;width:100%;max-width:none
  }
  #tripInlineSheet{min-width:1530px}
- #vehicleInlineSheet{min-width:1650px}
+ #vehicleInlineSheet{min-width:1515px}
  #tripInlineSheet thead th,#vehicleInlineSheet thead th{
    box-sizing:border-box;white-space:nowrap;vertical-align:middle;padding:12px 8px!important;
    text-align:center;min-width:0!important
@@ -17160,7 +17225,6 @@ document.addEventListener('toggle',function(event){
  #vehicleInlineSheet th[data-col-key="end"]{width:156px}
  #vehicleInlineSheet th[data-col-key="roundTrip"]{width:110px}
  #vehicleInlineSheet th[data-col-key="distance"]{width:112px}
- #vehicleInlineSheet th[data-col-key="baseMileage"]{width:135px}
  #vehicleInlineSheet th[data-col-key="currentMileage"]{width:135px}
  #vehicleInlineSheet th[data-col-key="status"]{width:105px}
  #vehicleInlineSheet .drive-check-col{width:60px!important;min-width:60px!important;max-width:60px!important;text-align:center!important}
@@ -17173,6 +17237,31 @@ document.addEventListener('toggle',function(event){
  #trip-edit .entry-toolrow,#vehicle-edit .entry-toolrow{display:flex;flex-direction:column;align-items:stretch;gap:9px}
  #trip-edit .entry-main-actions,#vehicle-edit .entry-main-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
  #trip-edit .entry-main-actions button,#vehicle-edit .entry-main-actions button{min-height:35px}
+}
+</style>
+
+<style id="vehicle-responsive-mobile-final-20261117">
+/* 760px 이하는 기존 모바일 카드형 입력 보존. 긴 주소는 줄바꿈해 표시 */
+@media(max-width:760px){
+ #vehicle-edit .table-wrap{width:100%!important;max-width:100%!important;overflow:visible!important}
+ #vehicleInlineSheet{display:block!important;min-width:0!important;max-width:100%!important;width:100%!important;table-layout:auto!important}
+ #vehicleInlineSheet thead{display:none!important}
+ #vehicleInlineSheet tbody{display:block!important;width:100%!important}
+ #vehicleInlineSheet tbody tr{display:grid!important;width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3px 12px!important}
+ #vehicleInlineSheet tbody tr td{display:grid!important;grid-template-columns:minmax(80px,35%) minmax(0,65%)!important;align-items:center!important;gap:6px!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;overflow:visible!important;white-space:normal!important}
+ #vehicleInlineSheet tbody tr td.region-cell{display:grid!important;grid-template-columns:minmax(80px,35%) minmax(0,65%)!important;max-width:100%!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;text-overflow:clip!important}
+ #vehicleInlineSheet tbody tr td.drive-check-col{display:grid!important;width:100%!important;min-width:0!important;max-width:100%!important}
+ #vehicleInlineSheet tbody tr td.drive-check-col::before{content:attr(data-label)!important}
+ #vehicleInlineSheet tbody tr td::before{display:block!important}
+ #vehicleInlineSheet tbody tr>td:nth-child(n){width:100%!important;min-width:0!important;max-width:100%!important}
+ #vehicleInlineSheet tbody tr td[data-col-key="start"],#vehicleInlineSheet tbody tr td[data-col-key="end"]{grid-column:1/-1!important}
+ #vehicleInlineSheet tbody tr.empty-row{display:block!important}
+ #vehicleInlineSheet tbody tr.empty-row td{display:block!important}
+ #vehicleInlineSheet tbody tr.empty-row td::before{display:none!important}
+}
+@media(max-width:560px){
+ #vehicleInlineSheet tbody tr{grid-template-columns:minmax(0,1fr)!important}
+ #vehicleInlineSheet tbody tr td[data-col-key="start"],#vehicleInlineSheet tbody tr td[data-col-key="end"]{grid-column:1!important}
 }
 </style>
 
