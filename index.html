@@ -3556,7 +3556,7 @@ function tripRowHtml(t){
  const carList=vehiclesForDriveDate(t.tripDate||'');
  const carCell=`<td class="editable-cell trip-vehicle-cell"><select class="cell-select" data-field="vehicle" ${isCar?'':'disabled'}>${opts(carList,chosenVehicle,'차종 선택')}</select></td>`;
  const kmCell=`<td class="editable-cell trip-distance-cell"><input class="cell-input" data-field="distance" type="number" min="0" step="0.1" value="${esc(chosenKm===''?'':String(chosenKm))}" placeholder="km" ${isCar?'':'disabled'}></td>`;
- const deleting=t.originDriveId?'<span class="drive-direct-label" title="운행일지 원본은 차량운행일지에서 관리합니다">운행원본</span>':'<button type="button" class="row-delete-btn">삭제</button>';
+ const deleting=t.originDriveId?'<span class="drive-direct-label" title="차량운행일지에서 작성된 출장">운행원본</span> <button type="button" class="row-delete-btn" title="이 운행원본도 차량운행일지에서 삭제 처리됩니다">삭제</button>':'<button type="button" class="row-delete-btn">삭제</button>';
  return `<tr data-record-id="${esc(t.recordId)}" data-source-keys="${esc(t.sourceKeys||'')}" data-origin-drive-id="${esc(t.originDriveId||'')}" data-trip-date="${esc(t.tripDate||'')}" data-last-transport="${esc(t.transport||'')}">${dateCell}<td class="editable-cell"><input class="cell-input" data-field="person" value="${esc(t.person||(String(t.recordId||'').startsWith('TMP:')?'CEO':''))}" placeholder="출장자"></td><td class="editable-cell"><select class="cell-select" data-field="purpose">${opts(state.master.purpose,t.purpose,'선택')}</select></td>${regionEditorHtml(t)}<td class="editable-cell"><select class="cell-select" data-field="transport">${opts(['대중교통','차량','도보','항공'],t.transport,'선택')}</select></td>${carCell}${kmCell}<td class="editable-cell"><select class="cell-select" data-field="payment">${opts(['법인카드','비용 없음','기타'],t.payment,'선택')}</select></td><td class="cost-total">${money(t.total)}</td><td class="cost-detail-cell">${details}</td><td class="locked" data-status>${statusPill(t.status)}</td><td>${deleting}</td></tr>`;
 }
 function bindTripRow(row){
@@ -3593,7 +3593,37 @@ function clientTripStatus(t){return [t.tripDate,t.person,t.purpose,t.region,t.tr
 function remapTripId(oldId,newId){if(!oldId||!newId||oldId===newId)return;const t=state.trips.find(x=>x.recordId===oldId);if(t)t.recordId=newId;state.driveLogs.forEach(d=>{if(d.tripRecordId===oldId){d.tripRecordId=newId;if(String(d.driveId||'').startsWith('LINKTMP:'))d.driveId='LINKTMP:'+newId}})}
 function applyDriveSync(sync,oldTripId,newTripId){if(!sync)return;if(sync.action==='deleted'){state.driveLogs=state.driveLogs.filter(d=>d.tripRecordId!==newTripId&&d.tripRecordId!==oldTripId);return}const d=sync.driveLog;if(!d)return;state.driveLogs=state.driveLogs.filter(x=>!(x.tripRecordId===newTripId||x.tripRecordId===oldTripId)||(!String(x.driveId||'').startsWith('LINKTMP:')&&x.driveId!==d.driveId));const idx=state.driveLogs.findIndex(x=>x.driveId===d.driveId);if(idx>=0)state.driveLogs[idx]=d;else state.driveLogs.unshift(d)}
 
-async function deleteTripRow(row){const id=row.dataset.recordId;const payload={recordId:id,tripDate:readField(row,'tripDate')||row.dataset.tripDate||'',sourceKeys:row.dataset.sourceKeys||''};if(String(id).startsWith('TMP:')){tripPendingDrafts.delete(id);state.trips=state.trips.filter(t=>t.recordId!==id);selectedTripIds.delete(id);tripPersistDrafts();tripUpdateSaveUi();renderTripAll();return}row.classList.add('saving-cell');try{await rpc('deleteTrip',payload);tripPendingDrafts.delete(id);tripPersistDrafts();tripUpdateSaveUi();state.trips=state.trips.filter(t=>t.recordId!==id);toast('출장기록 삭제됨');await loadData(false)}catch(e){toast(e.message,'error');row.classList.remove('saving-cell')}}
+// 운행원본은 가상 출장 행입니다. 삭제할 때 출장 시트에 없는 ID를 지우는 대신
+// 해당 차량운행일지 원본 ID만 삭제 표시(Y)합니다. 동일 날짜의 다른 출장은 건드리지 않습니다.
+async function tripDeleteRecordFromSheet(row){
+ const id=String(row.dataset.recordId||'');
+ const originDriveId=String(row.dataset.originDriveId||'');
+ if(originDriveId&&id==='DRIVEONLY:'+originDriveId){
+  const drive=state.driveLogs.find(d=>d.driveId===originDriveId);
+  if(!drive||!drive.persisted||drive.driveType!=='출장')throw new Error('삭제할 운행원본을 찾지 못했습니다. 새로고침 후 다시 시도해 주세요.');
+  await rpc('deleteDriveLogs',{ids:[originDriveId]});
+  state.driveLogs=state.driveLogs.filter(d=>d.driveId!==originDriveId);
+ }else if(!id.startsWith('TMP:')){
+  await rpc('deleteTrip',{recordId:id,tripDate:readField(row,'tripDate')||row.dataset.tripDate||'',sourceKeys:row.dataset.sourceKeys||''});
+ }
+ tripPendingDrafts.delete(id);selectedTripIds.delete(id);
+ state.trips=state.trips.filter(t=>t.recordId!==id);
+}
+async function deleteTripRow(row){
+ const id=String(row.dataset.recordId||'');
+ const origin=String(row.dataset.originDriveId||'');
+ if(origin&&id==='DRIVEONLY:'+origin&&
+  !window.confirm('이 운행원본을 삭제할까요?\n차량운행일지에서도 삭제 처리되어 주행거리 합계에서 제외됩니다.'))return;
+ if(id.startsWith('TMP:')){
+  await tripDeleteRecordFromSheet(row);tripPersistDrafts();tripUpdateSaveUi();renderTripAll();return;
+ }
+ row.classList.add('saving-cell');
+ try{
+  await tripDeleteRecordFromSheet(row);
+  tripPersistDrafts();tripUpdateSaveUi();toast('출장기록 삭제됨');
+  await loadData(false);
+ }catch(e){toast(e.message,'error');row.classList.remove('saving-cell')}
+}
 document.getElementById('addManualTrip')?.addEventListener('click',()=>{const id='TMP:'+Date.now()+':'+(++state.tempSeq);state.trips.unshift({recordId:id,sourceKeys:'',tripDate:tripTodayDate(),currentCosts:{routine:0,fuel:0,entertainment:0,transport:0,lodging:0,other:0},total:0,person:'CEO',department:'',summary:'',purpose:'',region:'',sourceAddresses:[],transport:'',payment:'비용 없음',status:'미정리',persisted:false});renderTripInput();const newRow=document.querySelector(`#tripInlineSheet tr[data-record-id="${CSS.escape(id)}"]`);if(newRow){tripCaptureDraft(newRow);newRow.querySelector('input[type=date]')?.focus()}});
 
 const MASTER_DRAFT_TYPES=['purpose'];
@@ -4077,14 +4107,15 @@ document.getElementById('deleteSelectedTrips')?.addEventListener('click',async()
  if(tripManualSaveBusy)return;
  const rows=[...document.querySelectorAll('#tripInlineSheet tbody tr[data-record-id]')].filter(r=>selectedTripIds.has(r.dataset.recordId));
  if(!rows.length){toast('삭제할 출장기록을 선택해 주세요.','error');return;}
- if(!window.confirm(`선택한 출장기록 ${rows.length}건을 삭제할까요? 원본 카드 사용내역은 삭제되지 않습니다.`))return;
+ const originCount=rows.filter(r=>r.dataset.originDriveId&&r.dataset.recordId==='DRIVEONLY:'+r.dataset.originDriveId).length;
+ const originNotice=originCount?`\n운행원본 ${originCount}건은 차량운행일지에서도 삭제 처리되어 주행거리 합계에서 제외됩니다.`:'';
+ if(!window.confirm(`선택한 출장기록 ${rows.length}건을 삭제할까요?${originNotice}\n원본 카드 사용내역은 삭제되지 않습니다.`))return;
  const button=document.getElementById('deleteSelectedTrips');button.disabled=true;
  let removed=0,failed='';
  for(const row of rows){
   const id=row.dataset.recordId;
   try{
-   if(!id.startsWith('TMP:'))await rpc('deleteTrip',{recordId:id,tripDate:readField(row,'tripDate')||row.dataset.tripDate||'',sourceKeys:row.dataset.sourceKeys||''});
-   tripPendingDrafts.delete(id);selectedTripIds.delete(id);state.trips=state.trips.filter(t=>t.recordId!==id);removed++;
+   await tripDeleteRecordFromSheet(row);removed++;
   }catch(e){failed=e?.message||String(e);break;}
  }
  tripPersistDrafts();tripUpdateSaveUi();
