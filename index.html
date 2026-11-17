@@ -3541,7 +3541,26 @@ function appendExistingUnlinkedDriveTrips(){
 function tripMatchesInputSearch(t){const d=tripDriveFor(t);return recordSearchMatch([t.recordId,t.tripDate,t.person,t.purpose,t.region,t.transport,t.payment,t.status,t.total,d?.vehicle,d?.distance],tripRecordSearchQuery)}
 function driveMatchesInputSearch(d){return recordSearchMatch([d.driveId,d.tripRecordId,d.date,d.vehicle,d.driveType,d.start,d.end,d.roundTrip,d.distance,d.baseMileage,d.currentMileage,d.status],driveRecordSearchQuery)}
 function recordSearchCount(id,shown,total,query){const el=document.getElementById(id);if(el)el.textContent=query?`${shown}건 검색됨 / 전체 ${total}건`:`전체 ${total}건`}
-function renderTripInput(){const body=document.querySelector('#tripInlineSheet tbody');if(!body)return;const raw=currentTripRows(true).map(tripMergeDraft),matching=raw.filter(tripMatchesInputSearch),temps=matching.filter(t=>String(t.recordId).startsWith('TMP:')),rows=[...temps,...sortTripRows(matching.filter(t=>!String(t.recordId).startsWith('TMP:')),'tripInput')];body.innerHTML=rows.length?rows.map(tripRowHtml).join(''):'<tr class="empty-row"><td colspan="12">조회할 출장기록이 없습니다.</td></tr>';recordSearchCount('tripRecordSearchCount',rows.length,raw.length,tripRecordSearchQuery);finalizeTableColumns('tripInlineSheet');labelResponsiveCells('tripInlineSheet');body.querySelectorAll('tr[data-record-id]').forEach(row=>{bindTripRow(row);if(tripPendingDrafts.has(row.dataset.recordId))tripMarkPending(row)});bulkUpdateTripSelectionUi()}
+// 출장기록 입력 목록에서 같은 출장일자가 둘 이상이면 날짜 셀에만 색상을 표시합니다.
+// 카드를 합치거나 출장비용을 계산하는 로직과는 무관한 화면 표시 기능입니다.
+function tripMarkDuplicateDates(){
+ const dates=new Map();
+ for(const trip of currentTripRows(true).map(tripMergeDraft)){
+  const date=String(trip.tripDate||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
+  dates.set(date,(dates.get(date)||0)+1);
+ }
+ document.querySelectorAll('#tripInlineSheet tbody tr[data-record-id]').forEach(row=>{
+  const date=String(row.querySelector('[data-field="tripDate"]')?.value||row.dataset.tripDate||'').trim();
+  const cell=row.querySelector('td[data-col-key="tripDate"]');
+  if(!cell)return;
+  const repeats=dates.get(date)||0;
+  cell.classList.toggle('trip-date-duplicate',repeats>1);
+  if(repeats>1)cell.title='같은 날짜의 출장기록 '+repeats+'건';
+  else cell.removeAttribute('title');
+ });
+}
+function renderTripInput(){const body=document.querySelector('#tripInlineSheet tbody');if(!body)return;const raw=currentTripRows(true).map(tripMergeDraft),matching=raw.filter(tripMatchesInputSearch),temps=matching.filter(t=>String(t.recordId).startsWith('TMP:')),rows=[...temps,...sortTripRows(matching.filter(t=>!String(t.recordId).startsWith('TMP:')),'tripInput')];body.innerHTML=rows.length?rows.map(tripRowHtml).join(''):'<tr class="empty-row"><td colspan="12">조회할 출장기록이 없습니다.</td></tr>';recordSearchCount('tripRecordSearchCount',rows.length,raw.length,tripRecordSearchQuery);finalizeTableColumns('tripInlineSheet');labelResponsiveCells('tripInlineSheet');body.querySelectorAll('tr[data-record-id]').forEach(row=>{bindTripRow(row);if(tripPendingDrafts.has(row.dataset.recordId))tripMarkPending(row)});bulkUpdateTripSelectionUi();tripMarkDuplicateDates()}
 document.getElementById('tripRecordSearch')?.addEventListener('input',e=>{tripRecordSearchQuery=e.target.value.trim();renderTripInput()});
 document.getElementById('tripRecordSearchClear')?.addEventListener('click',()=>{tripRecordSearchQuery='';const input=document.getElementById('tripRecordSearch');input.value='';renderTripInput();input.focus()});
 function regionEditorHtml(t){const addresses=[...new Set((t.sourceAddresses||[]).map(v=>String(v||'').trim()).filter(Boolean))];const listId='region_'+String(t.recordId||'').replace(/[^a-zA-Z0-9_-]/g,'_');const listAttr=addresses.length?` list="${listId}"`:'';const hint=addresses.length>1?`${addresses.length}개 주소 중 선택하거나 직접 입력`:'출장지 직접입력';const dl=addresses.length?`<datalist id="${listId}">${addresses.map(a=>`<option value="${esc(a)}"></option>`).join('')}</datalist>`:'';return `<td class="editable-cell region-cell"><input class="cell-input region-input" data-field="region" value="${esc(t.region||'')}"${listAttr} placeholder="${esc(hint)}">${dl}</td>`}
@@ -3574,6 +3593,7 @@ function bindTripRow(row){
      select.innerHTML=opts(eligible,eligible.includes(old)?old:'','차종 선택');}
    }
    tripCaptureDraft(row);
+   if(el.dataset.field==='tripDate')tripMarkDuplicateDates();
   });
  });
  row.querySelector('.row-delete-btn')?.addEventListener('click',()=>deleteTripRow(row));
@@ -17995,6 +18015,43 @@ document.addEventListener('toggle',function(event){
 @media(max-width:1350px){#vehicle-edit .entry-odometer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#vehicle-edit .entry-odometer-delta{grid-column:span 2}}
 @media(max-width:760px){#vehicle-edit .entry-odometer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#vehicle-edit .entry-odometer-delta{grid-column:span 2}}
 @media(max-width:460px){#vehicle-edit .entry-odometer-grid{grid-template-columns:1fr}#vehicle-edit .entry-odometer-delta{grid-column:auto}}
+</style>
+
+<!-- 출장기록 입력 표 전용: 열 너비 균형 + 중복 출장일자 표시. 다른 메뉴 영향 없음. -->
+<style id="frameby-trip-input-column-widths-and-duplicate-dates">
+@media (min-width:761px){
+ #tripInlineSheet{table-layout:fixed!important;min-width:1613px!important}
+ #tripInlineSheet th[data-col-key="tripDate"]{width:182px!important}
+ #tripInlineSheet th[data-col-key="person"]{width:90px!important}
+ #tripInlineSheet th[data-col-key="purpose"]{width:240px!important}
+ #tripInlineSheet th[data-col-key="region"]{width:265px!important}
+ #tripInlineSheet th[data-col-key="transport"]{width:103px!important}
+ #tripInlineSheet th[data-col-key="vehicle"]{width:167px!important}
+ #tripInlineSheet th[data-col-key="distance"]{width:112px!important}
+ #tripInlineSheet th[data-col-key="payment"]{width:111px!important}
+ #tripInlineSheet th[data-col-key="total"]{width:104px!important}
+ #tripInlineSheet th[data-col-key="costDetail"]{width:85px!important}
+ #tripInlineSheet th[data-col-key="status"]{width:83px!important}
+ #tripInlineSheet th[data-col-key="delete"]{width:71px!important}
+ #tripInlineSheet td[data-col-key="person"]{min-width:0!important}
+ #tripInlineSheet td[data-col-key="vehicle"]{min-width:0!important}
+ #tripInlineSheet td[data-col-key="distance"]{min-width:0!important}
+ #tripInlineSheet td[data-col-key="region"]{min-width:0!important}
+ #tripInlineSheet td[data-col-key="purpose"]{min-width:0!important}
+ #tripInlineSheet .trip-date-select{min-width:0!important}
+}
+#tripInlineSheet tbody td[data-col-key="tripDate"].trip-date-duplicate{
+ background:#fff0c7!important;
+ box-shadow:inset 3px 0 0 #dda948,2px 0 0 #e5eaf1;
+ color:#5d4a18!important;
+ font-weight:750
+}
+#tripInlineSheet tbody td[data-col-key="tripDate"].trip-date-duplicate .cell-input{border-color:#e7c976}
+@media (max-width:760px){
+ #tripInlineSheet tbody td[data-col-key="tripDate"].trip-date-duplicate{
+  background:#fff0c7!important;border-radius:6px;box-shadow:inset 3px 0 0 #dda948!important
+ }
+}
 </style>
 </body>
 </html>
