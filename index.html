@@ -3522,7 +3522,9 @@ function recordSearchMatch(values,query){
 function tripDriveFor(t){
  const origin=String(t.originDriveId||'');
  const id=String(t.recordId||'');
- return state.driveLogs.find(d=>d.driveId===origin||(id&&d.tripRecordId===id&&!d.fuelSource))||null;
+ // 과거 출장번호가 남아 있어도 출퇴근·기타 운행은 출장기록의 차량 입력에 연결하지 않습니다.
+ return state.driveLogs.find(d=>d.driveType==='출장'&&!d.fuelSource&&
+  ((origin&&d.driveId===origin)||(id&&d.tripRecordId===id)))||null;
 }
 // 현존하는 운행일지의 출장만 별도 조회 행으로 표시합니다. 원본 시트에는 새 행을 쓰지 않습니다.
 function appendExistingUnlinkedDriveTrips(){
@@ -5072,7 +5074,7 @@ async function ghSavePendingBatch(request){
     if(!old){audit.push(ghAuditRow('생성',sheet,key,'','','일괄 입력'));return}
     for(const h of headers){if(h==='수정일시')continue;if(String(old[h]??'')!==String(o[h]??''))audit.push(ghAuditRow('수정',sheet,key,old[h]??'',o[h]??'',h))}
   }
-  function findActiveDrive(tripId){return drives.find(r=>ghText(r.trip_record_id)===tripId&&String(r.삭제여부||'').toUpperCase()!=='Y'&&!deletedDriveRows.has(r.__rowNo))}
+  function findActiveDrive(tripId){return drives.find(r=>ghText(r.trip_record_id)===tripId&&ghText(r.운행구분)==='출장'&&String(r.삭제여부||'').toUpperCase()!=='Y'&&!deletedDriveRows.has(r.__rowNo))}
   for(const {key,payload} of tripDrafts){
     const date=ghDate(payload.tripDate),clientId=ghText(payload.recordId)||ghText(key);
     // 운행일지에서 생성된 출장 행은 카드금액이 있어도 다른 출장 행을 덮어쓰지 않습니다.
@@ -5108,17 +5110,21 @@ async function ghSavePendingBatch(request){
     let existing=findActiveDrive(recordId);
     const requestedDriveId=ghText(payload.linkedDriveId);
     if(existing&&requestedDriveId&&ghText(existing.drive_id)!==requestedDriveId &&
-      !requestedDriveId.startsWith('LINKTMP:'))
+      !requestedDriveId.startsWith('LINKTMP:') &&
+      ghText(driveById.get(requestedDriveId)?.운행구분)==='출장')
       throw new Error('출장기록에 연결된 운행 ID가 일치하지 않습니다. 운행일지 연결을 확인해 주세요.');
     if(!existing&&requestedDriveId&&driveById.has(requestedDriveId)){
       const candidate=driveById.get(requestedDriveId);
-      if(ghText(candidate.trip_record_id)&&ghText(candidate.trip_record_id)!==recordId)
-        throw new Error('다른 출장에 이미 연결된 차량운행일지는 옮길 수 없습니다.');
-      if(ghText(candidate.운행구분)!=='출장')throw new Error('출장 운행기록만 출장기록장에 연결할 수 있습니다.');
-      // 운행원본에서 출발한 동일 ID의 출장만 날짜 변경을 허용합니다.
-      if(ghDate(candidate.일자)!==date && clientId!=='DRIVEONLY:'+requestedDriveId)
-        throw new Error('출장일자와 연결된 운행일지의 날짜가 다릅니다.');
-      existing=candidate;
+      // 브라우저 임시저장에 남은 출퇴근/기타 운행 ID는 잘못된 링크로 취급합니다.
+      // 대상 운행의 차종·거리·경로와 저장된 원본은 변경하지 않습니다.
+      if(ghText(candidate.운행구분)==='출장'&&String(candidate.삭제여부||'').toUpperCase()!=='Y'){
+        if(ghText(candidate.trip_record_id)&&ghText(candidate.trip_record_id)!==recordId)
+          throw new Error('다른 출장에 이미 연결된 차량운행일지는 옮길 수 없습니다.');
+        // 운행원본에서 출발한 동일 ID의 출장만 날짜 변경을 허용합니다.
+        if(ghDate(candidate.일자)!==date && clientId!=='DRIVEONLY:'+requestedDriveId)
+          throw new Error('출장일자와 연결된 운행일지의 날짜가 다릅니다.');
+        existing=candidate;
+      }
     }
     if(o.이동수단==='차량'){
       let d;
