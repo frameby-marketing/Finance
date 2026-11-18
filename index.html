@@ -5231,8 +5231,8 @@ async function ghSavePendingBatch(request){
     if(o.이동수단==='차량'){
       let d;
       if(existing){
-        if(ghText(existing.운행구분)!=='출장')
-          throw new Error('출퇴근 운행기록은 출장기록 수정으로 변경할 수 없습니다.');
+        // findActiveDrive와 연결 후보 처리 단계에서 출장 운행만 선별합니다.
+        // 출퇴근 기록은 이 분기에 들어오지 않으며, 별도 행으로 그대로 유지합니다.
         const oldDrive={...existing};
         // 출장지를 바꾼 경우에만 도착지를 갱신합니다. 목적·차종만 바꾼 경우
         // 운행일지에서 직접 작성한 더 자세한 도착지 주소는 보존합니다.
