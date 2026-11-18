@@ -5075,6 +5075,8 @@ async function ghSavePendingBatch(request){
   function findActiveDrive(tripId){return drives.find(r=>ghText(r.trip_record_id)===tripId&&String(r.삭제여부||'').toUpperCase()!=='Y'&&!deletedDriveRows.has(r.__rowNo))}
   for(const {key,payload} of tripDrafts){
     const date=ghDate(payload.tripDate),clientId=ghText(payload.recordId)||ghText(key);
+    // 운행일지에서 생성된 출장 행은 카드금액이 있어도 다른 출장 행을 덮어쓰지 않습니다.
+    const driveOrigin=clientId.startsWith('DRIVEONLY:');
     const sourceBacked=Boolean(ghText(payload.sourceKeys))||clientId.startsWith('AUTO:');
     const sourceGroup=sourceBacked?snapshot.source.groups[date]:null;
     // 카드 결제일의 유류비도 출장비용으로 합산합니다. 운행기록의 주행거리와는 별개입니다.
@@ -5083,8 +5085,11 @@ async function ghSavePendingBatch(request){
     const opts=g?(snapshot.source.addresses[date]||[]):[];
     const sourceKeys=g?g.rows.map(r=>r.row).join(','):'';
     let old=tripById.get(clientId)||null;
-    if(!old&&sourceKeys)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys)===sourceKeys)||null;
-    if(!old&&sourceKeys)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys))||null;
+    if(driveOrigin&&sourceKeys&&trips.some(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&
+       ghDate(r.출장일자)===date&&ghText(r.source_keys)))
+      throw new Error('같은 날짜의 다른 출장에 카드 사용금액이 연결되어 있습니다. 원본 금액의 중복을 확인해 주세요.');
+    if(!old&&sourceKeys&&!driveOrigin)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys)===sourceKeys)||null;
+    if(!old&&sourceKeys&&!driveOrigin)old=trips.find(r=>String(r.삭제여부||'').toUpperCase()!=='Y'&&ghDate(r.출장일자)===date&&ghText(r.source_keys))||null;
     const recordId=old?ghText(old.record_id):issueTripId(date,payload._assignedId);
     tripIdMap.set(clientId,recordId);
     // 기존 출장의 입력 금액은 연결된 실제 카드 원본이 없는 경우 보존합니다.
@@ -5102,22 +5107,35 @@ async function ghSavePendingBatch(request){
     let sync={action:'none',tripRecordId:recordId};
     let existing=findActiveDrive(recordId);
     const requestedDriveId=ghText(payload.linkedDriveId);
+    if(existing&&requestedDriveId&&ghText(existing.drive_id)!==requestedDriveId &&
+      !requestedDriveId.startsWith('LINKTMP:'))
+      throw new Error('출장기록에 연결된 운행 ID가 일치하지 않습니다. 운행일지 연결을 확인해 주세요.');
     if(!existing&&requestedDriveId&&driveById.has(requestedDriveId)){
       const candidate=driveById.get(requestedDriveId);
       if(ghText(candidate.trip_record_id)&&ghText(candidate.trip_record_id)!==recordId)
         throw new Error('다른 출장에 이미 연결된 차량운행일지는 옮길 수 없습니다.');
-      if(ghDate(candidate.일자)!==date)throw new Error('출장일자와 연결된 운행일자의 날짜가 다릅니다.');
       if(ghText(candidate.운행구분)!=='출장')throw new Error('출장 운행기록만 출장기록장에 연결할 수 있습니다.');
+      // 운행원본에서 출발한 동일 ID의 출장만 날짜 변경을 허용합니다.
+      if(ghDate(candidate.일자)!==date && clientId!=='DRIVEONLY:'+requestedDriveId)
+        throw new Error('출장일자와 연결된 운행일지의 날짜가 다릅니다.');
       existing=candidate;
     }
     if(o.이동수단==='차량'){
       let d;
       if(existing){
+        if(ghText(existing.운행구분)!=='출장')
+          throw new Error('출퇴근 운행기록은 출장기록 수정으로 변경할 수 없습니다.');
         const oldDrive={...existing};
+        // 출장지를 바꾼 경우에만 도착지를 갱신합니다. 목적·차종만 바꾼 경우
+        // 운행일지에서 직접 작성한 더 자세한 도착지 주소는 보존합니다.
+        const changedDestination=old
+          ? ghText(old.방문지역)!==ghText(o.방문지역)
+          : ghText(o.방문지역)!==ghText(existing.도착지);
         d={...existing,trip_record_id:recordId,일자:date,
           차량명:ghText(payload.vehicle)||ghText(existing.차량명),
           실제거리_km:payload.distance!==undefined&&String(payload.distance).trim()!==''?ghNum(payload.distance):ghNum(existing.실제거리_km),
-          도착지:ghText(existing.도착지)||o.방문지역,삭제여부:'N',수정일시:now};
+          도착지:changedDestination?ghText(o.방문지역):(ghText(existing.도착지)||o.방문지역),
+          삭제여부:'N',수정일시:now};
         d.상태=ghDriveStatus(d);drives[drives.indexOf(existing)]=d;driveById.set(d.drive_id,d);
         mark('drive',d);diffAudit(INTEGRATED_CONFIG.driveSheet,oldDrive,d,GH_DRIVE_HEADERS,d.drive_id);
         sync={action:'updated',tripRecordId:recordId,driveLog:ghNormDrive(d)};
