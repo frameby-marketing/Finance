@@ -97,6 +97,14 @@ html[data-theme="dark"]{color-scheme:light!important}
 .cost-detail-line strong{font-variant-numeric:tabular-nums}
 .column-order-note{font-size:10px;color:#8893a5}
 
+
+/* 출장/차량 일괄저장: 실패 행 원인 표시. 다른 화면의 표 구조에는 적용하지 않음 */
+.entry-save-issue-report{margin:9px 0 12px;padding:10px 13px;border:1px solid #e8bd78;border-radius:9px;background:#fffaf2;font-size:12px;line-height:1.65;color:#5d4630}
+.entry-save-issue-report[hidden]{display:none!important}
+.entry-save-issue-report strong{color:#7b4210}
+.entry-save-issue-report ul{margin:6px 0 0;padding-left:19px}
+.entry-save-issue-report li{overflow-wrap:anywhere}
+#tripInlineSheet tr.trip-save-error-row td:first-child,#vehicleInlineSheet tr.trip-save-error-row td:first-child{box-shadow:inset 4px 0 #c76c17!important}
 </style>
 
 <style id="odometer-reconcile-style">
@@ -1956,6 +1964,7 @@ body.frameby-auth-locked .github-auth-btn{
             <div class="record-searchbar" role="search" aria-label="출장기록 입력 내역 검색"><label for="tripRecordSearch">내역 검색</label><input id="tripRecordSearch" type="search" autocomplete="off" spellcheck="false" placeholder="날짜 · 출장자 · 출장목적 · 출장지 검색"><button type="button" id="tripRecordSearchClear" class="record-search-clear" aria-label="출장 검색 초기화">초기화</button><span id="tripRecordSearchCount" class="record-search-count" aria-live="polite"></span></div>
             <div class="entry-main-actions"><button class="add-trip-btn" type="button" id="addManualTrip">+ 출장 추가</button><button class="trip-manual-save-btn" type="button" id="saveTripChanges" disabled>변경사항 저장</button><button class="entry-delete-selected" type="button" id="deleteSelectedTrips" disabled>선택 삭제</button></div>
           </div>
+          <div id="tripSaveIssueReport" class="entry-save-issue-report" hidden role="status" aria-live="polite"></div>
           <div class="batch-toolbar" id="tripBatchBar"><label class="batch-check" for="selectAllTripRows"><input type="checkbox" id="selectAllTripRows" aria-label="표에 표시된 출장기록 전체 선택">전체 선택</label><span class="batch-count" id="tripBulkCount">0건 선택</span><label for="tripBulkField">일괄 설정 항목</label><select id="tripBulkField"><option value="">항목 선택</option><option value="purpose">출장목적</option><option value="person">출장자</option><option value="region">출장지</option><option value="transport">이동수단</option><option value="payment">결제수단</option></select><select id="tripBulkValue" disabled aria-label="일괄 설정 값"><option value="">값 선택</option></select><input id="tripBulkText" class="batch-value-text" type="text" placeholder="값 입력" hidden><button id="applyTripBulk" class="master-add" type="button" disabled>선택 행에 적용</button></div>
           <div class="inline-sheet-wrap">
             <table class="inline-sheet" id="tripInlineSheet">
@@ -2090,6 +2099,7 @@ body.frameby-auth-locked .github-auth-btn{
             <div class="record-searchbar" role="search" aria-label="운행내역 입력 내역 검색"><label for="driveRecordSearch">내역 검색</label><input id="driveRecordSearch" type="search" autocomplete="off" spellcheck="false" placeholder="일자 · 차량 · 연결코드 · 출발지 · 도착지 검색"><button type="button" id="driveRecordSearchClear" class="record-search-clear" aria-label="운행 검색 초기화">초기화</button><span id="driveRecordSearchCount" class="record-search-count" aria-live="polite"></span></div>
             <div class="entry-main-actions"><button class="add-trip-btn" type="button" id="addManualDrive">+ 운행 추가</button><button class="trip-manual-save-btn" type="button" id="saveDriveChanges" disabled>변경사항 저장</button><button class="drive-delete-selected-btn entry-delete-selected" type="button" id="deleteSelectedDrives" disabled>선택 삭제</button></div>
           </div>
+          <div id="driveSaveIssueReport" class="entry-save-issue-report" hidden role="status" aria-live="polite"></div>
           <div class="entry-quick-vehicle"><label class="vehicle-quick-select" for="vehicleQuickSelect">기본 차량 <select id="vehicleQuickSelect" aria-label="기본 차량 선택"><option value="">차량 선택</option></select></label><button class="master-add" type="button" id="applyVehicleToBlanks">미지정 행에 적용</button><span>미지정 차량이 있는 행에만 적용 · 선택 차량은 운행일 기준 사용 가능 여부를 따릅니다.</span></div>
           <div class="batch-toolbar" id="driveBatchBar"><span class="batch-count" id="driveBulkCount">0건 선택</span><label for="driveBulkField">선택 행 일괄 설정</label><select id="driveBulkField"><option value="">항목 선택</option><option value="vehicle">차량</option><option value="driveType">운행구분</option><option value="start">출발지</option><option value="end">도착지</option><option value="roundTrip">왕복/편도</option><option value="distance">실제거리(km)</option></select><select id="driveBulkValue" disabled aria-label="일괄 설정 값"><option value="">값 선택</option></select><input id="driveBulkText" class="batch-value-text" type="text" placeholder="값 입력" hidden><button id="applyDriveBulk" class="master-add" type="button" disabled>선택 행에 적용</button><span class="batch-hint">날짜 옆 체크박스로 선택한 행만 변경 · 저장은 별도</span></div>
           <div class="table-wrap">
@@ -3130,21 +3140,46 @@ function tripRemapDraft(map,oldId,newId,snapshot,field){
  if(latest===snapshot){map.delete(oldId);return;}
  if(latest && newId!==oldId){map.delete(oldId);map.set(newId,{...latest,[field]:newId});}
 }
+// 저장 오류는 행별로 구분합니다. 성공한 행은 확정하고 실패한 행은 임시 입력 상태로 남깁니다.
+function tripShowSaveIssues(issues,savedCount,unverified=''){
+ const rows=(issues||[]).map(x=>`<li><b>${esc(x.kind)}</b> · ${esc(x.date||'날짜 없음')} · ${esc(x.key||'신규 입력')} — ${esc(x.reason)}</li>`).join('');
+ const headline=unverified?(savedCount?`저장 완료 ${savedCount}건 · 일부 저장 상태 확인 필요`:'저장 상태 확인 필요'):(savedCount?`저장 완료 ${savedCount}건 · 실패 ${issues.length}건`:`저장 실패 ${issues.length}건`);
+ const message=unverified?`<p>저장 상태 확인 필요: ${esc(unverified)}. 중복 저장을 막기 위해 자동 재시도하지 않았습니다. 새로고침 후 확인해 주세요.</p>`:'';
+ for(const id of ['tripSaveIssueReport','driveSaveIssueReport']){
+  const el=document.getElementById(id);if(!el)continue;
+  el.hidden=!issues.length&&!unverified;
+  el.innerHTML=el.hidden?'':`<strong>${headline}</strong><div>저장되지 않은 행만 수정한 뒤 다시 저장할 수 있습니다. 기존 입력값은 남아 있습니다.</div>${rows?'<ul>'+rows+'</ul>':''}${message}`;
+ }
+ for(const table of ['tripInlineSheet','vehicleInlineSheet']){
+  document.querySelectorAll(`#${table} tbody tr`).forEach(row=>row.classList.remove('trip-save-error-row'));
+ }
+ for(const issue of issues||[]){
+  const selector=issue.type==='trip'?'#tripInlineSheet tbody tr[data-record-id]':issue.type==='drive'?'#vehicleInlineSheet tbody tr[data-drive-id]':'';
+  if(!selector)continue;
+  document.querySelectorAll(selector).forEach(row=>{
+   if((row.dataset.recordId||row.dataset.driveId)===issue.key)row.classList.add('trip-save-error-row');
+  });
+ }
+}
+function tripSaveValidationError(err){
+ if(err?.retryable)return false; // 429 등 요청 제한 오류는 재시도하지 않음
+ if(err?.status===400)return true; // Sheets batchUpdate의 400 오류는 전체 거부되므로 행 단위 분리 가능
+ if(err?.status)return false; // 기타 쓰기/통신 오류는 저장 여부를 확인한 뒤 처리
+ return /출퇴근 운행기록|운행일지 연결|연결된 운행 ID|원본 출장사용내역|같은 날짜의 다른 출장|다른 출장에 이미 연결|출장일자와 연결된 운행일지|등록된 운행 중 차량|누적거리는 기초|출장기록에 일자가 없는|차량운행일지에 일자가 없는|주행거리 저장 항목|출장 운행기록만|출장기록에 연결된 차량운행일지/.test(String(err?.message||''));
+}
 async function tripSaveAllPending(){
  if(tripManualSaveBusy)return;
  if(!(tripPendingDrafts.size||drivePendingDrafts.size||mileagePendingDrafts.size))return;
  const tripBatch=[...tripPendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
  const driveBatch=[...drivePendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
  const mileageBatch=[...mileagePendingDrafts.entries()].map(([key,payload])=>({key,payload:{...payload}}));
- const total=tripBatch.length+driveBatch.length+mileageBatch.length;
- if(tripBatch.some(x=>!x.payload.tripDate)||driveBatch.some(x=>!x.payload.date)){
-  toast('날짜가 없는 입력 행이 있습니다. 날짜를 입력한 뒤 저장해 주세요.','error');return;
- }
- tripManualSaveBusy=true;tripUpdateSaveUi();
- for(const id of ['tripDraftNotice','driveDraftNotice']){const el=document.getElementById(id);if(el)el.textContent=`${total}건 일괄 저장 중 · 추가 입력값은 유지됩니다`}
- try{
-  const result=await rpc('savePendingBatch',{trips:tripBatch,drives:driveBatch,mileages:mileageBatch});
-  if(!result?.ok)throw new Error('저장 완료 여부를 확인할 수 없습니다.');
+ const items=[...tripBatch.map(x=>({...x,type:'trip'})),...driveBatch.map(x=>({...x,type:'drive'})),...mileageBatch.map(x=>({...x,type:'mileage'}))];
+ const total=items.length,issues=[],driveSaveAliases=new Map();
+ let savedCount=0,unverified='';
+ const kindName={trip:'출장',drive:'운행',mileage:'주행거리'};
+ const describe=x=>({type:x.type,kind:kindName[x.type],date:x.payload?.tripDate||x.payload?.date||'',key:x.key});
+ // 동일 화면에서 입력을 계속 수정한 경우에도 이전 스냅샷만 저장 성공으로 처리합니다.
+ function applySavedResult(result,tripBatch,driveBatch,mileageBatch){
   for(const saved of result.trips||[]){
    const key=saved.clientKey,original=tripBatch.find(x=>x.key===key),newId=saved.recordId||key;
    const ix=state.trips.findIndex(t=>t.recordId===key||t.recordId===newId);
@@ -3165,6 +3200,7 @@ async function tripSaveAllPending(){
     const driveId=linked?.driveId||driveKey;
     drivePendingDrafts.delete(driveKey);
     drivePendingDrafts.set(driveId,{...draft,driveId,tripRecordId:newId});
+    if(driveKey!==driveId)driveSaveAliases.set(driveKey,driveId);
    }
   }
   for(const saved of result.drives||[]){
@@ -3192,13 +3228,79 @@ async function tripSaveAllPending(){
    if(ix>=0)state.vehicles[ix]=copy;else state.vehicles.push(copy);
    if(original&&JSON.stringify(mileagePendingDrafts.get(key))===JSON.stringify(original.payload))mileagePendingDrafts.delete(key);
   }
-  tripPersistDrafts();try{await loadData(false)}catch(e){initFilters(false);renderTripSystemAll()}updateDriveSelectionUi();
-  const remaining=tripPendingDrafts.size+drivePendingDrafts.size+mileagePendingDrafts.size;
-  toast(remaining?`${result.count||total}건 저장 · 입력 중 변경된 ${remaining}건은 미저장으로 유지`:`${result.count||total}건 일괄 저장 완료`);
+ }
+ function prepared(x){
+  const map=x.type==='trip'?tripPendingDrafts:x.type==='drive'?drivePendingDrafts:mileagePendingDrafts;
+  const key=x.type==='drive'?(driveSaveAliases.get(x.key)||x.key):x.key;
+  const pending=map.get(key);
+  if(!pending)return null; // 앞서 연결 저장이 완료된 항목: 중복 전송하지 않음
+  const payload={...pending};
+  if(x.type==='drive')payload.driveId=key;
+  return {key,payload,type:x.type,originalKey:x.key};
+ }
+ function pack(list){
+  return {trips:list.filter(x=>x.type==='trip').map(({key,payload})=>({key,payload})),
+          drives:list.filter(x=>x.type==='drive').map(({key,payload})=>({key,payload})),
+          mileages:list.filter(x=>x.type==='mileage').map(({key,payload})=>({key,payload}))};
+ }
+ function progress(){
+  for(const id of ['tripDraftNotice','driveDraftNotice']){
+   const el=document.getElementById(id);if(el)el.textContent=`저장 확인 중 · 성공 ${savedCount}건 / 확인 필요 ${issues.length}건`;
+  }
+ }
+ async function persistGroup(group){
+  const current=group.map(prepared).filter(Boolean);
+  if(!current.length)return;
+  const eligible=[];
+  for(const x of current){
+   const date=x.type==='trip'?x.payload.tripDate:x.type==='drive'?x.payload.date:'';
+   if((x.type==='trip'||x.type==='drive')&&!/^\d{4}-\d{2}-\d{2}$/.test(String(date||''))){
+    issues.push({...describe(x),key:x.originalKey,reason:'일자가 없습니다. 날짜를 먼저 선택해 주세요.'});continue;
+   }
+   if(x.type==='mileage'&&!String(x.payload.vehicle||'').trim()){
+    issues.push({...describe(x),key:x.originalKey,reason:'차량명이 없습니다.'});continue;
+   }
+   eligible.push(x);
+  }
+  if(!eligible.length)return;
+  const batch=pack(eligible);
+  try{
+   const result=await rpc('savePendingBatch',batch);
+   if(!result?.ok)throw new Error('저장 완료 여부를 확인할 수 없습니다.');
+   applySavedResult(result,batch.trips,batch.drives,batch.mileages);
+   savedCount+=eligible.length;progress();
+  }catch(err){
+   if(!tripSaveValidationError(err))throw err;
+   if(eligible.length===1){
+    const x=eligible[0];issues.push({...describe(x),key:x.originalKey,reason:String(err.message||err)});progress();return;
+   }
+   const mid=Math.floor(eligible.length/2);
+   // Sheets batchUpdate는 호출 단위로 원자적으로 처리됩니다.
+   // 검증에 실패한 묶음만 분할하여 성공 건을 우선 저장합니다.
+   await persistGroup(eligible.slice(0,mid));
+   await persistGroup(eligible.slice(mid));
+  }
+ }
+ tripManualSaveBusy=true;tripUpdateSaveUi();
+ tripShowSaveIssues([],0);
+ progress();
+ try{
+  await persistGroup(items);
  }catch(err){
+  unverified=String(err?.message||err);
+ }finally{
   tripPersistDrafts();
-  toast('일괄 저장 실패: '+(err.message||err)+' · 입력 내용은 유지됩니다.','error');
- }finally{tripManualSaveBusy=false;tripUpdateSaveUi();updateDriveSelectionUi();}
+  if(savedCount){
+   try{await loadData(false)}catch(e){initFilters(false);renderTripSystemAll()}
+  }
+  tripManualSaveBusy=false;
+  tripUpdateSaveUi();updateDriveSelectionUi();
+  tripShowSaveIssues(issues,savedCount,unverified);
+  const remaining=tripPendingDrafts.size+drivePendingDrafts.size+mileagePendingDrafts.size;
+  if(unverified)toast(`${savedCount}건 저장 확인 · ${remaining}건 저장 상태 확인 필요`,'error');
+  else if(issues.length)toast(`${savedCount}건 저장 완료 · ${issues.length}건 실패 (아래 오류 목록 확인)`,'error');
+  else toast(remaining?`${savedCount}건 저장 · 미저장 ${remaining}건 남음`:`${savedCount||total}건 일괄 저장 완료`);
+ }
 }
 document.getElementById('saveTripChanges')?.addEventListener('click',tripSaveAllPending);
 document.getElementById('saveDriveChanges')?.addEventListener('click',tripSaveAllPending);
