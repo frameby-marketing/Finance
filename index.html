@@ -5739,6 +5739,41 @@ function githubApplyModuleAccess(access){
     researchWriteBtn.tabIndex=canOpenResearch?0:-1;
   }
 }
+/* 연구개발 권한 검사 '오류' 안내 (2026-11-19)
+ * denied(비공유자)는 안내 없이 숨김을 유지합니다.
+ * error(Drive 권한 미승인 등 검사 자체 실패)는 공유자가 원인을 알 수 있게 안내하고,
+ * Drive 권한 미승인이면 동의 화면을 다시 띄우는 버튼을 표시합니다. */
+function githubResearchShowCheckNotice(){
+  const check=window.FRAMEBY_RESEARCH_CHECK||{};
+  let box=document.getElementById('researchScopeNotice');
+  if(check.state!=='error'){if(box)box.hidden=true;return}
+  const scopeMissing=/insufficient authentication scopes|access_token_scope_insufficient|insufficientpermissions/i.test(String(check.reason||''));
+  if(!box){
+    box=document.createElement('div');
+    box.id='researchScopeNotice';
+    box.setAttribute('role','alert');
+    box.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;max-width:min(560px,calc(100vw - 32px));background:#fff7e6;border:1px solid #f0c36d;color:#5c4400;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.12);display:flex;gap:10px;align-items:center';
+    document.body.appendChild(box);
+  }
+  box.hidden=false;
+  box.textContent='';
+  const msg=document.createElement('span');
+  msg.textContent=scopeMissing
+    ?'연구개발 메뉴를 확인하려면 Google Drive 권한 승인이 필요합니다. 로그인 동의 화면에서 Drive 항목을 체크해 주세요.'
+    :'연구개발 권한 확인 중 오류가 발생했습니다: '+String(check.reason||'원인 미상');
+  box.appendChild(msg);
+  if(scopeMissing&&GITHUB_TOKEN_CLIENT){
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent='권한 다시 승인';
+    btn.style.cssText='flex:0 0 auto;border:0;border-radius:7px;background:#2757d7;color:#fff;padding:6px 10px;font-weight:700;cursor:pointer';
+    btn.addEventListener('click',()=>{
+      githubTokenCacheClear();
+      GITHUB_TOKEN_CLIENT.requestAccessToken({prompt:'consent',scope:INTEGRATED_CONFIG.oauthScope});
+    });
+    box.appendChild(btn);
+  }
+}
 function githubOpenAuthorizedInitialModule(){
   if(location.hash==='#sales'){showModule('sales');return true;}
   if(location.hash==='#work-record'&&githubHasModuleAccess('workRecord')){showModule('hr','work');return true;}
@@ -7043,6 +7078,7 @@ async function githubAfterLogin(){
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
+    githubResearchShowCheckNotice();
     const allowedModules=['cash','card','trip','hr','research'].filter(m=>access[m]);
 
     // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
