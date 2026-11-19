@@ -1419,6 +1419,7 @@ body.frameby-auth-locked .github-auth-btn{
       <div class="finance-secondary hidden research-secondary" id="researchSecondaryMenu">
         <div class="module-tabs" id="researchModuleTabs" aria-label="연구개발 세부 메뉴">
           <button type="button" class="module-tab active" data-research-page="notes">연구 타임라인</button>
+          <button type="button" class="module-tab" data-research-page="write">연구노트 작성</button>
         </div>
         <div class="research-month-row" id="researchMonthRow">
           <button type="button" class="research-year-btn active" id="researchYearBtn">2026년</button>
@@ -1631,6 +1632,7 @@ body.frameby-auth-locked .github-auth-btn{
         </div>
         <div id="researchDirectMount"></div>
       </div>
+      <iframe id="researchFrame" class="research-frame hidden" title="연구노트 작성" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 
     <div class="research-review-modal-backdrop" id="researchReviewModal">
@@ -2805,9 +2807,7 @@ async function researchRefreshDirect(force=false){
   if(loading){loading.textContent='공유된 Google Docs 연구개발 자료를 불러오는 중...';loading.classList.remove('hidden')}
   if(force){RESEARCH_DOC_CACHE=null;RESEARCH_DOC_FLAT=[];RESEARCH_COMMENTS_CACHE=[];RESEARCH_COMMENT_CAPABILITY=null}
   try{
-    if(!GITHUB_ACCESS_TOKEN)throw new Error('Google 계정으로 다시 로그인해 주세요.');
-    // 권한이 허용된 연구개발 메뉴에서 직접 문서 내용을 요청한다.
-    // 서버 API가 허용하지 않는 계정은 본문을 받지 못한다.
+    if(!GITHUB_ACCESS_TOKEN||!(await githubCheckResearchAccess()))throw new Error('Google Docs 공유 권한이 없습니다.');
     await Promise.all([researchLoadDocument(force),researchLoadCapabilities(force)]);
     try{await researchLoadComments(force)}catch(e){RESEARCH_COMMENTS_CACHE=[];console.warn(e)}
     researchRenderCurrent();
@@ -2818,8 +2818,33 @@ async function researchRefreshDirect(force=false){
     if(loading){loading.textContent=e?.message||'연구개발 문서를 불러오지 못했습니다.';loading.classList.remove('hidden')}
   }
 }
+function ensureResearchFrame(forceReload){
+  if(!githubHasModuleAccess('research'))return;
+  const frame=document.getElementById('researchFrame');
+  const shell=document.getElementById('researchDirectShell');
+  const loading=document.getElementById('researchLoading');
+  if(!frame)return;
+  shell?.classList.add('hidden');
+  frame.classList.remove('hidden');
+  const base=frame.dataset.src||INTEGRATED_CONFIG.researchWriteWebAppUrl||'';
+  if(!base){
+    if(loading){loading.textContent='연구개발 Apps Script 연결 주소가 없습니다.';loading.classList.remove('hidden')}
+    return;
+  }
+  const params=new URLSearchParams({shell:'1',page:'write',year:String(Number(RESEARCH_ACTIVE_YEAR)||2026),month:'0'});
+  if(!forceReload&&frame.dataset.loaded==='1'){if(loading)loading.classList.add('hidden');return}
+  if(!forceReload&&frame.dataset.loaded==='0'&&frame.getAttribute('src'))return;
+  if(loading){loading.textContent='연구노트 작성 화면을 불러오는 중...';loading.classList.remove('hidden')}
+  frame.onload=()=>{frame.dataset.loaded='1';if(loading)loading.classList.add('hidden')};
+  frame.dataset.loaded='0';
+  frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
+}
 function ensureResearchView(forceReload){
   if(!githubHasModuleAccess('research'))return;
+  const frame=document.getElementById('researchFrame');
+  if(RESEARCH_ACTIVE_PAGE==='write')return ensureResearchFrame(!!forceReload);
+  frame?.classList.add('hidden');
+  document.getElementById('researchDirectShell')?.classList.remove('hidden');
   return researchRefreshDirect(!!forceReload);
 }
 function researchTargetTab(tabId){return RESEARCH_DOC_FLAT.find(t=>t.id===String(tabId||''))||null}
@@ -2911,7 +2936,7 @@ function showModule(module,page){
     return;
   }
   if(module==='research'){
-    if(page==='notes') RESEARCH_ACTIVE_PAGE=page;
+    if(page==='notes'||page==='write') RESEARCH_ACTIVE_PAGE=page;
     syncModuleHeader('research','researchHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
     ensureResearchView(false);
@@ -4660,6 +4685,8 @@ const INTEGRATED_CONFIG={
   workRecordPayrollSheet:'급여대장_저장소',
   workRecordAuditSheet:'변경이력_저장소',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
+  researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
+  researchWriteWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   sourceSheet:'출장사용내역',tripSheet:'웹_출장기록',driveSheet:'웹_차량운행일지',masterSheet:'웹_기초관리',vehicleSheet:'웹_차량정보',auditSheet:'웹_변경이력',
   allowedDomain:'frame-by.com',
   oauthClientId:'691753741006-9i13kjkk3ci2jv6lr6rupa491j7rlb64.apps.googleusercontent.com',
@@ -5531,46 +5558,55 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
   }
 }
 
+function githubIsResearchOrigin(origin){
+  try{
+    const url=new URL(origin);
+    const host=url.hostname.toLowerCase();
+    return url.protocol==='https:' && (host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com'));
+  }catch(e){return false}
+}
 async function githubCheckResearchAccess(){
-  // 연구개발은 오직 원본 Google Docs 문서의 인증된 읽기 권한으로 허용한다.
-  // 기존 연구개발 스프레드시트/Apps Script의 공유여부로 메뉴를 열지 않는다.
+  // Only Apps Script approves access after verifying the token and the original Google Docs' ACL.
+  // A missing/failed response is NOT permission. Never use a public sharing-list endpoint.
+  const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
   const token=GITHUB_ACCESS_TOKEN;
-  const id=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
-  if(!token||!id)return false;
-  const headers={Authorization:'Bearer '+token};
-  const endpoints=[
-    'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?fields=id,mimeType,trashed&supportsAllDrives=true',
-    'https://docs.googleapis.com/v1/documents/'+encodeURIComponent(id)+'?fields=documentId'
-  ];
-  let deniedCount=0;
-  const diagnostics=[];
-  for(let i=0;i<endpoints.length;i++){
-    try{
-      const response=await fetch(endpoints[i],{headers,cache:'no-store'});
-      if(response.status===401){
-        // 토큰의 전체 세션이 만료된 경우에만 재로그인 대상으로 처리한다.
-        githubTokenCacheClear();GITHUB_ACCESS_TOKEN=null;
-        RESEARCH_ACCESS_ERROR='Google 계정의 인증이 만료되었습니다.';
-        return false;
+  const base=String(INTEGRATED_CONFIG.researchWriteWebAppUrl||'').trim();
+  if(!email||!token||!base)return false;
+  return new Promise(resolve=>{
+    const frame=document.createElement('iframe');
+    frame.className='research-access-probe';
+    frame.setAttribute('aria-hidden','true');
+    let done=false,tokenSent=false;
+    let timer;
+    const finish=(allowed,reason)=>{
+      if(done)return;
+      done=true;
+      window.removeEventListener('message',onMessage);
+      clearTimeout(timer);
+      try{frame.remove()}catch(e){}
+      RESEARCH_ACCESS_ERROR=allowed?'':String(reason||'Google Docs 공유권한을 확인할 수 없습니다.');
+      resolve(allowed===true);
+    };
+    function onMessage(event){
+      if(event.source!==frame.contentWindow||!githubIsResearchOrigin(event.origin))return;
+      const msg=event.data||{};
+      if(msg.type==='frameby-research-bridge-ready'){
+        if(tokenSent)return;
+        tokenSent=true;
+        try{frame.contentWindow.postMessage({type:'frameby-research-auth',accessToken:token},event.origin)}
+        catch(e){finish(false,'Apps Script 인증 요청을 전달하지 못했습니다.')}
+      }else if(msg.type==='frameby-research-auth-result'){
+        const verified=String(msg.email||'').trim().toLowerCase();
+        finish(msg.allowed===true&&verified===email,
+          msg.allowed===true&&verified!==email?'로그인 계정과 권한 확인 계정이 일치하지 않습니다.':
+          msg.message||'해당 Google Docs를 공유받지 않은 계정입니다.');
       }
-      if(!response.ok){
-        deniedCount+=(response.status===403||response.status===404)?1:0;
-        diagnostics.push((i===0?'Drive':'Docs')+' HTTP '+response.status);
-        continue;
-      }
-      const item=await response.json();
-      const permitted=(i===0)
-        ? item.id===id&&item.trashed!==true&&item.mimeType==='application/vnd.google-apps.document'
-        : item.documentId===id;
-      if(permitted){RESEARCH_ACCESS_ERROR='';return true}
-      diagnostics.push((i===0?'Drive':'Docs')+' 응답 문서 불일치');
-    }catch(e){diagnostics.push((i===0?'Drive':'Docs')+' 통신 오류')}
-  }
-  // 어느 API도 문서를 읽을 수 없으면 접근을 허용하지 않는다.
-  // API 비활성화와 실제 공유권한 거부는 운영 로그로 구분할 수 있게 한다.
-  RESEARCH_ACCESS_ERROR=diagnostics.join('; ')||'Google Docs 공유 권한을 확인하지 못했습니다.';
-  console.warn('[연구개발 접근 확인]',RESEARCH_ACCESS_ERROR);
-  return false;
+    }
+    timer=setTimeout(()=>finish(false,'Apps Script의 공유권한 검사 응답이 없습니다. 배포 상태를 점검해 주세요.'),10000);
+    window.addEventListener('message',onMessage);
+    frame.src=base+(base.includes('?')?'&':'?')+'mode=bridge&_='+Date.now();
+    document.body.appendChild(frame);
+  });
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -5584,7 +5620,7 @@ async function githubVerifyIntegratedAccess(){
     githubCheckSpreadsheetAccess(INTEGRATED_CONFIG.workRecordSpreadsheetId),
     researchPromise
   ]);
-  RESEARCH_ACCESS_ERROR=researchResult.error||RESEARCH_ACCESS_ERROR||'';
+  RESEARCH_ACCESS_ERROR=researchResult.error||'';
   return {cash,card,trip,leave,workRecord,hr:!!(leave||workRecord),
     research:researchResult.value,researchError:RESEARCH_ACCESS_ERROR};
 }
@@ -5615,6 +5651,13 @@ function githubApplyModuleAccess(access){
   if(!window.FRAMEBY_MODULE_ACCESS.card) document.getElementById('cardSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.trip) document.getElementById('tripSecondaryMenu')?.classList.add('hidden');
   if(!window.FRAMEBY_MODULE_ACCESS.hr) document.getElementById('hrSecondaryMenu')?.classList.add('hidden');
+  if(!window.FRAMEBY_MODULE_ACCESS.research){
+    const researchFrame=document.getElementById('researchFrame');
+    if(researchFrame){researchFrame.src='about:blank';researchFrame.dataset.loaded='0';researchFrame.classList.add('hidden')}
+    const mount=document.getElementById('researchDirectMount');
+    if(mount)mount.textContent='';
+    RESEARCH_DOC_CACHE=null;RESEARCH_DOC_FLAT=[];
+  }
 
   const leaveBtn=document.querySelector('.module-tab[data-hr-page="leave"]');
   const workBtn=document.querySelector('.module-tab[data-hr-page="work"]');
@@ -7880,7 +7923,7 @@ function initIntegratedNav(){
   // 최초 표시 모듈은 로그인 후 실제 스프레드시트 권한 확인이 끝난 뒤 선택합니다.
 }
 window.__FRAMEBY_GET_ACCESS_TOKEN__=()=>GITHUB_ACCESS_TOKEN;
-function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-docs-only-v31-dual-permission-check';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
+function initIntegrated(){githubLockApp();initIntegratedNav();initLeaveShell();githubInitResearchMessaging();initResearchShell();const btn=document.getElementById('githubLoginBtn');if(btn)btn.addEventListener('click',githubLoginClick);try{const scopeVer='research-docs-direct-comments-v30-menu-restore';if(localStorage.getItem('framebyIntegratedScopeVersion')!==scopeVer){githubTokenCacheClear();localStorage.setItem('framebyIntegratedScopeVersion',scopeVer)}}catch(e){}const cached=githubTokenCacheGet();if(cached){GITHUB_ACCESS_TOKEN=cached;githubWaitForGoogle(()=>githubAfterLogin())}else githubWaitForGoogle(()=>githubSilentLogin())}
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',initIntegrated,{once:true});
 }else{
