@@ -5624,41 +5624,37 @@ async function githubResearchApiProbe(url,source){
 }
 async function githubCheckResearchAccess(){
   // 판정 기준: 연구개발 Google 문서의 공유 목록(소유자·편집자·뷰어/댓글 작성자).
-  // 별도 Apps Script(소유자 권한 실행)가 로그인 토큰의 이메일을 Google에서 확인한 뒤
-  // DriveApp으로 문서 공유 목록과 대조합니다. Drive/Docs API 활성화가 필요 없습니다.
-  // 응답이 allowed:true 일 때만 허용하고, 실패·오류는 모두 숨김(fail-closed)입니다.
-  const url=String(INTEGRATED_CONFIG.researchAccessCheckUrl||'').trim();
-  if(!url){
-    githubResearchSetCheck('error','연구개발 권한 확인 주소(researchAccessCheckUrl)가 설정되지 않았습니다.',null,'apps-script');
-    throw new Error(window.FRAMEBY_RESEARCH_CHECK.reason);
-  }
-  if(!GITHUB_ACCESS_TOKEN||!GITHUB_USER_EMAIL)
-    throw new Error('Google 로그인 계정 정보가 없습니다.');
+  // 비공개(frame-by.com 내 사용자 전용) Apps Script 웹앱을 보이지 않는 iframe으로 열어
+  // 회사 계정 로그인 상태에서 접속자 이메일을 문서 공유 목록과 대조합니다.
+  // allowed:true 일 때만 허용하고, 실패·오류·시간초과는 모두 숨김(fail-closed)입니다.
+  const base=String(INTEGRATED_CONFIG.researchAccessCheckUrl||'').trim();
+  const fail=(reason,status=null)=>{githubResearchSetCheck('error',reason,status,'apps-script');throw new Error(reason)};
+  if(!base)fail('연구개발 권한 확인 주소(researchAccessCheckUrl)가 설정되지 않았습니다.');
+  if(!GITHUB_USER_EMAIL)fail('Google 로그인 계정 정보가 없습니다.');
   window.FRAMEBY_RESEARCH_CHECK={state:'checking',reason:'',httpStatus:null,source:'apps-script'};
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),20000);
-  let response,data;
-  try{
-    // text/plain 으로 보내 CORS 사전요청 없이 Apps Script 웹앱에 전달합니다. 토큰은 URL에 넣지 않습니다.
-    response=await fetch(url,{method:'POST',cache:'no-store',redirect:'follow',signal:ctrl.signal,
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({accessToken:GITHUB_ACCESS_TOKEN})});
-    data=await response.json();
-  }catch(e){
-    const reason=e?.name==='AbortError'?'Apps Script 응답 시간 초과':'Apps Script 연결 오류: '+String(e?.message||e);
-    githubResearchSetCheck('error',reason,response?.status||null,'apps-script');
-    throw new Error(reason);
-  }finally{clearTimeout(timer)}
-  if(!data||data.ok!==true){
-    const reason='Apps Script 권한 확인 실패: '+String(data?.error||('HTTP '+response.status));
-    githubResearchSetCheck('error',reason,response.status,'apps-script');
-    throw new Error(reason);
-  }
-  if(String(data.email||'').toLowerCase()!==String(GITHUB_USER_EMAIL).trim().toLowerCase()){
-    githubResearchSetCheck('error','Apps Script가 다른 계정을 확인했습니다.',response.status,'apps-script');
-    throw new Error('Apps Script가 다른 계정을 확인했습니다.');
-  }
-  return data.allowed===true
+  const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);
+  const nonce=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+  const trusted=origin=>{try{const u=new URL(origin);return u.protocol==='https:'&&(u.hostname==='script.google.com'||u.hostname.endsWith('.googleusercontent.com'))}catch(e){return false}};
+  const msg=await new Promise(resolve=>{
+    const frame=document.createElement('iframe');
+    frame.setAttribute('aria-hidden','true');frame.tabIndex=-1;
+    frame.style.cssText='position:absolute;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0';
+    const done=v=>{window.removeEventListener('message',onMessage);clearTimeout(timer);try{frame.remove()}catch(e){};resolve(v)};
+    const onMessage=ev=>{
+      const d=ev.data;
+      if(!trusted(ev.origin)||!d||d.type!=='frameby-research-access'||d.nonce!==nonce)return;
+      done(d);
+    };
+    const timer=setTimeout(()=>done(null),20000);
+    window.addEventListener('message',onMessage);
+    frame.src=base+(base.includes('?')?'&':'?')+'nonce='+nonce+'&_='+Date.now();
+    document.body.appendChild(frame);
+  });
+  if(!msg)fail('Apps Script 응답 시간 초과 (회사 Google 계정 로그인 상태를 확인해 주세요)');
+  if(msg.ok!==true)fail('Apps Script 권한 확인 실패: '+String(msg.error||'원인 미상'));
+  if(String(msg.email||'').toLowerCase()!==String(GITHUB_USER_EMAIL).trim().toLowerCase())
+    fail('브라우저의 기본 Google 계정('+String(msg.email||'')+')이 사이트 로그인 계정과 다릅니다.');
+  return msg.allowed===true
     ?githubResearchSetCheck('allowed','',200,'apps-script')
     :githubResearchSetCheck('denied','연구개발 문서 공유 대상이 아님',200,'apps-script');
 }
