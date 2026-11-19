@@ -1288,6 +1288,15 @@ body.frameby-auth-locked .github-auth-btn{
 #tripInlineSheet [data-field="distance"]{min-width:82px;text-align:right}
 #tripInlineSheet [data-field="vehicle"]:disabled,#tripInlineSheet [data-field="distance"]:disabled{opacity:.45;background:#f5f6f9;cursor:not-allowed}
 </style>
+<style id="frameby-research-ip-section-style">
+/* 디자인출원 화면: 연구개발 iframe·월 버튼은 숨기고 문서 미리보기만 표시 */
+#researchHost #ipFrame{display:block;width:100%;min-width:0;border:0;background:#fff;height:calc(100dvh - 140px);min-height:700px}
+#researchHost #ipFrame.hidden{display:none!important}
+#researchModuleTabs .module-tab[hidden]{display:none!important}
+body[data-research-section="ip"] #researchHost #researchFrame,
+body[data-research-section="ip"] #researchHost #researchLoading,
+body[data-research-section="ip"] #researchSecondaryMenu #researchMonthRow{display:none!important}
+</style>
 <style id="frameby-research-access-isolated-style">
 /* 다른 상단 메뉴에 영향을 주지 않는 연구개발 전용 표시 조건 */
 #researchPrimaryTab.frameby-no-access,
@@ -1319,7 +1328,7 @@ body.frameby-auth-locked .github-auth-btn{
         <button type="button" class="finance-primary-btn" id="salesPrimaryTab" data-module="sales" role="tab" aria-selected="false">매출현황</button>
         <button type="button" class="finance-primary-btn" id="tripPrimaryTab" data-module="trip" role="tab" aria-selected="false">출장·차량 관리</button>
         <button type="button" class="finance-primary-btn" id="hrPrimaryTab" data-module="hr" role="tab" aria-selected="false">인사관리</button>
-        <button type="button" class="finance-primary-btn frameby-no-access" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false" aria-hidden="true" tabindex="-1" hidden>연구개발</button>
+        <button type="button" class="finance-primary-btn frameby-no-access" id="researchPrimaryTab" data-module="research" role="tab" aria-selected="false" aria-hidden="true" tabindex="-1" hidden>연구·지식재산</button>
         <button type="button" class="finance-primary-btn" id="vatPrimaryTab" data-module="vat" role="tab" aria-selected="false" hidden>부가세신고자료</button>
       </div>
       <div class="finance-secondary hidden" id="cashSecondaryMenu">
@@ -1404,10 +1413,11 @@ body.frameby-auth-locked .github-auth-btn{
         </div>
       </div>
       <div class="finance-secondary hidden research-secondary" id="researchSecondaryMenu">
-        <div class="module-tabs" id="researchModuleTabs" aria-label="연구개발 세부 메뉴">
+        <div class="module-tabs" id="researchModuleTabs" aria-label="연구·지식재산 세부 메뉴">
           <button type="button" class="module-tab" data-research-page="documents">연구문서</button>
           <button type="button" class="module-tab active" data-research-page="notes">연구노트</button>
           <button type="button" class="module-tab" data-research-page="write">연구노트 작성</button>
+          <button type="button" class="module-tab" data-research-section="ip" hidden>디자인출원</button>
         </div>
         <div class="research-month-row" id="researchMonthRow">
           <button type="button" class="research-year-btn active" id="researchYearBtn">2026년</button>
@@ -1620,6 +1630,7 @@ body.frameby-auth-locked .github-auth-btn{
         </div>
         <div id="researchDirectMount"></div>
       </div>
+      <iframe id="ipFrame" class="ip-frame hidden" title="디자인출원" data-src="https://docs.google.com/document/d/1DUeqoQh7Xn61OcgZlEAiTZQJ6Li6FreGwkQVMRLvj8Y/preview"></iframe>
       <iframe id="researchFrame" class="research-frame hidden" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 
@@ -2441,6 +2452,7 @@ let RESEARCH_ACTIVE_YEAR=2026;
 let RESEARCH_ACTIVE_MONTH=0;
 let CASHFLOW_FRAME_LOADED=false;
 window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,hr:false,leave:false,workRecord:false,research:false};
+window.FRAMEBY_RESEARCH_SECTIONS={research:false,ip:false};
 window.FRAMEBY_ACCESS_READY=false;
 function githubHasModuleAccess(module){
   if(!window.FRAMEBY_ACCESS_READY)return true;
@@ -2860,6 +2872,7 @@ function ensureResearchFrame(forceReload){
   frame.src=base+(base.includes('?')?'&':'?')+params.toString()+'&_nav='+Date.now();
 }
 function ensureResearchView(forceReload){
+  researchSetSection('research');
   ensureResearchFrame(!!forceReload);
 }
 function researchTargetTab(tabId){return RESEARCH_DOC_FLAT.find(t=>t.id===String(tabId||''))||null}
@@ -2951,6 +2964,14 @@ function showModule(module,page){
     return;
   }
   if(module==='research'){
+    const sec=window.FRAMEBY_RESEARCH_SECTIONS||{research:false,ip:false};
+    if(sec.ip&&(page==='ip'||!sec.research)){
+      syncModuleHeader('research','researchHost');
+      document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
+      researchSetSection('ip');
+      try{history.replaceState(null,'','#research')}catch(e){}
+      return;
+    }
     if(['documents','notes','write'].includes(page)) RESEARCH_ACTIVE_PAGE=page;
     syncModuleHeader('research','researchHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
@@ -4700,6 +4721,8 @@ const INTEGRATED_CONFIG={
   workRecordPayrollSheet:'급여대장_저장소',
   workRecordAuditSheet:'변경이력_저장소',
   researchDocumentId:'1GYXVksfgnp79VXJaVgcd7gUfjmz898AXqn5vZEyQ-S8',
+  // 디자인출원(지식재산) 문서: 이 문서에 공유된 사람에게만 디자인출원 하위 메뉴를 표시합니다.
+  ipDocumentId:'1DUeqoQh7Xn61OcgZlEAiTZQJ6Li6FreGwkQVMRLvj8Y',
   researchWriteSpreadsheetId:'1NInrmQy2VzE5NEqOqAiJ0UnPBC-Zfy9FVxhzGeVv0FY',
   researchWriteWebAppUrl:'https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec',
   // 연구개발 메뉴 권한 확인용 Apps Script 웹앱 주소 (배포 후 /exec 로 끝나는 주소를 넣으세요)
@@ -5632,6 +5655,7 @@ async function githubCheckResearchAccess(){
   if(!base)fail('연구개발 권한 확인 주소(researchAccessCheckUrl)가 설정되지 않았습니다.');
   if(!GITHUB_USER_EMAIL)fail('Google 로그인 계정 정보가 없습니다.');
   window.FRAMEBY_RESEARCH_CHECK={state:'checking',reason:'',httpStatus:null,source:'apps-script'};
+  window.FRAMEBY_RESEARCH_SECTIONS={research:false,ip:false};
   const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);
   const nonce=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
   const trusted=origin=>{try{const u=new URL(origin);return u.protocol==='https:'&&(u.hostname==='script.google.com'||u.hostname.endsWith('.googleusercontent.com'))}catch(e){return false}};
@@ -5654,9 +5678,13 @@ async function githubCheckResearchAccess(){
   if(msg.ok!==true)fail('Apps Script 권한 확인 실패: '+String(msg.error||'원인 미상'));
   if(String(msg.email||'').toLowerCase()!==String(GITHUB_USER_EMAIL).trim().toLowerCase())
     fail('브라우저의 기본 Google 계정('+String(msg.email||'')+')이 사이트 로그인 계정과 다릅니다.');
-  return msg.allowed===true
+  // research: 연구개발 문서 공유 여부, ip: 디자인출원 문서 공유 여부 (이전 버전 Apps Script는 allowed만 반환)
+  const research=msg.research===true||(msg.research===undefined&&msg.allowed===true);
+  const ip=msg.ip===true;
+  window.FRAMEBY_RESEARCH_SECTIONS={research,ip};
+  return (research||ip)
     ?githubResearchSetCheck('allowed','',200,'apps-script')
-    :githubResearchSetCheck('denied','연구개발 문서 공유 대상이 아님',200,'apps-script');
+    :githubResearchSetCheck('denied','연구개발·디자인출원 문서 공유 대상이 아님',200,'apps-script');
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -5734,6 +5762,44 @@ function githubApplyModuleAccess(access){
     researchWriteBtn.hidden=!canOpenResearch;
     researchWriteBtn.setAttribute('aria-hidden',canOpenResearch?'false':'true');
     researchWriteBtn.tabIndex=canOpenResearch?0:-1;
+  }
+}
+/* 연구·지식재산 하위 메뉴 (2026-11-20)
+ * 연구개발: 연구개발 문서 공유자에게만 표시 (기존 Apps Script 화면)
+ * 디자인출원: 디자인출원 문서 공유자에게만 표시 (Google Docs 읽기 전용 미리보기) */
+function githubApplyResearchSections(){
+  const sec=window.FRAMEBY_RESEARCH_SECTIONS||{research:false,ip:false};
+  document.querySelectorAll('#researchModuleTabs .module-tab[data-research-page]').forEach(b=>{
+    if(b.dataset.researchPage==='documents')return;
+    b.hidden=!sec.research;
+    b.setAttribute('aria-hidden',sec.research?'false':'true');
+    b.tabIndex=sec.research?0:-1;
+  });
+  const ipBtn=document.querySelector('#researchModuleTabs .module-tab[data-research-section="ip"]');
+  if(ipBtn){
+    ipBtn.hidden=!sec.ip;
+    ipBtn.setAttribute('aria-hidden',sec.ip?'false':'true');
+    ipBtn.tabIndex=sec.ip?0:-1;
+    if(!ipBtn.dataset.bound){ipBtn.dataset.bound='1';ipBtn.addEventListener('click',()=>showModule('research','ip'))}
+  }
+  if(!sec.ip){
+    const f=document.getElementById('ipFrame');
+    if(f){f.removeAttribute('src');f.dataset.loaded='';f.classList.add('hidden')}
+  }
+}
+function researchSetSection(section){
+  const sec=window.FRAMEBY_RESEARCH_SECTIONS||{research:false,ip:false};
+  const ip=section==='ip'&&sec.ip;
+  document.body.dataset.researchSection=ip?'ip':'research';
+  const frame=document.getElementById('ipFrame');
+  const ipBtn=document.querySelector('#researchModuleTabs .module-tab[data-research-section="ip"]');
+  ipBtn?.classList.toggle('active',ip);
+  ipBtn?.setAttribute('aria-selected',ip?'true':'false');
+  if(!frame)return;
+  frame.classList.toggle('hidden',!ip);
+  if(ip){
+    document.querySelectorAll('#researchModuleTabs .module-tab[data-research-page]').forEach(b=>b.classList.remove('active'));
+    if(!frame.dataset.loaded){frame.dataset.loaded='1';frame.src=frame.dataset.src}
   }
 }
 /* 연구개발 권한 검사 '오류' 안내 (2026-11-19)
@@ -7075,6 +7141,7 @@ async function githubAfterLogin(){
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
     githubApplyModuleAccess(access);
+    githubApplyResearchSections();
     githubResearchShowCheckNotice();
     const allowedModules=['cash','card','trip','hr','research'].filter(m=>access[m]);
 
@@ -7108,7 +7175,7 @@ async function githubAfterLogin(){
       });
     }
 
-    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',hr:'인사관리',research:'연구개발'};
+    const labelMap={cash:'자금수지',card:'법인카드',trip:'출장·차량',hr:'인사관리',research:'연구·지식재산'};
     const badge=document.getElementById('statusBadge');
     if(badge && access.researchError){badge.title='연구개발 권한 검사 오류: '+access.researchError;}
     if(badge){
@@ -7123,6 +7190,7 @@ async function githubAfterLogin(){
     document.getElementById('researchPrimaryTab')?.classList.add('frameby-no-access');
     document.getElementById('researchPrimaryTab')?.setAttribute('hidden','');
     window.FRAMEBY_MODULE_ACCESS={cash:false,card:false,trip:false,hr:false,leave:false,workRecord:false,research:false};
+    window.FRAMEBY_RESEARCH_SECTIONS={research:false,ip:false};
     githubLockApp();
     const loadingEl=document.getElementById('loading');
     if(loadingEl)loadingEl.classList.add('hidden');
@@ -17548,7 +17616,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   'use strict';
   function sync(){
     const tab=document.querySelector('#researchSecondaryMenu .module-tab[data-research-page="notes"]');
-    if(tab)tab.textContent='연구 타임라인';
+    if(tab)tab.textContent='연구개발';
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
 })();
