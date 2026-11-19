@@ -1288,9 +1288,10 @@ body.frameby-auth-locked .github-auth-btn{
 #tripInlineSheet [data-field="distance"]{min-width:82px;text-align:right}
 #tripInlineSheet [data-field="vehicle"]:disabled,#tripInlineSheet [data-field="distance"]:disabled{opacity:.45;background:#f5f6f9;cursor:not-allowed}
 </style>
-<style id="frameby-research-menu-security">
-/* 공유 계정 인증이 끝나기 전 및 비공유자의 메뉴를 강제로 숨깁니다. */
-#researchPrimaryTab:not([data-research-doc-access="allowed"]){display:none!important;visibility:hidden!important;opacity:0!important}
+<style id="frameby-research-docs-authorized-menu">
+/* 구글 문서 API에서 권한 승인 전에는 연구개발 메뉴를 표시하지 않습니다. */
+#researchPrimaryTab:not([data-docs-authorized="yes"]){display:none!important;visibility:hidden!important;opacity:0!important}
+#researchPrimaryTab.frameby-no-access{display:none!important;visibility:hidden!important;opacity:0!important}
 </style>
 </head>
 <body class="frameby-auth-locked">
@@ -4713,7 +4714,7 @@ let RESEARCH_SESSION_KEY='',RESEARCH_AUTH_EMAIL='',RESEARCH_ACCESS_ERROR='';
 function githubAuthError(message){const el=document.getElementById('githubAuthError');if(!el)return;el.textContent=message||'';el.style.display=message?'block':'none'}
 function githubShowGate(){const el=document.getElementById('githubAuthGate');if(el)el.style.display='flex'}
 function githubHideGate(){const el=document.getElementById('githubAuthGate');if(el)el.style.display='none'}
-function githubLockApp(){document.getElementById('researchPrimaryTab')?.removeAttribute('data-research-doc-access');document.body?.classList.add('frameby-auth-locked');document.body?.classList.remove('frameby-auth-ready');githubShowGate()}
+function githubLockApp(){document.getElementById('researchPrimaryTab')?.removeAttribute('data-docs-authorized');document.body?.classList.add('frameby-auth-locked');document.body?.classList.remove('frameby-auth-ready');githubShowGate()}
 function githubUnlockApp(){document.body?.classList.remove('frameby-auth-locked');document.body?.classList.add('frameby-auth-ready');githubHideGate()}
 function githubTokenCacheGet(){try{return window.FBAuth?window.FBAuth.get():localStorage.getItem('framebyGithubAccessToken')}catch(e){return null}}
 function githubTokenCacheSave(token,expires){try{if(window.FBAuth)window.FBAuth.save(token,expires);else localStorage.setItem('framebyGithubAccessToken',token)}catch(e){}}
@@ -5571,98 +5572,55 @@ async function githubCheckSpreadsheetAccess(spreadsheetId){
   }
 }
 
-/* ===== 연구개발 메뉴 전용 인증 (2026-11-19 재작성) =====
- * 연구 문서에 직접 공유된 Google 계정만 승인합니다.
- * Apps Script의 startEmbeddedSession()이 토큰의 로그인 계정과 문서 공유자를 대조합니다.
- * Google Apps Script HtmlService는 중첩 iframe에서 메시지를 전송하므로
- * 메시지 출처는 nonce + Google 스크립트 HTTPS origin으로 검사합니다.
- * 연구개발 메뉴 외 다른 메뉴 및 데이터 로직은 그대로 사용합니다.
+/* ===== 연구개발 메뉴 권한 검사 (Google Docs API, 전면 교체) =====
+ * 웹사이트 로그인에 사용한 OAuth 액세스 토큰으로 실제 연구개발 문서에
+ * 접근 가능한지를 판정합니다. Apps Script 브리지/공유자 명단은 사용하지 않습니다.
+ * 성공(200 + 문서 ID 일치)만 허용; 기타 응답은 접근 거부 또는 설정 오류입니다.
  */
-function researchMenuTrustedOrigin(origin){
-  try{
-    const url=new URL(String(origin||''));
-    return url.protocol==='https:' && (
-      url.hostname==='script.google.com' ||
-      url.hostname==='script.googleusercontent.com' ||
-      url.hostname.endsWith('.script.googleusercontent.com') ||
-      url.hostname.endsWith('-script.googleusercontent.com')
-    );
-  }catch(_e){return false;}
-}
-function researchMenuNonce(){
-  if(!window.crypto?.getRandomValues) throw new Error('보안 인증 난수를 생성할 수 없습니다.');
-  const bytes=new Uint8Array(16);
-  window.crypto.getRandomValues(bytes);
-  return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
-}
 async function githubCheckResearchAccess(){
-  const email=String(GITHUB_USER_EMAIL||'').trim().toLowerCase();
-  const token=String(GITHUB_ACCESS_TOKEN||'');
-  const base=String(INTEGRATED_CONFIG.researchWriteWebAppUrl||'');
-  if(!email||!token||!base) throw new Error('연구개발 메뉴 인증 정보가 없습니다.');
-  const nonce=researchMenuNonce();
-  const url=new URL(base);
-  if(url.protocol!=='https:'||url.hostname!=='script.google.com')
-    throw new Error('연구개발 인증 서버 주소가 올바르지 않습니다.');
-  url.searchParams.set('mode','bridge');
-  url.searchParams.set('nonce',nonce);
-  url.searchParams.set('_',String(Date.now()));
-
-  return new Promise((resolve,reject)=>{
-    const frame=document.createElement('iframe');
-    frame.className='research-access-probe';
-    frame.title='연구개발 공유 권한 인증';
-    frame.setAttribute('aria-hidden','true');
-    let finished=false,authSent=false,timer=null;
-    function finish(value,error){
-      if(finished)return;
-      finished=true;
-      window.removeEventListener('message',onMessage);
-      if(timer!==null)clearTimeout(timer);
-      try{frame.remove();}catch(_e){}
-      if(error)reject(error);else resolve(value);
+  const fileId=String(INTEGRATED_CONFIG.researchDocumentId||'').trim();
+  const token=String(GITHUB_ACCESS_TOKEN||'').trim();
+  if(!fileId || !token || !GITHUB_USER_EMAIL){
+    throw new Error('연구개발 인증 계정 또는 문서 설정이 누락되었습니다.');
+  }
+  const url=new URL('https://docs.googleapis.com/v1/documents/'+encodeURIComponent(fileId));
+  // 본문 조회도 이 Docs API를 사용합니다. 메뉴와 본문에 동일한 접근 기준을 적용합니다.
+  url.searchParams.set('fields','documentId');
+  let response;
+  try{
+    response=await fetch(url.toString(),{
+      method:'GET',cache:'no-store',
+      headers:{Authorization:'Bearer '+token,Accept:'application/json'}
+    });
+  }catch(err){
+    throw new Error('연구개발 Google Docs API 연결 실패: '+String(err?.message||err));
+  }
+  let body={};
+  try{body=await response.json()}catch(_e){}
+  if(response.status===401){
+    githubTokenCacheClear();
+    GITHUB_ACCESS_TOKEN=null;
+    throw new Error('Google 로그인이 만료되었습니다. 다시 로그인해야 합니다.');
+  }
+  if(response.ok){
+    if(String(body?.documentId||'')!==fileId){
+      throw new Error('연구개발 문서 ID와 API 응답이 일치하지 않습니다.');
     }
-    function onMessage(event){
-      if(!researchMenuTrustedOrigin(event.origin))return;
-      const msg=event.data;
-      if(!msg||typeof msg!=='object'||msg.nonce!==nonce)return;
-      // HtmlService의 실제 스크립트는 iframe 안쪽 googleusercontent.com에서 실행됩니다.
-      // 따라서 event.source===frame.contentWindow 조건은 사용하지 않습니다.
-      if(msg.type==='frameby-research-bridge-ready'){
-        if(authSent)return;
-        authSent=true;
-        try{
-          if(!event.source||typeof event.source.postMessage!=='function')
-            throw new Error('인증 프레임에 연결할 수 없습니다.');
-          event.source.postMessage({
-            type:'frameby-research-auth',nonce:nonce,accessToken:token
-          },event.origin);
-        }catch(e){finish(false,e);}
-        return;
-      }
-      if(msg.type!=='frameby-research-auth-result'||!authSent)return;
-      if(msg.allowed===true){
-        const verifiedEmail=String(msg.email||'').trim().toLowerCase();
-        if(verifiedEmail!==email){
-          finish(false,new Error('연구개발 인증 계정이 현재 로그인 계정과 다릅니다.'));
-          return;
-        }
-        finish(true,null);
-      }else{
-        const reason=String(msg.message||'');
-        if(/공유 권한이 있는 계정만|공유 권한이 없습니다|접근 권한이 없습니다/.test(reason))
-          finish(false,null);
-        else finish(false,new Error(reason||'연구개발 인증 서버가 권한 검사에 실패했습니다.'));
-      }
-    }
-    timer=setTimeout(()=>{
-      finish(false,new Error('연구개발 인증 서버 응답이 없습니다. Apps Script 배포 버전과 접근 설정을 확인해 주세요.'));
-    },12000);
-    frame.addEventListener('error',()=>finish(false,new Error('연구개발 인증 서버 화면을 열지 못했습니다.')),{once:true});
-    window.addEventListener('message',onMessage);
-    frame.src=url.toString();
-    document.body.appendChild(frame);
-  });
+    return true;
+  }
+  // 사용자에게 해당 문서가 없거나 공유되지 않은 경우.
+  if(response.status===404) return false;
+  const err=body?.error||{};
+  const details=Array.isArray(err.details)?err.details:[];
+  const reasons=details.flatMap(d=>Array.isArray(d?.metadata)?d.metadata.map(x=>x.reason||''):[d?.reason||'',d?.metadata?.reason||'']);
+  const msg=String(err.message||'');
+  const configFailure=reasons.some(r=>/SERVICE_DISABLED|ACCESS_TOKEN_SCOPE_INSUFFICIENT|CONSUMER_INVALID|API_KEY_SERVICE_BLOCKED/i.test(String(r)))
+    || /api (has not been used|is not enabled)|insufficient authentication scopes|has not been used in project/i.test(msg);
+  if(response.status===403 && !configFailure){
+    // 사용자가 문서의 공유 대상이 아닌 경우. 메뉴를 표시하지 않습니다.
+    return false;
+  }
+  throw new Error('연구개발 문서 권한 검사 설정 오류 (HTTP '+response.status+'): '+(msg||'Google API 응답 오류'));
 }
 async function githubVerifyIntegratedAccess(){
   const researchPromise=githubCheckResearchAccess()
@@ -5710,7 +5668,7 @@ function githubApplyModuleAccess(access){
     const el=document.getElementById(id);
     if(!el) return;
     const allowed=!!window.FRAMEBY_MODULE_ACCESS[module];
-    if(module==='research'){if(allowed)el.setAttribute('data-research-doc-access','allowed');else el.removeAttribute('data-research-doc-access');}
+    if(module==='research'){if(allowed)el.setAttribute('data-docs-authorized','yes');else el.removeAttribute('data-docs-authorized');}
     el.classList.toggle('frameby-no-access',!allowed);
     el.hidden=!allowed;
     el.setAttribute('aria-hidden',allowed?'false':'true');
@@ -7046,7 +7004,7 @@ async function githubAfterLogin(){
 
     // 기존 관리 메뉴는 기존과 동일하게 각 스프레드시트/문서의 실제 공유 권한을 확인합니다.
     const access=await githubVerifyIntegratedAccess();
-    if(access.researchError)console.warn('[연구개발 메뉴 인증 오류]',access.researchError);
+    if(access.researchError) console.error('[연구개발 메뉴 권한 확인 오류]',access.researchError);
     githubApplyModuleAccess(access);
     const allowedModules=['cash','card','trip','hr','research'].filter(m=>access[m]);
 
@@ -7959,7 +7917,7 @@ async function salesInitDashboard(force=false){
 }
 
 function initIntegratedNav(){
-  ['cashPrimaryTab','cardPrimaryTab','salesPrimaryTab','tripPrimaryTab','hrPrimaryTab','researchPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
+  ['cashPrimaryTab','cardPrimaryTab','salesPrimaryTab','tripPrimaryTab','hrPrimaryTab'].forEach(id=>{const el=document.getElementById(id);if(el){el.hidden=false;el.classList.remove('hidden');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity')}});
   document.querySelectorAll('.finance-primary-btn[data-module]').forEach(btn=>{
     if(btn.dataset.moduleBound)return;
     btn.dataset.moduleBound='1';
