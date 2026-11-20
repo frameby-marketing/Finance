@@ -1416,7 +1416,6 @@ body[data-research-section="ip"] #researchSecondaryMenu #researchMonthRow{displa
         <div class="module-tabs" id="researchModuleTabs" aria-label="연구·지식재산 세부 메뉴">
           <button type="button" class="module-tab" data-research-page="documents">연구문서</button>
           <button type="button" class="module-tab active" data-research-page="notes">연구노트</button>
-          <button type="button" class="module-tab" data-research-page="write">연구노트 작성</button>
           <button type="button" class="module-tab" data-research-section="ip" hidden>디자인출원</button>
         </div>
         <div class="research-month-row" id="researchMonthRow">
@@ -2804,7 +2803,8 @@ function ensureResearchFrame(forceReload){
     return;
   }
 
-  const page=['documents','notes','write'].includes(RESEARCH_ACTIVE_PAGE)
+  // 연구노트 작성 메뉴는 삭제됨(2026-11-20): 'write'는 열지 않고 타임라인(notes)으로 엽니다.
+  const page=['documents','notes'].includes(RESEARCH_ACTIVE_PAGE)
     ? RESEARCH_ACTIVE_PAGE
     : 'notes';
   const year=Number(RESEARCH_ACTIVE_YEAR)||2026;
@@ -2972,7 +2972,7 @@ function showModule(module,page){
       try{history.replaceState(null,'','#research')}catch(e){}
       return;
     }
-    if(['documents','notes','write'].includes(page)) RESEARCH_ACTIVE_PAGE=page;
+    if(['documents','notes'].includes(page)) RESEARCH_ACTIVE_PAGE=page;
     syncModuleHeader('research','researchHost');
     document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='researchHost'));
     ensureResearchView(false);
@@ -5787,6 +5787,16 @@ function githubApplyResearchSections(){
     if(f){f.removeAttribute('src');f.dataset.loaded='';f.classList.add('hidden')}
   }
 }
+/* 속도 개선: 권한이 확인된 화면(연구개발·디자인출원)을 메뉴를 누르기 전에 미리 불러옵니다.
+ * 화면에는 보이지 않으며, 권한 판정은 각 Apps Script가 다시 합니다. */
+function githubPreloadResearchFrames(){
+  if(!window.FRAMEBY_ACCESS_READY)return;
+  const sec=window.FRAMEBY_RESEARCH_SECTIONS||{research:false,ip:false};
+  const ipFrame=document.getElementById('ipFrame');
+  if(sec.ip&&ipFrame&&!ipFrame.dataset.loaded){ipFrame.dataset.loaded='1';ipFrame.src=ipFrame.dataset.src}
+  const rd=document.getElementById('researchFrame');
+  if(sec.research&&rd&&!rd.getAttribute('src')){try{ensureResearchFrame(false)}catch(e){console.warn('연구개발 미리 불러오기:',e)}}
+}
 function researchSetSection(section){
   const sec=window.FRAMEBY_RESEARCH_SECTIONS||{research:false,ip:false};
   const ip=section==='ip'&&sec.ip;
@@ -7143,6 +7153,7 @@ async function githubAfterLogin(){
     githubApplyModuleAccess(access);
     githubApplyResearchSections();
     githubResearchShowCheckNotice();
+    setTimeout(githubPreloadResearchFrames,1200);
     const allowedModules=['cash','card','trip','hr','research'].filter(m=>access[m]);
 
     // 법인카드는 기존과 동일하게 권한이 있을 때만 데이터를 조회합니다.
