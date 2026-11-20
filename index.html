@@ -1289,8 +1289,8 @@ body.frameby-auth-locked .github-auth-btn{
 #tripInlineSheet [data-field="vehicle"]:disabled,#tripInlineSheet [data-field="distance"]:disabled{opacity:.45;background:#f5f6f9;cursor:not-allowed}
 </style>
 <style id="frameby-research-ip-section-style">
-/* 디자인출원 화면: 연구개발 iframe·월 버튼은 숨기고 문서 미리보기만 표시 */
-#researchHost #ipFrame{display:block;width:100%;min-width:0;border:0;background:#fff;height:calc(100dvh - 140px);min-height:700px}
+/* 디자인출원 화면: 연구개발 iframe·월 버튼은 숨기고 디자인출원 화면(Apps Script)만 표시 */
+#researchHost #ipFrame{display:block;width:100%;min-width:0;border:0;background:#f5f7fb;height:calc(100dvh - 140px);min-height:620px}
 #researchHost #ipFrame.hidden{display:none!important}
 #researchModuleTabs .module-tab[hidden]{display:none!important}
 body[data-research-section="ip"] #researchHost #researchFrame,
@@ -1630,7 +1630,7 @@ body[data-research-section="ip"] #researchSecondaryMenu #researchMonthRow{displa
         </div>
         <div id="researchDirectMount"></div>
       </div>
-      <iframe id="ipFrame" class="ip-frame hidden" title="디자인출원" data-src="https://docs.google.com/document/d/1DUeqoQh7Xn61OcgZlEAiTZQJ6Li6FreGwkQVMRLvj8Y/preview"></iframe>
+      <iframe id="ipFrame" class="ip-frame hidden" title="디자인출원" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbyhUuGQHDWPPYRiXuHBUHbXnfXZGXAgaVCfU7w0jNnIZKdziJkWYTU284ko4TkW6qAgXA/exec?mode=ip"></iframe>
       <iframe id="researchFrame" class="research-frame hidden" title="연구개발" data-src="https://script.google.com/a/macros/frame-by.com/s/AKfycbwvoh1HFjfvuOiwtU85q8zpxBlEXNraZk0PS8rrVTU35oJ55WQVTKnz5sYb65rmuYOb/exec"></iframe>
     </section>
 
